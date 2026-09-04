@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   import-live-build:
+    name: Import current Sports HULK Oracle build
     runs-on:
       - self-hosted
       - Linux
@@ -19,11 +20,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Copy current Sports HULK code from Oracle
+      - name: Ensure rsync is installed
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y rsync
 
+      - name: Copy current Sports HULK source from Oracle
+        run: |
           rsync -a \
             --exclude '.git/' \
             --exclude '.github/' \
@@ -31,20 +34,30 @@ jobs:
             --exclude '.venv/' \
             --exclude '__pycache__/' \
             --exclude '*.pyc' \
+            --exclude '*.parquet' \
+            --exclude 'raw/' \
+            --exclude 'history/' \
             --exclude 'logs/' \
             --exclude 'backups/' \
-            --exclude 'history/' \
             --exclude '*.db' \
             --exclude '*.sqlite' \
             --exclude '*.sqlite3' \
+            --exclude '*.backup' \
+            --exclude '*.backup_*' \
+            --exclude '*.bak' \
+            --exclude '*.bak_*' \
+            --exclude '*.pre_*' \
             /home/ubuntu/sports-hulk/ \
             "$GITHUB_WORKSPACE/"
 
-      - name: Preserve GitHub workflows
+      - name: Verify important source files exist
         run: |
-          mkdir -p .github/workflows
+          test -f app.py
+          test -f hulk_final_ui.py
+          test -f mcp_hulk/server.py
+          echo "Core Sports HULK source files found."
 
-      - name: Commit Sports HULK source
+      - name: Commit Sports HULK source to main
         run: |
           git config user.name "Sports HULK Deploy Bot"
           git config user.email "actions@github.com"
@@ -55,12 +68,14 @@ jobs:
             echo "No source changes to commit."
           else
             git commit -m "Import current Sports HULK Oracle build"
-            git push origin main
+            git push origin HEAD:main
           fi
 
       - name: Bootstrap complete
         run: |
           echo "========================================"
           echo "SPORTS HULK BOOTSTRAP: PASS"
-          echo "Secrets and runtime data were excluded."
+          echo "Core source imported to GitHub."
+          echo "Secrets, raw/history data, parquet files,"
+          echo "runtime databases, logs, backups, and venv were excluded."
           echo "========================================"
