@@ -1,0 +1,113 @@
+name: Sports HULK Force Live Rebuild
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  force-live:
+    name: Force tested Command Center live
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout final tested feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/final-ui-rebuild
+          fetch-depth: 0
+
+      - name: Verify checkout contains the new Sports HULK UI
+        run: |
+          grep -q '"Command Center"' app.py
+          grep -q '"Game Research"' app.py
+          grep -q '"Bet Tracker"' app.py
+          grep -q '"Performance Lab"' app.py
+          grep -q 'EVERYTHING THAT MATTERS' hulk_final_ui.py
+          grep -q 'Historical Explorer' app.py
+          echo "FEATURE BRANCH UI MARKERS: PASS"
+
+      - name: Force-sync tested branch to live Oracle app
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y rsync
+
+          rsync -a \
+            --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.env' \
+            --exclude '.venv/' \
+            --exclude '__pycache__/' \
+            --exclude '*.pyc' \
+            --exclude '*.parquet' \
+            --exclude 'raw/' \
+            --exclude 'history/' \
+            --exclude 'logs/' \
+            --exclude 'backups/' \
+            --exclude '*.db' \
+            --exclude '*.sqlite' \
+            --exclude '*.sqlite3' \
+            --exclude '*.backup' \
+            --exclude '*.backup_*' \
+            --exclude '*.bak' \
+            --exclude '*.bak_*' \
+            --exclude '*.pre_*' \
+            "$GITHUB_WORKSPACE/" \
+            /home/ubuntu/sports-hulk/
+
+      - name: Verify LIVE files contain the Command Center
+        working-directory: /home/ubuntu/sports-hulk
+        run: |
+          grep -q '"Command Center"' app.py
+          grep -q '"Game Research"' app.py
+          grep -q '"Bet Tracker"' app.py
+          grep -q '"Performance Lab"' app.py
+          grep -q 'EVERYTHING THAT MATTERS' hulk_final_ui.py
+          grep -q 'Historical Explorer' app.py
+          .venv/bin/python -m py_compile app.py
+          .venv/bin/python -m py_compile hulk_final_ui.py
+          .venv/bin/python -m py_compile prop_intelligence/hulk_prop_ui.py
+          .venv/bin/python self_test_ui_contract.py
+          echo "LIVE SOURCE UI MARKERS: PASS"
+
+      - name: Lock sports-hulk service to app.py
+        run: |
+          sudo mkdir -p /etc/systemd/system/sports-hulk.service.d
+          sudo tee /etc/systemd/system/sports-hulk.service.d/command-center.conf >/dev/null <<'EOF'
+          [Service]
+          WorkingDirectory=/home/ubuntu/sports-hulk
+          ExecStart=
+          ExecStart=/home/ubuntu/sports-hulk/.venv/bin/streamlit run /home/ubuntu/sports-hulk/app.py --server.address=127.0.0.1 --server.port=8501 --server.headless=true
+          EOF
+
+          sudo systemctl daemon-reload
+          sudo systemctl restart sports-hulk
+          sleep 8
+          sudo systemctl is-active sports-hulk
+
+      - name: Verify service is actually running app.py
+        run: |
+          echo "---- SYSTEMD ----"
+          sudo systemctl show sports-hulk \
+            --property=WorkingDirectory \
+            --property=ExecStart \
+            --no-pager
+
+          echo "---- PROCESS ----"
+          pgrep -af 'streamlit.*app.py' | head -5
+
+          echo "---- HTTP ----"
+          curl -fI http://127.0.0.1:8501
+
+          echo "========================================"
+          echo "SPORTS HULK COMMAND CENTER FORCE DEPLOY: PASS"
+          echo "Live source: /home/ubuntu/sports-hulk/app.py"
+          echo "Expected home nav: Command Center"
+          echo "========================================"
