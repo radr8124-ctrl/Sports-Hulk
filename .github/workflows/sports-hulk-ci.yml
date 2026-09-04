@@ -1,0 +1,66 @@
+name: Sports HULK Bootstrap
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-live-build:
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy current Sports HULK code from Oracle
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y rsync
+
+          rsync -a \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.env' \
+            --exclude '.venv/' \
+            --exclude '__pycache__/' \
+            --exclude '*.pyc' \
+            --exclude 'logs/' \
+            --exclude 'backups/' \
+            --exclude 'history/' \
+            --exclude '*.db' \
+            --exclude '*.sqlite' \
+            --exclude '*.sqlite3' \
+            /home/ubuntu/sports-hulk/ \
+            "$GITHUB_WORKSPACE/"
+
+      - name: Preserve GitHub workflows
+        run: |
+          mkdir -p .github/workflows
+
+      - name: Commit Sports HULK source
+        run: |
+          git config user.name "Sports HULK Deploy Bot"
+          git config user.email "actions@github.com"
+
+          git add .
+
+          if git diff --cached --quiet; then
+            echo "No source changes to commit."
+          else
+            git commit -m "Import current Sports HULK Oracle build"
+            git push origin main
+          fi
+
+      - name: Bootstrap complete
+        run: |
+          echo "========================================"
+          echo "SPORTS HULK BOOTSTRAP: PASS"
+          echo "Secrets and runtime data were excluded."
+          echo "========================================"
