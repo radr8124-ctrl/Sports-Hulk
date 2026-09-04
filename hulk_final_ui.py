@@ -165,7 +165,7 @@ def research_table(df, cols=None, title="Deep Research / Full Data", height=520,
         show = show.rename(columns={k:v for k,v in rename.items() if k in show.columns})
     with st.expander(title, expanded=False):
         st.caption("Full research data is preserved here for auditing. The main page above is the cleaned sports view.")
-        st.dataframe(show, hide_index=True, width="stretch", height=height)
+        st.dataframe((show if len(show.columns) <= 7 else show.iloc[:, :7]), hide_index=True, width="stretch", height=height, row_height=36)
 
 
 def matchup_card(sport, away, home, start=None, metrics=None, badge=None, note=None, accent="blue"):
@@ -267,7 +267,7 @@ def css():
     .kpi-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin-bottom:10px}.kpi{background:linear-gradient(180deg,#0b151d,#081018);border:1px solid #152839;border-radius:10px;min-height:88px;padding:12px 13px;position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.35}
     .kpi .lbl{font-size:12px;color:var(--m);font-weight:850;letter-spacing:.05em;text-transform:uppercase}.kpi .val{font-size:27px;font-weight:1000;color:#fff;margin:4px 0 2px}.kpi .note{font-size:12px;color:#8fa0ac}.kpi.green .val{color:var(--g)}.kpi.purple .val{color:var(--p)}.kpi.blue .val{color:var(--b)}.kpi.amber .val{color:var(--a)}
     .panel{background:linear-gradient(180deg,#0b141c,#081017);border:1px solid #152735;border-radius:10px;padding:12px}.panel+.panel{margin-top:10px}.phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.ptitle{font-size:22px;font-weight:1000;letter-spacing:.025em}.psub{font-size:12px;color:var(--m)}
-    .plays-head,.play-row{display:grid;grid-template-columns:70px minmax(240px,1.7fr) minmax(120px,.9fr) 95px 105px 110px 88px;gap:8px;align-items:center}.plays-head{background:#0e1922;border:1px solid #172b3a;border-radius:7px;padding:10px;font-size:12px;color:#aeb9c2;font-weight:900}.play-row{padding:12px 9px;border-bottom:1px solid #13232f;font-size:15px}.matchup-flex{display:flex;align-items:center;gap:6px;min-width:0}.team-chip{display:inline-flex;align-items:center;gap:5px;min-width:0}.team-chip img{width:24px;height:24px;object-fit:contain}.team-chip b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.at{color:#657681;font-weight:800}.dim{color:#93a2ad}.pick{font-weight:950;color:#fff}.badge{display:inline-block;padding:6px 9px;border-radius:7px;font-weight:1000;text-align:center;border:1px solid}.bet{background:rgba(85,255,50,.12);border-color:rgba(85,255,50,.34);color:#a9ff8f}.watch{background:rgba(255,194,71,.10);border-color:rgba(255,194,71,.34);color:#ffd66c}.research{background:rgba(76,194,255,.10);border-color:rgba(76,194,255,.34);color:#8ed8ff}.pass{background:rgba(255,92,97,.10);border-color:rgba(255,92,97,.34);color:#ff8589}.good{color:var(--g)}.warn{color:var(--a)}.bad{color:var(--r)}.blue{color:var(--b)}.purple{color:var(--p)}
+    .plays-head,.play-row{display:grid;grid-template-columns:70px minmax(240px,1.7fr) minmax(120px,.9fr) 95px 105px 110px 88px;gap:8px;align-items:center}.plays-head{background:#0e1922;border:1px solid #172b3a;border-radius:7px;padding:10px;font-size:12px;color:#aeb9c2;font-weight:900}.play-row{padding:12px 9px;border-bottom:1px solid #13232f;font-size:15px}.matchup-flex{display:flex;align-items:center;gap:6px;min-width:0}.team-chip{display:inline-flex;align-items:center;gap:5px;min-width:0}.team-chip img{width:24px;height:24px;object-fit:contain}.team-chip b{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15;overflow-wrap:anywhere}.at{color:#657681;font-weight:800}.dim{color:#93a2ad}.pick{font-weight:950;color:#fff}.badge{display:inline-flex;align-items:center;justify-content:center;padding:8px 11px;border-radius:8px;font-weight:1000;text-align:center;border:1px solid;font-size:14px;line-height:1.15;white-space:normal;overflow-wrap:anywhere;max-width:180px}.bet{background:rgba(85,255,50,.12);border-color:rgba(85,255,50,.34);color:#a9ff8f}.watch{background:rgba(255,194,71,.10);border-color:rgba(255,194,71,.34);color:#ffd66c}.research{background:rgba(76,194,255,.10);border-color:rgba(76,194,255,.34);color:#8ed8ff}.pass{background:rgba(255,92,97,.10);border-color:rgba(255,92,97,.34);color:#ff8589}.good{color:var(--g)}.warn{color:var(--a)}.bad{color:var(--r)}.blue{color:var(--b)}.purple{color:var(--p)}
     .two-col{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(320px,.8fr);gap:10px;align-items:start}.stack{display:flex;flex-direction:column;gap:10px}.info-row{display:grid;grid-template-columns:minmax(0,1.5fr) .7fr .7fr;gap:8px;padding:9px 5px;border-bottom:1px solid #13232f;font-size:13px}.info-row b{color:#fff}.empty{padding:28px 16px;text-align:center;border:1px dashed #284052;border-radius:9px;background:#091119}.empty b{font-size:16px}.empty span{display:block;color:var(--m);font-size:13px;margin-top:5px}
     .mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.system-row{display:flex;justify-content:space-between;gap:12px;padding:9px 4px;border-bottom:1px solid #13232f;font-size:13px}.system-row .status-ok{color:var(--g);font-weight:900}.system-row .status-info{color:var(--b);font-weight:900}
     .command-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 80% 20%,rgba(85,255,50,.24),transparent 34%),linear-gradient(135deg,#0b1b13,#071019 55%,#0a0d12);border:1px solid rgba(85,255,50,.38);border-radius:18px;padding:22px 24px;margin:4px 0 12px;box-shadow:0 0 34px rgba(85,255,50,.08)}
@@ -283,16 +283,17 @@ def css():
     .market-match{font-size:15px;font-weight:950;color:#fff}.market-signal{font-size:12px;color:#93a6b3;margin-top:3px;line-height:1.35}.market-meta{text-align:right}.market-books{font-size:12px;color:#a9b8c2}.market-strength{font-size:17px;font-weight:1000;color:#66ff48;margin-top:3px}
     .league-hero{border-radius:16px;padding:18px 20px;margin:4px 0 12px;border:1px solid #24374a;background:linear-gradient(115deg,#0a1219,#111521);position:relative;overflow:hidden}.league-hero:after{content:"";position:absolute;inset:auto -8% -55% 35%;height:180px;background:radial-gradient(circle,rgba(71,150,255,.18),rgba(181,93,255,.10),transparent 70%);pointer-events:none}.league-hero.cfb{border-color:rgba(255,180,48,.40);background:linear-gradient(115deg,#171007,#10131b 45%,#111024)}.league-hero.mlb{border-color:rgba(61,151,255,.43);background:linear-gradient(115deg,#07131f,#0b1119 45%,#101023)}
     .league-eyebrow{font-size:12px;font-weight:950;letter-spacing:.15em;color:#9db0bd}.league-title{font-size:36px;font-weight:1000;color:#fff;line-height:1.08;margin:4px 0}.league-title .blue{color:#54a4ff}.league-title .gold{color:#ffc14e}.league-copy{font-size:15px;color:#b4c1ca;max-width:920px}.league-stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:10px 0 12px}.league-stat{background:#0b141c;border:1px solid #1b2c3a;border-radius:11px;padding:13px}.league-stat .t{font-size:11px;color:#8da0ad;font-weight:900;text-transform:uppercase}.league-stat .n{font-size:28px;font-weight:1000;margin-top:2px;color:#fff}.league-stat.blue .n{color:#54a4ff}.league-stat.purple .n{color:#c47cff}.league-stat.gold .n{color:#ffc14e}.league-stat.red .n{color:#ff7378}
-    .pick-card{background:linear-gradient(145deg,#0b151e,#091119);border:1px solid #203444;border-radius:12px;padding:14px;margin:8px 0}.pick-card.cfb{border-left:4px solid #ffc14e}.pick-card.mlb{border-left:4px solid #54a4ff}.pick-top{display:flex;justify-content:space-between;gap:10px;align-items:start}.pick-match{font-size:17px;font-weight:1000;color:#fff}.pick-time{font-size:12px;color:#91a3af;margin-top:2px}.pick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:11px}.pick-metric{background:#0b1219;border:1px solid #172736;border-radius:8px;padding:8px}.pick-metric .l{font-size:10px;color:#7f919e;font-weight:900}.pick-metric .v{font-size:15px;color:#fff;font-weight:950;margin-top:2px}.empty-rich{padding:18px;border-radius:12px;background:linear-gradient(135deg,rgba(61,151,255,.10),rgba(181,93,255,.08));border:1px solid rgba(61,151,255,.24)}.empty-rich b{font-size:18px;color:#fff}.empty-rich span{display:block;font-size:14px;color:#aab8c2;margin-top:5px;line-height:1.45}
+    .pick-card{background:linear-gradient(145deg,#0b151e,#091119);border:1px solid #203444;border-radius:12px;padding:14px;margin:8px 0}.pick-card.cfb{border-left:4px solid #ffc14e}.pick-card.mlb{border-left:4px solid #54a4ff}.pick-top{display:flex;justify-content:space-between;gap:10px;align-items:start}.pick-match{font-size:17px;font-weight:1000;color:#fff}.pick-time{font-size:12px;color:#91a3af;margin-top:2px}.pick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:11px}.pick-metric{background:#0b1219;border:1px solid #172736;border-radius:8px;padding:8px}.pick-metric .l{font-size:10px;color:#7f919e;font-weight:900}.pick-metric .v{font-size:17px;color:#fff;font-weight:1000;margin-top:3px;line-height:1.18;overflow-wrap:anywhere;word-break:normal}.empty-rich{padding:18px;border-radius:12px;background:linear-gradient(135deg,rgba(61,151,255,.10),rgba(181,93,255,.08));border:1px solid rgba(61,151,255,.24)}.empty-rich b{font-size:18px;color:#fff}.empty-rich span{display:block;font-size:14px;color:#aab8c2;margin-top:5px;line-height:1.45}
 
     .clean-game-grid,.clean-player-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:10px 0 14px}
     .clean-game-card,.clean-player-card{background:linear-gradient(145deg,#0b151e,#081017);border:1px solid #203444;border-left:4px solid #4cc2ff;border-radius:14px;padding:15px;box-shadow:0 7px 20px #0004}
     .clean-game-card.green,.clean-player-card.green{border-left-color:#55ff32}.clean-game-card.purple,.clean-player-card.purple{border-left-color:#b978ff}.clean-game-card.gold,.clean-player-card.gold{border-left-color:#ffc247}.clean-game-card.red,.clean-player-card.red{border-left-color:#ff5c61}.clean-game-card.cyan,.clean-player-card.cyan{border-left-color:#22d8ff}
     .clean-game-top,.clean-player-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.clean-player-top{align-items:center}.clean-player-top img{width:46px;height:46px;object-fit:contain;flex:0 0 auto}
-    .clean-matchup{font-size:20px;font-weight:1000;color:#fff}.clean-matchup .team-chip img{width:34px;height:34px}.clean-time{font-size:13px;color:#9dafba;margin-top:5px}.clean-player-name{font-size:19px;font-weight:1000;color:#fff}.clean-player-meta{font-size:12px;color:#91a3ae;margin-top:2px}
-    .clean-badge{margin-left:auto;border-radius:999px;padding:6px 10px;border:1px solid #2a4050;font-size:11px;font-weight:950;white-space:nowrap;background:#0d1820}.clean-badge.green{color:#a8ff8c;border-color:#315c34}.clean-badge.blue{color:#6dcaff;border-color:#26577a}.clean-badge.purple{color:#d2a4ff;border-color:#5c3f76}.clean-badge.gold{color:#ffd470;border-color:#6e5624}.clean-badge.red{color:#ff8c90;border-color:#74363a}.clean-badge.cyan{color:#68eaff;border-color:#26606a}
-    .clean-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:13px}.clean-metric{background:#091119;border:1px solid #172a38;border-radius:9px;padding:9px;min-width:0}.clean-metric span{display:block;color:#8396a2;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.clean-metric b{display:block;color:#fff;font-size:15px;margin-top:3px;overflow:hidden;text-overflow:ellipsis}.clean-note{font-size:12px;line-height:1.45;color:#aab8c2;margin-top:10px}
+    .clean-matchup{font-size:20px;font-weight:1000;color:#fff;line-height:1.2;overflow-wrap:anywhere}.clean-matchup .team-chip img{width:34px;height:34px}.clean-time{font-size:13px;color:#9dafba;margin-top:5px}.clean-player-name{font-size:19px;font-weight:1000;color:#fff}.clean-player-meta{font-size:12px;color:#91a3ae;margin-top:2px}
+    .clean-badge{margin-left:auto;border-radius:12px;padding:10px 14px;border:1px solid #2a4050;font-size:18px;line-height:1.05;font-weight:1000;white-space:normal;overflow-wrap:anywhere;text-align:center;min-width:54px;max-width:180px;background:#0d1820;box-shadow:0 0 0 1px #0003 inset}.clean-badge.green{color:#b8ff9f;border-color:#4c8d48;background:linear-gradient(180deg,#17311a,#0e1d10)}.clean-badge.blue{color:#8ad5ff;border-color:#3275a5;background:linear-gradient(180deg,#112a3d,#0b1b28)}.clean-badge.purple{color:#ddb9ff;border-color:#744fa1;background:linear-gradient(180deg,#28173a,#180f23)}.clean-badge.gold{color:#ffe08d;border-color:#8e6b29;background:linear-gradient(180deg,#34270d,#201805)}.clean-badge.red{color:#ff9ba0;border-color:#9c454a;background:linear-gradient(180deg,#351719,#211011)}.clean-badge.cyan{color:#8ff3ff;border-color:#2f7f8b;background:linear-gradient(180deg,#0e3036,#0a1d21)}
+    .clean-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:13px}.clean-metric{background:#091119;border:1px solid #172a38;border-radius:9px;padding:9px;min-width:0}.clean-metric span{display:block;color:#93a6b3;font-size:12px;line-height:1.15;font-weight:950;text-transform:uppercase;letter-spacing:.035em}.clean-metric b{display:block;color:#fff;font-size:18px;line-height:1.18;margin-top:4px;overflow-wrap:anywhere;word-break:normal}.clean-note{font-size:12px;line-height:1.45;color:#aab8c2;margin-top:10px}
     .matchup-hero{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;background:radial-gradient(circle at 50% 0,rgba(76,194,255,.15),transparent 48%),linear-gradient(135deg,#0a151e,#080f15);border:1px solid #203848;border-radius:18px;padding:20px;margin:10px 0 14px}.matchup-team{text-align:center}.matchup-team img{width:86px;height:86px;object-fit:contain}.matchup-team b{display:block;font-size:24px;color:#fff;margin-top:6px}.matchup-mid{text-align:center;color:#8fa0ac}.matchup-mid strong{display:block;font-size:20px;color:#fff;margin:4px 0}.research-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.research-summary>div{background:#0a131b;border:1px solid #1a2e3d;border-radius:10px;padding:11px}.research-summary span{display:block;color:#8295a1;font-size:10px;font-weight:900;text-transform:uppercase}.research-summary b{display:block;color:#fff;font-size:18px;margin-top:3px}
+    @media(max-width:1180px){.clean-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.mock-play-head,.mock-play{grid-template-columns:64px minmax(190px,1.35fr) minmax(130px,.9fr) 84px 88px 76px}.mock-match{font-size:13px}.mock-pick{font-size:14px;padding:8px 10px}.clean-badge{font-size:17px}.pick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:900px){.clean-game-grid,.clean-player-grid{grid-template-columns:1fr}.clean-metrics,.research-summary{grid-template-columns:repeat(2,1fr)}.matchup-hero{grid-template-columns:1fr}.matchup-team img{width:64px;height:64px}}
     @media(max-width:1050px){.league-stat-row,.pick-grid{grid-template-columns:repeat(2,1fr)}}
     .st-key-mobile_nav_shell{display:none}
@@ -686,8 +687,11 @@ def render_parlays(sport=None):
             legs=games[:n]
             source="Hulk Model Parlay" if sport=="MLB" and all(x.get("action")=="BET" for x in legs) else ("MLB Research Parlay" if sport=="MLB" else "Market-Backed Research Parlay")
             metrics=[("Legs",n),("Source",source),("Correlation","Different games preferred"),("Status","RESEARCH" if source!="Hulk Model Parlay" else "BET/WATCH")]
-            note=' · '.join(f'{x["pick"]} ({x["event"]})' for x in legs)
-            out.append(f'<div class="clean-game-card {accent}"><div class="clean-game-top"><div><div class="clean-matchup">{label}</div><div class="clean-time">{esc(source)}</div></div><span class="clean-badge {accent}">PARLAY</span></div><div class="clean-metrics">'+''.join(f'<div class="clean-metric"><span>{esc(k)}</span><b>{esc(v)}</b></div>' for k,v in metrics)+'</div><div class="clean-note">{esc(note)}</div></div>')
+            leg_html=''.join(
+                f'<div class="clean-metric"><span>LEG {i+1}</span><b>{esc(x.get("pick","—"))}</b><div class="sport-sub">{esc(x.get("event","—"))} · {esc(x.get("market","GAME"))} {esc(x.get("line",""))}</div></div>'
+                for i,x in enumerate(legs)
+            )
+            out.append(f'<div class="clean-game-card {accent}"><div class="clean-game-top"><div><div class="clean-matchup">{label}</div><div class="clean-time">{esc(source)}</div></div><span class="clean-badge {accent}">PARLAY</span></div><div class="clean-metrics">'+leg_html+'</div><div class="clean-note">Every leg is shown above. Different games are preferred unless a validated correlation rule supports otherwise.</div></div>')
         st.markdown('<div class="clean-game-grid">'+''.join(out)+'</div>',unsafe_allow_html=True)
     else:
         st.info(f"Only {len(games)} eligible {sport} game leg(s) are available today. Two are required before Hulk can form a game parlay.")
@@ -1107,7 +1111,7 @@ def command_center():
     .mock-eyebrow{position:relative;color:#a6ff7b;font-size:13px;font-weight:1000;letter-spacing:.18em}.mock-title{position:relative;color:#fff;font-size:44px;font-weight:1000;letter-spacing:-.025em;line-height:1.02;margin:5px 0 7px}.mock-title span{color:#63ff37}.mock-copy{position:relative;color:#d5e0e6;font-size:16px;max-width:900px;line-height:1.45}
     .mock-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:12px 0}.mock-kpi{position:relative;overflow:hidden;border-radius:13px;padding:14px;background:linear-gradient(180deg,#0d1720,#081018);border:1px solid #1d3140;min-height:96px}.mock-kpi:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent)}.mock-kpi .klabel{font-size:11px;font-weight:950;letter-spacing:.07em;color:#9eb0bc}.mock-kpi .knum{font-size:31px;font-weight:1000;color:#fff;margin:4px 0 1px}.mock-kpi .knote{font-size:12px;color:#94a6b3}.mock-kpi.green{--accent:#65ff34}.mock-kpi.blue{--accent:#3e9cff}.mock-kpi.purple{--accent:#b95eff}.mock-kpi.gold{--accent:#ffb62b}.mock-kpi.red{--accent:#ff525b}.mock-kpi.cyan{--accent:#26d7ff}.mock-kpi.green .knum{color:#68ff3a}.mock-kpi.blue .knum{color:#62b4ff}.mock-kpi.purple .knum{color:#c27cff}.mock-kpi.gold .knum{color:#ffc454}.mock-kpi.red .knum{color:#ff757b}.mock-kpi.cyan .knum{color:#52e5ff}
     .mock-grid{display:grid;grid-template-columns:minmax(0,1.85fr) minmax(340px,.9fr);gap:12px;align-items:start}.mock-panel{background:linear-gradient(180deg,#0c151d,#081018);border:1px solid #1b3040;border-radius:13px;overflow:hidden}.mock-phead{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-bottom:1px solid #172936}.mock-ptitle{font-size:18px;font-weight:1000;color:#fff}.mock-sub{font-size:11px;color:#8498a6}.mock-tabs{display:flex;gap:5px;flex-wrap:wrap}.mock-tab{font-size:10px;font-weight:900;padding:5px 8px;border-radius:999px;background:#0c1821;border:1px solid #1e3443;color:#98aab6}.mock-tab.active{background:linear-gradient(180deg,#2c5f16,#17380e);border-color:#65ff34;color:#fff}
-    .mock-play-head,.mock-play{display:grid;grid-template-columns:70px minmax(210px,1.5fr) minmax(120px,.8fr) 92px 95px 78px;gap:8px;align-items:center}.mock-play-head{padding:9px 13px;background:#09131b;color:#8598a6;font-size:10px;font-weight:950}.mock-play{padding:11px 13px;border-top:1px solid #132431}.mock-play:hover{background:#0d1922}.mock-time{font-size:12px;color:#c4d1d9;font-weight:800}.mock-match{font-size:14px;color:#fff}.mock-pick{display:inline-block;border-radius:7px;padding:7px 9px;font-size:13px;font-weight:1000;border:1px solid}.mock-pick.green{color:#8aff64;background:#102a13;border-color:#3d7c2f}.mock-pick.blue{color:#79beff;background:#0d2133;border-color:#285f8e}.mock-pick.gold{color:#ffd06c;background:#2a210c;border-color:#7d6424}.mock-pick.red{color:#ff8a8e;background:#301214;border-color:#7d3438}.mock-conf{font-size:12px;color:#d8e1e6;font-weight:850}.mock-edge{font-size:15px;font-weight:1000;color:#fff}.mock-action{display:inline-block;padding:6px 9px;border-radius:7px;font-size:11px;font-weight:1000}.mock-action.bet{background:#154d19;color:#8cff6d;border:1px solid #337d37}.mock-action.watch{background:#46320e;color:#ffd66c;border:1px solid #89651f}.mock-action.research{background:#102a43;color:#7dc5ff;border:1px solid #2b5f86}.mock-action.pass{background:#461416;color:#ff8c91;border:1px solid #833237}
+    .mock-play-head,.mock-play{display:grid;grid-template-columns:70px minmax(210px,1.5fr) minmax(120px,.8fr) 92px 95px 78px;gap:8px;align-items:center}.mock-play-head{padding:9px 13px;background:#09131b;color:#8598a6;font-size:10px;font-weight:950}.mock-play{padding:11px 13px;border-top:1px solid #132431}.mock-play:hover{background:#0d1922}.mock-time{font-size:12px;color:#c4d1d9;font-weight:800}.mock-match{font-size:14px;color:#fff}.mock-pick{display:inline-flex;align-items:center;justify-content:center;border-radius:9px;padding:9px 12px;font-size:15px;line-height:1.15;font-weight:1000;border:1px solid;white-space:normal;overflow-wrap:anywhere;max-width:100%;min-height:38px;text-align:center}.mock-pick.green{color:#8aff64;background:#102a13;border-color:#3d7c2f}.mock-pick.blue{color:#79beff;background:#0d2133;border-color:#285f8e}.mock-pick.gold{color:#ffd06c;background:#2a210c;border-color:#7d6424}.mock-pick.red{color:#ff8a8e;background:#301214;border-color:#7d3438}.mock-conf{font-size:14px;color:#d8e1e6;font-weight:900;line-height:1.2}.mock-edge{font-size:15px;font-weight:1000;color:#fff}.mock-action{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;border-radius:8px;font-size:13px;line-height:1.15;font-weight:1000;white-space:normal;text-align:center}.mock-action.bet{background:#154d19;color:#8cff6d;border:1px solid #337d37}.mock-action.watch{background:#46320e;color:#ffd66c;border:1px solid #89651f}.mock-action.research{background:#102a43;color:#7dc5ff;border:1px solid #2b5f86}.mock-action.pass{background:#461416;color:#ff8c91;border:1px solid #833237}
     .market-card2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border-top:1px solid #142431}.market-card2 .mname{font-size:13px;font-weight:950;color:#fff}.market-card2 .msub{font-size:11px;color:#8fa2af;margin-top:2px}.market-card2 .mval{text-align:right;font-size:15px;font-weight:1000;color:#64ff40}.market-card2 .mbooks{font-size:10px;color:#8ea0ac;margin-top:2px}.mock-donut-wrap{display:flex;align-items:center;gap:16px;padding:16px}.mock-donut{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;background:var(--donut);position:relative}.mock-donut:after{content:"";position:absolute;width:70px;height:70px;border-radius:50%;background:#0a1218}.mock-donut strong{position:relative;z-index:1;font-size:25px;color:#fff}.mock-legend{flex:1}.mock-legend div{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:#d3dde3}.mock-legend b{color:#fff}
     .mock-lower{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.mock-mini{background:linear-gradient(180deg,#0c151e,#081018);border:1px solid #1a2d3b;border-radius:12px;overflow:hidden}.mock-mini.green{border-color:#2d5e2d}.mock-mini.purple{border-color:#5a3475}.mock-mini.gold{border-color:#755818}.mock-mini.blue{border-color:#26567f}.mock-mini-title{padding:11px 12px;font-size:13px;font-weight:1000;color:#fff;border-bottom:1px solid #162733}.mock-mini-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 11px;border-top:1px solid #13232f}.mock-mini-row b{font-size:12px;color:#fff}.mock-mini-row span{font-size:10px;color:#879aa7}.mock-mini-row .v{font-size:14px;font-weight:1000;color:#68ff3c}.mock-mini-row .p{font-size:14px;font-weight:1000;color:#ca83ff}.mock-mini-row .g{font-size:14px;font-weight:1000;color:#ffc550}.mock-empty{padding:14px;color:#8fa2af;font-size:12px;line-height:1.45}.mock-foot{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
     @media(max-width:1100px){.mock-kpis{grid-template-columns:repeat(3,1fr)}.mock-grid{grid-template-columns:1fr}.mock-lower{grid-template-columns:repeat(2,1fr)}}
@@ -1521,7 +1525,226 @@ def top300_page():
     research_table(d.head(300),None,"Full Top 300 Draft Board",760)
 
 
+def _safe_pct(v):
+    x=num(v)
+    if x is None:
+        return "—"
+    if 0 <= x <= 1:
+        x*=100
+    return f"{x:.0f}%"
+
+
+def _money(v):
+    x=num(v)
+    if x is None:
+        return "—"
+    return f"{x:+.0f}"
+
+
+def _short_team(v):
+    s=str(v if v is not None else "—").strip()
+    return s.title() if s.islower() else s
+
+
+def betting_slate_page():
+    css(); topbar("🎯 Betting","Today / upcoming cached slate")
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Today’s Slate</div><div class="sport-sub">Game cards first. Full source data stays collapsed below.</div></div><div class="source-pill">NO RAW TABLES</div></div>',unsafe_allow_html=True)
+    groups=[]
+    for sport,key,start_col,away_col,home_col in [
+        ("MLB","mlb","gameDate","away_team","home_team"),
+        ("NFL","nfl","start","away_team","home_team"),
+        ("CFB","cfb","start","away","home"),
+    ]:
+        d=load(key)
+        if d.empty: continue
+        cards=[]
+        for _,r in d.head(24).iterrows():
+            if sport=="MLB":
+                metrics=[("Decision",first(r,["decision"],"—")),("Lean",first(r,["lean"],"—")),("Total",first(r,["totals_median_point"],"—")),("Books",first(r,["h2h_book_count","spreads_book_count"],"—"))]
+                badge=first(r,["decision"],"MLB")
+            elif sport=="NFL":
+                metrics=[("Home ML",_money(r.get("home_moneyline"))),("Spread",first(r,["home_spread"],"—")),("Total",first(r,["total"],"—")),("Books",first(r,["sportsbooks"],"—"))]
+                badge="NFL"
+            else:
+                metrics=[("Research Lean",first(r,["research_lean"],"—")),("Confidence",first(r,["research_confidence"],"—")),("Spread",first(r,["Home_spread"],"—")),("Total",first(r,["Total"],"—"))]
+                badge="RESEARCH"
+            cards.append(matchup_card(sport,_short_team(r.get(away_col,"—")),_short_team(r.get(home_col,"—")),r.get(start_col),metrics,badge=badge,accent="green" if str(badge).upper() in {"BET","A+","A"} else "blue"))
+        groups.append((sport,d,cards))
+    if not groups:
+        st.info("No cached slate rows are available.")
+        return
+    for sport,d,cards in groups:
+        st.subheader(sport)
+        st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+        research_table(d,None,f"Full {sport} Slate Data",480)
+
+
+def line_movement_clean_page():
+    css(); topbar("🎯 Betting","MLB market movement cache")
+    d=load("mlb_market")
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Line Movement</div><div class="sport-sub">Grouped by game and market instead of spreadsheet columns.</div></div><div class="source-pill">MARKET</div></div>',unsafe_allow_html=True)
+    if d.empty:
+        st.info("No market movement cache is available."); return
+    cards=[]
+    for (away,home,start),g in d.groupby(["away_team","home_team","game_start"],dropna=False,sort=False):
+        bits=[]; strength="—"
+        for _,r in g.head(4).iterrows():
+            market=str(r.get("core_market","market")).replace("_"," ").title()
+            target=str(r.get("signal_target","—")).title()
+            movers=first(r,["books_moving"],"—"); reporting=first(r,["books_reporting"],"—")
+            bits.append((market,f"{target} · {movers}/{reporting} books"))
+            strength=first(r,["signal_strength"],strength)
+        cards.append(matchup_card("MLB",_short_team(away),_short_team(home),start,bits,badge=str(strength).upper(),accent="green" if str(strength).lower()=="strong" else "blue"))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards[:30])+'</div>',unsafe_allow_html=True)
+    research_table(d,None,"Full Market Movement Data",560,rename={"away_team":"Away","home_team":"Home","game_start":"Start","core_market":"Market","signal_target":"Move","signal_strength":"Strength","books_reporting":"Books Reporting","books_moving":"Books Moving","consensus_among_movers_pct":"Mover Agreement %"})
+
+
+def betting_results_clean_page():
+    css(); topbar("🎯 Betting","Official graded history only")
+    d=load("mlb_results")
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Results</div><div class="sport-sub">Readable graded cards. Internal IDs and model plumbing stay out of the main view.</div></div><div class="source-pill">GRADED</div></div>',unsafe_allow_html=True)
+    if d.empty:
+        st.info("No graded official MLB results are available yet."); return
+    show=d.tail(40).iloc[::-1]
+    cards=[]
+    for _,r in show.iterrows():
+        away=first(r,["away_team","away"],"Away"); home=first(r,["home_team","home"],"Home"); start=first(r,["gameDate","game_date","start"],None)
+        pick=first(r,["pick","hulk_model_side","lean","decision"],"—")
+        result=first(r,["result","grade","bet_result","outcome"],"—")
+        final=first(r,["final_score","score","final"],"—")
+        metrics=[("Hulk Pick",pick),("Result",result),("Final",final),("Decision",first(r,["decision"],"—"))]
+        cards.append(matchup_card("MLB",away,home,start,metrics,badge=str(result).upper(),accent="green" if str(result).upper() in {"WIN","W"} else "red" if str(result).upper() in {"LOSS","L"} else "blue"))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d,None,"Full Graded Results Data",560)
+
+
+def research_clean_page():
+    css(); topbar("🎯 Betting","Historical evidence and calibration")
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Research</div><div class="sport-sub">Research summaries first. Calibration files remain available one click down.</div></div><div class="source-pill">EVIDENCE</div></div>',unsafe_allow_html=True)
+    blocks=[]
+    for label,key in [("MLB Historical Games","mlb_history"),("NFL Historical Games","nfl_history"),("CFB Historical Games","cfb_history")]:
+        path=P.get(key)
+        try: d=pd.read_csv(path,low_memory=False) if path and path.exists() else pd.DataFrame()
+        except Exception: d=pd.DataFrame()
+        blocks.append((label,d))
+    cards=[]
+    for label,d in blocks:
+        seasons="—"
+        if not d.empty and "season" in d.columns:
+            vals=pd.to_numeric(d["season"],errors="coerce").dropna()
+            if not vals.empty: seasons=f"{int(vals.min())}–{int(vals.max())}"
+        cards.append(f'<div class="clean-game-card blue"><div class="clean-game-top"><div><div class="clean-matchup">{esc(label)}</div><div class="clean-time">Historical research vault</div></div><span class="clean-badge blue">{len(d):,} ROWS</span></div><div class="clean-metrics"><div class="clean-metric"><span>Coverage</span><b>{esc(seasons)}</b></div><div class="clean-metric"><span>Status</span><b>{"READY" if not d.empty else "UNAVAILABLE"}</b></div></div></div>')
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    for label,d in blocks:
+        research_table(d,None,f"{label} — Full Data",520)
+
+
+def mlb_starting_pitching_page():
+    css(); topbar("⚾ MLB","Probable starters and matchup context")
+    d=load("mlb")
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Starting Pitching</div><div class="sport-sub">Pitcher matchup cards replace the old wide table.</div></div><div class="source-pill">STARTERS</div></div>',unsafe_allow_html=True)
+    if d.empty:
+        st.info("MLB matchup board unavailable."); return
+    cards=[]
+    for _,r in d.head(30).iterrows():
+        away=first(r,["away_team"],"—"); home=first(r,["home_team"],"—")
+        metrics=[("Away Starter",first(r,["away_probable_pitcher"],"—")),("Away Matchup",first(r,["away_starter_vs_home_lineup"],"—")),("Home Starter",first(r,["home_probable_pitcher"],"—")),("Home Matchup",first(r,["home_starter_vs_away_lineup"],"—")),("Pitch Sample",first(r,["sample_pitches"],"—")),("Pitch Types",first(r,["pitch_types_matched"],"—"))]
+        cards.append(matchup_card("MLB",away,home,first(r,["gameDate"],None),metrics,badge=first(r,["confidence"],"MLB"),accent="green" if str(first(r,["confidence"],"")).upper()=="HIGH" else "blue"))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d,["gameDate","away_team","away_probable_pitcher","away_starter_vs_home_lineup","home_team","home_probable_pitcher","home_starter_vs_away_lineup","sample_pitches","pitch_types_matched"],"Full Starting Pitching Research",520,rename={"gameDate":"Start","away_team":"Away","away_probable_pitcher":"Away Starter","away_starter_vs_home_lineup":"Away Starter Matchup","home_team":"Home","home_probable_pitcher":"Home Starter","home_starter_vs_away_lineup":"Home Starter Matchup","sample_pitches":"Pitch Sample","pitch_types_matched":"Pitch Types"})
+
+
+def mlb_weather_clean_page():
+    css(); topbar("⚾ MLB","Game weather and park context")
+    d=load("mlb")
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Weather Impact</div><div class="sport-sub">Game-by-game weather cards with park context.</div></div><div class="source-pill">WEATHER</div></div>',unsafe_allow_html=True)
+    if d.empty:
+        st.info("MLB weather board unavailable."); return
+    cards=[]
+    for _,r in d.head(30).iterrows():
+        metrics=[("Temperature",f'{first(r,["temperature_f"],"—")}°F'),("Wind",f'{first(r,["wind_mph"],"—")} mph'),("Gusts",f'{first(r,["wind_gust_mph"],"—")} mph'),("Humidity",f'{first(r,["humidity_pct"],"—")}%'),("Rain",first(r,["precipitation"],"—")),("Park Factor",first(r,["park_run_factor"],"—"))]
+        cards.append(matchup_card("MLB",first(r,["away_team"],"—"),first(r,["home_team"],"—"),first(r,["gameDate"],None),metrics,badge=first(r,["run_environment_flag"],"WEATHER"),accent="cyan",note=first(r,["venue"],"")))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d,["gameDate","away_team","home_team","venue","temperature_f","precipitation","wind_mph","wind_gust_mph","humidity_pct","park_run_factor","run_environment_flag"],"Full MLB Weather Data",520,rename={"gameDate":"Start","away_team":"Away","home_team":"Home","venue":"Ballpark","temperature_f":"Temp °F","precipitation":"Rain","wind_mph":"Wind mph","wind_gust_mph":"Gust mph","humidity_pct":"Humidity %","park_run_factor":"Park Factor","run_environment_flag":"Run Environment"})
+
+
+def mlb_market_clean_page():
+    css(); topbar("⚾ MLB","Movement and consensus overlay")
+    d=load("mlb_market")
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">MLB Market</div><div class="sport-sub">One card per game with moneyline, spread and total movement grouped together.</div></div><div class="source-pill">CONSENSUS</div></div>',unsafe_allow_html=True)
+    if d.empty:
+        st.info("MLB market signal cache unavailable."); return
+    cards=[]
+    for (away,home,start),g in d.groupby(["away_team","home_team","game_start"],dropna=False,sort=False):
+        metrics=[]; strongest="—"
+        for _,r in g.iterrows():
+            mk=str(r.get("core_market","market")).replace("_"," ").title()
+            target=str(r.get("signal_target","—")).title()
+            metrics.append((mk,f'{target} · {first(r,["books_moving"],"—")}/{first(r,["books_reporting"],"—")} books'))
+            if str(r.get("signal_strength","")).lower()=="strong": strongest="STRONG"
+        cards.append(matchup_card("MLB",_short_team(away),_short_team(home),start,metrics[:4],badge=strongest,accent="green" if strongest=="STRONG" else "blue"))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards[:30])+'</div>',unsafe_allow_html=True)
+    research_table(d,None,"Full MLB Market Research",560,rename={"away_team":"Away","home_team":"Home","game_start":"Start","core_market":"Market","signal_target":"Target","signal_strength":"Strength","books_reporting":"Books","books_moving":"Books Moving","consensus_among_movers_pct":"Mover Agreement %","whole_market_share_pct":"Market Share %"})
+
+
+def mlb_results_clean_page():
+    return betting_results_clean_page()
+
+
+def nfl_research_clean_page():
+    css(); topbar("🏈 NFL","Historical game research")
+    path=P["nfl_history"]
+    try: d=pd.read_csv(path,low_memory=False) if path.exists() else pd.DataFrame()
+    except Exception: d=pd.DataFrame()
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">NFL Research</div><div class="sport-sub">Historical matchup cards first; the full vault stays collapsed.</div></div><div class="source-pill">HISTORY</div></div>',unsafe_allow_html=True)
+    if d.empty:
+        st.info("NFL historical vault unavailable."); return
+    sort_cols=[c for c in ["season","week"] if c in d.columns]
+    show=d.sort_values(sort_cols,ascending=False).head(40) if sort_cols else d.tail(40)
+    cards=[]
+    for _,r in show.iterrows():
+        final=f'{first(r,["away_score"],"—")}–{first(r,["home_score"],"—")}'
+        metrics=[("Final",final),("Spread",first(r,["spread_line"],"—")),("Total",first(r,["total_line","total"],"—")),("Roof",first(r,["roof"],"—")),("Temp",f'{first(r,["temp"],"—")}°F'),("Wind",f'{first(r,["wind"],"—")} mph')]
+        cards.append(matchup_card("NFL",first(r,["away_team"],"—"),first(r,["home_team"],"—"),first(r,["gameday"],None),metrics,badge=f'WEEK {first(r,["week"],"—")}',accent="blue",note=first(r,["stadium"],"")))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d,None,"Full NFL Historical Research",620)
+
+
+def cfb_matchups_clean_page():
+    css(); topbar("🏟️ College Football","Current research board")
+    d=load("cfb")
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">CFB Matchups</div><div class="sport-sub">Game cards with research lean, market and comparable-game context.</div></div><div class="source-pill">RESEARCH ONLY</div></div>',unsafe_allow_html=True)
+    if d.empty:
+        st.info("CFB research board unavailable."); return
+    cards=[]
+    for _,r in d.head(40).iterrows():
+        metrics=[("Research Lean",first(r,["research_lean"],"—")),("Confidence",first(r,["research_confidence"],"—")),("Home Spread",first(r,["Home_spread"],"—")),("Total",first(r,["Total"],"—")),("Comp Win",_safe_pct(first(r,["comp_home_win_prob"],None))),("Proj Margin",first(r,["comp_projected_margin"],"—"))]
+        cards.append(matchup_card("CFB",first(r,["away"],"—"),first(r,["home"],"—"),first(r,["start"],None),metrics,badge=first(r,["research_confidence"],"RESEARCH"),accent="gold"))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d,None,"Full CFB Matchup Research",560)
+
+
+def cfb_research_clean_page():
+    css(); topbar("🏟️ College Football","Historical comps and calibration")
+    d=load("cfb")
+    path=P["cfb_history"]
+    try: hist=pd.read_csv(path,low_memory=False) if path.exists() else pd.DataFrame()
+    except Exception: hist=pd.DataFrame()
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">CFB Research</div><div class="sport-sub">Current research summaries first. Historical vault remains available below.</div></div><div class="source-pill">COMPS</div></div>',unsafe_allow_html=True)
+    cards=[]
+    for _,r in d.head(30).iterrows():
+        metrics=[("Lean",first(r,["research_lean"],"—")),("Confidence",first(r,["research_confidence"],"—")),("Comp Samples",first(r,["comp_samples"],"—")),("Home Win Comp",_safe_pct(first(r,["comp_home_win_prob"],None))),("Projected Margin",first(r,["comp_projected_margin"],"—")),("Projected Total",first(r,["comp_projected_total"],"—"))]
+        cards.append(matchup_card("CFB",first(r,["away"],"—"),first(r,["home"],"—"),first(r,["start"],None),metrics,badge="RESEARCH",accent="gold"))
+    if cards: st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d,None,"Full Current CFB Research",560)
+    research_table(hist,None,"Full Historical CFB Vault",560)
+
+
 def feature(mode,page):
+    if mode=="🎯 Betting" and page=="Today's Slate": betting_slate_page(); return True
+    if mode=="🎯 Betting" and page=="Line Movement": line_movement_clean_page(); return True
+    if mode=="🎯 Betting" and page=="Results": betting_results_clean_page(); return True
+    if mode=="🎯 Betting" and page=="Research": research_clean_page(); return True
     if page=="MLB Best Bets": mlb_best_bets_page(); return True
     if page=="CFB Best Bets": cfb_best_bets_page(); return True
     if page=="Game Research": game_research_page(); return True
@@ -1543,4 +1766,12 @@ def feature(mode,page):
     if page=="Survivor": survivor_page(); return True
     if page=="NFL Weather": nfl_weather_page(); return True
     if page=="CFB Over / Unders": cfb_totals_page(); return True
+    if mode=="⚾ MLB" and page=="Starting Pitching": mlb_starting_pitching_page(); return True
+    if mode=="⚾ MLB" and page=="Weather": mlb_weather_clean_page(); return True
+    if mode=="⚾ MLB" and page=="MLB Market": mlb_market_clean_page(); return True
+    if mode=="⚾ MLB" and page=="MLB Results": mlb_results_clean_page(); return True
+    if mode=="🏈 NFL" and page=="NFL Research": nfl_research_clean_page(); return True
+    if mode=="🏟️ College Football" and page=="CFB Matchups": cfb_matchups_clean_page(); return True
+    if mode=="🏟️ College Football" and page=="CFB Research": cfb_research_clean_page(); return True
+    if mode=="🏆 Fantasy" and page=="NFL Research": nfl_research_clean_page(); return True
     return False
