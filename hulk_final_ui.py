@@ -11,6 +11,7 @@ import streamlit as st
 
 ROOT = Path(__file__).resolve().parent
 ET = ZoneInfo("America/New_York")
+PROP_SCORE_GUARDRAIL = "Hulk Prop Score is not a calibrated win probability."
 
 P = {
     "mlb": ROOT / "baseball_vault/derived/MLB_MATCHUP_BOARD_INTELLIGENCE.csv",
@@ -135,6 +136,118 @@ def matchup_html(sport, away, home):
     return f'{one(away)}<span class="at">@</span>{one(home)}'
 
 
+def fmt_datetime(value):
+    dt = parse_dt(value)
+    if dt is None:
+        return "—"
+    return dt.tz_convert(ET).strftime("%a %-m/%-d · %-I:%M %p ET")
+
+
+def pct_value(value):
+    x = num(value)
+    if x is None:
+        return "—"
+    if 0 <= x <= 1:
+        x *= 100
+    return f"{x:.0f}%"
+
+
+def research_table(df, cols=None, title="Deep Research / Full Data", height=520, rename=None):
+    """Keep raw research available without making the spreadsheet the product surface."""
+    if df is None or df.empty:
+        return
+    show = df.copy()
+    if cols:
+        cols = [c for c in cols if c in show.columns]
+        if cols:
+            show = show[cols]
+    if rename:
+        show = show.rename(columns={k:v for k,v in rename.items() if k in show.columns})
+    with st.expander(title, expanded=False):
+        st.caption("Full research data is preserved here for auditing. The main page above is the cleaned sports view.")
+        st.dataframe(show, hide_index=True, width="stretch", height=height)
+
+
+def matchup_card(sport, away, home, start=None, metrics=None, badge=None, note=None, accent="blue"):
+    metrics = metrics or []
+    logos = matchup_html(sport, away, home) if sport in {"MLB","NFL"} else f'<b>{esc(away)}</b><span class="at">@</span><b>{esc(home)}</b>'
+    items = ''.join(
+        f'<div class="clean-metric"><span>{esc(label)}</span><b>{esc(value)}</b></div>'
+        for label,value in metrics if value not in (None, "", "nan")
+    )
+    badge_html = f'<span class="clean-badge {esc(str(accent))}">{esc(badge)}</span>' if badge else ''
+    note_html = f'<div class="clean-note">{esc(note)}</div>' if note else ''
+    return (
+        f'<div class="clean-game-card {esc(str(accent))}">'
+        f'<div class="clean-game-top"><div><div class="clean-matchup">{logos}</div><div class="clean-time">{esc(fmt_datetime(start) if start is not None else "")}</div></div>{badge_html}</div>'
+        f'<div class="clean-metrics">{items}</div>{note_html}</div>'
+    )
+
+
+def player_card(name, team="—", position="", metrics=None, badge=None, sport=None, accent="green", note=None):
+    metrics = metrics or []
+    img = ''
+    if sport in {"MLB","NFL"} and team not in (None,"","—"):
+        u = logo_url(sport, team)
+        if u:
+            img = f'<img src="{u}" alt="" loading="lazy">'
+    meta = ' · '.join(x for x in [str(team) if team not in (None,"","—") else "", str(position) if position not in (None,"","—") else ""] if x)
+    items=''.join(f'<div class="clean-metric"><span>{esc(k)}</span><b>{esc(v)}</b></div>' for k,v in metrics if v not in (None,"","nan"))
+    badge_html=f'<span class="clean-badge {esc(str(accent))}">{esc(badge)}</span>' if badge else ''
+    note_html=f'<div class="clean-note">{esc(note)}</div>' if note else ''
+    return f'<div class="clean-player-card {esc(str(accent))}"><div class="clean-player-top">{img}<div><div class="clean-player-name">{esc(name)}</div><div class="clean-player-meta">{esc(meta)}</div></div>{badge_html}</div><div class="clean-metrics">{items}</div>{note_html}</div>'
+
+
+def _prop_rows_for_today(sport=None):
+    d=load("prop_signals")
+    if d.empty:
+        return d
+    if sport and "sport" in d.columns:
+        d=d[d["sport"].astype(str).str.upper().eq(str(sport).upper())].copy()
+    if "event_time" in d.columns:
+        d=d[d["event_time"].apply(is_today)].copy()
+    return d
+
+
+def _game_leg_pool(sport):
+    rows={"MLB":rows_mlb,"NFL":rows_nfl,"CFB":rows_cfb}.get(sport,lambda:[])()
+    if sport=="MLB":
+        rows=[r for r in rows if r.get("action") in {"BET","WATCH"}]
+    elif sport=="CFB":
+        rows=[r for r in rows if str(r.get("confidence","")).upper() in {"HIGH","MEDIUM"}]
+    # NFL rows are market research; retain strongest market-backed rows.
+    out=[]
+    for r in rows:
+        out.append({
+            "kind":"GAME","sport":sport,"event":f'{r.get("away")} @ {r.get("home")}',"pick":r.get("pick","—"),
+            "market":r.get("metric_label","GAME"),"line":r.get("metric","—"),"source":("Hulk MLB model" if sport=="MLB" else "Sportsbook market research" if sport=="NFL" else "CFB research"),
+            "action":r.get("action","RESEARCH"),"start":r.get("start"),"away":r.get("away"),"home":r.get("home"),"confidence":r.get("confidence","—")
+        })
+    return out
+
+
+def _prop_leg_pool(sport):
+    d=_prop_rows_for_today(sport)
+    if d.empty:
+        return []
+    books=pd.to_numeric(d.get("book_count",pd.Series(index=d.index,dtype=float)),errors="coerce").fillna(0)
+    sig=d.get("signal",pd.Series(index=d.index,dtype=str)).astype(str).str.upper()
+    d=d[sig.isin(["STRONG","LEAN"]) & books.ge(3)].copy()
+    if d.empty:
+        return []
+    d["_score"]=pd.to_numeric(d.get("hulk_prop_score",pd.Series(index=d.index,dtype=float)),errors="coerce").fillna(0)
+    d=d.sort_values(["_score"],ascending=False)
+    out=[]
+    seen=set()
+    for _,r in d.iterrows():
+        event=str(r.get("event_id") or r.get("event_time") or "")
+        key=(event,str(r.get("player")),str(r.get("canonical_market")))
+        if key in seen: continue
+        seen.add(key)
+        out.append({"kind":"PROP","sport":sport,"event":event,"pick":f'{r.get("player","—")} {str(r.get("market_direction","—")).upper()}',"market":str(r.get("canonical_market","—")).replace("_"," ").title(),"line":r.get("market_median","—"),"source":f'{int(num(r.get("book_count"),0) or 0)}-book consensus',"action":str(r.get("signal","LEAN")).upper(),"start":r.get("event_time"),"player":r.get("player","—"),"score":r.get("hulk_prop_score","—")})
+    return out
+
+
 def css():
     st.markdown(r"""
     <style>
@@ -171,6 +284,16 @@ def css():
     .league-hero{border-radius:16px;padding:18px 20px;margin:4px 0 12px;border:1px solid #24374a;background:linear-gradient(115deg,#0a1219,#111521);position:relative;overflow:hidden}.league-hero:after{content:"";position:absolute;inset:auto -8% -55% 35%;height:180px;background:radial-gradient(circle,rgba(71,150,255,.18),rgba(181,93,255,.10),transparent 70%);pointer-events:none}.league-hero.cfb{border-color:rgba(255,180,48,.40);background:linear-gradient(115deg,#171007,#10131b 45%,#111024)}.league-hero.mlb{border-color:rgba(61,151,255,.43);background:linear-gradient(115deg,#07131f,#0b1119 45%,#101023)}
     .league-eyebrow{font-size:12px;font-weight:950;letter-spacing:.15em;color:#9db0bd}.league-title{font-size:36px;font-weight:1000;color:#fff;line-height:1.08;margin:4px 0}.league-title .blue{color:#54a4ff}.league-title .gold{color:#ffc14e}.league-copy{font-size:15px;color:#b4c1ca;max-width:920px}.league-stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:10px 0 12px}.league-stat{background:#0b141c;border:1px solid #1b2c3a;border-radius:11px;padding:13px}.league-stat .t{font-size:11px;color:#8da0ad;font-weight:900;text-transform:uppercase}.league-stat .n{font-size:28px;font-weight:1000;margin-top:2px;color:#fff}.league-stat.blue .n{color:#54a4ff}.league-stat.purple .n{color:#c47cff}.league-stat.gold .n{color:#ffc14e}.league-stat.red .n{color:#ff7378}
     .pick-card{background:linear-gradient(145deg,#0b151e,#091119);border:1px solid #203444;border-radius:12px;padding:14px;margin:8px 0}.pick-card.cfb{border-left:4px solid #ffc14e}.pick-card.mlb{border-left:4px solid #54a4ff}.pick-top{display:flex;justify-content:space-between;gap:10px;align-items:start}.pick-match{font-size:17px;font-weight:1000;color:#fff}.pick-time{font-size:12px;color:#91a3af;margin-top:2px}.pick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:11px}.pick-metric{background:#0b1219;border:1px solid #172736;border-radius:8px;padding:8px}.pick-metric .l{font-size:10px;color:#7f919e;font-weight:900}.pick-metric .v{font-size:15px;color:#fff;font-weight:950;margin-top:2px}.empty-rich{padding:18px;border-radius:12px;background:linear-gradient(135deg,rgba(61,151,255,.10),rgba(181,93,255,.08));border:1px solid rgba(61,151,255,.24)}.empty-rich b{font-size:18px;color:#fff}.empty-rich span{display:block;font-size:14px;color:#aab8c2;margin-top:5px;line-height:1.45}
+
+    .clean-game-grid,.clean-player-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:10px 0 14px}
+    .clean-game-card,.clean-player-card{background:linear-gradient(145deg,#0b151e,#081017);border:1px solid #203444;border-left:4px solid #4cc2ff;border-radius:14px;padding:15px;box-shadow:0 7px 20px #0004}
+    .clean-game-card.green,.clean-player-card.green{border-left-color:#55ff32}.clean-game-card.purple,.clean-player-card.purple{border-left-color:#b978ff}.clean-game-card.gold,.clean-player-card.gold{border-left-color:#ffc247}.clean-game-card.red,.clean-player-card.red{border-left-color:#ff5c61}.clean-game-card.cyan,.clean-player-card.cyan{border-left-color:#22d8ff}
+    .clean-game-top,.clean-player-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.clean-player-top{align-items:center}.clean-player-top img{width:46px;height:46px;object-fit:contain;flex:0 0 auto}
+    .clean-matchup{font-size:20px;font-weight:1000;color:#fff}.clean-matchup .team-chip img{width:34px;height:34px}.clean-time{font-size:13px;color:#9dafba;margin-top:5px}.clean-player-name{font-size:19px;font-weight:1000;color:#fff}.clean-player-meta{font-size:12px;color:#91a3ae;margin-top:2px}
+    .clean-badge{margin-left:auto;border-radius:999px;padding:6px 10px;border:1px solid #2a4050;font-size:11px;font-weight:950;white-space:nowrap;background:#0d1820}.clean-badge.green{color:#a8ff8c;border-color:#315c34}.clean-badge.blue{color:#6dcaff;border-color:#26577a}.clean-badge.purple{color:#d2a4ff;border-color:#5c3f76}.clean-badge.gold{color:#ffd470;border-color:#6e5624}.clean-badge.red{color:#ff8c90;border-color:#74363a}.clean-badge.cyan{color:#68eaff;border-color:#26606a}
+    .clean-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:13px}.clean-metric{background:#091119;border:1px solid #172a38;border-radius:9px;padding:9px;min-width:0}.clean-metric span{display:block;color:#8396a2;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.clean-metric b{display:block;color:#fff;font-size:15px;margin-top:3px;overflow:hidden;text-overflow:ellipsis}.clean-note{font-size:12px;line-height:1.45;color:#aab8c2;margin-top:10px}
+    .matchup-hero{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;background:radial-gradient(circle at 50% 0,rgba(76,194,255,.15),transparent 48%),linear-gradient(135deg,#0a151e,#080f15);border:1px solid #203848;border-radius:18px;padding:20px;margin:10px 0 14px}.matchup-team{text-align:center}.matchup-team img{width:86px;height:86px;object-fit:contain}.matchup-team b{display:block;font-size:24px;color:#fff;margin-top:6px}.matchup-mid{text-align:center;color:#8fa0ac}.matchup-mid strong{display:block;font-size:20px;color:#fff;margin:4px 0}.research-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.research-summary>div{background:#0a131b;border:1px solid #1a2e3d;border-radius:10px;padding:11px}.research-summary span{display:block;color:#8295a1;font-size:10px;font-weight:900;text-transform:uppercase}.research-summary b{display:block;color:#fff;font-size:18px;margin-top:3px}
+    @media(max-width:900px){.clean-game-grid,.clean-player-grid{grid-template-columns:1fr}.clean-metrics,.research-summary{grid-template-columns:repeat(2,1fr)}.matchup-hero{grid-template-columns:1fr}.matchup-team img{width:64px;height:64px}}
     @media(max-width:1050px){.league-stat-row,.pick-grid{grid-template-columns:repeat(2,1fr)}}
     .st-key-mobile_nav_shell{display:none}
     @media(max-width:1050px){.league-actions{grid-template-columns:repeat(3,1fr)}.command-grid,.pp-card-grid{grid-template-columns:1fr 1fr}.kpi-row{grid-template-columns:repeat(3,1fr)}.two-col,.mini-grid{grid-template-columns:1fr}.plays-head,.play-row{grid-template-columns:62px minmax(190px,1.6fr) 110px 90px 88px}.plays-head>*:nth-child(6),.plays-head>*:nth-child(7),.play-row>*:nth-child(6),.play-row>*:nth-child(7){display:none}}
@@ -341,20 +464,20 @@ def play_table(mode, rows):
 def mlb_market_panel():
     d=load("mlb_market")
     if not d.empty and "game_start" in d.columns:
-        d=d[d["game_start"].apply(is_today)]
-    h='<div class="panel accent-cyan"><div class="phead"><div class="ptitle">MARKET MOVEMENT</div><div class="psub">clean signal view · MLB today</div></div>'
+        d=d[d["game_start"].apply(is_today)].copy()
+    st.markdown('<div class="panel accent-cyan"><div class="phead"><div class="ptitle">MARKET MOVEMENT</div><div class="psub">game-first · MLB today</div></div>',unsafe_allow_html=True)
     if d.empty:
-        h+='<div class="empty-rich"><b>No current MLB movement signal.</b><span>Nothing is substituted from another sport. This card fills only when the MLB market cache has a same-day signal.</span></div>'
-    else:
-        score=pd.to_numeric(d.get("market_signal_score",pd.Series(index=d.index,dtype=float)),errors="coerce")
-        d=d.assign(_score=score).sort_values("_score",ascending=False).head(5)
-        for _,r in d.iterrows():
-            matchup=f'{str(first(r,["away_team"],"")).title()} @ {str(first(r,["home_team"],"")).title()}'
-            signal=first(r,["market_signal"],"Market move detected")
-            books=first(r,["books_moving"],"—")
-            strength=first(r,["signal_strength"],"—")
-            h+=f'<div class="market-card"><div><div class="market-match">{esc(matchup)}</div><div class="market-signal">{esc(signal)}</div></div><div class="market-meta"><div class="market-books">{esc(books)} books moving</div><div class="market-strength">{esc(strength)}</div></div></div>'
-    st.markdown(h+'</div>',unsafe_allow_html=True)
+        st.markdown('<div class="empty-rich"><b>No current MLB movement signal.</b><span>Nothing is substituted from another sport. Check feed freshness in Deep Research if today should have games.</span></div></div>',unsafe_allow_html=True)
+        return
+    score=pd.to_numeric(d.get("market_signal_score",pd.Series(index=d.index,dtype=float)),errors="coerce")
+    d=d.assign(_score=score).sort_values("_score",ascending=False)
+    cards=[]
+    for _,r in d.head(8).iterrows():
+        away=str(first(r,["away_team"],"")).title(); home=str(first(r,["home_team"],"")).title()
+        metrics=[("Market",str(first(r,["core_market"],"—")).title()),("Target",str(first(r,["signal_target"],"—")).title()),("Books",f'{int(num(first(r,["books_moving"],0),0) or 0)}/{int(num(first(r,["books_reporting"],0),0) or 0)} moving'),("Strength",str(first(r,["signal_strength"],"—")).upper())]
+        cards.append(matchup_card("MLB",away,home,first(r,["game_start"],None),metrics,badge="MARKET MOVE",accent="cyan",note=first(r,["market_signal"],"Market move detected")))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div></div>',unsafe_allow_html=True)
+    research_table(d,["away_team","home_team","game_start","core_market","signal_target","signal_strength","books_reporting","books_moving","consensus_among_movers_pct","whole_market_share_pct","avg_implied_prob_move","market_signal_score","market_signal"],"Deep Market Research",520,rename={"game_start":"Start","core_market":"Market","signal_target":"Target","signal_strength":"Strength","books_reporting":"Books Reporting","books_moving":"Books Moving","consensus_among_movers_pct":"Mover Agreement %","whole_market_share_pct":"Whole Market Share %","avg_implied_prob_move":"Avg Implied Move","market_signal_score":"Signal Score","market_signal":"Signal"})
 
 
 def generic_market_panel(mode, rows):
@@ -543,7 +666,59 @@ def dashboard(mode,page):
 
 def render_parlays(sport=None):
     css(); mode={"MLB":"⚾ MLB","NFL":"🏈 NFL","CFB":"🏟️ College Football"}.get(sport,"🎯 Betting")
-    topbar(mode); st.markdown(parlay_panel(mode),unsafe_allow_html=True)
+    topbar(mode,"Game + prop + mixed parlay research")
+    st.markdown('<div class="command-hero"><div class="command-eyebrow">HULK PARLAY CENTER</div><div class="command-title">PARLAYS ARE <span>MORE THAN PROPS.</span></div><div class="command-sub">Game legs, qualified player props and mixed research are separated. Hulk does not lower thresholds or invent legs to fill a card.</div></div>',unsafe_allow_html=True)
+    if sport is None:
+        sport=st.selectbox("Sport",["MLB","NFL","CFB"],key="parlay_sport")
+    games=_game_leg_pool(sport); props=_prop_leg_pool(sport)
+    qualified=load("qualified_parlays")
+    if not qualified.empty and "sports" in qualified.columns:
+        qualified=qualified[qualified["sports"].astype(str).str.contains(sport,case=False,na=False)].copy()
+    cards=[("Game Leg Pool",len(games),"today · non-PASS" if sport=="MLB" else "today · research eligible","blue"),("Qualified Prop Legs",len(props),"LEAN/STRONG · 3+ books","green"),("Qualified Prop Parlays",len(qualified),"engine output only","purple"),("Sport",sport,"isolated","gold")]
+    st.markdown('<div class="league-stat-row">'+''.join(f'<div class="league-stat {c}"><div class="t">{esc(a)}</div><div class="n">{esc(b)}</div><div class="sport-sub">{esc(n)}</div></div>' for a,b,n,c in cards)+'</div>',unsafe_allow_html=True)
+
+    st.subheader("Game Parlays")
+    if len(games)>=2:
+        builds=[(2,"2-LEG SAFER","blue"),(3,"3-LEG BALANCED","gold"),(4,"4-LEG AGGRESSIVE","red")]
+        out=[]
+        for n,label,accent in builds:
+            if len(games)<n: continue
+            legs=games[:n]
+            source="Hulk Model Parlay" if sport=="MLB" and all(x.get("action")=="BET" for x in legs) else ("MLB Research Parlay" if sport=="MLB" else "Market-Backed Research Parlay")
+            metrics=[("Legs",n),("Source",source),("Correlation","Different games preferred"),("Status","RESEARCH" if source!="Hulk Model Parlay" else "BET/WATCH")]
+            note=' · '.join(f'{x["pick"]} ({x["event"]})' for x in legs)
+            out.append(f'<div class="clean-game-card {accent}"><div class="clean-game-top"><div><div class="clean-matchup">{label}</div><div class="clean-time">{esc(source)}</div></div><span class="clean-badge {accent}">PARLAY</span></div><div class="clean-metrics">'+''.join(f'<div class="clean-metric"><span>{esc(k)}</span><b>{esc(v)}</b></div>' for k,v in metrics)+'</div><div class="clean-note">{esc(note)}</div></div>')
+        st.markdown('<div class="clean-game-grid">'+''.join(out)+'</div>',unsafe_allow_html=True)
+    else:
+        st.info(f"Only {len(games)} eligible {sport} game leg(s) are available today. Two are required before Hulk can form a game parlay.")
+
+    st.subheader("Player-Prop Parlays")
+    if not qualified.empty:
+        qcards=[]
+        for _,r in qualified.head(6).iterrows():
+            qcards.append(player_card(first(r,["parlay_type","type"],"Qualified Prop Parlay"),sport,metrics=[("Score",first(r,["parlay_score","score"],"—")),("Legs",first(r,["leg_count","legs"],"—"))],badge="QUALIFIED",accent="purple",note=first(r,["leg_summary","legs_text","selections"],"Qualified engine output")))
+        st.markdown('<div class="clean-player-grid">'+''.join(qcards)+'</div>',unsafe_allow_html=True)
+    else:
+        st.info("No qualified player-prop parlays for today. This does not block game parlays above.")
+
+    st.subheader("Mixed Game + Prop Parlays")
+    if games and props:
+        mixed=[]
+        # Basic correlation guardrail: do not use duplicate event IDs when prop event identity is available.
+        for g in games:
+            mixed.append(g)
+            if len(mixed)>=2: break
+        for pr in props:
+            mixed.append(pr)
+            if len(mixed)>=3: break
+        note=' · '.join(f'{x.get("pick")} [{x.get("market")}]' for x in mixed)
+        st.markdown('<div class="clean-game-card purple"><div class="clean-game-top"><div><div class="clean-matchup">MIXED RESEARCH BUILD</div><div class="clean-time">game + qualified prop inputs</div></div><span class="clean-badge purple">RESEARCH</span></div><div class="clean-note">'+esc(note)+'</div></div>',unsafe_allow_html=True)
+        st.caption("Mixed builds are research combinations. Advanced same-game correlation modeling is not claimed until that engine exists.")
+    else:
+        st.info("Mixed parlays need at least one eligible game leg and one qualified prop leg on today’s slate.")
+
+    if not qualified.empty:
+        research_table(qualified,None,"Deep Qualified Parlay Data",420)
 
 
 def profiles():
@@ -686,90 +861,60 @@ def _fantasy_ranked_board():
 
 
 def waivers_page():
-    css(); topbar("🏆 Fantasy", "League-aware waiver wire")
-    d, rank, name = _fantasy_ranked_board()
+    css(); topbar("🏆 Fantasy", "League-aware waiver board")
+    d,rank,name=_fantasy_ranked_board()
     if d.empty or not name: st.error("Fantasy board unavailable."); return
-    data, leagues, active, league = active_league_context()
-    free_agents=_split_names(league.get("free_agents",[])) if active else []
-    roster=_split_names(league.get("roster",[])) if active else []
-    if active:
-        st.markdown(f'<div class="sport-banner"><div><div class="sport-name">Waiver Wire · {esc(active)}</div><div class="sport-sub">Only league-available players are ranked when the free-agent pool is synced or entered.</div></div><div class="source-pill">{esc(league.get("platform","MANUAL"))}</div></div>',unsafe_allow_html=True)
-    else:
-        st.warning("No active league. Showing the generic fantasy board until a league is added.")
-    if free_agents:
-        keys={_norm_name(x) for x in free_agents}
-        d=d[d[name].map(_norm_name).isin(keys)].copy()
-    elif roster:
-        roster_keys={_norm_name(x) for x in roster}
-        d=d[~d[name].map(_norm_name).isin(roster_keys)].copy()
-        st.info("Roster is known, but the provider free-agent pool is not. Hulk has removed your rostered players, but cannot know which players belong to other teams yet.")
-    elif active:
-        st.info("This league has no roster/free-agent data yet. Add it in My Leagues or connect a provider later; generic rankings are shown for now.")
-    if d.empty:
-        st.info("No available players from the league pool matched the current Hulk fantasy board."); return
-    d=d.copy()
-    d["Waiver Call"]=["ADD" if i<10 else "WATCH" if i<30 else "DEEP STASH" for i in range(len(d))]
-    proj=next((c for c in ["proj_ppr_points","projected_points","projection"] if c in d.columns),None)
-    cols=[c for c in [name,"team","position",rank,"hulk_v2_tier","tier",proj,"consensus_adp","depth_rank","status","Waiver Call"] if c and c in d.columns]
-    st.dataframe(d[cols].head(75),hide_index=True,width="stretch",height=700)
+    data,leagues,active,league=active_league_context(); free_agents=_split_names(league.get("free_agents",[])) if active else []; roster=_split_names(league.get("roster",[])) if active else []
+    if active: st.markdown(f'<div class="sport-banner"><div><div class="sport-name">Waiver Wire · {esc(active)}</div><div class="sport-sub">League-available players first.</div></div><div class="source-pill">{esc(league.get("platform","MANUAL"))}</div></div>',unsafe_allow_html=True)
+    else: st.warning("No active league. Showing the generic fantasy board until a league is added.")
+    if free_agents: keys={_norm_name(x) for x in free_agents}; d=d[d[name].map(_norm_name).isin(keys)].copy()
+    elif roster: roster_keys={_norm_name(x) for x in roster}; d=d[~d[name].map(_norm_name).isin(roster_keys)].copy(); st.info("Roster is known, but the provider free-agent pool is not. Hulk removed your rostered players only.")
+    if d.empty: st.info("No available players matched the current Hulk fantasy board."); return
+    d=d.copy(); d["Waiver Call"]=["ADD" if i<10 else "WATCH" if i<30 else "DEEP STASH" for i in range(len(d))]; proj=next((c for c in ["proj_ppr_points","projected_points","projection"] if c in d.columns),None)
+    cards=[]
+    for _,r in d.head(60).iterrows(): cards.append(player_card(r.get(name,"—"),r.get("team","—"),r.get("position",""),[("Rank",r.get(rank,"—") if rank else "—"),("Projection",r.get(proj,"—") if proj else "—"),("ADP",r.get("consensus_adp","—")),("Tier",r.get("hulk_v2_tier",r.get("tier","—")))],badge=r.get("Waiver Call","WATCH"),accent="green" if r.get("Waiver Call")=="ADD" else "gold"))
+    st.markdown('<div class="clean-player-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d,None,"Full Waiver Research Data",560)
 
 
 def lineup_page():
     css(); topbar("🏆 Fantasy", "League-aware lineup board")
-    d, rank, name = _fantasy_ranked_board()
+    d,rank,name=_fantasy_ranked_board()
     if d.empty or not name: st.error("Fantasy board unavailable."); return
-    _, _, active, league = active_league_context()
-    saved_roster=_split_names(league.get("roster",[])) if active else []
-    options=d[name].dropna().astype(str).drop_duplicates().tolist()
-    matched=[]
+    _,_,active,league=active_league_context(); saved_roster=_split_names(league.get("roster",[])) if active else []; options=d[name].dropna().astype(str).drop_duplicates().tolist(); matched=[]
     if saved_roster:
-        lookup={_norm_name(x):x for x in options}
-        matched=[lookup[k] for k in [_norm_name(x) for x in saved_roster] if k in lookup]
-        st.caption(f"Using roster from {active}. You can adjust the selection below without changing the saved league profile.")
+        lookup={_norm_name(x):x for x in options}; matched=[lookup[k] for k in [_norm_name(x) for x in saved_roster] if k in lookup]
     roster=st.multiselect("Roster",options,default=matched,key=f"hulk_lineup_{active or 'manual'}")
     if not roster: st.info("Add players above or save a roster in My Leagues to build a Start/Bench board."); return
-    x=d[d[name].astype(str).isin(roster)].copy()
-    score=next((c for c in ["proj_ppr_points","projected_points","projection","hulk_v2_score","hulk_score"] if c in x.columns),None)
-    if score:
-        x[score]=pd.to_numeric(x[score],errors="coerce"); x=x.sort_values(score,ascending=False)
-    elif rank:
-        x[rank]=pd.to_numeric(x[rank],errors="coerce"); x=x.sort_values(rank)
+    x=d[d[name].astype(str).isin(roster)].copy(); score=next((c for c in ["proj_ppr_points","projected_points","projection","hulk_v2_score","hulk_score"] if c in x.columns),None)
+    if score: x[score]=pd.to_numeric(x[score],errors="coerce"); x=x.sort_values(score,ascending=False)
+    elif rank: x[rank]=pd.to_numeric(x[rank],errors="coerce"); x=x.sort_values(rank)
     x["Hulk Lineup Call"]=["START" if i<min(7,len(x)) else "BENCH" for i in range(len(x))]
-    cols=[c for c in [name,"team","position",score,rank,"hulk_v2_tier","tier","status","Hulk Lineup Call"] if c and c in x.columns]
-    st.dataframe(x[cols],hide_index=True,width="stretch")
-    st.caption("The current Start/Bench label is a roster ordering aid, not a full slot optimizer yet. Exact starting-slot constraints will come from synced league settings.")
+    cards=[player_card(r.get(name,"—"),r.get("team","—"),r.get("position",""),[("Projection",r.get(score,"—") if score else "—"),("Rank",r.get(rank,"—") if rank else "—"),("Tier",r.get("hulk_v2_tier",r.get("tier","—")))],badge=r.get("Hulk Lineup Call"),accent="green" if r.get("Hulk Lineup Call")=="START" else "blue") for _,r in x.iterrows()]
+    st.markdown('<div class="clean-player-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True); research_table(x,None,"Full Lineup Research Data",500)
+    st.caption("Start/Bench is currently a roster ordering aid, not a full slot optimizer yet.")
 
 
 def trade_finder_page():
     css(); topbar("🏆 Fantasy", "Trade research")
-    d, rank, name = _fantasy_ranked_board()
+    d,rank,name=_fantasy_ranked_board()
     if d.empty or not name: st.error("Fantasy board unavailable."); return
-    _, _, active, league = active_league_context()
-    roster=_split_names(league.get("roster",[])) if active else []
-    st.markdown('<div class="sport-banner"><div><div class="sport-name">Hulk Trade Finder</div><div class="sport-sub">Built for roster-aware trades, not isolated player-vs-player grades.</div></div><div class="source-pill">FOUNDATION</div></div>',unsafe_allow_html=True)
-    if not active:
-        st.info("Add and select a league first. Trade Finder needs the active roster and eventually every opponent roster from league sync."); return
-    if not roster:
-        st.info("Save this league\'s roster in My Leagues. Once provider sync supplies opponent rosters, Hulk can search for trades that improve both teams."); return
-    lookup={_norm_name(v):v for v in d[name].astype(str)}
-    mine=[lookup[k] for k in [_norm_name(x) for x in roster] if k in lookup]
-    x=d[d[name].astype(str).isin(mine)].copy()
-    cols=[c for c in [name,"team","position",rank,"hulk_v2_tier","consensus_adp","proj_ppr_points","vorp"] if c and c in x.columns]
-    st.subheader(f"{active} · Your Trade Assets")
-    st.dataframe(x[cols],hide_index=True,width="stretch")
-    st.info("Opponent-roster sync is required before Hulk generates proposed trades. It will not invent targets from players who are not actually on another team in your league.")
+    _,_,active,league=active_league_context(); roster=_split_names(league.get("roster",[])) if active else []
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Hulk Trade Finder</div><div class="sport-sub">Roster-aware trade assets, not isolated spreadsheet grades.</div></div><div class="source-pill">FOUNDATION</div></div>',unsafe_allow_html=True)
+    if not active: st.info("Add and select a league first."); return
+    if not roster: st.info("Save this league's roster in My Leagues."); return
+    lookup={_norm_name(v):v for v in d[name].astype(str)}; mine=[lookup[k] for k in [_norm_name(x) for x in roster] if k in lookup]; x=d[d[name].astype(str).isin(mine)].copy(); cards=[]
+    for _,r in x.iterrows(): cards.append(player_card(r.get(name,"—"),r.get("team","—"),r.get("position",""),[("Rank",r.get(rank,"—") if rank else "—"),("Tier",r.get("hulk_v2_tier","—")),("ADP",r.get("consensus_adp","—")),("Projection",r.get("proj_ppr_points","—")),("VORP",r.get("vorp","—"))],badge="YOUR ASSET",accent="purple"))
+    st.markdown('<div class="clean-player-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True); research_table(x,None,"Full Trade Asset Data",480)
+    st.info("Opponent-roster sync is required before Hulk proposes trades. It will not invent targets.")
 
 
 def historical_explorer_page():
     css(); topbar("🎯 Betting", "Historical vault explorer")
-    st.markdown('<div class="command-hero"><div class="command-eyebrow">HULK HISTORICAL INTELLIGENCE</div><div class="command-title">DON\'T JUST SEE THE PICK. <span>SEE THE HISTORY.</span></div><div class="command-sub">Search the actual MLB, NFL and college football vaults by teams and context. Filters only appear for fields that exist in the cached historical data.</div></div>',unsafe_allow_html=True)
-    sport=st.selectbox("Sport",["NFL","MLB","CFB"],key="hist_sport")
-    key={"NFL":"nfl_history","MLB":"mlb_history","CFB":"cfb_history"}[sport]
-    d=load(key)
+    st.markdown('<div class="command-hero"><div class="command-eyebrow">HULK HISTORICAL INTELLIGENCE</div><div class="command-title">FILTER FIRST. <span>READ GAMES, NOT ROWS.</span></div><div class="command-sub">Use the vault filters, then review recent matching games as cards. Full raw history remains collapsed underneath.</div></div>',unsafe_allow_html=True)
+    sport=st.selectbox("Sport",["NFL","MLB","CFB"],key="hist_sport"); d=load({"NFL":"nfl_history","MLB":"mlb_history","CFB":"cfb_history"}[sport])
     if d.empty: st.info(f"{sport} historical vault is unavailable."); return
-    home="home_team" if "home_team" in d.columns else None
-    away="away_team" if "away_team" in d.columns else None
-    teams=sorted(set(d[home].dropna().astype(str)).union(set(d[away].dropna().astype(str)))) if home and away else []
+    home="home_team" if "home_team" in d.columns else None; away="away_team" if "away_team" in d.columns else None; teams=sorted(set(d[home].dropna().astype(str)).union(set(d[away].dropna().astype(str)))) if home and away else []
     c1,c2,c3=st.columns([1.2,1.2,.8])
     with c1: team=st.selectbox("Team",["ALL"]+teams)
     with c2: opponent=st.selectbox("Opponent",["ALL"]+teams)
@@ -780,33 +925,29 @@ def historical_explorer_page():
         elif venue_side=="AWAY": x=x[x[away].astype(str).eq(team)]
         else: x=x[x[home].astype(str).eq(team)|x[away].astype(str).eq(team)]
     if opponent!="ALL" and home and away:
-        if team!="ALL":
-            x=x[((x[home].astype(str).eq(team)) & x[away].astype(str).eq(opponent)) | ((x[away].astype(str).eq(team)) & x[home].astype(str).eq(opponent))]
-        else:
-            x=x[x[home].astype(str).eq(opponent)|x[away].astype(str).eq(opponent)]
+        if team!="ALL": x=x[((x[home].astype(str).eq(team))&x[away].astype(str).eq(opponent))|((x[away].astype(str).eq(team))&x[home].astype(str).eq(opponent))]
+        else: x=x[x[home].astype(str).eq(opponent)|x[away].astype(str).eq(opponent)]
     if sport=="NFL":
         f1,f2,f3=st.columns(3)
         if "roof" in x.columns:
-            vals=["ALL"]+sorted(x["roof"].dropna().astype(str).unique().tolist()); roof=f1.selectbox("Roof",vals)
-            if roof!="ALL": x=x[x["roof"].astype(str).eq(roof)]
+            vals=["ALL"]+sorted(x["roof"].dropna().astype(str).unique().tolist()); roof=f1.selectbox("Roof",vals); x=x if roof=="ALL" else x[x["roof"].astype(str).eq(roof)]
         if "surface" in x.columns:
-            vals=["ALL"]+sorted(x["surface"].dropna().astype(str).unique().tolist()); surface=f2.selectbox("Surface",vals)
-            if surface!="ALL": x=x[x["surface"].astype(str).eq(surface)]
+            vals=["ALL"]+sorted(x["surface"].dropna().astype(str).unique().tolist()); surface=f2.selectbox("Surface",vals); x=x if surface=="ALL" else x[x["surface"].astype(str).eq(surface)]
         if "wind" in x.columns:
             maxwind=f3.slider("Max wind",0,50,50); w=pd.to_numeric(x["wind"],errors="coerce"); x=x[w.isna()|w.le(maxwind)]
-    st.markdown(f'<div class="kpi-row"><div class="kpi green"><div class="lbl">MATCHING GAMES</div><div class="val">{len(x):,}</div><div class="note">real rows from {sport} vault</div></div></div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="research-summary"><div><span>Matching Games</span><b>{len(x):,}</b></div><div><span>Sport</span><b>{esc(sport)}</b></div><div><span>Team</span><b>{esc(team)}</b></div><div><span>Opponent</span><b>{esc(opponent)}</b></div></div>',unsafe_allow_html=True)
     if x.empty: st.info("No historical games match those filters."); return
-    if sport=="NFL":
-        cols=[c for c in ["gameday","season","week","away_team","away_score","home_team","home_score","spread_line","total_line","roof","surface","temp","wind","stadium","home_ats_result","ou_result"] if c in x.columns]
-    elif sport=="MLB":
-        cols=[c for c in ["officialDate","away_team","away_score","home_team","home_score","total_runs","venue","home_days_since_last","away_days_since_last","current_h2h_books","current_totals_books"] if c in x.columns]
-    else:
-        cols=[c for c in ["game_date","season","week","away_team","away_points","home_team","home_points","home_margin","total_points","neutral","conference_game","home_rest_days","away_rest_days","home_margin_last5","away_margin_last5"] if c in x.columns]
     date_col=next((c for c in ["gameday","officialDate","game_date"] if c in x.columns),None)
     if date_col: x=x.sort_values(date_col,ascending=False)
-    st.dataframe(x[cols].head(500),hide_index=True,width="stretch",height=720)
-    if sport=="MLB":
-        st.caption("Pitch-level research is stored separately in MLB_PITCHER_ARSENAL and MLB_BATTER_VS_PITCH_TYPE. This explorer does not fabricate pitch context that is not present in the game-master rows.")
+    cards=[]
+    for _,r in x.head(16).iterrows():
+        a=first(r,[away],"—") if away else "—"; h=first(r,[home],"—") if home else "—"
+        if sport=="NFL": metrics=[("Score",f'{first(r,["away_score"],"—")}–{first(r,["home_score"],"—")}'),("Spread",first(r,["spread_line"],"—")),("Total",first(r,["total_line"],"—")),("Weather",f'{first(r,["temp"],"—")}° · {first(r,["wind"],"—")} mph')]; note=first(r,["stadium"],"")
+        elif sport=="MLB": metrics=[("Score",f'{first(r,["away_score"],"—")}–{first(r,["home_score"],"—")}'),("Runs",first(r,["total_runs"],"—")),("Venue",first(r,["venue"],"—"))]; note=""
+        else: metrics=[("Score",f'{first(r,["away_points"],"—")}–{first(r,["home_points"],"—")}'),("Margin",first(r,["home_margin"],"—")),("Total",first(r,["total_points"],"—")),("Conference",first(r,["conference_game"],"—"))]; note=""
+        cards.append(matchup_card(sport,a,h,first(r,[date_col],None) if date_col else None,metrics,badge="HISTORY",accent="blue",note=note))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(x,None,"Full Historical Research Data",620)
 
 
 def count_rows(path):
@@ -886,25 +1027,25 @@ def prizepicks_preview_panel(sport):
 
 def mlb_best_bets_page():
     css(); topbar("⚾ MLB","Official model + props + PrizePicks + market")
-    rows=rows_mlb()
-    bets=[r for r in rows if r.get("action")=="BET"]
-    d=load("mlb")
+    rows=rows_mlb(); bets=[r for r in rows if r.get("action")=="BET"]
     pp=load("pp")
-    if not pp.empty and "league" in pp.columns:
-        pp=pp[pp["league"].astype(str).str.upper().eq("MLB")]
+    if not pp.empty and "league" in pp.columns: pp=pp[pp["league"].astype(str).str.upper().eq("MLB")]
     prop_edges, prop_leans, _=prop_action_counts()
-    st.markdown('<div class="league-hero mlb"><div class="league-eyebrow">MLB INTELLIGENCE</div><div class="league-title">BASEBALL <span class="blue">WITHOUT THE CLUTTER.</span></div><div class="league-copy">Official Hulk bets stay disciplined, but the page still gives you today’s props, PrizePicks, market movement, weather and parlay research in one place.</div></div><div class="spectrum-strip"></div>',unsafe_allow_html=True)
+    st.markdown('<div class="league-hero mlb"><div class="league-eyebrow">MLB INTELLIGENCE</div><div class="league-title">BASEBALL <span class="blue">WITHOUT THE CLUTTER.</span></div><div class="league-copy">Official Hulk bets stay disciplined. Games are shown first with team logos; props, PrizePicks, market, weather and parlays sit underneath.</div></div><div class="spectrum-strip"></div>',unsafe_allow_html=True)
     stats=[("Official Bets",len(bets),"blue"),("Today’s Games",len(rows),""),("MLB PrizePicks",len(pp),"purple"),("Qualified Prop Edges",prop_edges,"gold")]
     st.markdown('<div class="league-stat-row">'+''.join(f'<div class="league-stat {c}"><div class="t">{esc(a)}</div><div class="n">{esc(b)}</div></div>' for a,b,c in stats)+'</div>',unsafe_allow_html=True)
-    if bets:
-        play_table("⚾ MLB",bets)
+    if rows:
+        cards=[]
+        for r in rows:
+            accent="green" if r.get("action")=="BET" else "gold" if r.get("action")=="WATCH" else "blue"
+            metrics=[("Hulk Pick",r.get("pick","—")),("Decision",r.get("action","—")),("Confidence",r.get("confidence","—")),("Model Edge",r.get("metric","—")),("Market",r.get("market","—"))]
+            cards.append(matchup_card("MLB",r.get("away"),r.get("home"),r.get("start"),metrics,badge=r.get("action"),accent=accent,note=r.get("detail")))
+        st.markdown('<div class="panel"><div class="phead"><div class="ptitle">🔥 TODAY’S MLB BOARD</div><div class="psub">game first · official decision visible</div></div><div class="clean-game-grid">'+''.join(cards)+'</div></div>',unsafe_allow_html=True)
     else:
-        st.markdown('<div class="empty-rich"><b>No official MLB BETS right now.</b><span>That is discipline, not an empty product. Use the live prop, PrizePicks, market and weather research below while the official model waits for a qualifying spot.</span></div>',unsafe_allow_html=True)
+        st.markdown('<div class="empty-rich"><b>No same-day MLB games in cache.</b><span>Sports Hulk will not show stale games as today.</span></div>',unsafe_allow_html=True)
     c1,c2=st.columns(2,gap="small")
-    with c1:
-        st.markdown(prop_preview_panel("MLB"),unsafe_allow_html=True)
-    with c2:
-        st.markdown(prizepicks_preview_panel("MLB"),unsafe_allow_html=True)
+    with c1: st.markdown(prop_preview_panel("MLB"),unsafe_allow_html=True)
+    with c2: st.markdown(prizepicks_preview_panel("MLB"),unsafe_allow_html=True)
     c3,c4=st.columns(2,gap="small")
     with c3: mlb_market_panel()
     with c4: st.markdown(environment_panel("⚾ MLB",rows),unsafe_allow_html=True)
@@ -1130,47 +1271,56 @@ def _set_betting_page(page):
 
 def bet_tracker_page():
     css(); topbar("🎯 Betting", "Personal bet log · local Oracle storage")
-    st.markdown('<div class="command-hero"><div class="command-eyebrow">HULK BET TRACKER</div><div class="command-title">TRACK THE BET. <span>LEARN FROM THE CLOSE.</span></div><div class="command-sub">Record the exact line and odds you actually bet. Closing information stays optional until it is known; Hulk does not invent CLV.</div></div>', unsafe_allow_html=True)
-    summary = _tracker_summary()
-    cards=[("Tracked",summary["bets"],"all bets","blue"),("Record",f'{summary["w"]}-{summary["l"]}-{summary["p"]}',"graded only","green"),("Units",f'{summary["units"]:+.2f}u',"from entered stake + odds","green"),("ROI","—" if summary["roi"] is None else f'{summary["roi"]:+.1f}%',"graded risk only","blue"),("Avg CLV","—" if summary["avg_clv"] is None else f'{summary["avg_clv"]:+.2f}',"line pts or implied-prob pts","purple"),("Page API Cost",0,"local tracker","green")]
+    st.markdown('<div class="command-hero"><div class="command-eyebrow">HULK BET TRACKER</div><div class="command-title">PICK THE GAME. <span>TRACK THE BET.</span></div><div class="command-sub">Guided sport → game → market entry. Closing information stays optional until known; Hulk never invents CLV.</div></div>',unsafe_allow_html=True)
+    summary=_tracker_summary(); cards=[("Tracked",summary["bets"],"all bets","blue"),("Record",f'{summary["w"]}-{summary["l"]}-{summary["p"]}',"graded only","green"),("Units",f'{summary["units"]:+.2f}u',"entered stake + odds","green"),("ROI","—" if summary["roi"] is None else f'{summary["roi"]:+.1f}%',"graded risk only","blue"),("Avg CLV","—" if summary["avg_clv"] is None else f'{summary["avg_clv"]:+.2f}',"when close entered","purple"),("Storage","LOCAL","Oracle JSON","gold")]
     st.markdown('<div class="kpi-row">'+''.join(f'<div class="kpi {c}"><div class="lbl">{esc(a)}</div><div class="val">{esc(b)}</div><div class="note">{esc(n)}</div></div>' for a,b,n,c in cards)+'</div>',unsafe_allow_html=True)
-    with st.expander("➕ Track a bet", expanded=not bool(summary["bets"])):
+    with st.expander("➕ Track a bet",expanded=not bool(summary["bets"])):
+        sport=st.selectbox("1. Sport",["MLB","NFL","CFB","OTHER"],key="bt_sport")
+        rows={"MLB":rows_mlb,"NFL":rows_nfl,"CFB":rows_cfb}.get(sport,lambda:[])()
+        options=[f'{r["away"]} @ {r["home"]} · {r["time"]} ET' for r in rows]
+        game=st.selectbox("2. Game",options+["Manual / other"] if options else ["Manual / other"],key="bt_game")
+        market=st.selectbox("3. Market",["MONEYLINE","SPREAD","TOTAL","PROP","PARLAY","PRIZEPICKS","OTHER"],key="bt_market")
+        chosen=None
+        if game!="Manual / other" and game in options: chosen=rows[options.index(game)]
+        event=(f'{chosen["away"]} @ {chosen["home"]}' if chosen else st.text_input("Game / player / entry",placeholder="Manual description"))
+        if chosen:
+            st.markdown(matchup_card(sport,chosen["away"],chosen["home"],chosen["start"],[("Hulk/Research Lean",chosen.get("pick")),("Status",chosen.get("action")),("Market Context",chosen.get("market"))],badge=market,accent="blue"),unsafe_allow_html=True)
+        if market=="MONEYLINE" and chosen:
+            side=st.selectbox("4. Side",[chosen["away"],chosen["home"]])
+            line=None
+        elif market=="SPREAD" and chosen:
+            side=st.selectbox("4. Side",[chosen["away"],chosen["home"]]); line=st.number_input("Spread",value=0.0,step=0.5)
+        elif market=="TOTAL":
+            side=st.selectbox("4. Side",["OVER","UNDER"]); line=st.number_input("Total",value=0.0,step=0.5)
+        else:
+            side=st.text_input("4. Side / selection",placeholder="OVER / UNDER / team / player"); line=st.number_input("Bet line",value=None,step=0.5,placeholder="Optional")
         c1,c2,c3=st.columns(3)
-        with c1: sport=st.selectbox("Sport",["MLB","NFL","CFB","NBA","NCAAB","NHL","OTHER"],key="bt_sport")
-        with c2: market=st.selectbox("Market",["MONEYLINE","SPREAD","TOTAL","PROP","PARLAY","PRIZEPICKS","OTHER"],key="bt_market")
+        with c1: odds=st.number_input("American odds",value=-110,step=1)
+        with c2: stake=st.number_input("Stake (units)",min_value=0.0,value=1.0,step=0.25)
         with c3: result=st.selectbox("Result",["OPEN","WIN","LOSS","PUSH"],key="bt_result")
-        event=st.text_input("Game / player / entry",placeholder="Yankees @ Red Sox · Aaron Judge hits")
-        c1,c2,c3,c4=st.columns(4)
-        with c1: side=st.text_input("Side",placeholder="OVER / UNDER / team")
-        with c2: line=st.number_input("Bet line",value=None,step=0.5,placeholder="Optional")
-        with c3: odds=st.number_input("American odds",value=-110,step=1)
-        with c4: stake=st.number_input("Stake (units)",min_value=0.0,value=1.0,step=0.25)
         c1,c2=st.columns(2)
         with c1: close_line=st.number_input("Closing line",value=None,step=0.5,placeholder="Add later")
         with c2: close_odds=st.number_input("Closing odds",value=None,step=1,placeholder="Add later")
-        notes=st.text_input("Notes",placeholder="Book, why you bet it, Hulk pick, etc.")
-        if st.button("Save Bet",type="primary",disabled=not bool(event.strip())):
-            bets=_tracked_bets(); bets.append({"id":datetime.now(ET).strftime("%Y%m%d%H%M%S%f"),"created_at":datetime.now(ET).isoformat(),"sport":sport,"market":market,"event":event.strip(),"side":side.strip(),"line":line,"odds":int(odds),"stake":float(stake),"result":result,"closing_line":close_line,"closing_odds":close_odds,"notes":notes.strip()}); _save_tracked_bets(bets); st.rerun()
+        notes=st.text_input("Notes",placeholder="Book, reason, Hulk context, etc.")
+        if st.button("Save Bet",type="primary",disabled=not bool(str(event).strip())):
+            bets=_tracked_bets(); bets.append({"id":datetime.now(ET).strftime("%Y%m%d%H%M%S%f"),"created_at":datetime.now(ET).isoformat(),"sport":sport,"market":market,"event":str(event).strip(),"side":str(side).strip(),"line":line,"odds":int(odds),"stake":float(stake),"result":result,"closing_line":close_line,"closing_odds":close_odds,"notes":notes.strip()}); _save_tracked_bets(bets); st.rerun()
     bets=_tracked_bets()
-    if not bets:
-        st.info("No tracked bets yet. The Performance Lab stays empty until real bets are recorded."); return
-    rows=[]
-    for b in reversed(bets):
-        c=_bet_clv(b)
-        rows.append({"Date":str(b.get("created_at",""))[:16].replace("T"," "),"Sport":b.get("sport"),"Market":b.get("market"),"Game / Player":b.get("event"),"Side":b.get("side"),"Line":b.get("line"),"Odds":b.get("odds"),"Stake":b.get("stake"),"Result":b.get("result"),"Close":b.get("closing_line"),"Close Odds":b.get("closing_odds"),"CLV":None if c is None else round(c,2)})
-    st.dataframe(pd.DataFrame(rows),hide_index=True,width="stretch",height=620)
-    st.caption("For totals/props/spreads, CLV is expressed in line points from the side you bet. For markets with only odds available, it is the change in implied probability points. These are not mixed into one calibrated performance metric.")
+    if not bets: st.info("No tracked bets yet. The Performance Lab stays empty until real bets are recorded."); return
+    cards=[]
+    for b in reversed(bets[-30:]):
+        c=_bet_clv(b); accent="green" if str(b.get("result")).upper()=="WIN" else "red" if str(b.get("result")).upper()=="LOSS" else "blue"
+        cards.append(player_card(b.get("event","—"),b.get("sport","—"),b.get("market",""),[("Side",b.get("side","—")),("Line",b.get("line","—")),("Odds",b.get("odds","—")),("Stake",b.get("stake","—")),("CLV","—" if c is None else round(c,2))],badge=b.get("result","OPEN"),accent=accent,note=str(b.get("created_at",""))[:16].replace("T"," ")))
+    st.markdown('<div class="clean-player-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    raw=pd.DataFrame([{**b,"CLV":_bet_clv(b)} for b in bets])
+    research_table(raw,None,"Full Bet Log",520)
 
 
 def performance_lab_page():
     css(); topbar("🎯 Betting", "Personal performance · no fabricated record")
-    bets=_tracked_bets(); summary=_tracker_summary()
-    st.markdown('<div class="sport-banner"><div><div class="sport-name">Hulk Performance Lab</div><div class="sport-sub">Your actual tracked results by sport and market. Official model records remain separate from personal wagers.</div></div><div class="source-pill">TRACKED BETS ONLY</div></div>',unsafe_allow_html=True)
-    if not bets:
-        st.info("Performance Lab activates after you log bets in Bet Tracker."); return
+    bets=_tracked_bets(); st.markdown('<div class="sport-banner"><div><div class="sport-name">Hulk Performance Lab</div><div class="sport-sub">Your tracked results by sport and market. Official model records remain separate.</div></div><div class="source-pill">TRACKED BETS ONLY</div></div>',unsafe_allow_html=True)
+    if not bets: st.info("Performance Lab activates after you log bets in Bet Tracker."); return
     graded=[b for b in bets if str(b.get("result","")).upper() in {"WIN","LOSS","PUSH"}]
-    if not graded:
-        st.info("Bets are tracked, but none are graded yet."); return
+    if not graded: st.info("Bets are tracked, but none are graded yet."); return
     rows=[]
     for b in graded:
         stake=num(b.get("stake"),0) or 0; res=str(b.get("result","")).upper(); profit=0.0
@@ -1181,280 +1331,194 @@ def performance_lab_page():
     for group in ["Sport","Market"]:
         g=df.groupby(group,dropna=False).agg(Bets=("Result","size"),Wins=("Result",lambda x:(x=="WIN").sum()),Losses=("Result",lambda x:(x=="LOSS").sum()),Risked=("Stake","sum"),Units=("Profit","sum"),Avg_CLV=("CLV","mean")).reset_index()
         g["ROI %"]=(g["Units"]/g["Risked"]*100).where(g["Risked"].ne(0)).round(1); g["Units"]=g["Units"].round(2); g["Avg_CLV"]=g["Avg_CLV"].round(2)
-        st.subheader(f"By {group}"); st.dataframe(g,hide_index=True,width="stretch")
-    st.caption("CLV is shown only where closing data was entered. The lab never fills missing closes or results automatically.")
+        cards=[]
+        for _,r in g.iterrows():
+            cards.append(player_card(r[group],group,metrics=[("Bets",r["Bets"]),("Record",f'{r["Wins"]}-{r["Losses"]}'),("Units",f'{r["Units"]:+.2f}'),("ROI",f'{r["ROI %"]:+.1f}%' if pd.notna(r["ROI %"]) else "—"),("Avg CLV",r["Avg_CLV"] if pd.notna(r["Avg_CLV"]) else "—")],badge="PERFORMANCE",accent="green" if r["Units"]>=0 else "red"))
+        st.subheader(f"By {group}"); st.markdown('<div class="clean-player-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(df,None,"Full Performance Data",420)
 
 
 def game_research_page():
     css(); topbar("🎯 Betting", "Current matchup + historical vault")
-    st.markdown('<div class="command-hero"><div class="command-eyebrow">ONE-GAME DEEP DIVE</div><div class="command-title">ONE MATCHUP. <span>EVERY LAYER.</span></div><div class="command-sub">Current market/model context on top; historical team, venue, scoring and environment context underneath. Only fields actually present in the cache are shown.</div></div>',unsafe_allow_html=True)
+    st.markdown('<div class="command-hero"><div class="command-eyebrow">ONE-GAME DEEP DIVE</div><div class="command-title">THE GAME FIRST. <span>EVERYTHING ELSE BELOW.</span></div><div class="command-sub">Choose the matchup once. Team logos, start time and key game context stay at the top; deeper stats and raw research live underneath.</div></div>',unsafe_allow_html=True)
     sport=st.selectbox("Sport",["MLB","NFL","CFB"],key="game_research_sport")
     board=load({"MLB":"mlb","NFL":"nfl","CFB":"cfb"}[sport])
     if board.empty: st.info(f"{sport} current board unavailable."); return
-    ac, hc = ("away_team","home_team") if sport!="CFB" else ("away","home")
-    sc = "gameDate" if sport=="MLB" else "start"
+    ac,hc=("away_team","home_team") if sport!="CFB" else ("away","home"); sc="gameDate" if sport=="MLB" else "start"
     labels=[]; idxs=[]
-    for i,r in board.iterrows():
-        labels.append(f'{first(r,[ac],"—")} @ {first(r,[hc],"—")} · {fmt_time(first(r,[sc],None))} ET'); idxs.append(i)
-    pick=st.selectbox("Matchup",labels); r=board.loc[idxs[labels.index(pick)]]
-    away,home=str(first(r,[ac],"—")),str(first(r,[hc],"—"))
-    st.markdown(f'<div class="sport-banner"><div><div class="sport-name">{matchup_html(sport,away,home) if sport in {"MLB","NFL"} else esc(away)+" @ "+esc(home)}</div><div class="sport-sub">{esc(fmt_time(first(r,[sc],None)))} ET</div></div><div class="source-pill">{esc(sport)} DEEP DIVE</div></div>',unsafe_allow_html=True)
+    for i,r in board.iterrows(): labels.append(f'{first(r,[ac],"—")} @ {first(r,[hc],"—")} · {fmt_time(first(r,[sc],None))} ET'); idxs.append(i)
+    pick=st.selectbox("Matchup",labels); r=board.loc[idxs[labels.index(pick)]]; away,home=str(first(r,[ac],"—")),str(first(r,[hc],"—")); start=first(r,[sc],None)
+    if sport in {"MLB","NFL"}:
+        au,hu=logo_url(sport,away),logo_url(sport,home); ai=f'<img src="{au}" alt="">' if au else ''; hi=f'<img src="{hu}" alt="">' if hu else ''
+        middle=f'<div class="matchup-mid">{esc(sport)} DEEP DIVE<strong>@</strong>{esc(fmt_datetime(start))}</div>'
+        st.markdown(f'<div class="matchup-hero"><div class="matchup-team">{ai}<b>{esc(away)}</b></div>{middle}<div class="matchup-team">{hi}<b>{esc(home)}</b></div></div>',unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="matchup-hero"><div class="matchup-team"><b>{esc(away)}</b></div><div class="matchup-mid">CFB DEEP DIVE<strong>@</strong>{esc(fmt_datetime(start))}</div><div class="matchup-team"><b>{esc(home)}</b></div></div>',unsafe_allow_html=True)
     if sport=="MLB":
-        vals=[("Hulk Pick",first(r,["lean","hulk_model_side"],"—")),("Decision",first(r,["decision"],"—")),("Confidence",first(r,["confidence"],"—")),("Total",first(r,["totals_median_point"],"—")),("Park Factor",round(num(r.get("park_run_factor"),0),3) if num(r.get("park_run_factor")) is not None else "—"),("Weather",f'{first(r,["temperature_f"],"—")}°F · {first(r,["wind_mph"],"—")} mph')]
-        st.markdown('<div class="kpi-row">'+''.join(f'<div class="kpi"><div class="lbl">{esc(a)}</div><div class="val">{esc(b)}</div></div>' for a,b in vals)+'</div>',unsafe_allow_html=True)
-        c1,c2=st.columns(2)
-        with c1:
-            st.markdown(f'<div class="panel"><div class="ptitle">STARTING PITCHING</div><div class="info-row"><div><b>{esc(away)}</b><br><span class="dim">{esc(first(r,["away_probable_pitcher"],"—"))}</span></div><div>{esc(first(r,["away_starter_vs_home_lineup"],"—"))}</div></div><div class="info-row"><div><b>{esc(home)}</b><br><span class="dim">{esc(first(r,["home_probable_pitcher"],"—"))}</span></div><div>{esc(first(r,["home_starter_vs_away_lineup"],"—"))}</div></div></div>',unsafe_allow_html=True)
-        with c2:
-            st.markdown(f'<div class="panel"><div class="ptitle">ENVIRONMENT + BULLPEN</div><div class="system-row"><span>Venue</span><b>{esc(first(r,["venue"],"—"))}</b></div><div class="system-row"><span>Run environment</span><b>{esc(first(r,["run_environment_flag"],"—"))}</b></div><div class="system-row"><span>Away bullpen workload</span><b>{esc(first(r,["away_bullpen_workload"],"—"))}</b></div><div class="system-row"><span>Home bullpen workload</span><b>{esc(first(r,["home_bullpen_workload"],"—"))}</b></div></div>',unsafe_allow_html=True)
+        vals=[("Hulk Pick",first(r,["lean","hulk_model_side"],"—")),("Decision",first(r,["decision"],"—")),("Confidence",first(r,["confidence"],"—")),("Total",first(r,["totals_median_point"],"—")),("Venue",first(r,["venue"],"—")),("Weather",f'{first(r,["temperature_f"],"—")}°F · {first(r,["wind_mph"],"—")} mph')]
+        st.markdown('<div class="research-summary">'+''.join(f'<div><span>{esc(a)}</span><b>{esc(b)}</b></div>' for a,b in vals)+'</div>',unsafe_allow_html=True)
+        cards=[player_card(first(r,["away_probable_pitcher"],"—"),away,"Away Starter",[("Starter Matchup Score",first(r,["away_starter_vs_home_lineup"],"—")),("Bullpen Workload",first(r,["away_bullpen_workload"],"—"))],badge="AWAY",sport="MLB",accent="blue"),player_card(first(r,["home_probable_pitcher"],"—"),home,"Home Starter",[("Starter Matchup Score",first(r,["home_starter_vs_away_lineup"],"—")),("Bullpen Workload",first(r,["home_bullpen_workload"],"—"))],badge="HOME",sport="MLB",accent="blue")]
+        st.markdown('<div class="clean-player-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+        st.markdown(matchup_card("MLB",away,home,start,[("Park Factor",round(num(r.get("park_run_factor"),0),3) if num(r.get("park_run_factor")) is not None else "—"),("Run Environment",first(r,["run_environment_flag"],"—")),("Pitch Types Matched",first(r,["pitch_types_matched"],"—")),("Sample Pitches",first(r,["sample_pitches"],"—"))],badge="ENVIRONMENT",accent="cyan"),unsafe_allow_html=True)
         hist=load("mlb_history")
-        if not hist.empty:
+        if not hist.empty and {"away_team","home_team"}.issubset(hist.columns):
             x=hist[((hist["away_team"].astype(str).eq(away))&(hist["home_team"].astype(str).eq(home)))|((hist["away_team"].astype(str).eq(home))&(hist["home_team"].astype(str).eq(away)))].copy()
             avg=pd.to_numeric(x.get("total_runs"),errors="coerce").mean() if not x.empty else None
-            st.markdown(f'<div class="panel"><div class="phead"><div class="ptitle">HISTORICAL MATCHUP</div><div class="psub">actual game-master rows</div></div><div class="system-row"><span>Head-to-head games in vault</span><b>{len(x)}</b></div><div class="system-row"><span>Average total runs</span><b>{"—" if pd.isna(avg) else f"{avg:.2f}"}</b></div></div>',unsafe_allow_html=True)
-        st.caption("Pitch repertoire and batter-vs-pitch-type history live in separate MLB pitch vaults; this page does not pretend those rows are joined until the research engine does that explicitly.")
+            st.markdown(f'<div class="research-summary"><div><span>H2H Games in Vault</span><b>{len(x)}</b></div><div><span>Average Total Runs</span><b>{"—" if avg is None or pd.isna(avg) else f"{avg:.2f}"}</b></div></div>',unsafe_allow_html=True)
+            research_table(x,None,"Historical Matchup — Full Data",440)
+        research_table(pd.DataFrame([r]),None,"Current Game — Full Research Row",420)
     elif sport=="NFL":
-        vals=[("Home Market",f'{(num(r.get("home_market_win_prob"),0) or 0)*100:.1f}%'),("Away Market",f'{(num(r.get("away_market_win_prob"),0) or 0)*100:.1f}%'),("Spread",first(r,["home_spread"],"—")),("Total",first(r,["total"],"—")),("Books",first(r,["sportsbooks"],"—")),("Survivor",first(r,["survivor_grade"],"—"))]
-        st.markdown('<div class="kpi-row">'+''.join(f'<div class="kpi"><div class="lbl">{esc(a)}</div><div class="val">{esc(b)}</div></div>' for a,b in vals)+'</div>',unsafe_allow_html=True)
+        vals=[("Home Market",pct_value(r.get("home_market_win_prob"))),("Away Market",pct_value(r.get("away_market_win_prob"))),("Spread",first(r,["home_spread"],"—")),("Total",first(r,["total"],"—")),("Books",first(r,["sportsbooks"],"—")),("Survivor",first(r,["survivor_grade"],"—"))]
+        st.markdown('<div class="research-summary">'+''.join(f'<div><span>{esc(a)}</span><b>{esc(b)}</b></div>' for a,b in vals)+'</div>',unsafe_allow_html=True)
         hist=load("nfl_history")
         if not hist.empty:
-            # history uses abbreviations; translate current full names where possible
             rev={k:v.upper() for k,v in NFL_ABBR.items()}; aa=rev.get(away,away); hh=rev.get(home,home)
             h2h=hist[((hist["away_team"].astype(str).eq(aa))&(hist["home_team"].astype(str).eq(hh)))|((hist["away_team"].astype(str).eq(hh))&(hist["home_team"].astype(str).eq(aa)))].copy()
-            total_now=num(r.get("total")); similar=hist.copy()
-            if total_now is not None and "total_line" in similar.columns:
-                tl=pd.to_numeric(similar["total_line"],errors="coerce"); similar=similar[tl.between(total_now-3,total_now+3)]
-            c1,c2=st.columns(2)
-            with c1: st.metric("H2H games in vault",len(h2h))
-            with c2: st.metric("Similar total-line games",len(similar))
-            cols=[c for c in ["gameday","away_team","away_score","home_team","home_score","spread_line","total_line","roof","surface","temp","wind","stadium","home_ats_result","ou_result"] if c in h2h.columns]
-            if not h2h.empty: st.dataframe(h2h.sort_values("gameday",ascending=False)[cols].head(20),hide_index=True,width="stretch")
-        st.info("Current NFL forecast ingestion is still separate. Historical weather/stadium data is real; a current-game weather card appears only after the forecast collector populates it.")
+            cards=[]
+            for _,hr in h2h.sort_values("gameday",ascending=False).head(10).iterrows(): cards.append(matchup_card("NFL",hr.get("away_team","—"),hr.get("home_team","—"),hr.get("gameday"),[("Score",f'{hr.get("away_score","—")}–{hr.get("home_score","—")}'),("Spread",hr.get("spread_line","—")),("Total",hr.get("total_line","—")),("Weather",f'{hr.get("temp","—")}° · {hr.get("wind","—")} mph')],badge="HISTORY",accent="blue",note=hr.get("stadium","")))
+            if cards: st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+            research_table(h2h,None,"NFL Historical H2H — Full Data",440)
+        research_table(pd.DataFrame([r]),None,"Current Game — Full Research Row",420)
     else:
-        vals=[("Research Lean",first(r,["research_lean"],"—")),("Confidence",first(r,["research_confidence"],"—")),("Home Win Comp",f'{(num(r.get("comp_home_win_prob"),0) or 0)*100:.1f}%'),("Proj Margin",round(num(r.get("comp_projected_margin"),0) or 0,1)),("Market Total",first(r,["Total"],"—")),("Proj Total",round(num(r.get("comp_projected_total"),0) or 0,1))]
-        st.markdown('<div class="kpi-row">'+''.join(f'<div class="kpi"><div class="lbl">{esc(a)}</div><div class="val">{esc(b)}</div></div>' for a,b in vals)+'</div>',unsafe_allow_html=True)
+        vals=[("Research Lean",first(r,["research_lean"],"—")),("Confidence",first(r,["research_confidence"],"—")),("Home Win Comp",pct_value(r.get("comp_home_win_prob"))),("Proj Margin",round(num(r.get("comp_projected_margin"),0) or 0,1)),("Market Total",first(r,["Total"],"—")),("Proj Total",round(num(r.get("comp_projected_total"),0) or 0,1))]
+        st.markdown('<div class="research-summary">'+''.join(f'<div><span>{esc(a)}</span><b>{esc(b)}</b></div>' for a,b in vals)+'</div>',unsafe_allow_html=True)
         hist=load("cfb_history")
-        if not hist.empty and "away_team" in hist.columns and "home_team" in hist.columns:
-            x=hist[((hist["away_team"].astype(str).eq(away))&(hist["home_team"].astype(str).eq(home)))|((hist["away_team"].astype(str).eq(home))&(hist["home_team"].astype(str).eq(away)))].copy()
-            st.metric("Historical H2H rows",len(x))
+        if not hist.empty and {"away_team","home_team"}.issubset(hist.columns):
+            x=hist[((hist["away_team"].astype(str).eq(away))&(hist["home_team"].astype(str).eq(home)))|((hist["away_team"].astype(str).eq(home))&(hist["home_team"].astype(str).eq(away)))].copy(); st.metric("Historical H2H rows",len(x)); research_table(x,None,"CFB Historical H2H — Full Data",440)
+        research_table(pd.DataFrame([r]),None,"Current Game — Full Research Row",420)
         st.caption("College football remains team/game research only. No college player props are introduced here.")
 
+
 def prizepicks_page(sport=None):
-    css()
-    topbar("🟣 PrizePicks", f"Cache updated {age('pp')}")
-    d = load("pp")
-    if d.empty:
-        st.info("PrizePicks Standard cache is unavailable.")
-        return
-    if "odds_type" in d.columns:
-        d = d[d["odds_type"].astype(str).str.lower().eq("standard")]
-    if "is_promo" in d.columns:
-        d = d[~d["is_promo"].astype(str).str.lower().isin(["true", "1"])]
-    d = d[d.get("league", pd.Series(index=d.index, dtype=str)).astype(str).str.upper().isin(["NFL", "MLB"])]
-    if sport:
-        d = d[d["league"].astype(str).str.upper().eq(sport)]
-    d = d.copy()
+    css(); topbar("🟣 PrizePicks", f"Cache updated {age('pp')}")
+    raw=load("pp")
+    if raw.empty:
+        st.info("PrizePicks Standard cache is unavailable."); return
+    d=raw.copy()
+    if "odds_type" in d.columns: d=d[d["odds_type"].astype(str).str.lower().eq("standard")]
+    if "is_promo" in d.columns: d=d[~d["is_promo"].astype(str).str.lower().isin(["true","1"])]
+    if "league" in d.columns: d=d[d["league"].astype(str).str.upper().isin(["NFL","MLB"])]
+    if sport and "league" in d.columns: d=d[d["league"].astype(str).str.upper().eq(sport)]
+    eligible_before_time=d.copy()
     if "start_time" in d.columns:
-        dt = pd.to_datetime(d["start_time"], errors="coerce", utc=True)
-        now = pd.Timestamp.now(tz="UTC")
-        d = d[dt.isna() | (dt >= now - pd.Timedelta(hours=1))]
-    title = (sport + " PrizePicks") if sport else "PrizePicks Command Center"
-    st.markdown(
-        f'<div class="sport-banner"><div><div class="sport-name">{esc(title)}</div><div class="sport-sub">Standard lines only · promos filtered · player-first display</div></div><div class="source-pill">{len(d):,} LINES</div></div>',
-        unsafe_allow_html=True,
-    )
+        dt=pd.to_datetime(d["start_time"],errors="coerce",utc=True); now=pd.Timestamp.now(tz="UTC")
+        d=d[dt.isna()|(dt>=now-pd.Timedelta(hours=1))].copy()
+    title=(sport+" PrizePicks") if sport else "PrizePicks Command Center"
+    st.markdown(f'<div class="sport-banner"><div><div class="sport-name">{esc(title)}</div><div class="sport-sub">Standard lines only · promos filtered · player-first display</div></div><div class="source-pill">{len(d):,} UPCOMING LINES</div></div>',unsafe_allow_html=True)
     if d.empty:
-        st.info("No upcoming standard PrizePicks lines are cached for this view.")
+        latest="—"
+        if not eligible_before_time.empty and "start_time" in eligible_before_time.columns:
+            dt=pd.to_datetime(eligible_before_time["start_time"],errors="coerce",utc=True).dropna()
+            if not dt.empty: latest=dt.max().tz_convert(ET).strftime("%a %-m/%-d %-I:%M %p ET")
+        st.markdown(f'<div class="empty-rich"><b>No upcoming standard {esc(sport or "NFL/MLB")} lines.</b><span>The cache contains {len(eligible_before_time):,} matching standard rows before the future-time filter. Latest scheduled line: {esc(latest)}. If today should have lines, refresh the PrizePicks collector rather than showing stale rows.</span></div>',unsafe_allow_html=True)
+        research_table(eligible_before_time,None,"PrizePicks Feed Diagnostics",420)
         return
-    c1, c2 = st.columns([1, 2])
-    with c1:
-        choices = ["ALL", "NFL", "MLB"]
-        league = st.selectbox("Sport", choices, index=0 if not sport else choices.index(sport), disabled=bool(sport))
-    with c2:
-        q = st.text_input("Search player or stat", placeholder="Player name, passing yards, strikeouts...")
-    if not sport and league != "ALL":
-        d = d[d["league"].astype(str).str.upper().eq(league)]
-    if q.strip():
-        mask = d["player"].astype(str).str.contains(q, case=False, na=False) | d["stat"].astype(str).str.contains(q, case=False, na=False)
-        d = d[mask]
-    player_count = d["player"].nunique() if "player" in d.columns else 0
-    team_count = d["team"].nunique() if "team" in d.columns else 0
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Visible Lines", len(d))
-    m2.metric("Players", player_count)
-    m3.metric("Teams", team_count)
-    sort_cols = [c for c in ["start_time", "rank"] if c in d.columns]
-    if sort_cols:
-        d = d.sort_values(sort_cols)
-    d = d.head(60)
-    sig_index = _prop_signal_index(sport)
-    matched_research = 0
-    cards = []
-    for _, r in d.iterrows():
-        sp = str(r.get("league", "")).upper()
-        team = str(r.get("team", "—"))
-        code = team.lower().replace("cws", "chw")
-        league_name = "nfl" if sp == "NFL" else "mlb"
-        logo = f'https://a.espncdn.com/i/teamlogos/{league_name}/500/{code}.png' if team not in ("", "—", "nan") and "/" not in team else ""
-        img = f'<img src="{logo}" alt="" loading="lazy">' if logo else ''
-        start = fmt_time(r.get("start_time"))
-        market_key = _prop_market_from_pp(r.get("stat", ""))
-        sig = sig_index.get((_norm_name(r.get("player", "")), market_key)) if market_key else None
-        research = ''
+    sig_index=_prop_signal_index(sport)
+    cards=[]; matched_research=0
+    for _,r in d.sort_values([c for c in ["rank","player"] if c in d.columns]).head(36).iterrows():
+        sp=str(r.get("league","")).upper(); team=str(r.get("team","—")); start=fmt_datetime(r.get("start_time"))
+        market_key=_prop_market_from_pp(r.get("stat","")); sig=sig_index.get((_norm_name(r.get("player","")),market_key)) if market_key else None
+        metrics=[("Line",r.get("line","—")),("Stat",r.get("stat","—")),("Start",start)]
+        note=r.get("description","")
         if sig:
-            matched_research += 1
-            pp_line = num(r.get("line")); med = num(sig.get("market_median")); gap = None if pp_line is None or med is None else pp_line-med
-            research = (f'<div class="pp-research"><span>SPORTSBOOK MEDIAN <b>{esc(sig.get("market_median","—"))}</b></span>'
-                        f'<span>GAP <b>{"—" if gap is None else f"{gap:+.1f}"}</b></span>'
-                        f'<span>{esc(sig.get("book_count","—"))} BOOKS</span>'
-                        f'<span>AGREE {esc(sig.get("book_agreement_pct","—"))}%</span>'
-                        f'<span class="good">{esc(sig.get("market_direction","—"))} · SCORE {esc(sig.get("hulk_prop_score","—"))}</span>'
-                        f'<span>{esc(sig.get("signal","—"))}</span></div>')
-        cards.append(
-            f'<div class="pp-player-card"><div class="pp-player-top">{img}<div><div class="pp-player">{esc(r.get("player", "—"))}</div>'
-            f'<div class="pp-team">{esc(sp)} · {esc(team)} · {esc(r.get("position", ""))}</div></div></div>'
-            f'<div class="pp-stat">{esc(r.get("stat", "—"))}</div><div class="pp-line-big">{esc(r.get("line", "—"))}</div>'
-            f'{research}<div class="pp-start">{esc(start)} ET · {esc(r.get("description", ""))}</div></div>'
-        )
-    st.markdown(f'<div class="panel"><div class="phead"><div class="ptitle purple">PRIZEPICKS × HULK RESEARCH</div><div class="psub">{matched_research} visible lines matched to sportsbook consensus</div></div></div>', unsafe_allow_html=True)
-    st.markdown('<div class="pp-card-grid">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
-    st.caption("Hulk Prop Score is a market-quality research score, not a calibrated win probability. Player photos will be added only from a reliable player-image source; team-logo fallback remains safe.")
+            matched_research+=1
+            metrics += [("Sportsbook Median",sig.get("market_median","—")),("Books",sig.get("book_count","—")),("Agreement",f'{sig.get("book_agreement_pct","—")}%'),("Hulk Score",sig.get("hulk_prop_score","—"))]
+            note=f'{sig.get("market_direction","—")} research lean · {note}'
+        cards.append(player_card(r.get("player","—"),team,r.get("position",""),metrics,badge=sp,sport=sp,accent="purple",note=note))
+    st.markdown(f'<div class="panel"><div class="phead"><div class="ptitle purple">PRIZEPICKS × HULK RESEARCH</div><div class="psub">{matched_research} visible lines matched to sportsbook consensus</div></div></div>',unsafe_allow_html=True)
+    st.markdown('<div class="clean-player-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d,None,"Full PrizePicks Research Data",520)
 
 
 def cfb_totals_page():
-    css()
-    topbar("🏟️ College Football", f"Cache updated {age('cfb')}")
-    d = load("cfb")
-    if d.empty:
-        st.info("CFB board unavailable.")
-        return
-    rows = []
-    for _, r in d.iterrows():
-        total = num(r.get("Total"))
-        proj = num(r.get("comp_projected_total"))
-        start = first(r, ["start", "start_dt"], None)
-        if total is None or proj is None:
-            continue
-        edge = proj - total
-        rows.append({
-            "Start": fmt_time(start), "Away": first(r, ["away"], "—"), "Home": first(r, ["home"], "—"),
-            "Market O/U": total, "Projected Total": round(proj, 1), "Edge": round(edge, 1),
-            "Research Lean": "OVER" if edge >= 3 else "UNDER" if edge <= -3 else "PASS",
-            "Confidence": first(r, ["research_confidence"], "—"), "Comp Samples": first(r, ["comp_samples"], "—"),
-        })
-    x = pd.DataFrame(rows)
-    st.markdown('<div class="sport-banner"><div><div class="sport-name">CFB Over / Unders</div><div class="sport-sub">Historical-comp total research. No college player props.</div></div><div class="source-pill">RESEARCH ONLY</div></div>', unsafe_allow_html=True)
-    if x.empty:
-        st.info("No CFB totals have both a market total and comparable-game projection in the current cache.")
-        return
-    x = x.loc[x["Edge"].abs().sort_values(ascending=False).index]
-    st.dataframe(x, width="stretch", hide_index=True, height=720)
-    st.caption("These are research leans from comparable-game total projections, not a validated official CFB totals betting model.")
+    css(); topbar("🏟️ College Football",f"Cache updated {age('cfb')}")
+    d=load("cfb")
+    if d.empty: st.info("CFB board unavailable."); return
+    rows=[]
+    for _,r in d.iterrows():
+        total=num(r.get("Total")); proj=num(r.get("comp_projected_total")); start=first(r,["start","start_dt"],None)
+        if total is None or proj is None: continue
+        edge=proj-total; rows.append({"start":start,"away":first(r,["away"],"—"),"home":first(r,["home"],"—"),"market":total,"proj":round(proj,1),"edge":round(edge,1),"lean":"OVER" if edge>=3 else "UNDER" if edge<=-3 else "PASS","conf":first(r,["research_confidence"],"—"),"samples":first(r,["comp_samples"],"—")})
+    rows=sorted(rows,key=lambda z:abs(z["edge"]),reverse=True)
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">CFB Over / Unders</div><div class="sport-sub">Historical-comp total research. No college player props.</div></div><div class="source-pill">RESEARCH ONLY</div></div>',unsafe_allow_html=True)
+    if not rows: st.info("No CFB totals have both a market total and comparable-game projection in the current cache."); return
+    cards=[matchup_card("CFB",r["away"],r["home"],r["start"],[("Market O/U",r["market"]),("Projected",r["proj"]),("Edge",f'{r["edge"]:+.1f}'),("Samples",r["samples"]),("Confidence",r["conf"])],badge=r["lean"],accent="green" if r["lean"] in {"OVER","UNDER"} else "blue") for r in rows]
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(pd.DataFrame(rows),None,"Full CFB Totals Research",520)
+    st.caption("Research leans from comparable-game total projections, not a validated official CFB totals betting model.")
 
 
 def nfl_weather_page():
-    css()
-    topbar("🏈 NFL", "Historical weather vault ready · live forecast collector pending")
-    hist = pd.DataFrame()
-    try:
-        hist = pd.read_csv(P["nfl_history"], low_memory=False)
-    except Exception:
-        pass
-    st.markdown('<div class="sport-banner"><div><div class="sport-name">NFL Weather</div><div class="sport-sub">Weather belongs inside matchup, props, totals and Survivor context — not as a decorative forecast page.</div></div><div class="source-pill">NFL WEATHER</div></div>', unsafe_allow_html=True)
-    cols = [c for c in ["season", "week", "away_team", "home_team", "stadium", "roof", "surface", "temp", "wind", "total", "home_spread"] if c in hist.columns]
-    if cols:
-        st.markdown('<div class="panel"><div class="phead"><div class="ptitle">HISTORICAL WEATHER + STADIUM CONTEXT</div><div class="psub">existing NFL vault</div></div></div>', unsafe_allow_html=True)
-        show = hist[cols].tail(250)
-        sort_cols = [c for c in ["season", "week"] if c in show.columns]
-        if sort_cols:
-            show = show.sort_values(sort_cols, ascending=False)
-        st.dataframe(show, width="stretch", hide_index=True, height=560)
-    st.info("Current-game forecast ingestion is the next data collector: temperature, wind, precipitation and roof status will be cached before kickoff and reused by Best Bets, Player Props, Survivor and matchup research. No page-view weather API calls will be used.")
+    css(); topbar("🏈 NFL","Historical weather vault ready · live forecast collector pending")
+    try: hist=pd.read_csv(P["nfl_history"],low_memory=False)
+    except Exception: hist=pd.DataFrame()
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">NFL Weather</div><div class="sport-sub">Weather belongs inside matchup, props, totals and Survivor context.</div></div><div class="source-pill">NFL WEATHER</div></div>',unsafe_allow_html=True)
+    if hist.empty: st.info("NFL historical weather vault unavailable."); return
+    sort_cols=[c for c in ["season","week"] if c in hist.columns]
+    show=hist.sort_values(sort_cols,ascending=False).head(20) if sort_cols else hist.tail(20)
+    cards=[]
+    for _,r in show.iterrows():
+        cards.append(matchup_card("NFL",r.get("away_team","—"),r.get("home_team","—"),r.get("gameday"),[("Temp",f'{r.get("temp","—")}°F'),("Wind",f'{r.get("wind","—")} mph'),("Roof",r.get("roof","—")),("Surface",r.get("surface","—")),("Total",r.get("total_line",r.get("total","—")))],badge=f'WEEK {r.get("week","—")}',accent="cyan",note=r.get("stadium","")))
+    st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(hist,None,"Full NFL Weather / Stadium Vault",560)
+    st.info("Current-game forecast ingestion remains separate. This page does not fabricate live forecasts when the collector has not populated them.")
 
 
 def survivor_page():
-    css()
-    topbar("🏈 NFL", "Multi-entry Survivor manager")
-    data = survivor_data()
-    entries = data.get("entries", {})
-    st.markdown('<div class="sport-banner"><div><div class="sport-name">Survivor / Suicide Pool</div><div class="sport-sub">Every entry keeps its own used teams, current pick and future plan.</div></div><div class="source-pill">MULTI-ENTRY</div></div>', unsafe_allow_html=True)
+    css(); topbar("🏈 NFL","Multi-entry Survivor manager")
+    data=survivor_data(); entries=data.get("entries",{})
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Survivor / Suicide Pool</div><div class="sport-sub">Every entry keeps its own used teams, current pick and future plan.</div></div><div class="source-pill">MULTI-ENTRY</div></div>',unsafe_allow_html=True)
     if entries:
-        names = list(entries)
-        active = data.get("active") if data.get("active") in names else names[0]
-        pick = st.selectbox("Active Entry", names, index=names.index(active))
-        if pick != data.get("active"):
-            data["active"] = pick
-            _save_json(P["survivor_entries"], data)
-        e = entries[pick]
-        c1, c2, c3, c4 = st.columns(4)
-        with c1:
-            status = st.selectbox("Status", ["ALIVE", "ELIMINATED"], index=0 if e.get("status", "ALIVE") == "ALIVE" else 1, key=f"status_{pick}")
-        with c2:
-            st.metric("Teams Used", len(e.get("used_teams", [])))
-        with c3:
-            st.metric("Future Picks", len(e.get("future_picks", {})))
-        with c4:
-            st.metric("Pool", e.get("pool") or "—")
-        teams = sorted(NFL_ABBR.keys())
-        used = st.multiselect("Teams already used", teams, default=[x for x in e.get("used_teams", []) if x in NFL_ABBR], key=f"used_{pick}")
-        choices = ["—"] + teams
-        saved_current = e.get("current_pick") if e.get("current_pick") in teams else "—"
-        saved_backup = e.get("backup_pick") if e.get("backup_pick") in teams else "—"
-        c1, c2 = st.columns(2)
-        with c1:
-            current = st.selectbox("This week's pick", choices, index=choices.index(saved_current), key=f"cur_{pick}")
-        with c2:
-            backup = st.selectbox("Backup pick", choices, index=choices.index(saved_backup), key=f"bak_{pick}")
-        if current != "—" and current in used:
-            st.markdown("<div class='survivor-warning'>⚠️ This week's pick is already in this entry's used-team list.</div>", unsafe_allow_html=True)
-        if current != "—" and backup == current:
-            st.markdown('<div class="survivor-warning">⚠️ Backup pick must be different from the primary pick.</div>', unsafe_allow_html=True)
-        plan = st.text_area("Future pick plan", value="\n".join(f"Week {k}: {v}" for k, v in sorted(e.get("future_picks", {}).items(), key=lambda kv: str(kv[0]))), placeholder="Week 2: Buffalo Bills\nWeek 3: Kansas City Chiefs")
-        if st.button("Save Survivor Entry", type="primary"):
-            fp = {}
+        names=list(entries); active=data.get("active") if data.get("active") in names else names[0]; pick=st.selectbox("Active Entry",names,index=names.index(active))
+        if pick!=data.get("active"): data["active"]=pick; _save_json(P["survivor_entries"],data)
+        e=entries[pick]; c1,c2,c3,c4=st.columns(4)
+        with c1: status=st.selectbox("Status",["ALIVE","ELIMINATED"],index=0 if e.get("status","ALIVE")=="ALIVE" else 1,key=f"status_{pick}")
+        with c2: st.metric("Teams Used",len(e.get("used_teams",[])))
+        with c3: st.metric("Future Picks",len(e.get("future_picks",{})))
+        with c4: st.metric("Pool",e.get("pool") or "—")
+        teams=sorted(NFL_ABBR.keys()); used=st.multiselect("Teams already used",teams,default=[x for x in e.get("used_teams",[]) if x in NFL_ABBR],key=f"used_{pick}"); choices=["—"]+teams
+        saved_current=e.get("current_pick") if e.get("current_pick") in teams else "—"; saved_backup=e.get("backup_pick") if e.get("backup_pick") in teams else "—"; c1,c2=st.columns(2)
+        with c1: current=st.selectbox("This week's pick",choices,index=choices.index(saved_current),key=f"cur_{pick}")
+        with c2: backup=st.selectbox("Backup pick",choices,index=choices.index(saved_backup),key=f"bak_{pick}")
+        if current!="—" and current in used: st.markdown("<div class='survivor-warning'>⚠️ This week's pick is already in this entry's used-team list.</div>",unsafe_allow_html=True)
+        if current!="—" and backup==current: st.markdown('<div class="survivor-warning">⚠️ Backup pick must be different from the primary pick.</div>',unsafe_allow_html=True)
+        plan=st.text_area("Future pick plan",value="\n".join(f"Week {k}: {v}" for k,v in sorted(e.get("future_picks",{}).items(),key=lambda kv:str(kv[0]))),placeholder="Week 2: Buffalo Bills\nWeek 3: Kansas City Chiefs")
+        if st.button("Save Survivor Entry",type="primary"):
+            fp={}
             for line in plan.splitlines():
-                m = re.match(r"\s*Week\s*(\d+)\s*:\s*(.+)\s*$", line, re.I)
-                if m:
-                    fp[m.group(1)] = m.group(2)
-            e.update({"status": status, "used_teams": used, "current_pick": None if current == "—" else current, "backup_pick": None if backup == "—" else backup, "future_picks": fp})
-            entries[pick] = e
-            data["entries"] = entries
-            _save_json(P["survivor_entries"], data)
-            st.success("Entry saved.")
-    with st.expander("➕ Add Survivor Entry", expanded=not bool(entries)):
-        name = st.text_input("Entry name", placeholder="Office Pool - Entry 1")
-        pool = st.text_input("Pool name", placeholder="Office Survivor")
-        if st.button("Create Entry", disabled=not bool(name.strip())):
-            entries[name.strip()] = {"pool": pool.strip(), "status": "ALIVE", "used_teams": [], "current_pick": None, "backup_pick": None, "future_picks": {}, "history": []}
-            data["entries"] = entries
-            data["active"] = name.strip()
-            _save_json(P["survivor_entries"], data)
-            st.rerun()
-    board = pd.DataFrame()
-    try:
-        board = pd.read_csv(P["nfl_survivor"], low_memory=False) if P["nfl_survivor"].exists() else pd.DataFrame()
-    except Exception:
-        pass
+                m=re.match(r"\s*Week\s*(\d+)\s*:\s*(.+)\s*$",line,re.I)
+                if m: fp[m.group(1)]=m.group(2)
+            e.update({"status":status,"used_teams":used,"current_pick":None if current=="—" else current,"backup_pick":None if backup=="—" else backup,"future_picks":fp}); entries[pick]=e; data["entries"]=entries; _save_json(P["survivor_entries"],data); st.success("Entry saved.")
+    with st.expander("➕ Add Survivor Entry",expanded=not bool(entries)):
+        name=st.text_input("Entry name",placeholder="Office Pool - Entry 1"); pool=st.text_input("Pool name",placeholder="Office Survivor")
+        if st.button("Create Entry",disabled=not bool(name.strip())):
+            entries[name.strip()]={"pool":pool.strip(),"status":"ALIVE","used_teams":[],"current_pick":None,"backup_pick":None,"future_picks":{},"history":[]}; data["entries"]=entries; data["active"]=name.strip(); _save_json(P["survivor_entries"],data); st.rerun()
+    try: board=pd.read_csv(P["nfl_survivor"],low_memory=False) if P["nfl_survivor"].exists() else pd.DataFrame()
+    except Exception: board=pd.DataFrame()
     if not board.empty:
         st.subheader("Hulk Survivor Board")
-        st.dataframe(board, width="stretch", hide_index=True, height=430)
+        cards=[]
+        for _,r in board.head(20).iterrows():
+            cards.append(matchup_card("NFL",r.get("away_team","—"),r.get("home_team","—"),r.get("start"),[("Survivor Pick",r.get("survivor_team","—")),("Win Chance",pct_value(r.get("survivor_win_prob"))),("Spread",r.get("survivor_spread","—")),("Books",r.get("sportsbooks","—"))],badge=r.get("survivor_grade","—"),accent="green" if str(r.get("survivor_grade","")) in {"A+","A"} else "blue"))
+        st.markdown('<div class="clean-game-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+        research_table(board,None,"Full Survivor Research Data",480)
     st.caption("Future-value optimization will rank this week's safety against the value of saving strong teams for later weeks.")
 
 
 def top300_page():
-    css()
-    topbar("🏆 Fantasy", "Top 300 draft board")
-    d = fdf()
-    if d.empty:
-        st.info("Fantasy board unavailable.")
-        return
-    rank = next((c for c in ["hulk_v2_rank", "overall_rank", "hulk_rank", "rank"] if c in d.columns), None)
-    if rank:
-        d[rank] = pd.to_numeric(d[rank], errors="coerce")
-        d = d.sort_values(rank)
-    cols = [c for c in [rank, "full_name", "position", "team", "hulk_v2_tier", "consensus_adp", "espn_adp", "yahoo_adp", "sleeper_ppr_adp", "cbs_adp", "hulk_value_vs_consensus", "draft_action", "proj_ppr_points"] if c and c in d.columns]
-    st.markdown('<div class="sport-banner"><div><div class="sport-name">Fantasy Top 300 Cheat Sheet</div><div class="sport-sub">Overall board + positional value + platform ADP in the dense draft-sheet style.</div></div><div class="source-pill">TOP 300</div></div>', unsafe_allow_html=True)
-    st.dataframe(d[cols].head(300), width="stretch", hide_index=True, height=820)
+    css(); topbar("🏆 Fantasy", "Top 300 draft board")
+    d=fdf()
+    if d.empty: st.info("Fantasy board unavailable."); return
+    rank=next((c for c in ["hulk_v2_rank","overall_rank","hulk_rank","rank"] if c in d.columns),None)
+    if rank: d[rank]=pd.to_numeric(d[rank],errors="coerce"); d=d.sort_values(rank)
+    st.markdown('<div class="sport-banner"><div><div class="sport-name">Fantasy Top 300 Cheat Sheet</div><div class="sport-sub">Player cards first; dense full board remains one click down.</div></div><div class="source-pill">TOP 300</div></div>',unsafe_allow_html=True)
+    positions=sorted(d.get("position",pd.Series(dtype=str)).dropna().astype(str).unique().tolist()); pos=st.selectbox("Position",["ALL"]+positions)
+    show=d if pos=="ALL" else d[d["position"].astype(str).eq(pos)]; limit=st.select_slider("Cards shown",options=[25,50,100,150,300],value=50)
+    cards=[]
+    for _,r in show.head(limit).iterrows():
+        nm=first(r,["full_name","player","name"],"—"); action=first(r,["draft_action"],"DRAFT"); cards.append(player_card(nm,r.get("team","—"),r.get("position",""),[("Overall",r.get(rank,"—") if rank else "—"),("Tier",r.get("hulk_v2_tier","—")),("Consensus ADP",r.get("consensus_adp","—")),("Value vs ADP",r.get("hulk_value_vs_consensus","—")),("Proj PPR",r.get("proj_ppr_points","—"))],badge=action,accent="green" if "VALUE" in str(action).upper() else "blue"))
+    st.markdown('<div class="clean-player-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    research_table(d.head(300),None,"Full Top 300 Draft Board",760)
 
 
 def feature(mode,page):
