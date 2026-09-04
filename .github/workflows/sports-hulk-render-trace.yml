@@ -1,0 +1,78 @@
+name: Sports HULK Render Trace
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trace:
+    name: Trace the actual Command Center renderer
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+
+    steps:
+      - name: Inspect live imported UI module
+        shell: bash
+        run: |
+          set +e
+
+          echo "================ EXPECTED V2 HASH ================"
+          echo "ae6a70585ff5fd94fa3d503eec8b6880cd4ec8a6bc339f2fd5aadfe9467514e2"
+
+          echo
+          echo "================ LIVE FILE HASH ==================="
+          sha256sum /home/ubuntu/sports-hulk/hulk_final_ui.py || true
+
+          echo
+          echo "================ IMPORTED MODULE PATH ============="
+          cd /home/ubuntu/sports-hulk
+          .venv/bin/python - <<'PY'
+          import hashlib, inspect
+          import hulk_final_ui
+
+          p = hulk_final_ui.__file__
+          print("MODULE_FILE=", p)
+          data = open(p, "rb").read()
+          print("MODULE_SHA256=", hashlib.sha256(data).hexdigest())
+
+          print("COMMAND_CENTER_DEFINED_AT=", inspect.getsourcelines(hulk_final_ui.command_center)[1])
+          src = inspect.getsource(hulk_final_ui.command_center)
+
+          markers = [
+              "mock-hero",
+              "mock-kpis",
+              "mock-grid",
+              "MARKET MOVEMENT",
+              "HULK VS MARKET",
+              "PLAYER PROPS SPOTLIGHT",
+              "PARLAY CHEMISTRY",
+              "PRIZEPICKS BOARD",
+              "FANTASY / WAIVER WIRE",
+          ]
+          for m in markers:
+              print(m + "=", "YES" if m in src else "NO")
+
+          print("\n----- COMMAND CENTER FIRST 35 LINES -----")
+          for i, line in enumerate(src.splitlines()[:35], 1):
+              print("%02d: %s" % (i, line))
+          PY
+
+          echo
+          echo "================ APP ROUTING ======================="
+          grep -n -A18 -B6 'render_dashboard_boost(mode, page)' /home/ubuntu/sports-hulk/app.py || true
+          grep -n -A18 -B2 '^def dashboard(mode,page)' /home/ubuntu/sports-hulk/hulk_final_ui.py || true
+
+          echo
+          echo "================ PROCESS START ====================="
+          ps -eo pid,lstart,args | grep '[s]treamlit.*sports-hulk\|[s]treamlit run app.py' || true
+
+          echo
+          echo "================ SERVICE ==========================="
+          sudo systemctl show sports-hulk             --property=MainPID             --property=ExecStart             --property=WorkingDirectory             --no-pager || true
+
+          echo
+          echo "================ TRACE COMPLETE ===================="
