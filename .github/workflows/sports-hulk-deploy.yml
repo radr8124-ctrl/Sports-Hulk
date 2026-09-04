@@ -1,0 +1,115 @@
+name: Sports HULK Deploy
+
+on:
+  workflow_run:
+    workflows:
+      - "Sports HULK CI"
+    types:
+      - completed
+    branches:
+      - main
+
+  workflow_dispatch:
+
+concurrency:
+  group: sports-hulk-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Sports HULK
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout tested code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+
+      - name: Ensure rsync is installed
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y rsync
+
+      - name: Sync source to live Sports HULK
+        run: |
+          rsync -a \
+            --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.env' \
+            --exclude '.venv/' \
+            --exclude '__pycache__/' \
+            --exclude '*.pyc' \
+            --exclude '*.parquet' \
+            --exclude 'raw/' \
+            --exclude 'history/' \
+            --exclude 'logs/' \
+            --exclude 'backups/' \
+            --exclude '*.db' \
+            --exclude '*.sqlite' \
+            --exclude '*.sqlite3' \
+            --exclude '*.backup' \
+            --exclude '*.backup_*' \
+            --exclude '*.bak' \
+            --exclude '*.bak_*' \
+            --exclude '*.pre_*' \
+            "$GITHUB_WORKSPACE/" \
+            /home/ubuntu/sports-hulk/
+
+      - name: Rebuild live Python environment
+        working-directory: /home/ubuntu/sports-hulk
+        run: |
+          if [ ! -d ".venv" ]; then
+            python3 -m venv .venv
+          fi
+
+          .venv/bin/python -m pip install --upgrade pip
+
+          if [ -f requirements-oracle.txt ]; then
+            .venv/bin/pip install -r requirements-oracle.txt
+          else
+            .venv/bin/pip install -r requirements.txt
+          fi
+
+      - name: Verify live build before restart
+        working-directory: /home/ubuntu/sports-hulk
+        run: |
+          .venv/bin/python -m py_compile app.py
+          .venv/bin/python -m py_compile hulk_final_ui.py
+          .venv/bin/python -m py_compile mcp_hulk/server.py
+          .venv/bin/python -m py_compile prop_intelligence/build_prop_intelligence.py
+          .venv/bin/python -m py_compile prop_intelligence/hulk_prop_ui.py
+
+      - name: Restart Sports HULK
+        run: |
+          sudo systemctl restart sports-hulk
+          sleep 5
+          sudo systemctl is-active sports-hulk
+          curl -fI http://127.0.0.1:8501
+
+      - name: Restart Sports HULK MCP if installed
+        run: |
+          if systemctl list-unit-files | grep -q '^sports-hulk-mcp.service'; then
+            sudo systemctl restart sports-hulk-mcp
+            sleep 2
+            sudo systemctl is-active sports-hulk-mcp
+          else
+            echo "sports-hulk-mcp.service not installed; skipping MCP restart."
+          fi
+
+      - name: Deployment complete
+        run: |
+          echo "========================================"
+          echo "SPORTS HULK DEPLOY: PASS"
+          echo "Live path: /home/ubuntu/sports-hulk"
+          echo "========================================"
