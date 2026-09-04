@@ -1,0 +1,108 @@
+name: Sports HULK Live Diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: Find what the public site is actually running
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+
+    steps:
+      - name: Diagnose Sports HULK live path
+        shell: bash
+        run: |
+          set +e
+          echo "==================== 1) RUNNING PROCESSES ===================="
+          ps -eo pid,user,lstart,args | grep -E '[s]treamlit|[u]vicorn|sports-hulk' || true
+
+          echo
+          echo "==================== 2) PORT LISTENERS ======================="
+          sudo ss -ltnp | grep -E ':80 |:8501 |:8502 |:8080 ' || true
+
+          echo
+          echo "==================== 3) SYSTEMD UNIT =========================="
+          sudo systemctl cat sports-hulk 2>/dev/null || true
+          echo
+          sudo systemctl show sports-hulk \
+            --property=MainPID \
+            --property=WorkingDirectory \
+            --property=ExecStart \
+            --property=FragmentPath \
+            --property=DropInPaths \
+            --no-pager 2>/dev/null || true
+
+          echo
+          echo "==================== 4) NGINX ACTIVE CONFIG ==================="
+          sudo nginx -T 2>/dev/null | grep -n -E 'server_name|listen |proxy_pass|8501|8502|sports-hulk' || true
+
+          echo
+          echo "==================== 5) LIKELY SPORTS HULK DIRECTORIES ========"
+          sudo find /home/ubuntu -maxdepth 4 -type f -name app.py \
+            -printf '%p\n' 2>/dev/null | grep -Ei 'sport|hulk' || true
+
+          echo
+          echo "==================== 6) WHICH app.py HAS OLD/NEW UI? =========="
+          while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            echo
+            echo "FILE: $f"
+            echo "SHA256: $(sha256sum "$f" | awk '{print $1}')"
+            if grep -q '"Command Center"' "$f"; then
+              echo "NEW_MARKER_Command_Center=YES"
+            else
+              echo "NEW_MARKER_Command_Center=NO"
+            fi
+            if grep -q '"Game Research"' "$f"; then
+              echo "NEW_MARKER_Game_Research=YES"
+            else
+              echo "NEW_MARKER_Game_Research=NO"
+            fi
+            if grep -q '"Dashboard"' "$f"; then
+              echo "OLD_MARKER_Dashboard=YES"
+            else
+              echo "OLD_MARKER_Dashboard=NO"
+            fi
+          done < <(sudo find /home/ubuntu -maxdepth 4 -type f -name app.py 2>/dev/null | grep -Ei 'sport|hulk')
+
+          echo
+          echo "==================== 7) LIVE EXPECTED FILE ===================="
+          LIVE=/home/ubuntu/sports-hulk/app.py
+          if [ -f "$LIVE" ]; then
+            echo "LIVE_FILE=$LIVE"
+            echo "LIVE_SHA256=$(sha256sum "$LIVE" | awk '{print $1}')"
+            echo "-- Betting menu area --"
+            grep -n -A14 -B2 'mode == "🎯 Betting"' "$LIVE" | head -30 || true
+            echo "-- Command Center refs --"
+            grep -n 'Command Center\|Game Research\|Bet Tracker\|Performance Lab\|Historical Explorer' "$LIVE" | head -30 || true
+          else
+            echo "EXPECTED LIVE FILE MISSING"
+          fi
+
+          echo
+          echo "==================== 8) FINAL FEATURE CHECKOUT ================"
+          cd "$GITHUB_WORKSPACE"
+          echo "WORKSPACE=$GITHUB_WORKSPACE"
+          echo "BRANCH/COMMIT:"
+          git rev-parse --abbrev-ref HEAD 2>/dev/null || true
+          git rev-parse HEAD 2>/dev/null || true
+          if [ -f app.py ]; then
+            echo "WORKSPACE_SHA256=$(sha256sum app.py | awk '{print $1}')"
+            grep -n 'Command Center\|Game Research\|Bet Tracker\|Performance Lab\|Historical Explorer' app.py | head -30 || true
+          fi
+
+          echo
+          echo "==================== 9) HTTP ROUTE ============================="
+          echo "-- localhost:8501 --"
+          curl -sSI --max-time 5 http://127.0.0.1:8501 | head -20 || true
+          echo "-- localhost:80 --"
+          curl -sSI --max-time 5 http://127.0.0.1 | head -20 || true
+
+          echo
+          echo "==================== DIAGNOSTIC COMPLETE ======================="
