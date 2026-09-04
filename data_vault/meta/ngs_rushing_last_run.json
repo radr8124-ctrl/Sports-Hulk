@@ -1,0 +1,14 @@
+{
+  "dataset": "ngs_rushing",
+  "run_at_utc": "2026-09-01T21:43:20.879527+00:00",
+  "records": [
+    {
+      "status": "downloaded",
+      "bytes": 381166,
+      "sha256": "65d3e062c41e6ec4f7ee73de899862b10ea485302e5024e04b2ddc947e48805b",
+      "season": null,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_rushing.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/ngs_rushing/ngs_rushing.parquet"
+    }
+  ]
+}

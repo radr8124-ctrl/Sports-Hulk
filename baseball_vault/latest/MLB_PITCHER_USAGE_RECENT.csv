@@ -1,0 +1,386 @@
+gamePk,game_date,side,team,pitcher_id,pitcher,role,inningsPitched,outs,pitches,battersFaced,hits,runs,earnedRuns,walks,strikeouts
+824911,2026-08-31,away,San Francisco Giants,683627,Anthony Molina,starter,5.0,15,75.0,21.0,6.0,3.0,3.0,0,6.0
+824911,2026-08-31,away,San Francisco Giants,671345,Jason Foley,reliever,1.1,4,22.0,6.0,2.0,0,0,0,1.0
+824911,2026-08-31,away,San Francisco Giants,665665,Reiver Sanmartin,reliever,1.2,5,16.0,5.0,0,0,0,0,2.0
+824911,2026-08-31,away,San Francisco Giants,681916,Dylan Smith,reliever,1.0,3,15.0,4.0,1.0,0,0,1.0,1.0
+824911,2026-08-31,home,Atlanta Braves,693821,Bryce Elder,starter,5.1,16,84.0,27.0,8.0,5.0,5.0,3.0,3.0
+824911,2026-08-31,home,Atlanta Braves,669276,Dylan Lee,reliever,0.1,1,14.0,3.0,2.0,1.0,1.0,0,0
+824911,2026-08-31,home,Atlanta Braves,678061,Ray Kerr,reliever,3.1,10,34.0,11.0,1.0,1.0,1.0,0,4.0
+824473,2026-08-31,away,San Diego Padres,650633,Michael King,starter,6.0,18,96.0,26.0,4.0,0,0,3.0,6.0
+824473,2026-08-31,away,San Diego Padres,606996,Kyle Hart,reliever,2.0,6,29.0,7.0,0,0,0,1.0,4.0
+824473,2026-08-31,away,San Diego Padres,593974,Wandy Peralta,reliever,1.0,3,20.0,4.0,1.0,0,0,0,1.0
+824473,2026-08-31,home,Cincinnati Reds,663903,Brady Singer,starter,4.1,13,87.0,22.0,10.0,4.0,4.0,0,5.0
+824473,2026-08-31,home,Cincinnati Reds,670062,Julian Garcia,reliever,1.2,5,21.0,5.0,0,0,0,0,3.0
+824473,2026-08-31,home,Cincinnati Reds,572955,Pierce Johnson,reliever,1.0,3,19.0,6.0,3.0,1.0,1.0,0,0
+824473,2026-08-31,home,Cincinnati Reds,663574,Tony Santillan,reliever,1.0,3,10.0,5.0,1.0,0,0,0,0
+824473,2026-08-31,home,Cincinnati Reds,622088,Tejay Antone,reliever,1.0,3,15.0,5.0,1.0,0,0,0,2.0
+822932,2026-08-31,away,New York Mets,476594,Robert Stock,starter,5.1,16,72.0,21.0,5.0,0,0,0,4.0
+822932,2026-08-31,away,New York Mets,681320,Nate Lavender,reliever,0.2,2,9.0,2.0,1.0,0,0,0,0
+822932,2026-08-31,away,New York Mets,673380,Dedniel Núñez,reliever,1.0,3,11.0,3.0,0,0,0,0,1.0
+822932,2026-08-31,away,New York Mets,650960,Daniel Duarte,reliever,0.2,2,24.0,6.0,3.0,2.0,2.0,1.0,0
+822932,2026-08-31,away,New York Mets,606965,Chris Devenski,reliever,0.1,1,5.0,1.0,0,0,0,0,0
+822932,2026-08-31,away,New York Mets,673540,Kodai Senga,reliever,1.0,3,17.0,4.0,0,0,0,1.0,1.0
+822932,2026-08-31,home,Tampa Bay Rays,693855,Ian Seymour,starter,6.1,19,88.0,24.0,6.0,3.0,3.0,0,10.0
+822932,2026-08-31,home,Tampa Bay Rays,668984,Casey Legumina,reliever,0.2,2,15.0,4.0,2.0,0,0,0,0
+822932,2026-08-31,home,Tampa Bay Rays,664076,Garrett Cleavinger,reliever,1.0,3,10.0,3.0,0,0,0,0,1.0
+822932,2026-08-31,home,Tampa Bay Rays,571927,Steven Matz,reliever,1.0,3,22.0,5.0,2.0,0,0,0,1.0
+824719,2026-08-31,away,Seattle Mariners,669923,George Kirby,starter,5.0,15,86.0,23.0,7.0,5.0,5.0,2.0,2.0
+824719,2026-08-31,away,Seattle Mariners,622554,Seranthony Domínguez,reliever,1.0,3,8.0,3.0,0,0,0,0,0
+824719,2026-08-31,away,Seattle Mariners,642100,Gabe Speier,reliever,1.1,4,15.0,5.0,0,0,0,1.0,1.0
+824719,2026-08-31,away,Seattle Mariners,660825,Eduard Bazardo,reliever,0.1,1,13.0,4.0,3.0,2.0,2.0,0,0
+824719,2026-08-31,away,Seattle Mariners,662253,Andrés Muñoz,reliever,1.1,4,15.0,5.0,1.0,1.0,1.0,0,3.0
+824719,2026-08-31,away,Seattle Mariners,681867,Cooper Criswell,reliever,0.1,1,7.0,4.0,1.0,1.0,0,2.0,0
+824719,2026-08-31,home,Boston Red Sox,801139,Payton Tolle,starter,5.2,17,96.0,25.0,6.0,4.0,4.0,2.0,6.0
+824719,2026-08-31,home,Boston Red Sox,594027,Tyron Guerrero,reliever,0.1,1,13.0,5.0,3.0,3.0,3.0,1.0,0
+824719,2026-08-31,home,Boston Red Sox,669062,Erik Miller,reliever,1.0,3,16.0,4.0,1.0,1.0,1.0,0,2.0
+824719,2026-08-31,home,Boston Red Sox,687941,Alec Gamboa,reliever,2.0,6,23.0,7.0,1.0,0,0,0,1.0
+824719,2026-08-31,home,Boston Red Sox,547973,Aroldis Chapman,reliever,1.0,3,15.0,3.0,0,0,0,0,2.0
+822689,2026-08-31,away,Miami Marlins,687473,Ryan Gusto,starter,4.1,13,69.0,18.0,4.0,1.0,1.0,2.0,4.0
+822689,2026-08-31,away,Miami Marlins,667652,Jack Ralston,reliever,0.2,2,23.0,4.0,2.0,1.0,1.0,0,1.0
+822689,2026-08-31,away,Miami Marlins,676604,Tyler Zuber,reliever,1.1,4,24.0,5.0,1.0,1.0,1.0,0,3.0
+822689,2026-08-31,away,Miami Marlins,694795,Josh Ekness,reliever,0.1,1,18.0,5.0,3.0,3.0,3.0,1.0,1.0
+822689,2026-08-31,away,Miami Marlins,806188,Cade Gibson,reliever,1.1,4,9.0,4.0,1.0,0,0,0,0
+822689,2026-08-31,home,Washington Nationals,702021,Will Dion,starter,3.0,9,37.0,9.0,2.0,0,0,1.0,1.0
+822689,2026-08-31,home,Washington Nationals,691384,Luis Perales,reliever,1.0,3,34.0,8.0,4.0,3.0,3.0,1.0,2.0
+822689,2026-08-31,home,Washington Nationals,663362,Matt Waldron,reliever,3.0,9,41.0,14.0,5.0,0,0,0,0
+822689,2026-08-31,home,Washington Nationals,680899,Erik Tolman,reliever,2.0,6,21.0,5.0,0,0,0,0,4.0
+823663,2026-08-31,away,Detroit Tigers,695549,Jackson Jobe,starter,5.0,15,92.0,24.0,6.0,5.0,4.0,2.0,4.0
+823663,2026-08-31,away,Detroit Tigers,700270,Yilber Díaz,reliever,2.0,6,43.0,10.0,2.0,4.0,4.0,3.0,1.0
+823663,2026-08-31,away,Detroit Tigers,656716,Zach McKinstry,reliever,1.0,3,31.0,7.0,1.0,2.0,2.0,2.0,0
+823663,2026-08-31,home,Minnesota Twins,671737,Taj Bradley,starter,7.0,21,104.0,27.0,4.0,1.0,1.0,3.0,9.0
+823663,2026-08-31,home,Minnesota Twins,667297,Tommy Nance,reliever,2.0,6,26.0,7.0,1.0,0,0,0,2.0
+824635,2026-08-31,away,Milwaukee Brewers,690986,Kyle Harrison,starter,3.2,11,98.0,24.0,10.0,9.0,9.0,2.0,3.0
+824635,2026-08-31,away,Milwaukee Brewers,694477,Chad Patrick,reliever,1.1,4,21.0,6.0,0,0,0,2.0,0
+824635,2026-08-31,away,Milwaukee Brewers,669084,DL Hall,reliever,1.0,3,18.0,4.0,1.0,1.0,1.0,0,0
+824635,2026-08-31,away,Milwaukee Brewers,683734,Andrew Vaughn,reliever,2.0,6,55.0,18.0,9.0,7.0,7.0,3.0,0
+824635,2026-08-31,home,Chicago Cubs,605280,Clay Holmes,starter,6.0,18,101.0,23.0,5.0,0,0,2.0,8.0
+824635,2026-08-31,home,Chicago Cubs,669020,Ryan Rolison,reliever,1.0,3,12.0,5.0,2.0,2.0,2.0,0,0
+824635,2026-08-31,home,Chicago Cubs,607067,Colin Rea,reliever,2.0,6,29.0,8.0,2.0,1.0,1.0,0,3.0
+822855,2026-08-31,away,Athletics,695611,Gage Jump,starter,4.1,13,91.0,22.0,6.0,7.0,7.0,3.0,2.0
+822855,2026-08-31,away,Athletics,688297,Chris Roycroft,reliever,2.2,8,37.0,10.0,1.0,0,0,1.0,0
+822855,2026-08-31,away,Athletics,660761,José Suarez,reliever,1.0,3,23.0,6.0,2.0,1.0,1.0,1.0,1.0
+822855,2026-08-31,home,Texas Rangers,594798,Jacob deGrom,starter,7.0,21,85.0,21.0,1.0,0,0,0,8.0
+822855,2026-08-31,home,Texas Rangers,695239,Robby Ahlstrom,reliever,1.0,3,14.0,3.0,0,0,0,0,2.0
+822855,2026-08-31,home,Texas Rangers,687239,Ben Peoples,reliever,1.0,3,18.0,5.0,2.0,1.0,1.0,0,1.0
+824149,2026-08-31,away,Chicago White Sox,641743,Anthony Kay,starter,4.2,14,89.0,23.0,6.0,6.0,5.0,2.0,5.0
+824149,2026-08-31,away,Chicago White Sox,670950,Trevor Richards,reliever,2.1,7,34.0,10.0,2.0,0,0,1.0,2.0
+824149,2026-08-31,away,Chicago White Sox,699823,Tyler Davis,reliever,1.0,3,16.0,3.0,0,0,0,0,1.0
+824149,2026-08-31,home,Houston Astros,663567,Peter Lambert,starter,4.2,14,104.0,24.0,3.0,2.0,2.0,5.0,6.0
+824149,2026-08-31,home,Houston Astros,660853,Enyel De Los Santos,reliever,1.0,3,27.0,6.0,0,0,0,3.0,0
+824149,2026-08-31,home,Houston Astros,656986,Bennett Sousa,reliever,1.1,4,23.0,6.0,1.0,1.0,1.0,1.0,1.0
+824149,2026-08-31,home,Houston Astros,595345,Steven Okert,reliever,1.0,3,18.0,4.0,1.0,0,0,0,2.0
+824149,2026-08-31,home,Houston Astros,650556,Bryan Abreu,reliever,1.0,3,16.0,4.0,0,0,0,1.0,2.0
+824314,2026-08-31,away,Baltimore Orioles,700249,Cade Povich,starter,5.0,15,87.0,22.0,5.0,1.0,1.0,3.0,4.0
+824314,2026-08-31,away,Baltimore Orioles,664991,Grant Wolfram,reliever,2.0,6,25.0,6.0,1.0,0,0,0,2.0
+824314,2026-08-31,away,Baltimore Orioles,695380,Alex Hoppe,reliever,0.1,1,12.0,3.0,1.0,0,0,1.0,0
+824314,2026-08-31,away,Baltimore Orioles,670329,Rico Garcia,reliever,0.2,2,5.0,2.0,0,0,0,0,1.0
+824314,2026-08-31,away,Baltimore Orioles,552640,Andrew Kittredge,reliever,1.0,3,9.0,4.0,1.0,0,0,0,1.0
+824314,2026-08-31,home,Colorado Rockies,685299,Tanner Gordon,starter,5.0,15,60.0,18.0,3.0,1.0,1.0,1.0,3.0
+824314,2026-08-31,home,Colorado Rockies,815081,Mark Manfredi,reliever,1.1,4,23.0,6.0,0,1.0,1.0,3.0,1.0
+824314,2026-08-31,home,Colorado Rockies,693308,Nick Frasso,reliever,0.2,2,19.0,4.0,0,0,0,2.0,0
+824314,2026-08-31,home,Colorado Rockies,657514,Brennan Bernardino,reliever,1.0,3,17.0,4.0,1.0,0,0,0,0
+824314,2026-08-31,home,Colorado Rockies,605447,Jordan Romano,reliever,1.0,3,6.0,3.0,0,0,0,0,1.0
+823982,2026-08-31,away,New York Yankees,695684,Elmer Rodríguez,starter,3.2,11,91.0,20.0,4.0,4.0,4.0,3.0,5.0
+823982,2026-08-31,away,New York Yankees,605242,Michael Fulmer,reliever,1.1,4,31.0,7.0,3.0,2.0,1.0,0,2.0
+823982,2026-08-31,away,New York Yankees,661563,Luis Gil,reliever,2.0,6,39.0,10.0,1.0,1.0,1.0,1.0,3.0
+823982,2026-08-31,away,New York Yankees,670280,David Bednar,reliever,1.0,3,28.0,7.0,4.0,3.0,3.0,0,0
+823982,2026-08-31,home,Los Angeles Angels,700712,Walbert Ureña,starter,7.0,21,95.0,25.0,5.0,1.0,1.0,0,8.0
+823982,2026-08-31,home,Los Angeles Angels,642048,Tayler Saucedo,reliever,1.0,3,8.0,3.0,0,0,0,0,0
+823982,2026-08-31,home,Los Angeles Angels,676620,Blake Weiman,reliever,1.0,3,15.0,4.0,1.0,0,0,0,2.0
+825040,2026-08-31,away,Philadelphia Phillies,605400,Aaron Nola,starter,5.0,15,104.0,22.0,5.0,1.0,1.0,2.0,4.0
+825040,2026-08-31,away,Philadelphia Phillies,686934,Alex McFarlane,reliever,1.0,3,15.0,3.0,0,0,0,0,1.0
+825040,2026-08-31,away,Philadelphia Phillies,689147,Orion Kerkering,reliever,0.2,2,11.0,3.0,1.0,0,0,1.0,1.0
+825040,2026-08-31,away,Philadelphia Phillies,548384,Brooks Raley,reliever,0.1,1,3.0,1.0,0,0,0,0,0
+825040,2026-08-31,away,Philadelphia Phillies,621237,José Alvarado,reliever,1.0,3,14.0,5.0,1.0,0,0,1.0,1.0
+825040,2026-08-31,away,Philadelphia Phillies,661395,Jhoan Duran,reliever,1.0,3,18.0,5.0,2.0,0,0,0,2.0
+825040,2026-08-31,home,Arizona Diamondbacks,694297,Brandon Pfaadt,starter,6.0,18,87.0,24.0,5.0,2.0,2.0,1.0,1.0
+825040,2026-08-31,home,Arizona Diamondbacks,642528,Jonathan Loáisiga,reliever,1.0,3,14.0,3.0,0,0,0,0,1.0
+825040,2026-08-31,home,Arizona Diamondbacks,666661,Juan Morillo,reliever,1.0,3,33.0,6.0,1.0,0,0,2.0,0
+825040,2026-08-31,home,Arizona Diamondbacks,656464,Kevin Ginkel,reliever,1.0,3,12.0,3.0,0,0,0,0,1.0
+824472,2026-09-01,away,San Diego Padres,681190,Randy Vásquez,starter,4.2,14,69.0,19.0,5.0,2.0,2.0,1.0,3.0
+824472,2026-09-01,away,San Diego Padres,699134,Bradgley Rodriguez,reliever,1.1,4,22.0,5.0,1.0,0,0,0,2.0
+824472,2026-09-01,away,San Diego Padres,673513,Yuki Matsui,reliever,1.0,3,22.0,4.0,0,0,0,1.0,2.0
+824472,2026-09-01,away,San Diego Padres,670970,Adrian Morejon,reliever,0.2,2,27.0,6.0,2.0,2.0,2.0,2.0,0
+824472,2026-09-01,away,San Diego Padres,688158,David Morgan,reliever,0.1,1,1.0,1.0,0,0,0,0,0
+824472,2026-09-01,home,Cincinnati Reds,666157,Nick Lodolo,starter,6.0,18,100.0,24.0,5.0,2.0,2.0,2.0,5.0
+824472,2026-09-01,home,Cincinnati Reds,682825,Luis Mey,reliever,1.0,3,20.0,5.0,0,0,0,1.0,2.0
+824472,2026-09-01,home,Cincinnati Reds,656271,Brock Burke,reliever,1.0,3,19.0,5.0,1.0,0,0,1.0,2.0
+824472,2026-09-01,home,Cincinnati Reds,641941,Emilio Pagán,reliever,1.0,3,13.0,4.0,1.0,1.0,1.0,0,1.0
+823340,2026-09-01,away,San Francisco Giants,657277,Logan Webb,starter,2.0,6,65.0,18.0,9.0,9.0,9.0,2.0,1.0
+823340,2026-09-01,away,San Francisco Giants,694820,Braxton Roxby,reliever,1.0,3,31.0,8.0,4.0,2.0,2.0,0,1.0
+823340,2026-09-01,away,San Francisco Giants,702885,Cesar Perdomo,reliever,4.0,12,58.0,15.0,3.0,1.0,1.0,1.0,4.0
+823340,2026-09-01,away,San Francisco Giants,805345,Trent Harris,reliever,1.0,3,20.0,5.0,1.0,0,0,1.0,2.0
+823340,2026-09-01,away,San Francisco Giants,693313,Carson Seymour,reliever,0.2,2,19.0,5.0,2.0,1.0,0,0,0
+823340,2026-09-01,home,Pittsburgh Pirates,694973,Paul Skenes,starter,4.2,14,95.0,25.0,8.0,5.0,5.0,3.0,4.0
+823340,2026-09-01,home,Pittsburgh Pirates,670990,Yohan Ramírez,reliever,0.2,2,26.0,6.0,3.0,2.0,2.0,1.0,1.0
+823340,2026-09-01,home,Pittsburgh Pirates,642397,Gregory Soto,reliever,0.2,2,7.0,2.0,0,0,0,0,1.0
+823340,2026-09-01,home,Pittsburgh Pirates,666808,Camilo Doval,reliever,1.0,3,13.0,4.0,1.0,0,0,0,2.0
+823340,2026-09-01,home,Pittsburgh Pirates,681895,Evan Sisk,reliever,0.1,1,22.0,4.0,0,3.0,3.0,3.0,0
+823340,2026-09-01,home,Pittsburgh Pirates,596133,Luke Weaver,reliever,0.2,2,14.0,4.0,2.0,2.0,2.0,1.0,0
+823340,2026-09-01,home,Pittsburgh Pirates,682254,Mason Montgomery,reliever,1.0,3,15.0,5.0,2.0,0,0,0,0
+822929,2026-09-01,away,New York Mets,640455,Sean Manaea,starter,5.2,17,86.0,29.0,11.0,5.0,5.0,1.0,2.0
+822929,2026-09-01,away,New York Mets,681810,Austin Warren,reliever,0.1,1,6.0,1.0,0,0,0,0,0
+822929,2026-09-01,away,New York Mets,697811,Dylan Ross,reliever,1.0,3,11.0,3.0,0,0,0,0,0
+822929,2026-09-01,away,New York Mets,642376,Jefry Yan,reliever,1.0,3,19.0,6.0,2.0,1.0,1.0,0,2.0
+822929,2026-09-01,home,Tampa Bay Rays,642547,Freddy Peralta,starter,6.0,18,74.0,22.0,3.0,1.0,1.0,0,7.0
+822929,2026-09-01,home,Tampa Bay Rays,664076,Garrett Cleavinger,reliever,0.1,1,20.0,4.0,0,1.0,1.0,3.0,0
+822929,2026-09-01,home,Tampa Bay Rays,669330,Tyler Wells,reliever,1.2,5,26.0,6.0,0,0,0,1.0,1.0
+822929,2026-09-01,home,Tampa Bay Rays,687330,Kevin Kelly,reliever,1.0,3,13.0,3.0,0,0,0,0,2.0
+824391,2026-09-01,away,Toronto Blue Jays,693686,Spencer Miles,starter,1.0,3,16.0,4.0,1.0,0,0,0,0
+824391,2026-09-01,away,Toronto Blue Jays,694357,Ricky Tiedemann,reliever,1.0,3,21.0,4.0,0,0,0,2.0,0
+824391,2026-09-01,away,Toronto Blue Jays,681293,Spencer Arrighetti,reliever,3.2,11,62.0,14.0,2.0,2.0,2.0,1.0,2.0
+824391,2026-09-01,away,Toronto Blue Jays,573009,Joe Mantiply,reliever,1.1,4,22.0,7.0,3.0,2.0,2.0,0,1.0
+824391,2026-09-01,away,Toronto Blue Jays,547179,Michael Lorenzen,reliever,1.0,3,20.0,5.0,2.0,2.0,2.0,0,0
+824391,2026-09-01,home,Cleveland Guardians,668909,Gavin Williams,starter,7.0,21,97.0,25.0,2.0,1.0,0,1.0,13.0
+824391,2026-09-01,home,Cleveland Guardians,683769,Hunter Gaddis,reliever,1.0,3,9.0,3.0,0,0,0,0,1.0
+824391,2026-09-01,home,Cleveland Guardians,670036,Matt Festa,reliever,1.0,3,18.0,4.0,1.0,0,0,0,0
+824716,2026-09-01,away,Seattle Mariners,693433,Bryan Woo,starter,6.0,18,99.0,25.0,5.0,2.0,1.0,1.0,7.0
+824716,2026-09-01,away,Seattle Mariners,672841,Carlos Vargas,reliever,0.2,2,20.0,5.0,2.0,2.0,2.0,1.0,1.0
+824716,2026-09-01,away,Seattle Mariners,678606,José A. Ferrer,reliever,1.1,4,18.0,6.0,2.0,0,0,0,1.0
+824716,2026-09-01,away,Seattle Mariners,571948,Hoby Milner,reliever,0.1,1,7.0,3.0,2.0,2.0,2.0,0,0
+824716,2026-09-01,away,Seattle Mariners,662253,Andrés Muñoz,reliever,0.2,2,4.0,2.0,0,0,0,0,1.0
+824716,2026-09-01,home,Boston Red Sox,699151,Jedixson Paez,starter,3.2,11,87.0,23.0,10.0,8.0,8.0,2.0,3.0
+824716,2026-09-01,home,Boston Red Sox,681544,Wyatt Olds,reliever,2.1,7,53.0,10.0,2.0,1.0,1.0,1.0,2.0
+824716,2026-09-01,home,Boston Red Sox,687941,Alec Gamboa,reliever,2.0,6,27.0,8.0,1.0,0,0,1.0,2.0
+824716,2026-09-01,home,Boston Red Sox,669711,Greg Weissert,reliever,1.0,3,19.0,5.0,1.0,0,0,1.0,1.0
+822687,2026-09-01,away,Atlanta Braves,700363,AJ Smith-Shawver,starter,4.0,12,86.0,21.0,6.0,5.0,5.0,3.0,5.0
+822687,2026-09-01,away,Atlanta Braves,682989,Victor Mederos,reliever,1.0,3,18.0,5.0,1.0,0,0,1.0,1.0
+822687,2026-09-01,away,Atlanta Braves,686628,Blake Burkhalter,reliever,1.0,3,23.0,5.0,1.0,1.0,1.0,1.0,1.0
+822687,2026-09-01,away,Atlanta Braves,608718,Brent Suter,reliever,2.0,6,50.0,12.0,4.0,3.0,2.0,2.0,5.0
+822687,2026-09-01,home,Washington Nationals,663623,Jake Irvin,starter,4.0,12,86.0,18.0,5.0,2.0,2.0,1.0,5.0
+822687,2026-09-01,home,Washington Nationals,688692,Jared Simpson,reliever,3.0,9,34.0,8.0,0,0,0,0,3.0
+822687,2026-09-01,home,Washington Nationals,690925,Clayton Beeter,reliever,1.0,3,17.0,6.0,3.0,3.0,3.0,0,0
+822687,2026-09-01,home,Washington Nationals,687377,Orlando Ribalta,reliever,1.0,3,8.0,3.0,0,0,0,0,2.0
+823661,2026-09-01,away,Detroit Tigers,675512,Troy Melton,starter,5.1,16,96.0,25.0,6.0,7.0,5.0,1.0,4.0
+823661,2026-09-01,away,Detroit Tigers,640448,Kyle Finnegan,reliever,0.1,1,25.0,6.0,3.0,5.0,5.0,2.0,0
+823661,2026-09-01,away,Detroit Tigers,689225,Beau Brieske,reliever,1.1,4,27.0,8.0,3.0,2.0,2.0,1.0,1.0
+823661,2026-09-01,away,Detroit Tigers,621097,Jacob Waguespack,reliever,1.0,3,21.0,6.0,1.0,1.0,1.0,2.0,1.0
+823661,2026-09-01,home,Minnesota Twins,702193,Andrew Morris,starter,1.0,3,29.0,5.0,2.0,1.0,1.0,0,0
+823661,2026-09-01,home,Minnesota Twins,687570,Connor Prielipp,reliever,5.0,15,73.0,20.0,3.0,0,0,1.0,5.0
+823661,2026-09-01,home,Minnesota Twins,701519,Travis Adams,reliever,1.0,3,9.0,3.0,0,0,0,0,1.0
+823661,2026-09-01,home,Minnesota Twins,670183,Garrett Acton,reliever,2.0,6,39.0,10.0,3.0,1.0,1.0,0,2.0
+824070,2026-09-01,away,Miami Marlins,663969,Tyler Phillips,starter,5.0,15,69.0,17.0,1.0,0,0,2.0,4.0
+824070,2026-09-01,away,Miami Marlins,676534,Calvin Faucher,reliever,1.0,3,18.0,4.0,1.0,0,0,0,0
+824070,2026-09-01,away,Miami Marlins,680767,Victor Vodnik,reliever,2.0,6,26.0,9.0,2.0,2.0,2.0,1.0,2.0
+824070,2026-09-01,away,Miami Marlins,676604,Tyler Zuber,reliever,1.0,3,10.0,5.0,2.0,1.0,1.0,0,0
+824070,2026-09-01,home,Kansas City Royals,677976,Randy Dobnak,starter,6.0,18,87.0,26.0,7.0,6.0,6.0,2.0,6.0
+824070,2026-09-01,home,Kansas City Royals,543238,Anthony Gose,reliever,1.0,3,15.0,4.0,1.0,0,0,0,0
+824070,2026-09-01,home,Kansas City Royals,676510,Nolan Hoffman,reliever,1.0,3,13.0,3.0,0,0,0,0,1.0
+824070,2026-09-01,home,Kansas City Royals,668834,Easton McGee,reliever,1.0,3,15.0,3.0,0,0,0,0,1.0
+824633,2026-09-01,away,Milwaukee Brewers,688107,Robert Gasser,starter,4.1,13,76.0,19.0,3.0,3.0,2.0,2.0,4.0
+824633,2026-09-01,away,Milwaukee Brewers,622608,Antonio Senzatela,reliever,1.0,3,13.0,4.0,1.0,1.0,1.0,1.0,0
+824633,2026-09-01,away,Milwaukee Brewers,668941,JoJo Romero,reliever,0.2,2,11.0,4.0,2.0,0,0,0,0
+824633,2026-09-01,away,Milwaukee Brewers,682842,Abner Uribe,reliever,1.0,3,14.0,3.0,0,0,0,0,2.0
+824633,2026-09-01,away,Milwaukee Brewers,676879,Aaron Ashby,reliever,1.0,3,13.0,3.0,0,0,0,0,1.0
+824633,2026-09-01,away,Milwaukee Brewers,669084,DL Hall,reliever,1.0,3,11.0,3.0,0,0,0,0,1.0
+824633,2026-09-01,home,Chicago Cubs,571510,Matthew Boyd,starter,5.1,16,97.0,22.0,7.0,3.0,3.0,1.0,3.0
+824633,2026-09-01,home,Chicago Cubs,694037,Daniel Palencia,reliever,0.2,2,12.0,4.0,2.0,2.0,2.0,0,0
+824633,2026-09-01,home,Chicago Cubs,666171,Ryan Zeferjahn,reliever,0.2,2,17.0,4.0,2.0,2.0,2.0,0,1.0
+824633,2026-09-01,home,Chicago Cubs,573204,Caleb Thielbar,reliever,0.2,2,19.0,4.0,1.0,1.0,1.0,2.0,0
+824633,2026-09-01,home,Chicago Cubs,621053,Tyler Ferguson,reliever,1.2,5,37.0,8.0,1.0,1.0,1.0,2.0,1.0
+822854,2026-09-01,away,Athletics,669620,Brady Basso,starter,2.1,7,40.0,11.0,4.0,2.0,2.0,0,2.0
+822854,2026-09-01,away,Athletics,656240,Scott Blewett,reliever,1.2,5,38.0,9.0,2.0,2.0,2.0,2.0,3.0
+822854,2026-09-01,away,Athletics,665622,Luis Medina,reliever,1.0,3,21.0,5.0,2.0,1.0,1.0,0,1.0
+822854,2026-09-01,away,Athletics,660761,José Suarez,reliever,0.2,2,18.0,7.0,4.0,3.0,3.0,1.0,0
+822854,2026-09-01,away,Athletics,814305,Yunior Tur,reliever,2.1,7,29.0,8.0,0,0,0,1.0,3.0
+822854,2026-09-01,home,Texas Rangers,669022,MacKenzie Gore,starter,5.1,16,95.0,25.0,5.0,1.0,1.0,4.0,4.0
+822854,2026-09-01,home,Texas Rangers,681217,Chase Silseth,reliever,0.2,2,18.0,3.0,0,0,0,1.0,2.0
+822854,2026-09-01,home,Texas Rangers,671936,Adam Macko,reliever,1.0,3,24.0,6.0,2.0,1.0,1.0,1.0,1.0
+822854,2026-09-01,home,Texas Rangers,592866,Trevor Williams,reliever,1.1,4,43.0,10.0,4.0,3.0,3.0,1.0,1.0
+822854,2026-09-01,home,Texas Rangers,656641,Jacob Latz,reliever,0.2,2,7.0,2.0,0,0,0,0,2.0
+824148,2026-09-01,away,Chicago White Sox,680732,Sean Burke,starter,5.2,17,104.0,22.0,1.0,0,0,4.0,6.0
+824148,2026-09-01,away,Chicago White Sox,663542,Bryan Hudson,reliever,1.1,4,17.0,5.0,1.0,0,0,0,2.0
+824148,2026-09-01,away,Chicago White Sox,663855,Jordan Hicks,reliever,1.0,3,25.0,6.0,1.0,1.0,1.0,2.0,2.0
+824148,2026-09-01,away,Chicago White Sox,691799,Grant Taylor,reliever,1.0,3,14.0,3.0,0,0,0,0,2.0
+824148,2026-09-01,home,Houston Astros,669854,Ronel Blanco,starter,4.0,12,88.0,17.0,3.0,0,0,3.0,3.0
+824148,2026-09-01,home,Houston Astros,678906,Kai-Wei Teng,reliever,2.0,6,35.0,11.0,3.0,3.0,3.0,1.0,1.0
+824148,2026-09-01,home,Houston Astros,837227,Tatsuya Imai,reliever,3.0,9,59.0,14.0,2.0,2.0,2.0,3.0,5.0
+824313,2026-09-01,away,Baltimore Orioles,680694,Kyle Bradish,starter,5.0,15,95.0,23.0,6.0,2.0,2.0,2.0,4.0
+824313,2026-09-01,away,Baltimore Orioles,677020,Josh Walker,reliever,1.0,3,21.0,5.0,2.0,0,0,0,1.0
+824313,2026-09-01,away,Baltimore Orioles,801725,Luis De León,reliever,1.0,3,15.0,5.0,1.0,2.0,1.0,0,1.0
+824313,2026-09-01,away,Baltimore Orioles,676742,Cam Sanders,reliever,1.0,3,15.0,4.0,1.0,0,0,1.0,0
+824313,2026-09-01,home,Colorado Rockies,687312,Gabriel Hughes,starter,4.2,14,78.0,20.0,4.0,1.0,1.0,2.0,4.0
+824313,2026-09-01,home,Colorado Rockies,657514,Brennan Bernardino,reliever,0.1,1,3.0,1.0,0,0,0,0,0
+824313,2026-09-01,home,Colorado Rockies,688642,Zach Agnos,reliever,1.0,3,17.0,4.0,1.0,0,0,1.0,1.0
+824313,2026-09-01,home,Colorado Rockies,677955,Jaden Hill,reliever,1.0,3,17.0,4.0,1.0,1.0,1.0,0,1.0
+824313,2026-09-01,home,Colorado Rockies,675848,Juan Mejia,reliever,1.0,3,16.0,5.0,1.0,0,0,0,1.0
+824313,2026-09-01,home,Colorado Rockies,605447,Jordan Romano,reliever,1.0,3,17.0,3.0,0,0,0,0,2.0
+823984,2026-09-01,away,New York Yankees,543037,Gerrit Cole,starter,5.1,16,90.0,24.0,8.0,3.0,3.0,1.0,5.0
+823984,2026-09-01,away,New York Yankees,687396,Brent Headrick,reliever,1.1,4,14.0,4.0,0,0,0,0,1.0
+823984,2026-09-01,away,New York Yankees,621112,Paul Blackburn,reliever,1.1,4,20.0,4.0,1.0,0,0,0,2.0
+823984,2026-09-01,away,New York Yankees,670167,John Schreiber,reliever,1.0,3,21.0,3.0,0,0,0,0,0
+823984,2026-09-01,home,Los Angeles Angels,680570,Grayson Rodriguez,starter,6.0,18,102.0,26.0,7.0,4.0,4.0,2.0,7.0
+823984,2026-09-01,home,Los Angeles Angels,642048,Tayler Saucedo,reliever,1.0,3,16.0,4.0,1.0,0,0,0,1.0
+823984,2026-09-01,home,Los Angeles Angels,696519,Samy Natera Jr.,reliever,0.2,2,24.0,6.0,3.0,2.0,2.0,1.0,1.0
+823984,2026-09-01,home,Los Angeles Angels,671111,Sammy Peralta,reliever,1.1,4,25.0,8.0,3.0,1.0,1.0,1.0,3.0
+825038,2026-09-01,away,Philadelphia Phillies,666200,Jesús Luzardo,starter,6.2,20,99.0,27.0,6.0,1.0,1.0,1.0,6.0
+825038,2026-09-01,away,Philadelphia Phillies,680742,Jonathan Bowlan,reliever,1.1,4,21.0,4.0,0,0,0,0,2.0
+825038,2026-09-01,away,Philadelphia Phillies,663767,Chase Shugart,reliever,1.0,3,12.0,3.0,0,0,0,0,0
+825038,2026-09-01,home,Arizona Diamondbacks,593958,Eduardo Rodriguez,starter,5.0,15,103.0,25.0,8.0,3.0,3.0,3.0,3.0
+825038,2026-09-01,home,Arizona Diamondbacks,664199,Taylor Clarke,reliever,1.0,3,10.0,3.0,0,0,0,0,2.0
+825038,2026-09-01,home,Arizona Diamondbacks,679885,Justin Martinez,reliever,1.0,3,21.0,5.0,1.0,0,0,1.0,1.0
+825038,2026-09-01,home,Arizona Diamondbacks,672629,Gerardo Carrillo,reliever,0.0,0,13.0,3.0,2.0,3.0,3.0,1.0,0
+825038,2026-09-01,home,Arizona Diamondbacks,571882,Derek Law,reliever,1.0,3,17.0,4.0,1.0,0,0,0,0
+825038,2026-09-01,home,Arizona Diamondbacks,686796,Blake Walston,reliever,1.0,3,14.0,4.0,1.0,1.0,1.0,0,0
+823908,2026-09-01,away,St. Louis Cardinals,700241,Michael McGreevy,starter,5.0,15,90.0,22.0,5.0,4.0,4.0,2.0,4.0
+823908,2026-09-01,away,St. Louis Cardinals,703725,Luis Gastelum,reliever,1.0,3,23.0,5.0,1.0,0,0,1.0,0
+823908,2026-09-01,away,St. Louis Cardinals,677865,Justin Bruihl,reliever,0.1,1,11.0,3.0,0,1.0,1.0,1.0,1.0
+823908,2026-09-01,away,St. Louis Cardinals,681676,Ryan Fernandez,reliever,1.2,5,25.0,7.0,1.0,0,0,1.0,1.0
+823908,2026-09-01,away,St. Louis Cardinals,685464,Cade Winquest,reliever,1.0,3,25.0,7.0,2.0,3.0,1.0,1.0,1.0
+823908,2026-09-01,home,Los Angeles Dodgers,641778,Eric Lauer,starter,3.0,9,63.0,18.0,8.0,7.0,7.0,1.0,2.0
+823908,2026-09-01,home,Los Angeles Dodgers,678020,Seth Halvorsen,reliever,1.0,3,21.0,5.0,1.0,2.0,2.0,1.0,1.0
+823908,2026-09-01,home,Los Angeles Dodgers,681911,Alex Vesia,reliever,1.0,3,13.0,4.0,1.0,1.0,1.0,0,1.0
+823908,2026-09-01,home,Los Angeles Dodgers,669165,Kyle Hurt,reliever,1.0,3,18.0,3.0,0,0,0,0,2.0
+823908,2026-09-01,home,Los Angeles Dodgers,680736,Justin Wrobleski,reliever,2.0,6,36.0,10.0,2.0,3.0,2.0,1.0,4.0
+823908,2026-09-01,home,Los Angeles Dodgers,571771,Enrique Hernández,reliever,1.0,3,8.0,4.0,1.0,0,0,0,0
+824470,2026-09-02,away,San Diego Padres,663554,Casey Mize,starter,4.0,12,85.0,18.0,5.0,4.0,4.0,1.0,4.0
+824470,2026-09-02,away,San Diego Padres,593974,Wandy Peralta,reliever,1.1,4,20.0,5.0,1.0,1.0,1.0,0,1.0
+824470,2026-09-02,away,San Diego Padres,688158,David Morgan,reliever,0.1,1,16.0,3.0,1.0,0,0,1.0,0
+824470,2026-09-02,away,San Diego Padres,606996,Kyle Hart,reliever,0.2,2,17.0,3.0,1.0,1.0,1.0,0,0
+824470,2026-09-02,away,San Diego Padres,666745,Jhony Brito,reliever,1.2,5,23.0,8.0,2.0,1.0,1.0,0,2.0
+824470,2026-09-02,home,Cincinnati Reds,682227,Brandon Williamson,starter,5.1,16,87.0,24.0,7.0,3.0,3.0,2.0,5.0
+824470,2026-09-02,home,Cincinnati Reds,572955,Pierce Johnson,reliever,0.2,2,9.0,2.0,0,0,0,0,1.0
+824470,2026-09-02,home,Cincinnati Reds,622088,Tejay Antone,reliever,1.0,3,20.0,3.0,0,0,0,1.0,2.0
+824470,2026-09-02,home,Cincinnati Reds,663574,Tony Santillan,reliever,1.0,3,16.0,4.0,0,0,0,1.0,1.0
+824470,2026-09-02,home,Cincinnati Reds,641941,Emilio Pagán,reliever,1.0,3,13.0,3.0,0,0,0,0,1.0
+822686,2026-09-02,away,Atlanta Braves,656550,Grant Holmes,starter,3.0,9,26.0,9.0,0,0,0,0,1.0
+822686,2026-09-02,away,Atlanta Braves,689266,Dylan Dodd,reliever,1.0,3,14.0,4.0,0,0,0,1.0,1.0
+822686,2026-09-02,away,Atlanta Braves,622694,Elieser Hernández,reliever,3.0,9,44.0,11.0,1.0,0,0,1.0,1.0
+822686,2026-09-02,away,Atlanta Braves,800311,Didier Fuentes,reliever,1.0,3,17.0,4.0,1.0,0,0,0,2.0
+822686,2026-09-02,away,Atlanta Braves,682989,Victor Mederos,reliever,1.0,3,11.0,3.0,0,0,0,0,1.0
+822686,2026-09-02,home,Washington Nationals,695418,Brad Lord,starter,3.1,10,55.0,14.0,2.0,0,0,1.0,6.0
+822686,2026-09-02,home,Washington Nationals,683000,Riley Cornelio,reliever,2.2,8,47.0,11.0,3.0,3.0,3.0,1.0,3.0
+822686,2026-09-02,home,Washington Nationals,668820,Max Kranick,reliever,1.1,4,49.0,11.0,4.0,5.0,5.0,3.0,1.0
+822686,2026-09-02,home,Washington Nationals,663362,Matt Waldron,reliever,0.2,2,5.0,2.0,0,0,0,0,1.0
+822686,2026-09-02,home,Washington Nationals,677588,José Tena,reliever,1.0,3,11.0,5.0,2.0,1.0,1.0,1.0,0
+822851,2026-09-02,away,Athletics,682052,Jacob Lopez,starter,6.0,18,102.0,25.0,6.0,2.0,2.0,2.0,7.0
+822851,2026-09-02,away,Athletics,664129,Geoff Hartlieb,reliever,2.0,6,26.0,7.0,2.0,0,0,0,1.0
+822851,2026-09-02,away,Athletics,663687,Hogan Harris,reliever,1.0,3,17.0,3.0,0,0,0,0,2.0
+822851,2026-09-02,home,Texas Rangers,674003,Cody Bradford,starter,4.0,12,86.0,20.0,7.0,5.0,5.0,1.0,3.0
+822851,2026-09-02,home,Texas Rangers,695239,Robby Ahlstrom,reliever,1.0,3,22.0,6.0,3.0,3.0,3.0,0,1.0
+822851,2026-09-02,home,Texas Rangers,656756,Jordan Montgomery,reliever,3.0,9,52.0,14.0,3.0,1.0,1.0,2.0,3.0
+822851,2026-09-02,home,Texas Rangers,687239,Ben Peoples,reliever,1.0,3,23.0,6.0,1.0,0,0,2.0,1.0
+824312,2026-09-02,away,Baltimore Orioles,669432,Trevor Rogers,starter,6.2,20,94.0,24.0,6.0,2.0,2.0,0,11.0
+824312,2026-09-02,away,Baltimore Orioles,670329,Rico Garcia,reliever,1.0,3,11.0,4.0,1.0,0,0,0,1.0
+824312,2026-09-02,away,Baltimore Orioles,666974,Yennier Cano,reliever,0.1,1,3.0,1.0,0,0,0,0,0
+824312,2026-09-02,away,Baltimore Orioles,552640,Andrew Kittredge,reliever,0.2,2,13.0,4.0,2.0,1.0,1.0,0,1.0
+824312,2026-09-02,away,Baltimore Orioles,677020,Josh Walker,reliever,0.2,2,9.0,3.0,0,0,0,1.0,1.0
+824312,2026-09-02,away,Baltimore Orioles,695380,Alex Hoppe,reliever,0.2,2,12.0,3.0,0,0,0,1.0,1.0
+824312,2026-09-02,away,Baltimore Orioles,664991,Grant Wolfram,reliever,0.2,2,23.0,5.0,3.0,3.0,2.0,0,2.0
+824312,2026-09-02,home,Colorado Rockies,608372,Tomoyuki Sugano,starter,6.0,18,90.0,26.0,6.0,3.0,3.0,1.0,4.0
+824312,2026-09-02,home,Colorado Rockies,675848,Juan Mejia,reliever,0.2,2,18.0,4.0,1.0,0,0,1.0,0
+824312,2026-09-02,home,Colorado Rockies,623474,Jimmy Herget,reliever,1.1,4,19.0,4.0,0,0,0,1.0,1.0
+824312,2026-09-02,home,Colorado Rockies,677955,Jaden Hill,reliever,1.0,3,13.0,3.0,0,0,0,0,0
+824312,2026-09-02,home,Colorado Rockies,693308,Nick Frasso,reliever,1.0,3,9.0,3.0,0,0,0,0,1.0
+824312,2026-09-02,home,Colorado Rockies,680604,Blas Castaño,reliever,1.0,3,25.0,6.0,3.0,2.0,1.0,0,1.0
+825037,2026-09-02,away,Philadelphia Phillies,691725,Andrew Painter,starter,7.0,21,93.0,24.0,2.0,0,0,0,6.0
+825037,2026-09-02,away,Philadelphia Phillies,680742,Jonathan Bowlan,reliever,1.0,3,12.0,4.0,1.0,1.0,1.0,0,2.0
+825037,2026-09-02,home,Arizona Diamondbacks,664199,Taylor Clarke,starter,1.2,5,20.0,6.0,0,0,0,1.0,1.0
+825037,2026-09-02,home,Arizona Diamondbacks,571882,Derek Law,reliever,1.1,4,19.0,5.0,1.0,0,0,0,2.0
+825037,2026-09-02,home,Arizona Diamondbacks,656464,Kevin Ginkel,reliever,1.0,3,14.0,3.0,0,0,0,0,1.0
+825037,2026-09-02,home,Arizona Diamondbacks,703615,Jose Cabrera,reliever,2.0,6,24.0,6.0,1.0,0,0,0,1.0
+825037,2026-09-02,home,Arizona Diamondbacks,805299,Brandyn Garcia,reliever,1.0,3,14.0,4.0,1.0,0,0,0,2.0
+825037,2026-09-02,home,Arizona Diamondbacks,642528,Jonathan Loáisiga,reliever,1.0,3,15.0,3.0,0,0,0,0,0
+825037,2026-09-02,home,Arizona Diamondbacks,666661,Juan Morillo,reliever,1.0,3,15.0,4.0,0,0,0,1.0,2.0
+824717,2026-09-02,away,Seattle Mariners,682243,Bryce Miller,starter,4.2,14,65.0,21.0,7.0,1.0,1.0,1.0,3.0
+824717,2026-09-02,away,Seattle Mariners,678606,José A. Ferrer,reliever,0.1,1,8.0,2.0,1.0,0,0,0,0
+824717,2026-09-02,away,Seattle Mariners,621074,Michael Rucker,reliever,2.0,6,36.0,9.0,4.0,2.0,2.0,0,1.0
+824717,2026-09-02,away,Seattle Mariners,622554,Seranthony Domínguez,reliever,1.0,3,7.0,3.0,0,0,0,0,0
+824717,2026-09-02,away,Seattle Mariners,681867,Cooper Criswell,reliever,1.0,3,9.0,3.0,0,0,0,0,1.0
+824717,2026-09-02,home,Boston Red Sox,663776,Patrick Sandoval,starter,4.0,12,80.0,20.0,5.0,4.0,3.0,3.0,2.0
+824717,2026-09-02,home,Boston Red Sox,678394,Brayan Bello,reliever,3.0,9,69.0,17.0,7.0,4.0,4.0,2.0,0
+824717,2026-09-02,home,Boston Red Sox,670103,Raymond Burgos,reliever,2.0,6,19.0,6.0,0,0,0,0,3.0
+823339,2026-09-02,away,San Francisco Giants,694738,Landen Roupp,starter,5.0,15,75.0,19.0,2.0,1.0,1.0,2.0,4.0
+823339,2026-09-02,away,San Francisco Giants,665665,Reiver Sanmartin,reliever,0.2,2,20.0,4.0,1.0,0,0,1.0,0
+823339,2026-09-02,away,San Francisco Giants,676254,Ryan Walker,reliever,0.2,2,18.0,4.0,1.0,1.0,1.0,1.0,1.0
+823339,2026-09-02,away,San Francisco Giants,693313,Carson Seymour,reliever,1.2,5,15.0,7.0,2.0,1.0,1.0,0,1.0
+823339,2026-09-02,away,San Francisco Giants,671345,Jason Foley,reliever,1.0,3,11.0,5.0,1.0,0,0,1.0,0
+823339,2026-09-02,away,San Francisco Giants,681916,Dylan Smith,reliever,1.0,3,18.0,4.0,1.0,1.0,0,0,2.0
+823339,2026-09-02,home,Pittsburgh Pirates,696149,Bubba Chandler,starter,5.0,15,88.0,23.0,5.0,3.0,3.0,3.0,4.0
+823339,2026-09-02,home,Pittsburgh Pirates,685126,Brandon Eisert,reliever,1.0,3,14.0,4.0,1.0,0,0,0,0
+823339,2026-09-02,home,Pittsburgh Pirates,669387,Carmen Mlodzinski,reliever,3.0,9,30.0,9.0,0,0,0,0,2.0
+823339,2026-09-02,home,Pittsburgh Pirates,666808,Camilo Doval,reliever,1.0,3,16.0,5.0,1.0,2.0,1.0,1.0,0
+822931,2026-09-02,away,New York Mets,663795,Justin Hagenman,starter,3.0,9,46.0,12.0,2.0,1.0,1.0,1.0,2.0
+822931,2026-09-02,away,New York Mets,606965,Chris Devenski,reliever,0.2,2,17.0,6.0,4.0,3.0,3.0,0,0
+822931,2026-09-02,away,New York Mets,673380,Dedniel Núñez,reliever,1.1,4,11.0,4.0,0,0,0,0,1.0
+822931,2026-09-02,away,New York Mets,681320,Nate Lavender,reliever,1.2,5,30.0,7.0,1.0,0,0,1.0,2.0
+822931,2026-09-02,away,New York Mets,650960,Daniel Duarte,reliever,1.1,4,18.0,4.0,0,0,0,0,1.0
+822931,2026-09-02,away,New York Mets,702752,Jonathan Pintaro,reliever,1.0,3,11.0,3.0,0,0,0,0,1.0
+822931,2026-09-02,home,Tampa Bay Rays,643377,Griffin Jax,starter,2.2,8,63.0,17.0,7.0,6.0,3.0,2.0,1.0
+822931,2026-09-02,home,Tampa Bay Rays,571927,Steven Matz,reliever,2.1,7,30.0,8.0,0,0,0,1.0,1.0
+822931,2026-09-02,home,Tampa Bay Rays,592155,Cam Booser,reliever,1.1,4,26.0,7.0,3.0,2.0,2.0,0,1.0
+822931,2026-09-02,home,Tampa Bay Rays,655889,Manuel Rodríguez,reliever,1.2,5,33.0,9.0,3.0,2.0,2.0,0,3.0
+822931,2026-09-02,home,Tampa Bay Rays,641329,Bryan Baker,reliever,1.0,3,19.0,5.0,1.0,0,0,1.0,0
+824390,2026-09-02,away,Toronto Blue Jays,656302,Dylan Cease,starter,6.0,18,83.0,21.0,4.0,0,0,0,4.0
+824390,2026-09-02,away,Toronto Blue Jays,623149,Paul Sewald,reliever,1.0,3,18.0,4.0,0,0,0,0,1.0
+824390,2026-09-02,away,Toronto Blue Jays,663893,Brendon Little,reliever,1.0,3,15.0,3.0,0,0,0,0,2.0
+824390,2026-09-02,away,Toronto Blue Jays,680755,Braydon Fisher,reliever,1.0,3,27.0,5.0,2.0,0,0,0,2.0
+824390,2026-09-02,home,Cleveland Guardians,676282,Joey Cantillo,starter,5.1,16,102.0,28.0,9.0,9.0,4.0,2.0,6.0
+824390,2026-09-02,home,Cleveland Guardians,672578,Carlos Hernández,reliever,2.0,6,25.0,8.0,3.0,1.0,1.0,0,2.0
+824390,2026-09-02,home,Cleveland Guardians,595978,Austin Hedges,reliever,1.2,5,25.0,8.0,3.0,1.0,1.0,0,0
+823660,2026-09-02,away,Detroit Tigers,623454,Drew Anderson,starter,5.2,17,90.0,24.0,3.0,2.0,1.0,2.0,5.0
+823660,2026-09-02,away,Detroit Tigers,641755,Tyler Kinley,reliever,1.1,4,17.0,4.0,0,0,0,0,2.0
+823660,2026-09-02,away,Detroit Tigers,805427,Drew Sommers,reliever,0.1,1,17.0,4.0,2.0,3.0,3.0,0,1.0
+823660,2026-09-02,away,Detroit Tigers,445276,Kenley Jansen,reliever,0.1,1,17.0,3.0,1.0,0,0,1.0,1.0
+823660,2026-09-02,away,Detroit Tigers,663947,Tyler Holton,reliever,1.0,3,16.0,4.0,1.0,0,0,0,1.0
+823660,2026-09-02,away,Detroit Tigers,621097,Jacob Waguespack,reliever,1.1,4,15.0,5.0,0,0,0,1.0,1.0
+823660,2026-09-02,away,Detroit Tigers,640448,Kyle Finnegan,reliever,2.0,6,39.0,8.0,2.0,1.0,0,0,3.0
+823660,2026-09-02,home,Minnesota Twins,665152,Dean Kremer,starter,4.0,12,79.0,20.0,6.0,4.0,4.0,2.0,5.0
+823660,2026-09-02,home,Minnesota Twins,681892,Kody Funderburk,reliever,1.2,5,29.0,8.0,3.0,1.0,1.0,0,2.0
+823660,2026-09-02,home,Minnesota Twins,701519,Travis Adams,reliever,0.1,1,3.0,1.0,0,0,0,0,0
+823660,2026-09-02,home,Minnesota Twins,656546,Jeff Hoffman,reliever,1.0,3,12.0,3.0,0,0,0,0,3.0
+823660,2026-09-02,home,Minnesota Twins,621345,A.J. Minter,reliever,1.1,4,17.0,5.0,1.0,0,0,0,1.0
+823660,2026-09-02,home,Minnesota Twins,672782,Yoendrys Gómez,reliever,1.2,5,15.0,5.0,0,0,0,1.0,1.0
+823660,2026-09-02,home,Minnesota Twins,573124,Taylor Rogers,reliever,0.2,2,7.0,4.0,1.0,1.0,0,1.0,1.0
+823660,2026-09-02,home,Minnesota Twins,667297,Tommy Nance,reliever,1.1,4,33.0,9.0,3.0,5.0,4.0,1.0,1.0
+824068,2026-09-02,away,Miami Marlins,691587,Eury Pérez,starter,4.2,14,102.0,26.0,9.0,6.0,6.0,3.0,3.0
+824068,2026-09-02,away,Miami Marlins,806188,Cade Gibson,reliever,0.1,1,4.0,1.0,0,0,0,0,1.0
+824068,2026-09-02,away,Miami Marlins,694795,Josh Ekness,reliever,1.0,3,26.0,6.0,0,0,0,3.0,1.0
+824068,2026-09-02,away,Miami Marlins,667652,Jack Ralston,reliever,1.0,3,8.0,3.0,0,0,0,0,0
+824068,2026-09-02,away,Miami Marlins,656848,Michael Petersen,reliever,1.0,3,9.0,3.0,0,0,0,0,1.0
+824068,2026-09-02,away,Miami Marlins,676534,Calvin Faucher,reliever,1.0,3,6.0,3.0,0,0,0,0,0
+824068,2026-09-02,home,Kansas City Royals,702070,Noah Cameron,starter,5.0,15,86.0,22.0,5.0,4.0,4.0,1.0,7.0
+824068,2026-09-02,home,Kansas City Royals,621016,Jose Cuas,reliever,0.1,1,22.0,4.0,2.0,3.0,2.0,1.0,0
+824068,2026-09-02,home,Kansas City Royals,671162,Connor Thomas,reliever,0.2,2,14.0,3.0,1.0,0,0,0,1.0
+824068,2026-09-02,home,Kansas City Royals,518886,Craig Kimbrel,reliever,1.0,3,9.0,4.0,1.0,0,0,0,1.0
+824068,2026-09-02,home,Kansas City Royals,663878,Nate Pearson,reliever,1.0,3,14.0,5.0,2.0,0,0,0,1.0
+824068,2026-09-02,home,Kansas City Royals,656638,Alex Lange,reliever,1.0,3,21.0,5.0,2.0,2.0,2.0,0,1.0
+824634,2026-09-02,away,Milwaukee Brewers,694819,Jacob Misiorowski,starter,4.0,12,92.0,21.0,5.0,5.0,5.0,4.0,5.0
+824634,2026-09-02,away,Milwaukee Brewers,668941,JoJo Romero,reliever,1.0,3,11.0,3.0,0,0,0,0,1.0
+824634,2026-09-02,away,Milwaukee Brewers,622608,Antonio Senzatela,reliever,1.0,3,12.0,4.0,0,0,0,1.0,0
+824634,2026-09-02,away,Milwaukee Brewers,682842,Abner Uribe,reliever,1.0,3,12.0,3.0,0,0,0,0,1.0
+824634,2026-09-02,away,Milwaukee Brewers,676879,Aaron Ashby,reliever,1.0,3,11.0,3.0,0,0,0,0,0
+824634,2026-09-02,away,Milwaukee Brewers,656730,Trevor Megill,reliever,1.0,3,12.0,4.0,1.0,0,0,0,2.0
+824634,2026-09-02,home,Chicago Cubs,656849,David Peterson,starter,3.2,11,96.0,23.0,7.0,6.0,6.0,4.0,4.0
+824634,2026-09-02,home,Chicago Cubs,663423,Trent Thornton,reliever,0.2,2,23.0,5.0,2.0,0,0,1.0,2.0
+824634,2026-09-02,home,Chicago Cubs,669020,Ryan Rolison,reliever,1.2,5,19.0,5.0,0,0,0,0,1.0
+824634,2026-09-02,home,Chicago Cubs,694037,Daniel Palencia,reliever,1.0,3,13.0,4.0,2.0,1.0,1.0,0,0
+824634,2026-09-02,home,Chicago Cubs,573204,Caleb Thielbar,reliever,1.0,3,11.0,3.0,0,0,0,0,2.0
+824634,2026-09-02,home,Chicago Cubs,657097,Jacob Webb,reliever,0.1,1,7.0,3.0,1.0,2.0,2.0,0,0
+824634,2026-09-02,home,Chicago Cubs,607067,Colin Rea,reliever,0.2,2,8.0,3.0,2.0,0,0,0,0
+824147,2026-09-02,away,Chicago White Sox,663436,Davis Martin,starter,5.2,17,80.0,23.0,5.0,0,0,1.0,3.0
+824147,2026-09-02,away,Chicago White Sox,656794,Sean Newcomb,reliever,2.0,6,41.0,10.0,2.0,2.0,2.0,1.0,2.0
+824147,2026-09-02,away,Chicago White Sox,699823,Tyler Davis,reliever,0.1,1,7.0,2.0,0,0,0,1.0,0
+824147,2026-09-02,home,Houston Astros,669713,Hayden Wesneski,starter,7.0,21,90.0,25.0,1.0,0,0,2.0,5.0
+824147,2026-09-02,home,Houston Astros,805123,AJ Blubaugh,reliever,1.0,3,15.0,5.0,2.0,0,0,1.0,0
+824147,2026-09-02,home,Houston Astros,623352,Josh Hader,reliever,1.0,3,14.0,3.0,0,0,0,0,1.0
+823983,2026-09-02,away,New York Yankees,693645,Cam Schlittler,starter,8.0,24,99.0,26.0,2.0,1.0,1.0,0,9.0
+823983,2026-09-02,away,New York Yankees,670280,David Bednar,reliever,1.0,3,20.0,4.0,1.0,0,0,0,3.0
+823983,2026-09-02,away,New York Yankees,605242,Michael Fulmer,reliever,1.0,3,17.0,4.0,1.0,2.0,1.0,0,1.0
+823983,2026-09-02,home,Los Angeles Angels,672282,Reid Detmers,starter,7.0,21,99.0,25.0,6.0,1.0,1.0,0,8.0
+823983,2026-09-02,home,Los Angeles Angels,670245,Ryan Watson,reliever,1.0,3,18.0,4.0,1.0,0,0,0,1.0
+823983,2026-09-02,home,Los Angeles Angels,690829,Ben Joyce,reliever,1.0,3,13.0,3.0,0,0,0,0,1.0
+823983,2026-09-02,home,Los Angeles Angels,684665,Luke Murphy,reliever,0.2,2,29.0,8.0,5.0,5.0,4.0,1.0,1.0
+823983,2026-09-02,home,Los Angeles Angels,676620,Blake Weiman,reliever,0.1,1,1.0,1.0,0,0,0,0,0
+823906,2026-09-02,away,St. Louis Cardinals,802408,Brycen Mautz,starter,1.0,3,36.0,10.0,2.0,3.0,3.0,3.0,0
+823906,2026-09-02,away,St. Louis Cardinals,681676,Ryan Fernandez,reliever,1.0,3,26.0,4.0,0,0,0,1.0,2.0
+823906,2026-09-02,away,St. Louis Cardinals,700669,Gordon Graceffo,reliever,3.0,9,48.0,13.0,3.0,0,0,1.0,6.0
+823906,2026-09-02,away,St. Louis Cardinals,666277,George Soriano,reliever,1.0,3,20.0,6.0,3.0,2.0,2.0,0,1.0
+823906,2026-09-02,away,St. Louis Cardinals,592773,Ryne Stanek,reliever,1.0,3,15.0,5.0,2.0,0,0,0,1.0
+823906,2026-09-02,away,St. Louis Cardinals,703725,Luis Gastelum,reliever,1.0,3,15.0,3.0,0,0,0,1.0,1.0
+823906,2026-09-02,away,St. Louis Cardinals,677865,Justin Bruihl,reliever,1.0,3,12.0,4.0,1.0,0,0,0,1.0
+823906,2026-09-02,away,St. Louis Cardinals,676617,Riley O'Brien,reliever,1.0,3,17.0,3.0,0,1.0,0,0,1.0
+823906,2026-09-02,home,Los Angeles Dodgers,808967,Yoshinobu Yamamoto,starter,7.0,21,93.0,27.0,5.0,4.0,4.0,2.0,8.0
+823906,2026-09-02,home,Los Angeles Dodgers,656945,Tanner Scott,reliever,1.0,3,16.0,4.0,1.0,1.0,1.0,0,0
+823906,2026-09-02,home,Los Angeles Dodgers,676263,Jack Dreyer,reliever,1.0,3,14.0,3.0,0,0,0,0,0
+823906,2026-09-02,home,Los Angeles Dodgers,592779,Brock Stewart,reliever,1.0,3,15.0,6.0,3.0,3.0,2.0,0,1.0

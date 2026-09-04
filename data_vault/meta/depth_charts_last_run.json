@@ -1,0 +1,30 @@
+{
+  "dataset": "depth_charts",
+  "run_at_utc": "2026-09-01T21:42:34.204473+00:00",
+  "records": [
+    {
+      "status": "downloaded",
+      "bytes": 482923,
+      "sha256": "2b5e72fa37f6a498238da30d619cd5d2fe883ffbfdbaaf637301893ad6c22097",
+      "season": 2024,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/depth_charts/depth_charts_2024.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/depth_charts/depth_charts_2024.parquet"
+    },
+    {
+      "status": "downloaded",
+      "bytes": 2584724,
+      "sha256": "14f74185b3c2c48df234ced284ba3596bda3333d0b2a8df40841f68cd34539fa",
+      "season": 2025,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/depth_charts/depth_charts_2025.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/depth_charts/depth_charts_2025.parquet"
+    },
+    {
+      "status": "downloaded",
+      "bytes": 2260894,
+      "sha256": "37d17237d7e76907078698a19960ee255343f43918a4b29a8191fa51663a9aab",
+      "season": 2026,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/depth_charts/depth_charts_2026.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/depth_charts/depth_charts_2026.parquet"
+    }
+  ]
+}

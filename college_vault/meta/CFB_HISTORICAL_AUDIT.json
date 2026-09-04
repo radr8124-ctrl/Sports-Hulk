@@ -1,0 +1,22 @@
+{
+  "historical_games": {
+    "status": 401,
+    "response": "{\"message\":\"Unauthorized\"}"
+  },
+  "core_ratings": {
+    "status": 401,
+    "response": "{\"message\":\"Unauthorized\"}"
+  },
+  "srs_ratings": {
+    "status": 401,
+    "response": "{\"message\":\"Unauthorized\"}"
+  },
+  "elo_ratings": {
+    "status": 401,
+    "response": "{\"message\":\"Unauthorized\"}"
+  },
+  "team_box_scores": {
+    "status": 401,
+    "response": "{\"message\":\"Unauthorized\"}"
+  }
+}

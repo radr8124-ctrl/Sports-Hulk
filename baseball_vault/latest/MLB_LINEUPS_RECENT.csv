@@ -1,0 +1,757 @@
+gamePk,game_date,side,team,batting_order,player_id,player,position
+824911,2026-08-31,away,San Francisco Giants,1,806367,Turner Hill,LF
+824911,2026-08-31,away,San Francisco Giants,2,646240,Rafael Devers,DH
+824911,2026-08-31,away,San Francisco Giants,3,805811,Bryce Eldridge,1B
+824911,2026-08-31,away,San Francisco Giants,4,813841,Jonah Cox,CF
+824911,2026-08-31,away,San Francisco Giants,5,808982,Jung Hoo Lee,RF
+824911,2026-08-31,away,San Francisco Giants,6,678545,Osleivis Basabe,2B
+824911,2026-08-31,away,San Francisco Giants,7,668800,Andrew Knizner,C
+824911,2026-08-31,away,San Francisco Giants,8,694376,Shay Whitcomb,3B
+824911,2026-08-31,away,San Francisco Giants,9,683766,Christian Koss,SS
+824911,2026-08-31,home,Atlanta Braves,1,686948,Drake Baldwin,DH
+824911,2026-08-31,home,Atlanta Braves,2,660670,Ronald Acuña Jr.,RF
+824911,2026-08-31,home,Atlanta Braves,3,621566,Matt Olson,1B
+824911,2026-08-31,home,Atlanta Braves,4,643289,Mauricio Dubón,SS
+824911,2026-08-31,home,Atlanta Braves,5,671739,Michael Harris II,CF
+824911,2026-08-31,home,Atlanta Braves,6,645277,Ozzie Albies,2B
+824911,2026-08-31,home,Atlanta Braves,7,669221,Sean Murphy,C
+824911,2026-08-31,home,Atlanta Braves,8,663586,Austin Riley,3B
+824911,2026-08-31,home,Atlanta Braves,9,573262,Mike Yastrzemski,LF
+824473,2026-08-31,away,San Diego Padres,1,665487,Fernando Tatis Jr.,RF
+824473,2026-08-31,away,San Diego Padres,2,630105,Jake Cronenworth,2B
+824473,2026-08-31,away,San Diego Padres,3,592518,Manny Machado,3B
+824473,2026-08-31,away,San Diego Padres,4,664034,Ty France,1B
+824473,2026-08-31,away,San Diego Padres,5,701538,Jackson Merrill,CF
+824473,2026-08-31,away,San Diego Padres,6,593428,Xander Bogaerts,DH
+824473,2026-08-31,away,San Diego Padres,7,687957,Dustin Harris,LF
+824473,2026-08-31,away,San Diego Padres,8,669134,Luis Campusano,C
+824473,2026-08-31,away,San Diego Padres,9,823550,Sung-Mun Song,SS
+824473,2026-08-31,home,Cincinnati Reds,1,699302,Héctor Rodríguez,RF
+824473,2026-08-31,home,Cincinnati Reds,2,682829,Elly De La Cruz,DH
+824473,2026-08-31,home,Cincinnati Reds,3,701398,Sal Stewart,1B
+824473,2026-08-31,home,Cincinnati Reds,4,668709,JJ Bleday,LF
+824473,2026-08-31,home,Cincinnati Reds,5,663886,Tyler Stephenson,C
+824473,2026-08-31,home,Cincinnati Reds,6,553993,Eugenio Suárez,3B
+824473,2026-08-31,home,Cincinnati Reds,7,680574,Matt McLain,SS
+824473,2026-08-31,home,Cincinnati Reds,8,667472,Dane Myers,PH
+824473,2026-08-31,home,Cincinnati Reds,9,695490,Edwin Arroyo,2B
+822932,2026-08-31,away,New York Mets,1,596019,Francisco Lindor,SS
+822932,2026-08-31,away,New York Mets,2,666182,Bo Bichette,3B
+822932,2026-08-31,away,New York Mets,3,701807,Carson Benge,RF
+822932,2026-08-31,away,New York Mets,4,668901,Mark Vientos,DH
+822932,2026-08-31,away,New York Mets,5,676724,Jared Young,1B
+822932,2026-08-31,away,New York Mets,6,665506,Cristian Pache,LF
+822932,2026-08-31,away,New York Mets,7,543760,Marcus Semien,2B
+822932,2026-08-31,away,New York Mets,8,805999,A.J. Ewing,CF
+822932,2026-08-31,away,New York Mets,9,620443,Luis Torrens,C
+822932,2026-08-31,home,Tampa Bay Rays,1,650490,Yandy Díaz,DH
+822932,2026-08-31,home,Tampa Bay Rays,2,666018,Jonathan Aranda,1B
+822932,2026-08-31,home,Tampa Bay Rays,3,691406,Junior Caminero,3B
+822932,2026-08-31,home,Tampa Bay Rays,4,700652,Kenny Piper,C
+822932,2026-08-31,home,Tampa Bay Rays,5,802415,Chandler Simpson,LF
+822932,2026-08-31,home,Tampa Bay Rays,6,656775,Cedric Mullins,CF
+822932,2026-08-31,home,Tampa Bay Rays,7,676356,Jonny DeLuca,RF
+822932,2026-08-31,home,Tampa Bay Rays,8,680700,Richie Palacios,2B
+822932,2026-08-31,home,Tampa Bay Rays,9,670764,Taylor Walls,SS
+824719,2026-08-31,away,Seattle Mariners,1,668227,Randy Arozarena,LF
+824719,2026-08-31,away,Seattle Mariners,2,801126,Brock Rodden,DH
+824719,2026-08-31,away,Seattle Mariners,3,677594,Julio Rodríguez,CF
+824719,2026-08-31,away,Seattle Mariners,4,663728,Cal Raleigh,C
+824719,2026-08-31,away,Seattle Mariners,5,647304,Josh Naylor,1B
+824719,2026-08-31,away,Seattle Mariners,6,645302,Victor Robles,RF
+824719,2026-08-31,away,Seattle Mariners,7,702284,Cole Young,2B
+824719,2026-08-31,away,Seattle Mariners,8,642215,Weston Wilson,3B
+824719,2026-08-31,away,Seattle Mariners,9,641487,J.P. Crawford,SS
+824719,2026-08-31,home,Boston Red Sox,1,701350,Roman Anthony,DH
+824719,2026-08-31,home,Boston Red Sox,2,681508,Mickey Gasper,1B
+824719,2026-08-31,home,Boston Red Sox,3,678882,Ceddanne Rafaela,CF
+824719,2026-08-31,home,Boston Red Sox,4,642201,Eli White,PR
+824719,2026-08-31,home,Boston Red Sox,5,686765,Nick Sogard,2B
+824719,2026-08-31,home,Boston Red Sox,6,702332,Caleb Durbin,3B
+824719,2026-08-31,home,Boston Red Sox,7,680776,Jarren Duran,LF
+824719,2026-08-31,home,Boston Red Sox,8,596115,Trevor Story,SS
+824719,2026-08-31,home,Boston Red Sox,9,657136,Connor Wong,C
+822689,2026-08-31,away,Miami Marlins,1,681715,Heriberto Hernández,LF
+822689,2026-08-31,away,Miami Marlins,2,672640,Otto Lopez,SS
+822689,2026-08-31,away,Miami Marlins,3,665052,Griffin Conine,DH
+822689,2026-08-31,away,Miami Marlins,4,691594,Javier Sanoja,2B
+822689,2026-08-31,away,Miami Marlins,5,669065,Kyle Stowers,1B
+822689,2026-08-31,away,Miami Marlins,6,677870,Leo Jiménez,3B
+822689,2026-08-31,away,Miami Marlins,7,805300,Jakob Marsee,CF
+822689,2026-08-31,away,Miami Marlins,8,665923,Esteury Ruiz,RF
+822689,2026-08-31,away,Miami Marlins,9,640459,Brian Navarreto,C
+822689,2026-08-31,home,Washington Nationals,1,695734,Daylen Lile,LF
+822689,2026-08-31,home,Washington Nationals,2,694673,Abimelec Ortiz,DH
+822689,2026-08-31,home,Washington Nationals,3,665953,Andrés Chaparro,1B
+822689,2026-08-31,home,Washington Nationals,4,660688,Keibert Ruiz,C
+822689,2026-08-31,home,Washington Nationals,5,691781,Brady House,3B
+822689,2026-08-31,home,Washington Nationals,6,677588,José Tena,2B
+822689,2026-08-31,home,Washington Nationals,7,696285,Jacob Young,CF
+822689,2026-08-31,home,Washington Nationals,8,683083,Nasim Nuñez,SS
+822689,2026-08-31,home,Washington Nationals,9,687605,Andrew Pinckney,RF
+823663,2026-08-31,away,Detroit Tigers,1,701162,Ben Malgeri,RF
+823663,2026-08-31,away,Detroit Tigers,2,690993,Colt Keith,3B
+823663,2026-08-31,away,Detroit Tigers,3,807726,John Peck,SS
+823663,2026-08-31,away,Detroit Tigers,4,693307,Dillon Dingler,C
+823663,2026-08-31,away,Detroit Tigers,5,814430,Brett Callahan,LF
+823663,2026-08-31,away,Detroit Tigers,6,656716,Zach McKinstry,P
+823663,2026-08-31,away,Detroit Tigers,7,680664,Eduardo Valencia,1B
+823663,2026-08-31,away,Detroit Tigers,8,703601,Max Clark,CF
+823663,2026-08-31,away,Detroit Tigers,9,701678,Hao-Yu Lee,2B
+823663,2026-08-31,home,Minnesota Twins,1,694224,Gabriel Gonzalez,RF
+823663,2026-08-31,home,Minnesota Twins,2,686797,Brooks Lee,3B
+823663,2026-08-31,home,Minnesota Twins,3,668952,Ryan Kreidler,2B
+823663,2026-08-31,home,Minnesota Twins,4,656577,Alex Jackson,C
+823663,2026-08-31,home,Minnesota Twins,5,605137,Josh Bell,DH
+823663,2026-08-31,home,Minnesota Twins,6,663616,Trevor Larnach,LF
+823663,2026-08-31,home,Minnesota Twins,7,668904,Royce Lewis,1B
+823663,2026-08-31,home,Minnesota Twins,8,701785,Kaelen Culpepper,SS
+823663,2026-08-31,home,Minnesota Twins,9,805805,Walker Jenkins,CF
+824635,2026-08-31,away,Milwaukee Brewers,1,668930,Brice Turang,2B
+824635,2026-08-31,away,Milwaukee Brewers,2,694192,Jackson Chourio,LF
+824635,2026-08-31,away,Milwaukee Brewers,3,683734,Andrew Vaughn,P
+824635,2026-08-31,away,Milwaukee Brewers,4,596142,Gary Sánchez,C
+824635,2026-08-31,away,Milwaukee Brewers,5,687401,Joey Ortiz,1B
+824635,2026-08-31,away,Milwaukee Brewers,6,800325,Luis Lara,CF
+824635,2026-08-31,away,Milwaukee Brewers,7,686217,Sal Frelick,RF
+824635,2026-08-31,away,Milwaukee Brewers,8,666152,David Hamilton,3B
+824635,2026-08-31,away,Milwaukee Brewers,9,806198,Cooper Pratt,SS
+824635,2026-08-31,home,Chicago Cubs,1,624424,Michael Conforto,LF
+824635,2026-08-31,home,Chicago Cubs,2,673548,Seiya Suzuki,RF
+824635,2026-08-31,home,Chicago Cubs,3,608324,Alex Bregman,3B
+824635,2026-08-31,home,Chicago Cubs,4,621438,Tyrone Taylor,CF
+824635,2026-08-31,home,Chicago Cubs,5,672356,Gabriel Arias,SS
+824635,2026-08-31,home,Chicago Cubs,6,683737,Michael Busch,1B
+824635,2026-08-31,home,Chicago Cubs,7,608348,Carson Kelly,C
+824635,2026-08-31,home,Chicago Cubs,8,665804,Miguel Amaya,DH
+824635,2026-08-31,home,Chicago Cubs,9,807713,Matt Shaw,2B
+822855,2026-08-31,away,Athletics,1,703607,Henry Bolte,CF
+822855,2026-08-31,away,Athletics,2,643446,Jeff McNeil,2B
+822855,2026-08-31,away,Athletics,3,680869,Zack Gelof,3B
+822855,2026-08-31,away,Athletics,4,671732,Lawrence Butler,RF
+822855,2026-08-31,away,Athletics,5,695720,Tommy White,1B
+822855,2026-08-31,away,Athletics,6,691777,Max Muncy,DH
+822855,2026-08-31,away,Athletics,7,666126,Carlos Cortes,LF
+822855,2026-08-31,away,Athletics,8,641680,Jonah Heim,C
+822855,2026-08-31,away,Athletics,9,687231,Darell Hernaiz,SS
+822855,2026-08-31,home,Texas Rangers,1,677649,Ezequiel Duran,SS
+822855,2026-08-31,home,Texas Rangers,2,670032,Nicky Lopez,2B
+822855,2026-08-31,home,Texas Rangers,3,694671,Wyatt Langford,LF
+822855,2026-08-31,home,Texas Rangers,4,607043,Brandon Nimmo,RF
+822855,2026-08-31,home,Texas Rangers,5,669394,Jake Burger,1B
+822855,2026-08-31,home,Texas Rangers,6,694497,Evan Carter,CF
+822855,2026-08-31,home,Texas Rangers,7,681351,Logan O'Hoppe,DH
+822855,2026-08-31,home,Texas Rangers,8,683227,Cody Freeman,3B
+822855,2026-08-31,home,Texas Rangers,9,643376,Danny Jansen,C
+824149,2026-08-31,away,Chicago White Sox,1,803011,Sam Antonacci,LF
+824149,2026-08-31,away,Chicago White Sox,2,808959,Munetaka Murakami,1B
+824149,2026-08-31,away,Chicago White Sox,3,678246,Miguel Vargas,3B
+824149,2026-08-31,away,Chicago White Sox,4,545341,Randal Grichuk,DH
+824149,2026-08-31,away,Chicago White Sox,5,695731,Braden Montgomery,RF
+824149,2026-08-31,away,Chicago White Sox,6,695657,Colson Montgomery,SS
+824149,2026-08-31,away,Chicago White Sox,7,805367,Chase Meidroth,2B
+824149,2026-08-31,away,Chicago White Sox,8,686668,Brenton Doyle,CF
+824149,2026-08-31,away,Chicago White Sox,9,668670,Jake Rogers,C
+824149,2026-08-31,home,Houston Astros,1,665161,Jeremy Peña,SS
+824149,2026-08-31,home,Houston Astros,2,670541,Yordan Alvarez,DH
+824149,2026-08-31,home,Houston Astros,3,670623,Isaac Paredes,3B
+824149,2026-08-31,home,Houston Astros,4,572233,Christian Walker,1B
+824149,2026-08-31,home,Houston Astros,5,662139,Daulton Varsho,CF
+824149,2026-08-31,home,Houston Astros,6,701358,Cam Smith,RF
+824149,2026-08-31,home,Houston Astros,7,666211,Taylor Trammell,LF
+824149,2026-08-31,home,Houston Astros,8,669397,Nick Allen,2B
+824149,2026-08-31,home,Houston Astros,9,543877,Christian Vázquez,C
+824314,2026-08-31,away,Baltimore Orioles,1,702616,Jackson Holliday,2B
+824314,2026-08-31,away,Baltimore Orioles,2,624413,Pete Alonso,1B
+824314,2026-08-31,away,Baltimore Orioles,3,683002,Gunnar Henderson,SS
+824314,2026-08-31,away,Baltimore Orioles,4,691723,Coby Mayo,DH
+824314,2026-08-31,away,Baltimore Orioles,5,687952,Christian Encarnacion-Strand,3B
+824314,2026-08-31,away,Baltimore Orioles,6,694212,Samuel Basallo,C
+824314,2026-08-31,away,Baltimore Orioles,7,677942,Blaze Alexander,LF
+824314,2026-08-31,away,Baltimore Orioles,8,681297,Colton Cowser,CF
+824314,2026-08-31,away,Baltimore Orioles,9,665750,Leody Taveras,RF
+824314,2026-08-31,home,Colorado Rockies,1,664983,Jake McCarthy,CF
+824314,2026-08-31,home,Colorado Rockies,2,681393,Connor Norby,2B
+824314,2026-08-31,home,Colorado Rockies,3,696100,Hunter Goodman,C
+824314,2026-08-31,home,Colorado Rockies,4,681198,TJ Rumfield,1B
+824314,2026-08-31,home,Colorado Rockies,5,650489,Willi Castro,3B
+824314,2026-08-31,home,Colorado Rockies,6,666160,Mickey Moniak,RF
+824314,2026-08-31,home,Colorado Rockies,7,694249,Cole Carrigg,PH
+824314,2026-08-31,home,Colorado Rockies,8,690022,Ryan Ritter,PR
+824314,2026-08-31,home,Colorado Rockies,9,691728,Zac Veen,PH
+823982,2026-08-31,away,New York Yankees,1,700250,Ben Rice,DH
+823982,2026-08-31,away,New York Yankees,2,641355,Cody Bellinger,LF
+823982,2026-08-31,away,New York Yankees,3,671277,Luis García Jr.,1B
+823982,2026-08-31,away,New York Yankees,4,642708,Amed Rosario,3B
+823982,2026-08-31,away,New York Yankees,5,663757,Trent Grisham,CF
+823982,2026-08-31,away,New York Yankees,6,665862,Jazz Chisholm Jr.,2B
+823982,2026-08-31,away,New York Yankees,7,682987,Spencer Jones,RF
+823982,2026-08-31,away,New York Yankees,8,676609,José Caballero,SS
+823982,2026-08-31,away,New York Yankees,9,669224,Austin Wells,C
+823982,2026-08-31,home,Los Angeles Angels,1,694203,Denzer Guzman,3B
+823982,2026-08-31,home,Los Angeles Angels,2,545361,Mike Trout,CF
+823982,2026-08-31,home,Los Angeles Angels,3,642350,Jose Siri,LF
+823982,2026-08-31,home,Los Angeles Angels,4,687093,Vaughn Grissom,1B
+823982,2026-08-31,home,Los Angeles Angels,5,694208,Moisés Ballesteros,DH
+823982,2026-08-31,home,Los Angeles Angels,6,695681,Christian Moore,2B
+823982,2026-08-31,home,Los Angeles Angels,7,666139,Josh Lowe,RF
+823982,2026-08-31,home,Los Angeles Angels,8,672724,Oswald Peraza,SS
+823982,2026-08-31,home,Los Angeles Angels,9,623168,Tyler Heineman,C
+825040,2026-08-31,away,Philadelphia Phillies,1,656941,Kyle Schwarber,DH
+825040,2026-08-31,away,Philadelphia Phillies,2,607208,Trea Turner,SS
+825040,2026-08-31,away,Philadelphia Phillies,3,547180,Bryce Harper,RF
+825040,2026-08-31,away,Philadelphia Phillies,4,650333,Luis Arraez,2B
+825040,2026-08-31,away,Philadelphia Phillies,5,664761,Alec Bohm,1B
+825040,2026-08-31,away,Philadelphia Phillies,6,681082,Bryson Stott,3B
+825040,2026-08-31,away,Philadelphia Phillies,7,669016,Brandon Marsh,LF
+825040,2026-08-31,away,Philadelphia Phillies,8,702222,Justin Crawford,CF
+825040,2026-08-31,away,Philadelphia Phillies,9,596117,Garrett Stubbs,C
+825040,2026-08-31,home,Arizona Diamondbacks,1,672695,Geraldo Perdomo,SS
+825040,2026-08-31,home,Arizona Diamondbacks,2,682998,Corbin Carroll,RF
+825040,2026-08-31,home,Arizona Diamondbacks,3,672515,Gabriel Moreno,C
+825040,2026-08-31,home,Arizona Diamondbacks,4,606466,Ketel Marte,DH
+825040,2026-08-31,home,Arizona Diamondbacks,5,691783,Jordan Lawlar,CF
+825040,2026-08-31,home,Arizona Diamondbacks,6,571448,Nolan Arenado,3B
+825040,2026-08-31,home,Arizona Diamondbacks,7,694374,Tim Tawa,1B
+825040,2026-08-31,home,Arizona Diamondbacks,8,545121,Ildemaro Vargas,2B
+825040,2026-08-31,home,Arizona Diamondbacks,9,814439,Ryan Waldschmidt,LF
+824472,2026-09-01,away,San Diego Padres,1,665487,Fernando Tatis Jr.,2B
+824472,2026-09-01,away,San Diego Padres,2,669392,Samad Taylor,LF
+824472,2026-09-01,away,San Diego Padres,3,592518,Manny Machado,3B
+824472,2026-09-01,away,San Diego Padres,4,664034,Ty France,1B
+824472,2026-09-01,away,San Diego Padres,5,701538,Jackson Merrill,CF
+824472,2026-09-01,away,San Diego Padres,6,593428,Xander Bogaerts,SS
+824472,2026-09-01,away,San Diego Padres,7,669134,Luis Campusano,DH
+824472,2026-09-01,away,San Diego Padres,8,823550,Sung-Mun Song,PH
+824472,2026-09-01,away,San Diego Padres,9,630105,Jake Cronenworth,PH
+824472,2026-09-01,home,Cincinnati Reds,1,699302,Héctor Rodríguez,RF
+824472,2026-09-01,home,Cincinnati Reds,2,682829,Elly De La Cruz,DH
+824472,2026-09-01,home,Cincinnati Reds,3,701398,Sal Stewart,1B
+824472,2026-09-01,home,Cincinnati Reds,4,668709,JJ Bleday,LF
+824472,2026-09-01,home,Cincinnati Reds,5,680574,Matt McLain,SS
+824472,2026-09-01,home,Cincinnati Reds,6,624431,Jose Trevino,C
+824472,2026-09-01,home,Cincinnati Reds,7,682877,Juan Brito,2B
+824472,2026-09-01,home,Cincinnati Reds,8,667472,Dane Myers,CF
+824472,2026-09-01,home,Cincinnati Reds,9,695490,Edwin Arroyo,3B
+823340,2026-09-01,away,San Francisco Giants,1,806367,Turner Hill,LF
+823340,2026-09-01,away,San Francisco Giants,2,646240,Rafael Devers,1B
+823340,2026-09-01,away,San Francisco Giants,3,805811,Bryce Eldridge,DH
+823340,2026-09-01,away,San Francisco Giants,4,813841,Jonah Cox,CF
+823340,2026-09-01,away,San Francisco Giants,5,808982,Jung Hoo Lee,RF
+823340,2026-09-01,away,San Francisco Giants,6,678545,Osleivis Basabe,3B
+823340,2026-09-01,away,San Francisco Giants,7,668800,Andrew Knizner,C
+823340,2026-09-01,away,San Francisco Giants,8,801501,Nate Furman,2B
+823340,2026-09-01,away,San Francisco Giants,9,683766,Christian Koss,SS
+823340,2026-09-01,home,Pittsburgh Pirates,1,687462,Spencer Horwitz,1B
+823340,2026-09-01,home,Pittsburgh Pirates,2,664040,Brandon Lowe,2B
+823340,2026-09-01,home,Pittsburgh Pirates,3,668804,Bryan Reynolds,RF
+823340,2026-09-01,home,Pittsburgh Pirates,4,693304,Nick Gonzales,DH
+823340,2026-09-01,home,Pittsburgh Pirates,5,665833,Oneil Cruz,CF
+823340,2026-09-01,home,Pittsburgh Pirates,6,804668,Rafael Flores Jr.,C
+823340,2026-09-01,home,Pittsburgh Pirates,7,694377,Nick Yorke,3B
+823340,2026-09-01,home,Pittsburgh Pirates,8,669707,Jared Triolo,SS
+823340,2026-09-01,home,Pittsburgh Pirates,9,663968,Jake Mangum,LF
+822929,2026-09-01,away,New York Mets,1,596019,Francisco Lindor,SS
+822929,2026-09-01,away,New York Mets,2,665742,Juan Soto,DH
+822929,2026-09-01,away,New York Mets,3,666182,Bo Bichette,3B
+822929,2026-09-01,away,New York Mets,4,701807,Carson Benge,RF
+822929,2026-09-01,away,New York Mets,5,676724,Jared Young,LF
+822929,2026-09-01,away,New York Mets,6,543760,Marcus Semien,2B
+822929,2026-09-01,away,New York Mets,7,682626,Francisco Alvarez,C
+822929,2026-09-01,away,New York Mets,8,805999,A.J. Ewing,CF
+822929,2026-09-01,away,New York Mets,9,668901,Mark Vientos,1B
+822929,2026-09-01,home,Tampa Bay Rays,1,650490,Yandy Díaz,DH
+822929,2026-09-01,home,Tampa Bay Rays,2,668723,Ryan Vilade,1B
+822929,2026-09-01,home,Tampa Bay Rays,3,691406,Junior Caminero,3B
+822929,2026-09-01,home,Tampa Bay Rays,4,676356,Jonny DeLuca,CF
+822929,2026-09-01,home,Tampa Bay Rays,5,622761,Jorge Mateo,2B
+822929,2026-09-01,home,Tampa Bay Rays,6,802415,Chandler Simpson,LF
+822929,2026-09-01,home,Tampa Bay Rays,7,663743,Nick Fortes,C
+822929,2026-09-01,home,Tampa Bay Rays,8,683748,Victor Mesa Jr.,RF
+822929,2026-09-01,home,Tampa Bay Rays,9,670764,Taylor Walls,SS
+824391,2026-09-01,away,Toronto Blue Jays,1,703520,Brett Bateman,CF
+824391,2026-09-01,away,Toronto Blue Jays,2,672386,Alejandro Kirk,C
+824391,2026-09-01,away,Toronto Blue Jays,3,665489,Vladimir Guerrero Jr.,1B
+824391,2026-09-01,away,Toronto Blue Jays,4,543807,George Springer,DH
+824391,2026-09-01,away,Toronto Blue Jays,5,664770,Nathan Lukes,RF
+824391,2026-09-01,away,Toronto Blue Jays,6,672960,Kazuma Okamoto,3B
+824391,2026-09-01,away,Toronto Blue Jays,7,665926,Andrés Giménez,SS
+824391,2026-09-01,away,Toronto Blue Jays,8,676391,Ernie Clement,2B
+824391,2026-09-01,away,Toronto Blue Jays,9,660821,Jesús Sánchez,LF
+824391,2026-09-01,home,Cleveland Guardians,1,680757,Steven Kwan,LF
+824391,2026-09-01,home,Cleveland Guardians,2,800050,Chase DeLauter,DH
+824391,2026-09-01,home,Cleveland Guardians,3,608070,José Ramírez,3B
+824391,2026-09-01,home,Cleveland Guardians,4,690984,Petey Halpin,CF
+824391,2026-09-01,home,Cleveland Guardians,5,663993,Nathaniel Lowe,1B
+824391,2026-09-01,home,Cleveland Guardians,6,682657,Angel Martínez,RF
+824391,2026-09-01,home,Cleveland Guardians,7,694197,Angel Genao,2B
+824391,2026-09-01,home,Cleveland Guardians,8,672275,Patrick Bailey,C
+824391,2026-09-01,home,Cleveland Guardians,9,677587,Brayan Rocchio,SS
+824716,2026-09-01,away,Seattle Mariners,1,645302,Victor Robles,LF
+824716,2026-09-01,away,Seattle Mariners,2,686527,Dominic Canzone,RF
+824716,2026-09-01,away,Seattle Mariners,3,677594,Julio Rodríguez,CF
+824716,2026-09-01,away,Seattle Mariners,4,663728,Cal Raleigh,C
+824716,2026-09-01,away,Seattle Mariners,5,647304,Josh Naylor,1B
+824716,2026-09-01,away,Seattle Mariners,6,702284,Cole Young,2B
+824716,2026-09-01,away,Seattle Mariners,7,703155,Lazaro Montes,DH
+824716,2026-09-01,away,Seattle Mariners,8,641487,J.P. Crawford,SS
+824716,2026-09-01,away,Seattle Mariners,9,801126,Brock Rodden,3B
+824716,2026-09-01,home,Boston Red Sox,1,701350,Roman Anthony,RF
+824716,2026-09-01,home,Boston Red Sox,2,663330,Jahmai Jones,PH
+824716,2026-09-01,home,Boston Red Sox,3,642201,Eli White,CF
+824716,2026-09-01,home,Boston Red Sox,4,677800,Wilyer Abreu,DH
+824716,2026-09-01,home,Boston Red Sox,5,643396,Isiah Kiner-Falefa,2B
+824716,2026-09-01,home,Boston Red Sox,6,702332,Caleb Durbin,3B
+824716,2026-09-01,home,Boston Red Sox,7,680776,Jarren Duran,LF
+824716,2026-09-01,home,Boston Red Sox,8,596115,Trevor Story,SS
+824716,2026-09-01,home,Boston Red Sox,9,657136,Connor Wong,C
+822687,2026-09-01,away,Atlanta Braves,1,686948,Drake Baldwin,C
+822687,2026-09-01,away,Atlanta Braves,2,660670,Ronald Acuña Jr.,RF
+822687,2026-09-01,away,Atlanta Braves,3,621566,Matt Olson,1B
+822687,2026-09-01,away,Atlanta Braves,4,671739,Michael Harris II,CF
+822687,2026-09-01,away,Atlanta Braves,5,643289,Mauricio Dubón,2B
+822687,2026-09-01,away,Atlanta Braves,6,645277,Ozzie Albies,DH
+822687,2026-09-01,away,Atlanta Braves,7,663586,Austin Riley,3B
+822687,2026-09-01,away,Atlanta Braves,8,676551,Brewer Hicklen,LF
+822687,2026-09-01,away,Atlanta Braves,9,673490,Ha-Seong Kim,SS
+822687,2026-09-01,home,Washington Nationals,1,682928,CJ Abrams,SS
+822687,2026-09-01,home,Washington Nationals,2,686611,Dylan Crews,RF
+822687,2026-09-01,home,Washington Nationals,3,691781,Brady House,3B
+822687,2026-09-01,home,Washington Nationals,4,695734,Daylen Lile,LF
+822687,2026-09-01,home,Washington Nationals,5,691002,Yohandy Morales,DH
+822687,2026-09-01,home,Washington Nationals,6,665953,Andrés Chaparro,1B
+822687,2026-09-01,home,Washington Nationals,7,695670,Harry Ford,C
+822687,2026-09-01,home,Washington Nationals,8,683083,Nasim Nuñez,2B
+822687,2026-09-01,home,Washington Nationals,9,696285,Jacob Young,CF
+823661,2026-09-01,away,Detroit Tigers,1,814430,Brett Callahan,LF
+823661,2026-09-01,away,Detroit Tigers,2,701162,Ben Malgeri,RF
+823661,2026-09-01,away,Detroit Tigers,3,693307,Dillon Dingler,C
+823661,2026-09-01,away,Detroit Tigers,4,621097,Jacob Waguespack,P
+823661,2026-09-01,away,Detroit Tigers,5,701678,Hao-Yu Lee,3B
+823661,2026-09-01,away,Detroit Tigers,6,679529,Spencer Torkelson,1B
+823661,2026-09-01,away,Detroit Tigers,7,703601,Max Clark,CF
+823661,2026-09-01,away,Detroit Tigers,8,595879,Javier Báez,2B
+823661,2026-09-01,away,Detroit Tigers,9,807726,John Peck,SS
+823661,2026-09-01,home,Minnesota Twins,1,807712,Luke Keaschall,RF
+823661,2026-09-01,home,Minnesota Twins,2,668952,Ryan Kreidler,2B
+823661,2026-09-01,home,Minnesota Twins,3,805346,Ben Ross,3B
+823661,2026-09-01,home,Minnesota Twins,4,656577,Alex Jackson,C
+823661,2026-09-01,home,Minnesota Twins,5,605137,Josh Bell,DH
+823661,2026-09-01,home,Minnesota Twins,6,694224,Gabriel Gonzalez,LF
+823661,2026-09-01,home,Minnesota Twins,7,668904,Royce Lewis,1B
+823661,2026-09-01,home,Minnesota Twins,8,701785,Kaelen Culpepper,SS
+823661,2026-09-01,home,Minnesota Twins,9,805805,Walker Jenkins,CF
+824070,2026-09-01,away,Miami Marlins,1,669065,Kyle Stowers,DH
+824070,2026-09-01,away,Miami Marlins,2,665052,Griffin Conine,1B
+824070,2026-09-01,away,Miami Marlins,3,681715,Heriberto Hernández,LF
+824070,2026-09-01,away,Miami Marlins,4,805300,Jakob Marsee,CF
+824070,2026-09-01,away,Miami Marlins,5,683357,Owen Caissie,RF
+824070,2026-09-01,away,Miami Marlins,6,691858,Jared Serna,2B
+824070,2026-09-01,away,Miami Marlins,7,640459,Brian Navarreto,C
+824070,2026-09-01,away,Miami Marlins,8,688363,Graham Pauley,3B
+824070,2026-09-01,away,Miami Marlins,9,691594,Javier Sanoja,SS
+824070,2026-09-01,home,Kansas City Royals,1,695600,Carter Jensen,C
+824070,2026-09-01,home,Kansas City Royals,2,677951,Bobby Witt Jr.,SS
+824070,2026-09-01,home,Kansas City Royals,3,695506,Jac Caglianone,RF
+824070,2026-09-01,home,Kansas City Royals,4,521692,Salvador Perez,DH
+824070,2026-09-01,home,Kansas City Royals,5,686469,Vinnie Pasquantino,1B
+824070,2026-09-01,home,Kansas City Royals,6,679845,Nick Loftin,2B
+824070,2026-09-01,home,Kansas City Royals,7,668942,Josh Rojas,3B
+824070,2026-09-01,home,Kansas City Royals,8,686555,Isaac Collins,LF
+824070,2026-09-01,home,Kansas City Royals,9,664728,Kyle Isbel,CF
+824633,2026-09-01,away,Milwaukee Brewers,1,694192,Jackson Chourio,LF
+824633,2026-09-01,away,Milwaukee Brewers,2,668930,Brice Turang,2B
+824633,2026-09-01,away,Milwaukee Brewers,3,661388,William Contreras,C
+824633,2026-09-01,away,Milwaukee Brewers,4,641343,Jake Bauers,1B
+824633,2026-09-01,away,Milwaukee Brewers,5,686217,Sal Frelick,RF
+824633,2026-09-01,away,Milwaukee Brewers,6,592885,Christian Yelich,DH
+824633,2026-09-01,away,Milwaukee Brewers,7,800325,Luis Lara,CF
+824633,2026-09-01,away,Milwaukee Brewers,8,687401,Joey Ortiz,3B
+824633,2026-09-01,away,Milwaukee Brewers,9,806198,Cooper Pratt,SS
+824633,2026-09-01,home,Chicago Cubs,1,691718,Pete Crow-Armstrong,CF
+824633,2026-09-01,home,Chicago Cubs,2,673548,Seiya Suzuki,RF
+824633,2026-09-01,home,Chicago Cubs,3,608324,Alex Bregman,3B
+824633,2026-09-01,home,Chicago Cubs,4,664023,Ian Happ,LF
+824633,2026-09-01,home,Chicago Cubs,5,663538,Nico Hoerner,SS
+824633,2026-09-01,home,Chicago Cubs,6,683737,Michael Busch,1B
+824633,2026-09-01,home,Chicago Cubs,7,608348,Carson Kelly,C
+824633,2026-09-01,home,Chicago Cubs,8,681230,BJ Murray Jr.,DH
+824633,2026-09-01,home,Chicago Cubs,9,807713,Matt Shaw,2B
+822854,2026-09-01,away,Athletics,1,703607,Henry Bolte,DH
+822854,2026-09-01,away,Athletics,2,680869,Zack Gelof,CF
+822854,2026-09-01,away,Athletics,3,671732,Lawrence Butler,RF
+822854,2026-09-01,away,Athletics,4,641680,Jonah Heim,C
+822854,2026-09-01,away,Athletics,5,683021,Michael Stefanic,2B
+822854,2026-09-01,away,Athletics,6,643446,Jeff McNeil,1B
+822854,2026-09-01,away,Athletics,7,691777,Max Muncy,3B
+822854,2026-09-01,away,Athletics,8,622268,Donovan Walton,SS
+822854,2026-09-01,away,Athletics,9,687231,Darell Hernaiz,PH
+822854,2026-09-01,home,Texas Rangers,1,681351,Logan O'Hoppe,DH
+822854,2026-09-01,home,Texas Rangers,2,608369,Corey Seager,SS
+822854,2026-09-01,home,Texas Rangers,3,694671,Wyatt Langford,LF
+822854,2026-09-01,home,Texas Rangers,4,607043,Brandon Nimmo,RF
+822854,2026-09-01,home,Texas Rangers,5,677649,Ezequiel Duran,1B
+822854,2026-09-01,home,Texas Rangers,6,670032,Nicky Lopez,2B
+822854,2026-09-01,home,Texas Rangers,7,683227,Cody Freeman,3B
+822854,2026-09-01,home,Texas Rangers,8,694497,Evan Carter,CF
+822854,2026-09-01,home,Texas Rangers,9,553869,Elias Díaz,C
+824148,2026-09-01,away,Chicago White Sox,1,803011,Sam Antonacci,LF
+824148,2026-09-01,away,Chicago White Sox,2,808959,Munetaka Murakami,1B
+824148,2026-09-01,away,Chicago White Sox,3,678246,Miguel Vargas,3B
+824148,2026-09-01,away,Chicago White Sox,4,643217,Andrew Benintendi,DH
+824148,2026-09-01,away,Chicago White Sox,5,695657,Colson Montgomery,SS
+824148,2026-09-01,away,Chicago White Sox,6,686668,Brenton Doyle,CF
+824148,2026-09-01,away,Chicago White Sox,7,671976,Tristan Peters,RF
+824148,2026-09-01,away,Chicago White Sox,8,805367,Chase Meidroth,2B
+824148,2026-09-01,away,Chicago White Sox,9,691011,Drew Romo,C
+824148,2026-09-01,home,Houston Astros,1,665161,Jeremy Peña,SS
+824148,2026-09-01,home,Houston Astros,2,670541,Yordan Alvarez,DH
+824148,2026-09-01,home,Houston Astros,3,670623,Isaac Paredes,3B
+824148,2026-09-01,home,Houston Astros,4,514888,Jose Altuve,2B
+824148,2026-09-01,home,Houston Astros,5,676369,Nelson Velázquez,LF
+824148,2026-09-01,home,Houston Astros,6,572233,Christian Walker,1B
+824148,2026-09-01,home,Houston Astros,7,673237,Yainer Diaz,C
+824148,2026-09-01,home,Houston Astros,8,666211,Taylor Trammell,CF
+824148,2026-09-01,home,Houston Astros,9,701358,Cam Smith,RF
+824313,2026-09-01,away,Baltimore Orioles,1,702616,Jackson Holliday,2B
+824313,2026-09-01,away,Baltimore Orioles,2,624413,Pete Alonso,DH
+824313,2026-09-01,away,Baltimore Orioles,3,683002,Gunnar Henderson,SS
+824313,2026-09-01,away,Baltimore Orioles,4,687952,Christian Encarnacion-Strand,3B
+824313,2026-09-01,away,Baltimore Orioles,5,687637,Dylan Beavers,LF
+824313,2026-09-01,away,Baltimore Orioles,6,694212,Samuel Basallo,1B
+824313,2026-09-01,away,Baltimore Orioles,7,665750,Leody Taveras,RF
+824313,2026-09-01,away,Baltimore Orioles,8,681297,Colton Cowser,CF
+824313,2026-09-01,away,Baltimore Orioles,9,677942,Blaze Alexander,PH
+824313,2026-09-01,home,Colorado Rockies,1,664983,Jake McCarthy,LF
+824313,2026-09-01,home,Colorado Rockies,2,666160,Mickey Moniak,RF
+824313,2026-09-01,home,Colorado Rockies,3,696100,Hunter Goodman,DH
+824313,2026-09-01,home,Colorado Rockies,4,681198,TJ Rumfield,1B
+824313,2026-09-01,home,Colorado Rockies,5,694249,Cole Carrigg,CF
+824313,2026-09-01,home,Colorado Rockies,6,681393,Connor Norby,3B
+824313,2026-09-01,home,Colorado Rockies,7,664954,Brett Sullivan,C
+824313,2026-09-01,home,Colorado Rockies,8,690022,Ryan Ritter,2B
+824313,2026-09-01,home,Colorado Rockies,9,678662,Ezequiel Tovar,SS
+823984,2026-09-01,away,New York Yankees,1,700250,Ben Rice,DH
+823984,2026-09-01,away,New York Yankees,2,641355,Cody Bellinger,LF
+823984,2026-09-01,away,New York Yankees,3,671277,Luis García Jr.,1B
+823984,2026-09-01,away,New York Yankees,4,682987,Spencer Jones,RF
+823984,2026-09-01,away,New York Yankees,5,665862,Jazz Chisholm Jr.,2B
+823984,2026-09-01,away,New York Yankees,6,663757,Trent Grisham,CF
+823984,2026-09-01,away,New York Yankees,7,641857,Ryan McMahon,3B
+823984,2026-09-01,away,New York Yankees,8,676609,José Caballero,SS
+823984,2026-09-01,away,New York Yankees,9,645305,Ali Sánchez,C
+823984,2026-09-01,home,Los Angeles Angels,1,687263,Zach Neto,SS
+823984,2026-09-01,home,Los Angeles Angels,2,545361,Mike Trout,CF
+823984,2026-09-01,home,Los Angeles Angels,3,685133,Wade Meckler,RF
+823984,2026-09-01,home,Los Angeles Angels,4,687093,Vaughn Grissom,1B
+823984,2026-09-01,home,Los Angeles Angels,5,694208,Moisés Ballesteros,DH
+823984,2026-09-01,home,Los Angeles Angels,6,695681,Christian Moore,2B
+823984,2026-09-01,home,Los Angeles Angels,7,642350,Jose Siri,LF
+823984,2026-09-01,home,Los Angeles Angels,8,624428,Adam Frazier,PH
+823984,2026-09-01,home,Los Angeles Angels,9,623168,Tyler Heineman,C
+825038,2026-09-01,away,Philadelphia Phillies,1,656941,Kyle Schwarber,DH
+825038,2026-09-01,away,Philadelphia Phillies,2,607208,Trea Turner,SS
+825038,2026-09-01,away,Philadelphia Phillies,3,547180,Bryce Harper,RF
+825038,2026-09-01,away,Philadelphia Phillies,4,650333,Luis Arraez,2B
+825038,2026-09-01,away,Philadelphia Phillies,5,664761,Alec Bohm,1B
+825038,2026-09-01,away,Philadelphia Phillies,6,669016,Brandon Marsh,LF
+825038,2026-09-01,away,Philadelphia Phillies,7,681082,Bryson Stott,3B
+825038,2026-09-01,away,Philadelphia Phillies,8,592663,J.T. Realmuto,C
+825038,2026-09-01,away,Philadelphia Phillies,9,702222,Justin Crawford,CF
+825038,2026-09-01,home,Arizona Diamondbacks,1,672695,Geraldo Perdomo,SS
+825038,2026-09-01,home,Arizona Diamondbacks,2,682998,Corbin Carroll,RF
+825038,2026-09-01,home,Arizona Diamondbacks,3,672515,Gabriel Moreno,C
+825038,2026-09-01,home,Arizona Diamondbacks,4,606466,Ketel Marte,DH
+825038,2026-09-01,home,Arizona Diamondbacks,5,571448,Nolan Arenado,3B
+825038,2026-09-01,home,Arizona Diamondbacks,6,545121,Ildemaro Vargas,2B
+825038,2026-09-01,home,Arizona Diamondbacks,7,694374,Tim Tawa,1B
+825038,2026-09-01,home,Arizona Diamondbacks,8,691783,Jordan Lawlar,CF
+825038,2026-09-01,home,Arizona Diamondbacks,9,814439,Ryan Waldschmidt,LF
+823908,2026-09-01,away,St. Louis Cardinals,1,665877,José Fermín,2B
+823908,2026-09-01,away,St. Louis Cardinals,2,671056,Iván Herrera,DH
+823908,2026-09-01,away,St. Louis Cardinals,3,691023,Jordan Walker,RF
+823908,2026-09-01,away,St. Louis Cardinals,4,676475,Alec Burleson,1B
+823908,2026-09-01,away,St. Louis Cardinals,5,687363,Victor Scott II,LF
+823908,2026-09-01,away,St. Louis Cardinals,6,699024,Leo Bernal,C
+823908,2026-09-01,away,St. Louis Cardinals,7,669357,Nolan Gorman,3B
+823908,2026-09-01,away,St. Louis Cardinals,8,695336,Thomas Saggese,SS
+823908,2026-09-01,away,St. Louis Cardinals,9,701675,Nathan Church,CF
+823908,2026-09-01,home,Los Angeles Dodgers,1,669743,Alex Call,CF
+823908,2026-09-01,home,Los Angeles Dodgers,2,571771,Enrique Hernández,P
+823908,2026-09-01,home,Los Angeles Dodgers,3,605141,Mookie Betts,SS
+823908,2026-09-01,home,Los Angeles Dodgers,4,676439,Hunter Feduccia,1B
+823908,2026-09-01,home,Los Angeles Dodgers,5,669257,Will Smith,C
+823908,2026-09-01,home,Los Angeles Dodgers,6,663656,Kyle Tucker,RF
+823908,2026-09-01,home,Los Angeles Dodgers,7,669242,Tommy Edman,2B
+823908,2026-09-01,home,Los Angeles Dodgers,8,606192,Teoscar Hernández,LF
+823908,2026-09-01,home,Los Angeles Dodgers,9,690976,Alex Freeland,3B
+824470,2026-09-02,away,San Diego Padres,1,665487,Fernando Tatis Jr.,2B
+824470,2026-09-02,away,San Diego Padres,2,669392,Samad Taylor,LF
+824470,2026-09-02,away,San Diego Padres,3,701538,Jackson Merrill,CF
+824470,2026-09-02,away,San Diego Padres,4,664034,Ty France,1B
+824470,2026-09-02,away,San Diego Padres,5,593428,Xander Bogaerts,SS
+824470,2026-09-02,away,San Diego Padres,6,806956,Ethan Salas,C
+824470,2026-09-02,away,San Diego Padres,7,687957,Dustin Harris,RF
+824470,2026-09-02,away,San Diego Padres,8,669134,Luis Campusano,DH
+824470,2026-09-02,away,San Diego Padres,9,630105,Jake Cronenworth,3B
+824470,2026-09-02,home,Cincinnati Reds,1,670770,TJ Friedl,LF
+824470,2026-09-02,home,Cincinnati Reds,2,682829,Elly De La Cruz,DH
+824470,2026-09-02,home,Cincinnati Reds,3,701398,Sal Stewart,1B
+824470,2026-09-02,home,Cincinnati Reds,4,668709,JJ Bleday,RF
+824470,2026-09-02,home,Cincinnati Reds,5,663886,Tyler Stephenson,C
+824470,2026-09-02,home,Cincinnati Reds,6,667472,Dane Myers,CF
+824470,2026-09-02,home,Cincinnati Reds,7,682877,Juan Brito,2B
+824470,2026-09-02,home,Cincinnati Reds,8,680574,Matt McLain,SS
+824470,2026-09-02,home,Cincinnati Reds,9,695490,Edwin Arroyo,3B
+822686,2026-09-02,away,Atlanta Braves,1,686948,Drake Baldwin,DH
+822686,2026-09-02,away,Atlanta Braves,2,660670,Ronald Acuña Jr.,RF
+822686,2026-09-02,away,Atlanta Braves,3,621566,Matt Olson,1B
+822686,2026-09-02,away,Atlanta Braves,4,645277,Ozzie Albies,2B
+822686,2026-09-02,away,Atlanta Braves,5,676551,Brewer Hicklen,CF
+822686,2026-09-02,away,Atlanta Braves,6,669221,Sean Murphy,C
+822686,2026-09-02,away,Atlanta Braves,7,573262,Mike Yastrzemski,LF
+822686,2026-09-02,away,Atlanta Braves,8,663586,Austin Riley,3B
+822686,2026-09-02,away,Atlanta Braves,9,673490,Ha-Seong Kim,SS
+822686,2026-09-02,home,Washington Nationals,1,696285,Jacob Young,CF
+822686,2026-09-02,home,Washington Nationals,2,694673,Abimelec Ortiz,DH
+822686,2026-09-02,home,Washington Nationals,3,686611,Dylan Crews,RF
+822686,2026-09-02,home,Washington Nationals,4,682928,CJ Abrams,2B
+822686,2026-09-02,home,Washington Nationals,5,665953,Andrés Chaparro,3B
+822686,2026-09-02,home,Washington Nationals,6,695734,Daylen Lile,LF
+822686,2026-09-02,home,Washington Nationals,7,691002,Yohandy Morales,1B
+822686,2026-09-02,home,Washington Nationals,8,695670,Harry Ford,C
+822686,2026-09-02,home,Washington Nationals,9,683083,Nasim Nuñez,SS
+822851,2026-09-02,away,Athletics,1,703607,Henry Bolte,RF
+822851,2026-09-02,away,Athletics,2,680869,Zack Gelof,LF
+822851,2026-09-02,away,Athletics,3,671732,Lawrence Butler,DH
+822851,2026-09-02,away,Athletics,4,641680,Jonah Heim,1B
+822851,2026-09-02,away,Athletics,5,643446,Jeff McNeil,2B
+822851,2026-09-02,away,Athletics,6,683021,Michael Stefanic,3B
+822851,2026-09-02,away,Athletics,7,675961,Alika Williams,SS
+822851,2026-09-02,away,Athletics,8,661531,Brian Serven,C
+822851,2026-09-02,away,Athletics,9,672016,Denzel Clarke,CF
+822851,2026-09-02,home,Texas Rangers,1,677649,Ezequiel Duran,RF
+822851,2026-09-02,home,Texas Rangers,2,670032,Nicky Lopez,SS
+822851,2026-09-02,home,Texas Rangers,3,695508,Cam Cauley,LF
+822851,2026-09-02,home,Texas Rangers,4,694497,Evan Carter,CF
+822851,2026-09-02,home,Texas Rangers,5,669394,Jake Burger,1B
+822851,2026-09-02,home,Texas Rangers,6,679822,Justin Foscue,2B
+822851,2026-09-02,home,Texas Rangers,7,553869,Elias Díaz,DH
+822851,2026-09-02,home,Texas Rangers,8,683227,Cody Freeman,3B
+822851,2026-09-02,home,Texas Rangers,9,643376,Danny Jansen,C
+824312,2026-09-02,away,Baltimore Orioles,1,702616,Jackson Holliday,DH
+824312,2026-09-02,away,Baltimore Orioles,2,624413,Pete Alonso,1B
+824312,2026-09-02,away,Baltimore Orioles,3,683002,Gunnar Henderson,SS
+824312,2026-09-02,away,Baltimore Orioles,4,673357,Luis Robert Jr.,LF
+824312,2026-09-02,away,Baltimore Orioles,5,665750,Leody Taveras,RF
+824312,2026-09-02,away,Baltimore Orioles,6,687952,Christian Encarnacion-Strand,3B
+824312,2026-09-02,away,Baltimore Orioles,7,665966,Carlos Narváez,C
+824312,2026-09-02,away,Baltimore Orioles,8,677942,Blaze Alexander,2B
+824312,2026-09-02,away,Baltimore Orioles,9,681297,Colton Cowser,CF
+824312,2026-09-02,home,Colorado Rockies,1,664983,Jake McCarthy,CF
+824312,2026-09-02,home,Colorado Rockies,2,681393,Connor Norby,3B
+824312,2026-09-02,home,Colorado Rockies,3,680604,Blas Castaño,P
+824312,2026-09-02,home,Colorado Rockies,4,681198,TJ Rumfield,1B
+824312,2026-09-02,home,Colorado Rockies,5,694249,Cole Carrigg,SS
+824312,2026-09-02,home,Colorado Rockies,6,691728,Zac Veen,RF
+824312,2026-09-02,home,Colorado Rockies,7,691182,Adael Amador,2B
+824312,2026-09-02,home,Colorado Rockies,8,664954,Brett Sullivan,C
+824312,2026-09-02,home,Colorado Rockies,9,666160,Mickey Moniak,LF
+825037,2026-09-02,away,Philadelphia Phillies,1,656941,Kyle Schwarber,1B
+825037,2026-09-02,away,Philadelphia Phillies,2,607208,Trea Turner,SS
+825037,2026-09-02,away,Philadelphia Phillies,3,656537,Derek Hill,PR
+825037,2026-09-02,away,Philadelphia Phillies,4,650333,Luis Arraez,2B
+825037,2026-09-02,away,Philadelphia Phillies,5,681082,Bryson Stott,3B
+825037,2026-09-02,away,Philadelphia Phillies,6,669016,Brandon Marsh,LF
+825037,2026-09-02,away,Philadelphia Phillies,7,702222,Justin Crawford,CF
+825037,2026-09-02,away,Philadelphia Phillies,8,592663,J.T. Realmuto,C
+825037,2026-09-02,away,Philadelphia Phillies,9,650559,Bryan De La Cruz,RF
+825037,2026-09-02,home,Arizona Diamondbacks,1,678489,Jorge Barrosa,CF
+825037,2026-09-02,home,Arizona Diamondbacks,2,682998,Corbin Carroll,RF
+825037,2026-09-02,home,Arizona Diamondbacks,3,672515,Gabriel Moreno,DH
+825037,2026-09-02,home,Arizona Diamondbacks,4,672695,Geraldo Perdomo,SS
+825037,2026-09-02,home,Arizona Diamondbacks,5,571448,Nolan Arenado,3B
+825037,2026-09-02,home,Arizona Diamondbacks,6,694374,Tim Tawa,1B
+825037,2026-09-02,home,Arizona Diamondbacks,7,543510,James McCann,C
+825037,2026-09-02,home,Arizona Diamondbacks,8,545121,Ildemaro Vargas,2B
+825037,2026-09-02,home,Arizona Diamondbacks,9,691783,Jordan Lawlar,LF
+824717,2026-09-02,away,Seattle Mariners,1,668227,Randy Arozarena,LF
+824717,2026-09-02,away,Seattle Mariners,2,686527,Dominic Canzone,DH
+824717,2026-09-02,away,Seattle Mariners,3,677594,Julio Rodríguez,CF
+824717,2026-09-02,away,Seattle Mariners,4,647304,Josh Naylor,1B
+824717,2026-09-02,away,Seattle Mariners,5,621493,Taylor Ward,RF
+824717,2026-09-02,away,Seattle Mariners,6,702284,Cole Young,2B
+824717,2026-09-02,away,Seattle Mariners,7,642215,Weston Wilson,3B
+824717,2026-09-02,away,Seattle Mariners,8,641487,J.P. Crawford,SS
+824717,2026-09-02,away,Seattle Mariners,9,640902,Jhonny Pereda,C
+824717,2026-09-02,home,Boston Red Sox,1,701350,Roman Anthony,DH
+824717,2026-09-02,home,Boston Red Sox,2,681508,Mickey Gasper,1B
+824717,2026-09-02,home,Boston Red Sox,3,642201,Eli White,CF
+824717,2026-09-02,home,Boston Red Sox,4,677800,Wilyer Abreu,RF
+824717,2026-09-02,home,Boston Red Sox,5,686765,Nick Sogard,2B
+824717,2026-09-02,home,Boston Red Sox,6,702332,Caleb Durbin,3B
+824717,2026-09-02,home,Boston Red Sox,7,680776,Jarren Duran,LF
+824717,2026-09-02,home,Boston Red Sox,8,596115,Trevor Story,SS
+824717,2026-09-02,home,Boston Red Sox,9,657136,Connor Wong,C
+823339,2026-09-02,away,San Francisco Giants,1,678545,Osleivis Basabe,2B
+823339,2026-09-02,away,San Francisco Giants,2,646240,Rafael Devers,1B
+823339,2026-09-02,away,San Francisco Giants,3,687529,Grant McCray,DH
+823339,2026-09-02,away,San Francisco Giants,4,806367,Turner Hill,LF
+823339,2026-09-02,away,San Francisco Giants,5,808982,Jung Hoo Lee,RF
+823339,2026-09-02,away,San Francisco Giants,6,701852,Drew Cavanaugh,C
+823339,2026-09-02,away,San Francisco Giants,7,813841,Jonah Cox,CF
+823339,2026-09-02,away,San Francisco Giants,8,694376,Shay Whitcomb,3B
+823339,2026-09-02,away,San Francisco Giants,9,683766,Christian Koss,SS
+823339,2026-09-02,home,Pittsburgh Pirates,1,687462,Spencer Horwitz,1B
+823339,2026-09-02,home,Pittsburgh Pirates,2,664040,Brandon Lowe,2B
+823339,2026-09-02,home,Pittsburgh Pirates,3,668804,Bryan Reynolds,DH
+823339,2026-09-02,home,Pittsburgh Pirates,4,693304,Nick Gonzales,3B
+823339,2026-09-02,home,Pittsburgh Pirates,5,665833,Oneil Cruz,CF
+823339,2026-09-02,home,Pittsburgh Pirates,6,699013,Esmerlyn Valdez,RF
+823339,2026-09-02,home,Pittsburgh Pirates,7,804668,Rafael Flores Jr.,C
+823339,2026-09-02,home,Pittsburgh Pirates,8,663968,Jake Mangum,LF
+823339,2026-09-02,home,Pittsburgh Pirates,9,694378,Jacob Gonzalez,SS
+822931,2026-09-02,away,New York Mets,1,596019,Francisco Lindor,SS
+822931,2026-09-02,away,New York Mets,2,665742,Juan Soto,DH
+822931,2026-09-02,away,New York Mets,3,666182,Bo Bichette,3B
+822931,2026-09-02,away,New York Mets,4,701807,Carson Benge,RF
+822931,2026-09-02,away,New York Mets,5,676724,Jared Young,1B
+822931,2026-09-02,away,New York Mets,6,543760,Marcus Semien,2B
+822931,2026-09-02,away,New York Mets,7,805999,A.J. Ewing,CF
+822931,2026-09-02,away,New York Mets,8,703492,Nick Morabito,LF
+822931,2026-09-02,away,New York Mets,9,620443,Luis Torrens,C
+822931,2026-09-02,home,Tampa Bay Rays,1,650490,Yandy Díaz,DH
+822931,2026-09-02,home,Tampa Bay Rays,2,666018,Jonathan Aranda,1B
+822931,2026-09-02,home,Tampa Bay Rays,3,691406,Junior Caminero,3B
+822931,2026-09-02,home,Tampa Bay Rays,4,689414,Liam Hicks,C
+822931,2026-09-02,home,Tampa Bay Rays,5,802415,Chandler Simpson,LF
+822931,2026-09-02,home,Tampa Bay Rays,6,683748,Victor Mesa Jr.,RF
+822931,2026-09-02,home,Tampa Bay Rays,7,676356,Jonny DeLuca,CF
+822931,2026-09-02,home,Tampa Bay Rays,8,680700,Richie Palacios,2B
+822931,2026-09-02,home,Tampa Bay Rays,9,670764,Taylor Walls,SS
+824390,2026-09-02,away,Toronto Blue Jays,1,703520,Brett Bateman,CF
+824390,2026-09-02,away,Toronto Blue Jays,2,660821,Jesús Sánchez,DH
+824390,2026-09-02,away,Toronto Blue Jays,3,815873,Sean Keys,1B
+824390,2026-09-02,away,Toronto Blue Jays,4,672386,Alejandro Kirk,C
+824390,2026-09-02,away,Toronto Blue Jays,5,807727,Charles McAdoo,3B
+824390,2026-09-02,away,Toronto Blue Jays,6,664770,Nathan Lukes,RF
+824390,2026-09-02,away,Toronto Blue Jays,7,676391,Ernie Clement,SS
+824390,2026-09-02,away,Toronto Blue Jays,8,669701,Josh Smith,2B
+824390,2026-09-02,away,Toronto Blue Jays,9,664702,Myles Straw,LF
+824390,2026-09-02,home,Cleveland Guardians,1,690984,Petey Halpin,CF
+824390,2026-09-02,home,Cleveland Guardians,2,800050,Chase DeLauter,DH
+824390,2026-09-02,home,Cleveland Guardians,3,682177,Daniel Schneemann,3B
+824390,2026-09-02,home,Cleveland Guardians,4,681807,David Fry,RF
+824390,2026-09-02,home,Cleveland Guardians,5,663993,Nathaniel Lowe,1B
+824390,2026-09-02,home,Cleveland Guardians,6,682657,Angel Martínez,LF
+824390,2026-09-02,home,Cleveland Guardians,7,683953,Travis Bazzana,2B
+824390,2026-09-02,home,Cleveland Guardians,8,672275,Patrick Bailey,C
+824390,2026-09-02,home,Cleveland Guardians,9,694197,Angel Genao,SS
+823660,2026-09-02,away,Detroit Tigers,1,805808,Kevin McGonigle,3B
+823660,2026-09-02,away,Detroit Tigers,2,701678,Hao-Yu Lee,2B
+823660,2026-09-02,away,Detroit Tigers,3,679529,Spencer Torkelson,1B
+823660,2026-09-02,away,Detroit Tigers,4,682985,Riley Greene,DH
+823660,2026-09-02,away,Detroit Tigers,5,680664,Eduardo Valencia,C
+823660,2026-09-02,away,Detroit Tigers,6,701162,Ben Malgeri,RF
+823660,2026-09-02,away,Detroit Tigers,7,703601,Max Clark,CF
+823660,2026-09-02,away,Detroit Tigers,8,807726,John Peck,SS
+823660,2026-09-02,away,Detroit Tigers,9,595879,Javier Báez,LF
+823660,2026-09-02,home,Minnesota Twins,1,807712,Luke Keaschall,RF
+823660,2026-09-02,home,Minnesota Twins,2,686797,Brooks Lee,3B
+823660,2026-09-02,home,Minnesota Twins,3,665019,Kody Clemens,LF
+823660,2026-09-02,home,Minnesota Twins,4,680777,Ryan Jeffers,C
+823660,2026-09-02,home,Minnesota Twins,5,805346,Ben Ross,DH
+823660,2026-09-02,home,Minnesota Twins,6,668952,Ryan Kreidler,2B
+823660,2026-09-02,home,Minnesota Twins,7,668904,Royce Lewis,1B
+823660,2026-09-02,home,Minnesota Twins,8,701785,Kaelen Culpepper,SS
+823660,2026-09-02,home,Minnesota Twins,9,805805,Walker Jenkins,CF
+824068,2026-09-02,away,Miami Marlins,1,681715,Heriberto Hernández,LF
+824068,2026-09-02,away,Miami Marlins,2,672640,Otto Lopez,SS
+824068,2026-09-02,away,Miami Marlins,3,669065,Kyle Stowers,1B
+824068,2026-09-02,away,Miami Marlins,4,682663,Agustín Ramírez,DH
+824068,2026-09-02,away,Miami Marlins,5,691594,Javier Sanoja,3B
+824068,2026-09-02,away,Miami Marlins,6,805300,Jakob Marsee,CF
+824068,2026-09-02,away,Miami Marlins,7,665052,Griffin Conine,RF
+824068,2026-09-02,away,Miami Marlins,8,691858,Jared Serna,2B
+824068,2026-09-02,away,Miami Marlins,9,691788,Joe Mack,C
+824068,2026-09-02,home,Kansas City Royals,1,695600,Carter Jensen,C
+824068,2026-09-02,home,Kansas City Royals,2,677951,Bobby Witt Jr.,SS
+824068,2026-09-02,home,Kansas City Royals,3,695506,Jac Caglianone,RF
+824068,2026-09-02,home,Kansas City Royals,4,521692,Salvador Perez,DH
+824068,2026-09-02,home,Kansas City Royals,5,686469,Vinnie Pasquantino,1B
+824068,2026-09-02,home,Kansas City Royals,6,679845,Nick Loftin,3B
+824068,2026-09-02,home,Kansas City Royals,7,686681,Michael Massey,2B
+824068,2026-09-02,home,Kansas City Royals,8,670231,John Rave,LF
+824068,2026-09-02,home,Kansas City Royals,9,664728,Kyle Isbel,CF
+824634,2026-09-02,away,Milwaukee Brewers,1,694192,Jackson Chourio,LF
+824634,2026-09-02,away,Milwaukee Brewers,2,668930,Brice Turang,2B
+824634,2026-09-02,away,Milwaukee Brewers,3,686217,Sal Frelick,RF
+824634,2026-09-02,away,Milwaukee Brewers,4,661388,William Contreras,C
+824634,2026-09-02,away,Milwaukee Brewers,5,641343,Jake Bauers,1B
+824634,2026-09-02,away,Milwaukee Brewers,6,800325,Luis Lara,CF
+824634,2026-09-02,away,Milwaukee Brewers,7,592885,Christian Yelich,DH
+824634,2026-09-02,away,Milwaukee Brewers,8,687401,Joey Ortiz,3B
+824634,2026-09-02,away,Milwaukee Brewers,9,806198,Cooper Pratt,SS
+824634,2026-09-02,home,Chicago Cubs,1,691718,Pete Crow-Armstrong,CF
+824634,2026-09-02,home,Chicago Cubs,2,673548,Seiya Suzuki,DH
+824634,2026-09-02,home,Chicago Cubs,3,608324,Alex Bregman,3B
+824634,2026-09-02,home,Chicago Cubs,4,683737,Michael Busch,1B
+824634,2026-09-02,home,Chicago Cubs,5,663538,Nico Hoerner,SS
+824634,2026-09-02,home,Chicago Cubs,6,664023,Ian Happ,LF
+824634,2026-09-02,home,Chicago Cubs,7,807713,Matt Shaw,2B
+824634,2026-09-02,home,Chicago Cubs,8,624424,Michael Conforto,PH
+824634,2026-09-02,home,Chicago Cubs,9,681230,BJ Murray Jr.,PH
+824147,2026-09-02,away,Chicago White Sox,1,803011,Sam Antonacci,LF
+824147,2026-09-02,away,Chicago White Sox,2,808959,Munetaka Murakami,1B
+824147,2026-09-02,away,Chicago White Sox,3,678246,Miguel Vargas,3B
+824147,2026-09-02,away,Chicago White Sox,4,502054,Tommy Pham,PH
+824147,2026-09-02,away,Chicago White Sox,5,545341,Randal Grichuk,PH
+824147,2026-09-02,away,Chicago White Sox,6,695657,Colson Montgomery,SS
+824147,2026-09-02,away,Chicago White Sox,7,805367,Chase Meidroth,2B
+824147,2026-09-02,away,Chicago White Sox,8,671976,Tristan Peters,CF
+824147,2026-09-02,away,Chicago White Sox,9,691011,Drew Romo,C
+824147,2026-09-02,home,Houston Astros,1,665161,Jeremy Peña,SS
+824147,2026-09-02,home,Houston Astros,2,669397,Nick Allen,DH
+824147,2026-09-02,home,Houston Astros,3,670623,Isaac Paredes,3B
+824147,2026-09-02,home,Houston Astros,4,514888,Jose Altuve,2B
+824147,2026-09-02,home,Houston Astros,5,662139,Daulton Varsho,CF
+824147,2026-09-02,home,Houston Astros,6,676694,Jake Meyers,LF
+824147,2026-09-02,home,Houston Astros,7,701358,Cam Smith,RF
+824147,2026-09-02,home,Houston Astros,8,572233,Christian Walker,1B
+824147,2026-09-02,home,Houston Astros,9,543877,Christian Vázquez,C
+823983,2026-09-02,away,New York Yankees,1,669224,Austin Wells,C
+823983,2026-09-02,away,New York Yankees,2,641355,Cody Bellinger,LF
+823983,2026-09-02,away,New York Yankees,3,663757,Trent Grisham,CF
+823983,2026-09-02,away,New York Yankees,4,700250,Ben Rice,DH
+823983,2026-09-02,away,New York Yankees,5,641857,Ryan McMahon,3B
+823983,2026-09-02,away,New York Yankees,6,682987,Spencer Jones,RF
+823983,2026-09-02,away,New York Yankees,7,676609,José Caballero,SS
+823983,2026-09-02,away,New York Yankees,8,665862,Jazz Chisholm Jr.,2B
+823983,2026-09-02,away,New York Yankees,9,671277,Luis García Jr.,1B
+823983,2026-09-02,home,Los Angeles Angels,1,687263,Zach Neto,SS
+823983,2026-09-02,home,Los Angeles Angels,2,545361,Mike Trout,CF
+823983,2026-09-02,home,Los Angeles Angels,3,685133,Wade Meckler,RF
+823983,2026-09-02,home,Los Angeles Angels,4,687093,Vaughn Grissom,1B
+823983,2026-09-02,home,Los Angeles Angels,5,694208,Moisés Ballesteros,DH
+823983,2026-09-02,home,Los Angeles Angels,6,695681,Christian Moore,2B
+823983,2026-09-02,home,Los Angeles Angels,7,642350,Jose Siri,LF
+823983,2026-09-02,home,Los Angeles Angels,8,672724,Oswald Peraza,3B
+823983,2026-09-02,home,Los Angeles Angels,9,623168,Tyler Heineman,C
+823906,2026-09-02,away,St. Louis Cardinals,1,687363,Victor Scott II,LF
+823906,2026-09-02,away,St. Louis Cardinals,2,671056,Iván Herrera,C
+823906,2026-09-02,away,St. Louis Cardinals,3,676475,Alec Burleson,1B
+823906,2026-09-02,away,St. Louis Cardinals,4,691023,Jordan Walker,RF
+823906,2026-09-02,away,St. Louis Cardinals,5,699024,Leo Bernal,DH
+823906,2026-09-02,away,St. Louis Cardinals,6,602104,Ramón Urías,3B
+823906,2026-09-02,away,St. Louis Cardinals,7,665877,José Fermín,2B
+823906,2026-09-02,away,St. Louis Cardinals,8,701675,Nathan Church,CF
+823906,2026-09-02,away,St. Louis Cardinals,9,695336,Thomas Saggese,SS
+823906,2026-09-02,home,Los Angeles Dodgers,1,660271,Shohei Ohtani,DH
+823906,2026-09-02,home,Los Angeles Dodgers,2,669242,Tommy Edman,CF
+823906,2026-09-02,home,Los Angeles Dodgers,3,605141,Mookie Betts,SS
+823906,2026-09-02,home,Los Angeles Dodgers,4,518692,Freddie Freeman,1B
+823906,2026-09-02,home,Los Angeles Dodgers,5,690976,Alex Freeland,2B
+823906,2026-09-02,home,Los Angeles Dodgers,6,663656,Kyle Tucker,RF
+823906,2026-09-02,home,Los Angeles Dodgers,7,606192,Teoscar Hernández,LF
+823906,2026-09-02,home,Los Angeles Dodgers,8,571771,Enrique Hernández,3B
+823906,2026-09-02,home,Los Angeles Dodgers,9,669257,Will Smith,C

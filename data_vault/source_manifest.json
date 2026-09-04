@@ -1,0 +1,70 @@
+{
+  "version": "2026-09-01",
+  "format_preference": "parquet",
+  "notes": [
+    "Standalone NFL Data Vault layer. Does not modify app.py or .env.",
+    "Installer performs no network/API calls.",
+    "Downloads happen only when loader.py is run explicitly."
+  ],
+  "datasets": {
+    "players": {
+      "kind": "single",
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/players/players.parquet",
+      "description": "NFLverse player identity crosswalk / metadata"
+    },
+    "pbp": {
+      "kind": "season",
+      "url_template": "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{season}.parquet",
+      "min_season": 1999,
+      "description": "nflfastR play-by-play"
+    },
+    "rosters": {
+      "kind": "season",
+      "url_template": "https://github.com/nflverse/nflverse-data/releases/download/rosters/roster_{season}.parquet",
+      "min_season": 1920,
+      "description": "Season rosters"
+    },
+    "weekly_rosters": {
+      "kind": "season",
+      "url_template": "https://github.com/nflverse/nflverse-data/releases/download/weekly_rosters/roster_weekly_{season}.parquet",
+      "min_season": 2002,
+      "description": "Weekly roster snapshots"
+    },
+    "injuries": {
+      "kind": "season",
+      "url_template": "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_{season}.parquet",
+      "min_season": 2009,
+      "description": "Weekly injury reports"
+    },
+    "depth_charts": {
+      "kind": "season",
+      "url_template": "https://github.com/nflverse/nflverse-data/releases/download/depth_charts/depth_charts_{season}.parquet",
+      "min_season": 2001,
+      "description": "Weekly depth charts"
+    },
+    "snap_counts": {
+      "kind": "season",
+      "url_template": "https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_{season}.parquet",
+      "min_season": 2012,
+      "description": "Game-level snap counts"
+    },
+    "ngs_passing": {
+      "kind": "single",
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_passing.parquet",
+      "min_season": 2016,
+      "description": "Next Gen Stats passing"
+    },
+    "ngs_receiving": {
+      "kind": "single",
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_receiving.parquet",
+      "min_season": 2016,
+      "description": "Next Gen Stats receiving"
+    },
+    "ngs_rushing": {
+      "kind": "single",
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_rushing.parquet",
+      "min_season": 2016,
+      "description": "Next Gen Stats rushing"
+    }
+  }
+}

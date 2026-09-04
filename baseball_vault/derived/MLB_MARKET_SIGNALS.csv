@@ -1,0 +1,67 @@
+away_team,home_team,game_start,core_market,signal_target,signal_strength,books_reporting,books_moving,consensus_among_movers_pct,whole_market_share_pct,avg_implied_prob_move,market_signal_score,market_signal
+detroit tigers,minnesota twins,2026-09-02 23:40:00+00:00,total,under,strong,13.0,12.0,100.0,92.3076923076923,1.789628313417042,0.923076923076923,Total market moved toward UNDER
+san diego padres,cincinnati reds,2026-09-02 16:40:00+00:00,spread,san diego padres,strong,13.0,12.0,100.0,92.3076923076923,1.1541796215854754,0.923076923076923,Spread market moved toward san diego padres
+san diego padres,cincinnati reds,2026-09-02 16:40:00+00:00,moneyline,san diego padres,strong,14.0,12.0,100.0,85.71428571428571,0.7747526251204808,0.8571428571428571,Moneyline market moved toward san diego padres
+atlanta braves,washington nationals,2026-09-02 17:05:00+00:00,spread,atlanta braves,strong,13.0,13.0,84.61538461538461,84.61538461538461,0.5570685000483339,0.7159763313609467,Spread market moved toward atlanta braves
+atlanta braves,washington nationals,2026-09-02 17:05:00+00:00,total,over,strong,13.0,11.0,90.9090909090909,76.92307692307693,0.819311603727006,0.6993006993006994,Total market moved toward OVER
+san francisco giants,pittsburgh pirates,2026-09-02 22:40:00+00:00,total,under,strong,13.0,10.0,90.0,69.23076923076923,2.1712975150564024,0.6230769230769231,Total market moved toward UNDER
+athletics,texas rangers,2026-09-02 18:35:00+00:00,total,over,strong,13.0,11.0,81.81818181818183,69.23076923076923,0.6608612529616914,0.5664335664335665,Total market moved toward OVER
+st. louis cardinals,los angeles dodgers,2026-09-03 02:10:00+00:00,spread,los angeles dodgers,strong,9.0,6.0,100.0,66.66666666666666,1.8375540967109028,0.6666666666666665,Spread market moved toward los angeles dodgers
+st. louis cardinals,los angeles dodgers,2026-09-03 02:10:00+00:00,total,over,strong,9.0,6.0,100.0,66.66666666666666,1.0736155933632108,0.6666666666666665,Total market moved toward OVER
+detroit tigers,minnesota twins,2026-09-02 23:40:00+00:00,spread,detroit tigers,strong,13.0,10.0,80.0,61.53846153846154,2.4659951091733685,0.49230769230769234,Spread market moved toward detroit tigers
+baltimore orioles,colorado rockies,2026-09-02 19:10:00+00:00,moneyline,baltimore orioles,medium,14.0,8.0,100.0,57.14285714285714,0.4472474007885808,0.5714285714285714,Moneyline market moved toward baltimore orioles
+new york mets,tampa bay rays,2026-09-02 22:40:00+00:00,moneyline,new york mets,medium,14.0,9.0,88.88888888888889,57.14285714285714,0.3453842018906584,0.5079365079365079,Moneyline market moved toward new york mets
+new york yankees,los angeles angels,2026-09-03 01:35:00+00:00,moneyline,los angeles angels,medium,14.0,10.0,80.0,57.14285714285714,0.261781010937415,0.45714285714285713,Moneyline market moved toward los angeles angels
+chicago white sox,houston astros,2026-09-03 00:10:00+00:00,moneyline,houston astros,medium,14.0,11.0,72.72727272727273,57.14285714285714,0.7801923467303961,0.41558441558441556,Moneyline market moved toward houston astros
+chicago white sox,houston astros,2026-09-03 00:10:00+00:00,spread,houston astros,medium,13.0,8.0,87.5,53.84615384615385,0.8846056794672639,0.47115384615384615,Spread market moved toward houston astros
+miami marlins,kansas city royals,2026-09-02 23:40:00+00:00,spread,miami marlins,medium,13.0,9.0,77.77777777777779,53.84615384615385,10.92004525524657,0.41880341880341887,Spread market moved toward miami marlins
+miami marlins,kansas city royals,2026-09-02 23:40:00+00:00,total,under,medium,13.0,10.0,70.0,53.84615384615385,0.0360836767103685,0.37692307692307686,Total market moved toward UNDER
+st. louis cardinals,los angeles dodgers,2026-09-03 02:10:00+00:00,moneyline,los angeles dodgers,medium,10.0,5.0,100.0,50.0,0.4870197020501954,0.5,Moneyline market moved toward los angeles dodgers
+miami marlins,kansas city royals,2026-09-02 23:40:00+00:00,moneyline,kansas city royals,medium,14.0,8.0,87.5,50.0,0.3849115707621293,0.4375,Moneyline market moved toward kansas city royals
+seattle mariners,boston red sox,2026-09-02 20:10:00+00:00,spread,boston red sox,medium,13.0,7.0,85.71428571428571,46.15384615384615,0.2536669270758574,0.39560439560439553,Spread market moved toward boston red sox
+san francisco giants,pittsburgh pirates,2026-09-02 22:40:00+00:00,spread,pittsburgh pirates,medium,13.0,8.0,75.0,46.15384615384615,0.4987780414149921,0.34615384615384615,Spread market moved toward pittsburgh pirates
+baltimore orioles,colorado rockies,2026-09-02 19:10:00+00:00,spread,baltimore orioles,medium,13.0,9.0,66.66666666666666,46.15384615384615,0.2021572457625883,0.3076923076923076,Spread market moved toward baltimore orioles
+baltimore orioles,colorado rockies,2026-09-02 19:10:00+00:00,total,under,medium,13.0,9.0,66.66666666666666,46.15384615384615,0.2737428239218537,0.3076923076923076,Total market moved toward UNDER
+atlanta braves,washington nationals,2026-09-02 17:05:00+00:00,moneyline,atlanta braves,medium,14.0,8.0,75.0,42.85714285714285,0.3235128612931768,0.3214285714285714,Moneyline market moved toward atlanta braves
+milwaukee brewers,chicago cubs,2026-09-02 23:40:00+00:00,moneyline,chicago cubs,medium,14.0,9.0,66.66666666666666,42.85714285714285,0.0408392732974616,0.2857142857142856,Moneyline market moved toward chicago cubs
+philadelphia phillies,arizona diamondbacks,2026-09-02 19:40:00+00:00,spread,arizona diamondbacks,medium,12.0,5.0,100.0,41.66666666666667,0.4607947942804501,0.41666666666666674,Spread market moved toward arizona diamondbacks
+milwaukee brewers,chicago cubs,2026-09-02 23:40:00+00:00,total,over,weak,13.0,11.0,54.54545454545454,46.15384615384615,-0.4903357003490568,0.2517482517482517,Total market moved toward OVER
+athletics,texas rangers,2026-09-02 18:35:00+00:00,moneyline,athletics,weak,14.0,10.0,60.0,42.85714285714285,-0.0180227143899151,0.25714285714285706,Moneyline market moved toward athletics
+chicago white sox,houston astros,2026-09-03 00:10:00+00:00,total,over,weak,13.0,6.0,83.33333333333334,38.46153846153847,0.5467253396108916,0.32051282051282065,Total market moved toward OVER
+new york yankees,los angeles angels,2026-09-03 01:35:00+00:00,spread,new york yankees,weak,13.0,7.0,71.42857142857143,38.46153846153847,0.2970068398700684,0.2747252747252748,Spread market moved toward new york yankees
+new york yankees,los angeles angels,2026-09-03 01:35:00+00:00,total,under,weak,13.0,8.0,62.5,38.46153846153847,0.0526870536557464,0.24038461538461542,Total market moved toward UNDER
+new york mets,tampa bay rays,2026-09-02 22:40:00+00:00,spread,tampa bay rays,weak,13.0,9.0,55.55555555555556,38.46153846153847,0.9840591153518908,0.21367521367521372,Spread market moved toward tampa bay rays
+toronto blue jays,cleveland guardians,2026-09-02 22:40:00+00:00,spread,toronto blue jays,weak,13.0,9.0,55.55555555555556,38.46153846153847,0.1197193672439554,0.21367521367521372,Spread market moved toward toronto blue jays
+seattle mariners,boston red sox,2026-09-02 20:10:00+00:00,moneyline,boston red sox,weak,14.0,7.0,71.42857142857143,35.714285714285715,0.0701490641981272,0.25510204081632654,Moneyline market moved toward boston red sox
+toronto blue jays,cleveland guardians,2026-09-02 22:40:00+00:00,moneyline,cleveland guardians,weak,14.0,8.0,62.5,35.714285714285715,0.1421850461341708,0.22321428571428573,Moneyline market moved toward cleveland guardians
+seattle mariners,boston red sox,2026-09-02 20:10:00+00:00,total,under,weak,13.0,5.0,80.0,30.76923076923077,0.3361524599949556,0.24615384615384617,Total market moved toward UNDER
+new york mets,tampa bay rays,2026-09-02 22:40:00+00:00,total,under,weak,13.0,6.0,66.66666666666666,30.76923076923077,-0.612677709451691,0.2051282051282051,Total market moved toward UNDER
+philadelphia phillies,arizona diamondbacks,2026-09-02 19:40:00+00:00,moneyline,philadelphia phillies,weak,13.0,6.0,66.66666666666666,30.76923076923077,0.0088059772354777,0.2051282051282051,Moneyline market moved toward philadelphia phillies
+toronto blue jays,cleveland guardians,2026-09-02 22:40:00+00:00,total,over,weak,13.0,6.0,66.66666666666666,30.76923076923077,0.2493812676317635,0.2051282051282051,Total market moved toward OVER
+san diego padres,cincinnati reds,2026-09-02 16:40:00+00:00,total,mixed,weak,13.0,8.0,50.0,30.76923076923077,-0.0919579368917895,0.0,total: mixed/no clear market direction
+philadelphia phillies,arizona diamondbacks,2026-09-02 19:40:00+00:00,total,under,weak,12.0,3.0,100.0,25.0,-0.1759714599917342,0.25,Total market moved toward UNDER
+athletics,texas rangers,2026-09-02 18:35:00+00:00,spread,texas rangers,weak,13.0,4.0,75.0,23.07692307692308,0.3796164433290446,0.1730769230769231,Spread market moved toward texas rangers
+milwaukee brewers,chicago cubs,2026-09-02 23:40:00+00:00,spread,milwaukee brewers,weak,13.0,5.0,60.0,23.07692307692308,0.0925339208355981,0.13846153846153847,Spread market moved toward milwaukee brewers
+detroit tigers,minnesota twins,2026-09-02 23:40:00+00:00,moneyline,minnesota twins,weak,14.0,3.0,100.0,21.428571428571427,0.1979933651149925,0.21428571428571427,Moneyline market moved toward minnesota twins
+san francisco giants,pittsburgh pirates,2026-09-02 22:40:00+00:00,moneyline,mixed,weak,14.0,6.0,50.0,21.428571428571427,0.2249607481363102,0.0,moneyline: mixed/no clear market direction
+athletics,seattle mariners,2026-09-04 01:40:00+00:00,moneyline,mixed,weak,14.0,0.0,0.0,0.0,0.0,0.0,moneyline: mixed/no clear market direction
+athletics,seattle mariners,2026-09-04 01:40:00+00:00,spread,mixed,weak,13.0,0.0,0.0,0.0,0.0,0.0,spread: mixed/no clear market direction
+athletics,seattle mariners,2026-09-04 01:40:00+00:00,total,mixed,weak,13.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction
+boston red sox,baltimore orioles,2026-09-03 23:15:00+00:00,moneyline,mixed,weak,14.0,0.0,0.0,0.0,0.0,0.0,moneyline: mixed/no clear market direction
+boston red sox,baltimore orioles,2026-09-03 23:15:00+00:00,spread,mixed,weak,13.0,0.0,0.0,0.0,0.0,0.0,spread: mixed/no clear market direction
+boston red sox,baltimore orioles,2026-09-03 23:15:00+00:00,total,mixed,weak,13.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction
+chicago white sox,houston astros,2026-09-03 18:10:00+00:00,spread,mixed,weak,2.0,0.0,0.0,0.0,0.0,0.0,spread: mixed/no clear market direction
+chicago white sox,houston astros,2026-09-03 18:10:00+00:00,total,mixed,weak,3.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction
+miami marlins,kansas city royals,2026-09-03 23:40:00+00:00,spread,mixed,weak,5.0,0.0,0.0,0.0,0.0,0.0,spread: mixed/no clear market direction
+miami marlins,kansas city royals,2026-09-03 23:40:00+00:00,total,mixed,weak,13.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction
+milwaukee brewers,chicago cubs,2026-09-03 23:15:00+00:00,total,mixed,weak,7.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction
+san francisco giants,pittsburgh pirates,2026-09-03 16:35:00+00:00,spread,mixed,weak,2.0,0.0,0.0,0.0,0.0,0.0,spread: mixed/no clear market direction
+san francisco giants,pittsburgh pirates,2026-09-03 16:35:00+00:00,total,mixed,weak,2.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction
+st. louis cardinals,los angeles dodgers,2026-09-04 02:10:00+00:00,moneyline,mixed,weak,4.0,0.0,0.0,0.0,0.0,0.0,moneyline: mixed/no clear market direction
+st. louis cardinals,los angeles dodgers,2026-09-04 02:10:00+00:00,spread,mixed,weak,6.0,0.0,0.0,0.0,0.0,0.0,spread: mixed/no clear market direction
+st. louis cardinals,los angeles dodgers,2026-09-04 02:10:00+00:00,total,mixed,weak,11.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction
+tampa bay rays,texas rangers,2026-09-04 00:05:00+00:00,moneyline,mixed,weak,14.0,0.0,0.0,0.0,0.0,0.0,moneyline: mixed/no clear market direction
+tampa bay rays,texas rangers,2026-09-04 00:05:00+00:00,spread,mixed,weak,13.0,0.0,0.0,0.0,0.0,0.0,spread: mixed/no clear market direction
+tampa bay rays,texas rangers,2026-09-04 00:05:00+00:00,total,mixed,weak,13.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction
+toronto blue jays,cleveland guardians,2026-09-03 17:10:00+00:00,spread,mixed,weak,5.0,0.0,0.0,0.0,0.0,0.0,spread: mixed/no clear market direction
+toronto blue jays,cleveland guardians,2026-09-03 17:10:00+00:00,total,mixed,weak,13.0,0.0,0.0,0.0,0.0,0.0,total: mixed/no clear market direction

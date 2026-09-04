@@ -1,0 +1,14 @@
+{
+  "dataset": "players",
+  "run_at_utc": "2026-09-01T21:41:19.177726+00:00",
+  "records": [
+    {
+      "status": "downloaded",
+      "bytes": 3419569,
+      "sha256": "88620fc3b8e2fbd073051f159ab7a5fb341fd809763af32088adc0e8a2882e66",
+      "season": null,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/players/players.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/players/players.parquet"
+    }
+  ]
+}

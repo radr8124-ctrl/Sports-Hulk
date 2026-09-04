@@ -1,0 +1,18 @@
+{
+  "monthly_entity_limit": 2500,
+  "reserve_pct": 20,
+  "feeds": {
+    "mlb_props": {
+      "share_pct": 50,
+      "priority": "HIGH"
+    },
+    "nfl_props": {
+      "share_pct": 35,
+      "priority": "HIGH"
+    },
+    "flex": {
+      "share_pct": 15,
+      "priority": "CRITICAL"
+    }
+  }
+}

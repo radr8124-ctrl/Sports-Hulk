@@ -1,0 +1,29 @@
+{
+  "providers": {
+    "balldontlie": {
+      "monthly_limit": null,
+      "priority": "LOW"
+    },
+    "cfbd": {
+      "monthly_limit": null,
+      "priority": "MEDIUM"
+    },
+    "propline": {
+      "monthly_limit": null,
+      "priority": "MEDIUM"
+    },
+    "sportsgameodds": {
+      "monthly_limit": null,
+      "priority": "HIGH"
+    },
+    "the_odds_api": {
+      "monthly_limit": 500.0,
+      "priority": "HIGH"
+    },
+    "therundown": {
+      "monthly_limit": null,
+      "priority": "MEDIUM"
+    }
+  },
+  "reserve_pct": 20.0
+}

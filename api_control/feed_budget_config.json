@@ -1,0 +1,36 @@
+{
+  "the_odds_api": {
+    "feeds": {
+      "nfl_core": {
+        "share_pct": 45,
+        "estimated_cost": 3,
+        "priority": "HIGH",
+        "serves": [
+          "NFL Matchups",
+          "NFL Survivor",
+          "Betting Dashboard"
+        ]
+      },
+      "mlb_core": {
+        "share_pct": 35,
+        "estimated_cost": 3,
+        "priority": "HIGH",
+        "serves": [
+          "MLB Matchups",
+          "MLB Market",
+          "Betting Dashboard"
+        ]
+      },
+      "flex_reserve": {
+        "share_pct": 20,
+        "estimated_cost": 1,
+        "priority": "CRITICAL",
+        "serves": [
+          "Emergency refresh",
+          "Closing lines",
+          "Special validation"
+        ]
+      }
+    }
+  }
+}

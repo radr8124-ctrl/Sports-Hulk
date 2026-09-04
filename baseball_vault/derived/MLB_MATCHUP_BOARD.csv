@@ -1,0 +1,26 @@
+gamePk,gameDate,away_team,home_team,away_probable_pitcher,home_probable_pitcher,away_starter_vs_home_lineup,home_starter_vs_away_lineup,home_bullpen_workload,away_bullpen_workload,bullpen_data_present,both_starter_matchups_present,home_edge_score,sample_pitches,pitch_types_matched,h2h_book_count,h2h_median_point,h2h_median_price,spreads_book_count,spreads_median_point,spreads_median_price,totals_book_count,totals_median_point,totals_median_price,confidence,lean,decision
+823337,2026-09-03T16:35:00Z,San Francisco Giants,Pittsburgh Pirates,Blade Tidwell,Lake Bachar,0.251,0.373,21.875,41.875,True,True,0.16,2282,12,9.0,,-12.5,9.0,0.0,-110.5,9.0,8.5,-110.0,HIGH,Pittsburgh Pirates,PASS
+824388,2026-09-03T17:10:00Z,Toronto Blue Jays,Cleveland Guardians,José Soriano,Tanner Bibee,0.023,-0.03,19.25,26.428571428571427,True,True,-0.011,7090,12,9.0,,-108.0,9.0,0.0,-13.5,9.0,8.0,-110.0,HIGH,Toronto Blue Jays,PASS
+824144,2026-09-03T18:10:00Z,Chicago White Sox,Houston Astros,Luis Castillo,Hunter Brown,0.056,0.031,25.875,28.666666666666668,True,True,-0.01,7142,10,9.0,,-9.0,9.0,0.0,-12.5,9.0,8.5,-113.0,HIGH,Chicago White Sox,PASS
+824796,2026-09-03T23:15:00Z,Boston Red Sox,Baltimore Orioles,Jake Bennett,Brandon Young,0.02,-0.011,32.875,34.0,True,True,-0.021,1824,14,9.0,,-10.0,9.0,0.0,-10.5,9.0,8.5,-112.0,HIGH,Boston Red Sox,PASS
+824632,2026-09-03T23:15:00Z,Milwaukee Brewers,Chicago Cubs,Logan Henderson,Kevin Gausman,-0.002,-0.029,34.875,38.0,True,True,-0.013,5030,10,9.0,,-108.5,9.0,0.0,-11.0,9.0,8.0,-110.5,HIGH,Milwaukee Brewers,PASS
+824069,2026-09-03T23:40:00Z,Miami Marlins,Kansas City Royals,Sandy Alcantara,Michael Wacha,-0.071,0.272,15.375,38.714285714285715,True,True,0.361,6795,13,9.0,,-109.5,9.0,0.0,-10.0,9.0,9.0,-110.0,HIGH,Kansas City Royals,WATCH
+822853,2026-09-04T00:05:00Z,Tampa Bay Rays,Texas Rangers,Shane McClanahan,Cal Quantrill,0.202,0.022,36.714285714285715,31.25,True,True,-0.16,2715,12,9.0,,-10.0,9.0,0.0,-10.5,9.0,7.5,-110.5,HIGH,Tampa Bay Rays,PASS
+823095,2026-09-04T01:40:00Z,Athletics,Seattle Mariners,Jack Perkins,Kade Anderson,0.222,0.374,26.555555555555557,32.42857142857143,True,True,0.142,1285,11,9.0,,-12.0,9.0,0.0,-10.0,9.0,7.5,-109.0,HIGH,Seattle Mariners,PASS
+823907,2026-09-04T02:10:00Z,St. Louis Cardinals,Los Angeles Dodgers,Quinn Mathews,Tarik Skubal,0.099,-0.004,17.625,36.375,True,True,-0.013,4153,11,9.0,,-30.0,9.0,0.0,-111.0,9.0,7.5,-110.0,HIGH,St. Louis Cardinals,PASS
+824424,2026-09-04T18:10:00Z,Detroit Tigers,Cleveland Guardians,Keider Montero,,0.078,,19.25,33.77777777777778,True,False,-0.008,2027,6,,,,,,,,,,LOW,Detroit Tigers,PASS
+824387,2026-09-04T23:15:00Z,Detroit Tigers,Cleveland Guardians,Andrew Sears,,0.096,,19.25,33.77777777777778,True,False,-0.022,116,4,,,,,,,,,,LOW,Detroit Tigers,PASS
+824471,2026-09-04T22:10:00Z,Milwaukee Brewers,Cincinnati Reds,,Rhett Lowder,,0.08,35.285714285714285,38.0,True,False,0.071,476,5,,,,,,,,,,LOW,Cincinnati Reds,PASS
+823418,2026-09-04T22:40:00Z,Atlanta Braves,Philadelphia Phillies,Chris Sale,Cristopher Sánchez,0.035,0.042,17.714285714285715,30.375,True,True,0.058,6161,7,,,,,,,,,,HIGH,Philadelphia Phillies,PASS
+823338,2026-09-04T22:45:00Z,Los Angeles Angels,Pittsburgh Pirates,Ryan Johnson,Jared Jones,0.078,0.402,21.875,26.428571428571427,True,True,0.278,1154,10,,,,,,,,,,HIGH,Pittsburgh Pirates,PASS
+824797,2026-09-04T23:05:00Z,Boston Red Sox,Baltimore Orioles,Ranger Suarez,Shane Baz,0.018,0.119,32.875,34.0,True,True,0.084,6199,12,9.0,,-10.0,9.0,0.0,-10.5,9.0,8.5,-112.0,HIGH,Baltimore Orioles,PASS
+823579,2026-09-04T23:10:00Z,San Francisco Giants,New York Mets,,Nolan McLean,,-0.039,29.0,41.875,True,False,0.005,1205,7,,,,,,,,,,LOW,New York Mets,PASS
+823824,2026-09-04T23:10:00Z,Chicago Cubs,Miami Marlins,,,,,38.714285714285715,34.875,True,False,-0.01,0,0,,,,,,,,,,LOW,Chicago Cubs,PASS
+824554,2026-09-04T23:40:00Z,Minnesota Twins,Chicago White Sox,Zebby Matthews,,0.074,,28.666666666666668,33.22222222222222,True,False,-0.044,1828,6,,,,,,,,,,LOW,Minnesota Twins,PASS
+822852,2026-09-05T00:05:00Z,Tampa Bay Rays,Texas Rangers,Nick Martinez,Kumar Rocker,0.109,-0.067,36.714285714285715,31.25,True,True,-0.157,4891,14,9.0,,-10.0,9.0,0.0,-10.5,9.0,7.5,-110.5,HIGH,Tampa Bay Rays,PASS
+824146,2026-09-05T00:10:00Z,Arizona Diamondbacks,Houston Astros,Merrill Kelly,,0.145,,25.875,30.7,True,False,-0.099,3431,7,,,,,,,,,,LOW,Arizona Diamondbacks,PASS
+824067,2026-09-05T00:10:00Z,Toronto Blue Jays,Kansas City Royals,Jameson Taillon,,-0.056,,15.375,26.428571428571427,True,False,0.098,2255,7,,,,,,,,,,LOW,Kansas City Royals,PASS
+824311,2026-09-05T00:40:00Z,St. Louis Cardinals,Colorado Rockies,,Ryan Feltner,,0.024,34.333333333333336,36.375,True,False,0.025,1125,6,,,,,,,,,,LOW,Colorado Rockies,PASS
+823256,2026-09-05T01:40:00Z,New York Yankees,San Diego Padres,Max Fried,Walker Buehler,-0.038,-0.09,35.857142857142854,37.666666666666664,True,True,-0.037,6475,14,,,,,,,,,,HIGH,New York Yankees,PASS
+823905,2026-09-05T02:10:00Z,Washington Nationals,Los Angeles Dodgers,Jackson Kent,,0.101,,17.625,31.666666666666668,True,False,-0.024,358,5,,,,,,,,,,LOW,Washington Nationals,PASS
+823093,2026-09-05T02:10:00Z,Athletics,Seattle Mariners,,Logan Gilbert,,0.418,26.555555555555557,32.42857142857143,True,False,0.354,3062,7,9.0,,-12.0,9.0,0.0,-10.0,9.0,7.5,-109.0,LOW,Seattle Mariners,PASS

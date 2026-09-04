@@ -1,0 +1,42 @@
+{
+  "version": "2026-09-01",
+  "sources": {
+    "mlb_statsapi": {
+      "base": "https://statsapi.mlb.com",
+      "auth": "none",
+      "purpose": [
+        "schedule",
+        "probable pitchers",
+        "scores/status",
+        "boxscores",
+        "lineups",
+        "bullpen workload"
+      ]
+    },
+    "sportsgameodds": {
+      "base": "https://api.sportsgameodds.com/v2/events",
+      "env": "SPORTSGAMEODDS_API_KEY",
+      "purpose": [
+        "MLB game odds",
+        "player props",
+        "bookmaker market snapshots"
+      ]
+    },
+    "the_odds_api": {
+      "base": "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds",
+      "env": "THE_ODDS_API_KEY",
+      "purpose": [
+        "secondary MLB market snapshot",
+        "moneyline",
+        "run line",
+        "total"
+      ]
+    }
+  },
+  "notes": [
+    "Installer makes no network/API calls.",
+    "Collector reads existing SPORTS_HULK_STARTER/.env; secrets are never copied into the package.",
+    "SportsGameOdds pull is capped at 25 events per collector run to conserve the current entity allowance.",
+    "Raw snapshots are append-only by timestamp; latest normalized CSVs are overwritten for convenience."
+  ]
+}

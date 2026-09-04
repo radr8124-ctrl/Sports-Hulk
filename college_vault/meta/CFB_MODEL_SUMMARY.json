@@ -1,0 +1,20 @@
+{
+  "historical_games": 8643,
+  "history_ready_games": 8152,
+  "walkforward_games": 8052,
+  "winner_accuracy": 0.7065325384997516,
+  "margin_mae": 14.235167122216733,
+  "total_mae": 14.15442783680116,
+  "comp_features": [
+    "margin_form_gap_3",
+    "margin_form_gap_5",
+    "margin_form_gap_8",
+    "offense_gap_5",
+    "defense_gap_5",
+    "winpct_gap_5",
+    "rest_gap",
+    "home_field"
+  ],
+  "comp_k": 50,
+  "method": "prior-games-only nearest historical comps"
+}

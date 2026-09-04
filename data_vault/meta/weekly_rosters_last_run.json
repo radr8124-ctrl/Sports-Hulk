@@ -1,0 +1,30 @@
+{
+  "dataset": "weekly_rosters",
+  "run_at_utc": "2026-09-01T21:44:03.588095+00:00",
+  "records": [
+    {
+      "status": "downloaded",
+      "bytes": 829272,
+      "sha256": "4b144e8eda5a159f36037b02e8b7d5a7861acb65b0816b0a063244992038dcf8",
+      "season": 2024,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/weekly_rosters/roster_weekly_2024.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/weekly_rosters/weekly_rosters_2024.parquet"
+    },
+    {
+      "status": "downloaded",
+      "bytes": 850871,
+      "sha256": "a8764c947bfe6a9d8f122a194e3f026973c8efcc8a3456c67cbfac4371c20342",
+      "season": 2025,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/weekly_rosters/roster_weekly_2025.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/weekly_rosters/weekly_rosters_2025.parquet"
+    },
+    {
+      "status": "downloaded",
+      "bytes": 510191,
+      "sha256": "91ae7e48f39b6184c52147078f874c29961d0f4999d619ececcc4765e3237721",
+      "season": 2026,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/weekly_rosters/roster_weekly_2026.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/weekly_rosters/weekly_rosters_2026.parquet"
+    }
+  ]
+}

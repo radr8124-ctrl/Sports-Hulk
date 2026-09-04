@@ -1,0 +1,273 @@
+event_id,start,away_team,home_team,away_moneyline,home_moneyline,away_spread,home_spread,total,sportsbooks,books_list,collected_at
+8c94552d022acec4a0458d70c19d3da9,2026-09-10 00:20:00+00:00,New England Patriots,Seattle Seahawks,158.0,-185.0,3.5,-3.5,44.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.052937+00:00
+acc580d74344ea3b31bbcdd057fe6a9c,2026-09-11 00:35:00+00:00,San Francisco 49ers,Los Angeles Rams,170.0,-205.0,4.0,-4.0,48.0,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.054005+00:00
+95c01d1bb797d6df14824b106c5a9130,2026-09-13 17:00:00+00:00,Atlanta Falcons,Pittsburgh Steelers,155.0,-180.0,3.0,-3.0,42.0,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.054912+00:00
+b6cfdcbafa61ce220ba87dc2d9b80c77,2026-09-13 17:00:00+00:00,Baltimore Ravens,Indianapolis Colts,-178.0,150.0,-3.5,3.5,48.0,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.055839+00:00
+7e09efed7e12c659b82740b67ce2f9a1,2026-09-13 17:00:00+00:00,Buffalo Bills,Houston Texans,-115.0,-107.5,-1.0,1.0,44.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.056713+00:00
+fc362aff0d889ec52d358307a70c32ed,2026-09-13 17:00:00+00:00,Chicago Bears,Carolina Panthers,-155.0,132.0,-2.5,2.5,47.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.057574+00:00
+ed6d24ff979f9c71979fead577b0b3f7,2026-09-13 17:00:00+00:00,Tampa Bay Buccaneers,Cincinnati Bengals,172.0,-210.0,4.0,-4.0,50.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.058402+00:00
+e55c6fe19fce094ce214c8b0e5b504e9,2026-09-13 17:00:00+00:00,Cleveland Browns,Jacksonville Jaguars,310.0,-400.0,8.0,-8.0,40.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.059288+00:00
+c1d3fcec25aaeb06ebd2244d33d338e0,2026-09-13 17:00:00+00:00,New Orleans Saints,Detroit Lions,250.0,-305.0,7.0,-7.0,50.0,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.060357+00:00
+7dddb296a42e7a41a774b24bd1709ce1,2026-09-13 17:00:00+00:00,New York Jets,Tennessee Titans,110.0,-130.0,1.5,-1.5,39.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.061291+00:00
+17885cb8dcade8f6c3bce14b2de805e8,2026-09-13 20:25:00+00:00,Washington Commanders,Philadelphia Eagles,195.0,-235.0,5.0,-5.0,45.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.064800+00:00
+c5d95f48a16849ab6bebc68fbbfcb74a,2026-09-13 20:25:00+00:00,Miami Dolphins,Las Vegas Raiders,159.0,-186.0,3.5,-3.5,40.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.063958+00:00
+1edfa5ceaa1ad2cb57df1c1b908731f6,2026-09-13 20:25:00+00:00,Arizona Cardinals,Los Angeles Chargers,415.0,-550.0,10.0,-10.0,47.0,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.062158+00:00
+cb77efed7e711d25a72c1a2a0a1af119,2026-09-13 20:25:00+00:00,Green Bay Packers,Minnesota Vikings,100.0,-121.0,1.5,-1.5,46.0,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.063036+00:00
+3e646c7479c57f5d9752d8c7dfe7059b,2026-09-14 00:20:00+00:00,Dallas Cowboys,New York Giants,-160.0,130.0,-3.0,3.0,48.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.065664+00:00
+5ad8135dc2b5f27de0b777acd317855a,2026-09-15 00:15:00+00:00,Denver Broncos,Kansas City Chiefs,122.0,-144.0,2.5,-2.5,43.5,9,"BetMGM, BetOnline.ag, BetRivers, BetUS, Bovada, DraftKings, FanDuel, LowVig.ag, MyBookie.ag",2026-09-03T08:47:53.066476+00:00
+56e8897681915f7ec92baeee952bb1ae,2026-09-18 00:15:00+00:00,Detroit Lions,Buffalo Bills,134.5,-163.5,3.0,-3.0,52.0,4,"BetOnline.ag, BetRivers, DraftKings, LowVig.ag",2026-09-03T08:47:53.067329+00:00
+4aeee070bb6ec60bdfae4dede61b9014,2026-09-20 17:00:00+00:00,Green Bay Packers,New York Jets,-250.0,205.0,-5.5,5.5,42.5,1,DraftKings,2026-09-03T08:47:53.072209+00:00
+fafc649c455e32a0f2ba1bd06e2039bc,2026-09-20 17:00:00+00:00,Philadelphia Eagles,Tennessee Titans,-218.0,180.0,-4.5,4.5,42.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.073887+00:00
+9d14f87600f6edc74dbcb5c74edf6246,2026-09-20 17:00:00+00:00,Pittsburgh Steelers,New England Patriots,180.0,-218.0,4.5,-4.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.073039+00:00
+0636ebff776d43f8c829a36713c80b22,2026-09-20 17:00:00+00:00,Cleveland Browns,Tampa Bay Buccaneers,230.0,-285.0,6.5,-6.5,42.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.071397+00:00
+2143ade9684fd876b68a4e8cbf451f05,2026-09-20 17:00:00+00:00,New Orleans Saints,Baltimore Ravens,275.0,-345.0,7.5,-7.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.068952+00:00
+0283a29e1b38ef78b29b904fd56a16dd,2026-09-20 17:00:00+00:00,Minnesota Vikings,Chicago Bears,160.0,-192.0,3.5,-3.5,45.5,1,DraftKings,2026-09-03T08:47:53.069778+00:00
+aee7eae1849ebb103b9bf233e9741392,2026-09-20 17:00:00+00:00,Carolina Panthers,Atlanta Falcons,105.0,-125.0,1.5,-1.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.068145+00:00
+36ad2fa722f4915ef23d2c81351261de,2026-09-20 17:00:00+00:00,Cincinnati Bengals,Houston Texans,114.0,-135.0,2.5,-2.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.070576+00:00
+1fd6628c781f556a7a19638e97d7107f,2026-09-20 20:05:00+00:00,Jacksonville Jaguars,Denver Broncos,130.0,-155.0,2.75,-2.75,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.074878+00:00
+71b3b83747589efdc5baef2c5cf811bf,2026-09-20 20:05:00+00:00,Las Vegas Raiders,Los Angeles Chargers,285.0,-360.0,8.5,-8.5,42.5,1,DraftKings,2026-09-03T08:47:53.075744+00:00
+4dd8020192a544385db42374e5555303,2026-09-20 20:25:00+00:00,Seattle Seahawks,Arizona Cardinals,-535.0,400.0,-10.0,10.0,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.076530+00:00
+85ef85098ddd22fe4ecf45e7e3c0a9c0,2026-09-20 20:25:00+00:00,Washington Commanders,Dallas Cowboys,170.0,-205.0,4.5,-4.5,51.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.077310+00:00
+68bc55903f50af4af4766adcc89fcc61,2026-09-20 20:25:00+00:00,Miami Dolphins,San Francisco 49ers,490.0,-675.0,10.5,-10.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.078153+00:00
+50bc247030707d823b9c3581d7eb5760,2026-09-21 00:20:00+00:00,Indianapolis Colts,Kansas City Chiefs,260.0,-325.0,6.0,-6.0,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.078962+00:00
+32367f882fac1a0c20a6335619922025,2026-09-22 00:15:00+00:00,New York Giants,Los Angeles Rams,300.0,-380.0,9.0,-9.0,48.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.079802+00:00
+e5fbd3b3953b896b1bf897ddadb3cc4b,2026-09-25 00:15:00+00:00,Atlanta Falcons,Green Bay Packers,295.0,-375.0,7.5,-7.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.080598+00:00
+0339a0e41bcee12820eb3e64bb5fadb4,2026-09-27 17:00:00+00:00,Kansas City Chiefs,Miami Dolphins,-440.0,340.0,-7.25,7.25,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.086603+00:00
+2a529c108305ffa049d8b6cfdbaa4d36,2026-09-27 17:00:00+00:00,Seattle Seahawks,Washington Commanders,-185.0,154.0,-3.5,3.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.088229+00:00
+555afd4a27aaa392662881cffa8f2eef,2026-09-27 17:00:00+00:00,Tennessee Titans,New York Giants,140.0,-166.0,3.0,-3.0,45.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.087415+00:00
+1f3cfd315a24d1a7dd5859a8e6b88e18,2026-09-27 17:00:00+00:00,New England Patriots,Jacksonville Jaguars,-102.0,-118.0,1.5,-1.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.085787+00:00
+613b8cd3a5fab58f7be4e3fd6f76223e,2026-09-27 17:00:00+00:00,Carolina Panthers,Cleveland Browns,-125.0,105.0,-1.5,1.5,39.5,1,DraftKings,2026-09-03T08:47:53.082160+00:00
+07f552badfa8a565d1be22123713e4da,2026-09-27 17:00:00+00:00,New York Jets,Detroit Lions,330.0,-425.0,9.5,-9.5,45.5,1,DraftKings,2026-09-03T08:47:53.084138+00:00
+71123be049587b6facce3a20c53e5d09,2026-09-27 17:00:00+00:00,Cincinnati Bengals,Pittsburgh Steelers,-125.0,105.0,-1.5,1.5,47.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.083186+00:00
+b225458a282e140c44c45651255f2f6c,2026-09-27 17:00:00+00:00,Los Angeles Chargers,Buffalo Bills,136.0,-162.0,3.0,-3.0,48.5,1,DraftKings,2026-09-03T08:47:53.081364+00:00
+17a730b7d399feeab6a78c30767c29d2,2026-09-27 17:00:00+00:00,Houston Texans,Indianapolis Colts,-125.0,105.0,-1.5,1.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.084986+00:00
+9d2b09e0f9b6dd5ce0d985894f4f98fa,2026-09-27 20:05:00+00:00,Arizona Cardinals,San Francisco 49ers,490.0,-675.0,11.5,-11.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.089048+00:00
+f1724dead3eab61546033032fc782375,2026-09-27 20:05:00+00:00,Minnesota Vikings,Tampa Bay Buccaneers,105.0,-125.0,1.5,-1.5,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.089877+00:00
+84cfca14efc21363fd605508404cf1ff,2026-09-27 20:25:00+00:00,Baltimore Ravens,Dallas Cowboys,-135.0,114.0,-2.5,2.5,51.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.090687+00:00
+2e523fcb0497aa689473e290eb2b97de,2026-09-27 20:25:00+00:00,Las Vegas Raiders,New Orleans Saints,160.0,-192.0,3.5,-3.5,42.5,1,DraftKings,2026-09-03T08:47:53.091510+00:00
+3bfd8bfb4b8e9a365a0877879b73b16b,2026-09-28 00:20:00+00:00,Los Angeles Rams,Denver Broncos,-155.0,130.0,-3.0,3.0,45.5,1,DraftKings,2026-09-03T08:47:53.092290+00:00
+47dc7baa254659f3beb2ed2b38c207b6,2026-09-29 00:15:00+00:00,Philadelphia Eagles,Chicago Bears,-102.0,-118.0,1.5,-1.5,46.5,1,DraftKings,2026-09-03T08:47:53.093096+00:00
+d55cb69fed50a09170560b5b75d8de86,2026-10-02 00:15:00+00:00,Pittsburgh Steelers,Cleveland Browns,-135.0,114.0,-2.5,2.5,40.5,1,DraftKings,2026-09-03T08:47:53.093908+00:00
+c9d8ed8aa4889486eaf10a630138ede0,2026-10-04 13:30:00+00:00,Indianapolis Colts,Washington Commanders,-109.0,-110.0,1.5,-1.5,49.5,3,"BetUS, DraftKings, FanDuel",2026-09-03T08:47:53.094764+00:00
+1b4f2e60ce83fa1d63a5dff83769d27c,2026-10-04 17:00:00+00:00,Los Angeles Rams,Philadelphia Eagles,-125.0,105.0,-1.5,1.5,47.5,1,DraftKings,2026-09-03T08:47:53.101760+00:00
+99a9bae4dc0dc2590496bd3102b211f2,2026-10-04 17:00:00+00:00,Green Bay Packers,Tampa Bay Buccaneers,-125.0,105.0,-1.5,1.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.100883+00:00
+daf55e2df5341c007fee5a0fc5bbc2d4,2026-10-04 17:00:00+00:00,Dallas Cowboys,Houston Texans,114.0,-135.0,2.5,-2.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.099936+00:00
+2ea94ddf20f66432b9024fe2e2eaba5f,2026-10-04 17:00:00+00:00,Jacksonville Jaguars,Cincinnati Bengals,114.0,-135.0,2.5,-2.5,51.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.099070+00:00
+164e6eb68f31bac190381903c3cccd31,2026-10-04 17:00:00+00:00,New York Jets,Chicago Bears,330.0,-425.0,8.5,-8.5,45.5,1,DraftKings,2026-09-03T08:47:53.098247+00:00
+f01589b0e7e6dd4f4ac1220a1db81f53,2026-10-04 17:00:00+00:00,Tennessee Titans,Baltimore Ravens,310.0,-395.0,8.5,-8.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.096589+00:00
+664e6bda5721dc63be16bcf7d962a436,2026-10-04 17:00:00+00:00,Arizona Cardinals,New York Giants,260.0,-325.0,7.0,-7.0,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.095610+00:00
+573cc0ef39631a4f6673ec843a8bedd4,2026-10-04 17:00:00+00:00,New England Patriots,Buffalo Bills,140.0,-166.0,3.0,-3.0,49.5,1,DraftKings,2026-09-03T08:47:53.097376+00:00
+c327223d76a3b7b0db8c6c104442f44b,2026-10-04 20:05:00+00:00,Miami Dolphins,Minnesota Vikings,320.0,-410.0,7.5,-7.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.102554+00:00
+a7e7efb75a9792ac63480ae6328dca18,2026-10-04 20:25:00+00:00,Denver Broncos,San Francisco 49ers,120.0,-142.0,2.5,-2.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.103802+00:00
+e0cbd266dcf997089203a1b33ba0333d,2026-10-04 20:25:00+00:00,Kansas City Chiefs,Las Vegas Raiders,-250.0,205.0,-5.5,5.5,43.5,1,DraftKings,2026-09-03T08:47:53.104675+00:00
+96d2373cda647873b971f268482bced0,2026-10-04 20:25:00+00:00,Los Angeles Chargers,Seattle Seahawks,145.0,-175.0,3.0,-3.0,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.105464+00:00
+a73a76599a4f3422803e57bd8f61b626,2026-10-05 00:20:00+00:00,Detroit Lions,Carolina Panthers,-162.0,136.0,-3.0,3.0,47.5,1,DraftKings,2026-09-03T08:47:53.106282+00:00
+8bd90781e17e6d97df3941063cedae1e,2026-10-06 00:15:00+00:00,Atlanta Falcons,New Orleans Saints,114.0,-135.0,2.5,-2.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.107138+00:00
+259b5df9aa0d10257f56de78523495e0,2026-10-09 00:15:00+00:00,Tampa Bay Buccaneers,Dallas Cowboys,170.0,-205.0,3.5,-3.5,52.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.108019+00:00
+21b26266f3d78af02eb672e606275d95,2026-10-11 13:30:00+00:00,Philadelphia Eagles,Jacksonville Jaguars,-122.5,103.5,-1.5,1.5,44.5,3,"BetUS, DraftKings, FanDuel",2026-09-03T08:47:53.108870+00:00
+2cda9bf0fbe35a2735f0dd8aaafe9eff,2026-10-11 17:00:00+00:00,Minnesota Vikings,New Orleans Saints,-125.0,105.0,-1.5,1.5,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.113740+00:00
+fbffd0b7722fd81d68d5d62472dc80e8,2026-10-11 17:00:00+00:00,New York Giants,Washington Commanders,110.0,-130.0,2.0,-2.0,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.114534+00:00
+6b024bad1abb54f597225e4ab9b39d89,2026-10-11 17:00:00+00:00,Las Vegas Raiders,New England Patriots,310.0,-395.0,8.5,-8.5,44.5,1,DraftKings,2026-09-03T08:47:53.112924+00:00
+9db4ed15fe34fca1fb62f040cd244591,2026-10-11 17:00:00+00:00,Cleveland Browns,New York Jets,110.0,-130.0,2.5,-2.5,39.5,1,DraftKings,2026-09-03T08:47:53.110449+00:00
+cc52bba56e74f5cddbe9011046181c3d,2026-10-11 17:00:00+00:00,Houston Texans,Tennessee Titans,-185.0,154.0,-3.5,3.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.111296+00:00
+448d7cf18c6db4c811ed82ded1b72867,2026-10-11 17:00:00+00:00,Indianapolis Colts,Pittsburgh Steelers,114.0,-135.0,2.5,-2.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.112120+00:00
+c4647ca1201e6768501877267ca8251b,2026-10-11 17:00:00+00:00,Cincinnati Bengals,Miami Dolphins,-278.0,225.0,-5.75,5.75,49.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.109682+00:00
+d1d408fdfd272046fb517fe992a1c5a0,2026-10-11 20:05:00+00:00,Denver Broncos,Los Angeles Chargers,114.0,-135.0,2.5,-2.5,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.115361+00:00
+f8e7f43f73aa983c5c99c189587f0118,2026-10-11 20:25:00+00:00,Detroit Lions,Arizona Cardinals,-380.0,300.0,-8.5,8.5,48.5,1,DraftKings,2026-09-03T08:47:53.116170+00:00
+2caea57b1e5cfbba1334cfbfd46f6771,2026-10-11 20:25:00+00:00,Chicago Bears,Green Bay Packers,140.0,-166.0,3.0,-3.0,49.5,1,DraftKings,2026-09-03T08:47:53.116972+00:00
+8e5d515b10d8a5ffb324640ed60bcc55,2026-10-11 20:25:00+00:00,San Francisco 49ers,Seattle Seahawks,170.0,-205.0,3.5,-3.5,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.117777+00:00
+86457f91112732f21ad4bb7d37bd291c,2026-10-12 00:20:00+00:00,Baltimore Ravens,Atlanta Falcons,-205.0,170.0,-4.5,4.5,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.118668+00:00
+e6d00eedd87d367e510314bd8cab8f6f,2026-10-13 00:15:00+00:00,Buffalo Bills,Los Angeles Rams,140.0,-166.0,3.0,-3.0,53.5,1,DraftKings,2026-09-03T08:47:53.119546+00:00
+855f58fad5f0f14b239f4f63df27998b,2026-10-16 00:15:00+00:00,Seattle Seahawks,Denver Broncos,-130.0,110.0,-2.5,2.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.120330+00:00
+57418b2cf5aca558b3c98eafac1e264a,2026-10-18 13:30:00+00:00,Houston Texans,Jacksonville Jaguars,-110.0,-108.0,-1.5,1.5,41.5,3,"BetUS, DraftKings, FanDuel",2026-09-03T08:47:53.121148+00:00
+27f3994841ce8081c0b7349cf3d1e3d7,2026-10-18 17:00:00+00:00,Pittsburgh Steelers,Tampa Bay Buccaneers,105.0,-125.0,1.5,-1.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.127158+00:00
+1cf74afd313e9fd300e1462012b174cb,2026-10-18 17:00:00+00:00,New Orleans Saints,New York Giants,120.0,-142.0,2.5,-2.5,45.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.126001+00:00
+84aa9e190e625d7e9cd67e1f157a45b4,2026-10-18 17:00:00+00:00,Tennessee Titans,Indianapolis Colts,160.0,-192.0,3.5,-3.5,48.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.124381+00:00
+0b0b582b32b09ab6ff6664ffae0c9653,2026-10-18 17:00:00+00:00,New York Jets,New England Patriots,330.0,-425.0,9.5,-9.5,42.5,1,DraftKings,2026-09-03T08:47:53.125183+00:00
+e86227938fd3cf008fc5648fb5128344,2026-10-18 17:00:00+00:00,Baltimore Ravens,Cleveland Browns,-250.0,205.0,-6.5,6.5,44.5,1,DraftKings,2026-09-03T08:47:53.122770+00:00
+7c312fdf24fb35f58b0e07c2932cc997,2026-10-18 17:00:00+00:00,Chicago Bears,Atlanta Falcons,-155.0,130.0,-3.0,3.0,47.5,1,DraftKings,2026-09-03T08:47:53.121959+00:00
+caca2d752fe1a1779029082e95332fcc,2026-10-18 17:00:00+00:00,Carolina Panthers,Philadelphia Eagles,225.0,-278.0,6.5,-6.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.123607+00:00
+3729ac6d2a66b642850caf2044cdc658,2026-10-18 20:05:00+00:00,Arizona Cardinals,Los Angeles Rams,550.0,-800.0,13.5,-13.5,47.5,1,DraftKings,2026-09-03T08:47:53.128043+00:00
+45b2690b350ed45145c7a716b18e8e66,2026-10-18 20:25:00+00:00,Buffalo Bills,Las Vegas Raiders,-265.0,215.0,-6.5,6.5,47.5,1,DraftKings,2026-09-03T08:47:53.128872+00:00
+20fefae8c296247460ba5773caa42218,2026-10-18 20:25:00+00:00,Los Angeles Chargers,Kansas City Chiefs,120.0,-142.0,2.5,-2.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.129688+00:00
+82fd5a159fa130e67abab93a9537f70b,2026-10-19 00:20:00+00:00,Dallas Cowboys,Green Bay Packers,140.0,-166.0,3.0,-3.0,51.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.130460+00:00
+f122527f003276d3bca19efa48c902c1,2026-10-20 00:15:00+00:00,Washington Commanders,San Francisco 49ers,205.0,-250.0,5.5,-5.5,50.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.131314+00:00
+ffebea881c1d7b2dfb85b3e590c35985,2026-10-23 00:15:00+00:00,New England Patriots,Chicago Bears,105.0,-125.0,1.5,-1.5,47.5,1,DraftKings,2026-09-03T08:47:53.132144+00:00
+2e710ea5a306b614f0f966e3d78732f8,2026-10-25 13:30:00+00:00,Pittsburgh Steelers,New Orleans Saints,-136.0,115.0,-2.5,2.5,42.5,3,"BetUS, DraftKings, FanDuel",2026-09-03T08:47:53.132957+00:00
+2bba7fde6f97d0e54403d53676e4ab63,2026-10-25 17:00:00+00:00,New York Giants,Houston Texans,195.0,-238.0,5.5,-5.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.137003+00:00
+5dce18baccec5d3ad5fb3a3ce52f7619,2026-10-25 17:00:00+00:00,Cleveland Browns,Tennessee Titans,114.0,-135.0,2.5,-2.5,40.5,1,DraftKings,2026-09-03T08:47:53.136194+00:00
+f3992ad4496724baf7dcd1ef58245d6b,2026-10-25 17:00:00+00:00,Indianapolis Colts,Minnesota Vikings,120.0,-142.0,2.75,-2.75,47.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.137825+00:00
+550ec5290f935d311995affbcb0b5c79,2026-10-25 17:00:00+00:00,Cincinnati Bengals,Baltimore Ravens,154.0,-185.0,3.5,-3.5,52.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.134557+00:00
+b1be064fb52a198a62109c279e7ab24c,2026-10-25 17:00:00+00:00,San Francisco 49ers,Atlanta Falcons,-218.0,180.0,-4.5,4.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.133765+00:00
+2823e986597c449ab94126cd5ed3fae9,2026-10-25 17:00:00+00:00,Tampa Bay Buccaneers,Carolina Panthers,-125.0,105.0,-1.5,1.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.135388+00:00
+be5dd120ca08b43d647b6caa8953500a,2026-10-25 17:00:00+00:00,Miami Dolphins,New York Jets,114.0,-135.0,2.5,-2.5,41.5,1,DraftKings,2026-09-03T08:47:53.138616+00:00
+436119bb3ccdaa6ed7808aa3ebd82b76,2026-10-25 20:05:00+00:00,Denver Broncos,Arizona Cardinals,-360.0,285.0,-7.5,7.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.139435+00:00
+e8e5715eefb6a9ce64765e9ddf49c0cc,2026-10-25 20:25:00+00:00,Green Bay Packers,Detroit Lions,120.0,-142.0,2.5,-2.5,50.5,1,DraftKings,2026-09-03T08:47:53.140423+00:00
+f7679cf18454e4d88a8f2b990c3f08ac,2026-10-25 20:25:00+00:00,Los Angeles Rams,Las Vegas Raiders,-345.0,275.0,-7.5,7.5,46.5,1,DraftKings,2026-09-03T08:47:53.141266+00:00
+176d474ed8b2bbf1eb4d7e9c56b4bf22,2026-10-26 00:20:00+00:00,Kansas City Chiefs,Seattle Seahawks,145.0,-175.0,3.0,-3.0,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.142077+00:00
+4853610e63c246f2027a6a248e642c9a,2026-10-27 00:15:00+00:00,Dallas Cowboys,Philadelphia Eagles,136.0,-162.0,3.0,-3.0,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.142901+00:00
+ab2865e9f2d4b012de8bc6fb6de11a7c,2026-10-30 00:15:00+00:00,Carolina Panthers,Green Bay Packers,270.0,-340.0,7.0,-7.0,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.143788+00:00
+9255ca8f32aea590d00aa57de79f6bb6,2026-11-01 18:00:00+00:00,Arizona Cardinals,Dallas Cowboys,380.0,-500.0,10.5,-10.5,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.144898+00:00
+921859689f5f8b3b8b1caf4248bdb1ec,2026-11-01 18:00:00+00:00,Atlanta Falcons,Tampa Bay Buccaneers,180.0,-218.0,4.5,-4.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.145736+00:00
+c93c421e5fa46031a43162d111d981d0,2026-11-01 18:00:00+00:00,Baltimore Ravens,Buffalo Bills,114.0,-135.0,2.5,-2.5,51.5,1,DraftKings,2026-09-03T08:47:53.146781+00:00
+9c5d8f57e0ba0fbd9ef436c1f0898f99,2026-11-01 18:00:00+00:00,Tennessee Titans,Cincinnati Bengals,240.0,-298.0,6.5,-6.5,49.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.147712+00:00
+ab5ab731ab655bd6308bc7a922275518,2026-11-01 18:00:00+00:00,Cleveland Browns,Pittsburgh Steelers,210.0,-258.0,6.0,-6.0,39.5,1,DraftKings,2026-09-03T08:47:53.148483+00:00
+52e7ee9c42525e6deec02da32dc2fad8,2026-11-01 18:00:00+00:00,Minnesota Vikings,Detroit Lions,185.0,-225.0,4.5,-4.5,47.5,1,DraftKings,2026-09-03T08:47:53.149293+00:00
+159dbf0253dd2038eda2212f84387f0c,2026-11-01 18:00:00+00:00,Indianapolis Colts,Jacksonville Jaguars,185.0,-225.0,4.5,-4.5,49.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.150107+00:00
+98f1b121b793977434c046e76c707145,2026-11-01 18:00:00+00:00,Las Vegas Raiders,New York Jets,102.0,-122.0,1.5,-1.5,40.5,1,DraftKings,2026-09-03T08:47:53.150908+00:00
+2ff84d3f6053d083c8c0a5bebf7cdd4c,2026-11-01 21:05:00+00:00,Los Angeles Chargers,Los Angeles Rams,160.0,-192.0,3.5,-3.5,48.5,1,DraftKings,2026-09-03T08:47:53.151747+00:00
+05405af79752f5e742cdf50b61f6745e,2026-11-01 21:25:00+00:00,New England Patriots,Miami Dolphins,-355.0,280.0,-7.0,7.0,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.153344+00:00
+f2a036d5edf483a277880014861e78ad,2026-11-01 21:25:00+00:00,Kansas City Chiefs,Denver Broncos,105.0,-125.0,1.5,-1.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.152534+00:00
+b9c60db63b1a19ad319f24b33c0defe8,2026-11-02 01:20:00+00:00,Philadelphia Eagles,Washington Commanders,-125.0,105.0,-2.0,2.0,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.154184+00:00
+7d664fbcd39350e559d83c0068ba7169,2026-11-03 01:20:00+00:00,Chicago Bears,Seattle Seahawks,185.0,-225.0,4.5,-4.5,47.5,1,DraftKings,2026-09-03T08:47:53.155013+00:00
+c75744790b7acf6260c78ba5e739c0e5,2026-11-06 01:15:00+00:00,Jacksonville Jaguars,Baltimore Ravens,170.0,-205.0,4.5,-4.5,49.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.155890+00:00
+dc56d980f527ffeef89940133b211b13,2026-11-08 14:30:00+00:00,Cincinnati Bengals,Atlanta Falcons,-222.5,185.0,-4.5,4.5,49.5,3,"BetUS, DraftKings, FanDuel",2026-09-03T08:47:53.156712+00:00
+44d8c37868b700e90f816db7c5df5cdd,2026-11-08 18:00:00+00:00,Detroit Lions,Miami Dolphins,-278.0,225.0,-6.5,6.5,47.5,1,DraftKings,2026-09-03T08:47:53.159941+00:00
+014282b888c741b7d70c857c09f40aa7,2026-11-08 18:00:00+00:00,Denver Broncos,Carolina Panthers,-162.0,136.0,-3.0,3.0,42.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.157484+00:00
+e571bab6736f9338130a78a4f75c3231,2026-11-08 18:00:00+00:00,Cleveland Browns,New Orleans Saints,170.0,-205.0,3.5,-3.5,41.5,1,DraftKings,2026-09-03T08:47:53.158284+00:00
+415fc42e72888c63e82f7bce24c65391,2026-11-08 18:00:00+00:00,Dallas Cowboys,Indianapolis Colts,-125.0,105.0,-1.5,1.5,52.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.159095+00:00
+e354e6a04b1cb9c96e549b863debb92e,2026-11-08 18:00:00+00:00,New York Jets,Kansas City Chiefs,360.0,-470.0,9.5,-9.5,41.5,1,DraftKings,2026-09-03T08:47:53.160918+00:00
+89de07377e0aa8ffaa2ae6a7dc0855cc,2026-11-08 18:00:00+00:00,Los Angeles Rams,Washington Commanders,-218.0,180.0,-5.5,5.5,50.5,1,DraftKings,2026-09-03T08:47:53.161738+00:00
+fe93e6ab1e553c0169936a0a983c324f,2026-11-08 18:00:00+00:00,New York Giants,Philadelphia Eagles,195.0,-238.0,5.5,-5.5,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.162541+00:00
+39aeac43cea7b12558b91cdab1255a10,2026-11-08 21:05:00+00:00,Houston Texans,Los Angeles Chargers,120.0,-142.0,2.0,-2.0,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.163382+00:00
+ac9d38a18d5c92814233a31aa9a48d78,2026-11-08 21:05:00+00:00,Las Vegas Raiders,San Francisco 49ers,340.0,-440.0,8.5,-8.5,46.5,1,DraftKings,2026-09-03T08:47:53.164196+00:00
+2922c573ec3df8466c4a34975e446898,2026-11-08 21:25:00+00:00,Green Bay Packers,New England Patriots,105.0,-125.0,1.5,-1.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.165817+00:00
+240e23b02b1e3fef655d04a286b5a623,2026-11-08 21:25:00+00:00,Arizona Cardinals,Seattle Seahawks,575.0,-850.0,13.5,-13.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.165004+00:00
+9760d8f19f84bfee300a74ceb656c95d,2026-11-09 01:20:00+00:00,Tampa Bay Buccaneers,Chicago Bears,164.0,-198.0,3.5,-3.5,48.5,1,DraftKings,2026-09-03T08:47:53.166615+00:00
+17ad7eff2f7875e20a8109abe40470e3,2026-11-10 01:15:00+00:00,Buffalo Bills,Minnesota Vikings,-170.0,142.0,-3.0,3.0,48.5,1,DraftKings,2026-09-03T08:47:53.167461+00:00
+74d39e19225caf211ad2c8eb4110179f,2026-11-13 01:15:00+00:00,Washington Commanders,New York Giants,105.0,-125.0,1.5,-1.5,47.5,1,DraftKings,2026-09-03T08:47:53.168301+00:00
+b8c10fdf1e0ac4e13deee7f7c0af0b0b,2026-11-15 14:30:00+00:00,New England Patriots,Detroit Lions,-6.5,-12.5,0.0,0.0,49.0,2,"DraftKings, FanDuel",2026-09-03T08:47:53.169417+00:00
+b5700b4d938fd94429f60d4622cc9c0a,2026-11-15 18:00:00+00:00,Miami Dolphins,Indianapolis Colts,245.0,-305.0,6.5,-6.5,47.5,1,DraftKings,2026-09-03T08:47:53.174367+00:00
+5d8d85473b87f772a979ecf294acab94,2026-11-15 18:00:00+00:00,Minnesota Vikings,Green Bay Packers,200.0,-245.0,4.5,-4.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.173551+00:00
+be0e03cc42fbc9b6962467b22c7bf9dd,2026-11-15 18:00:00+00:00,Houston Texans,Cleveland Browns,-205.0,170.0,-4.5,4.5,38.5,1,DraftKings,2026-09-03T08:47:53.172742+00:00
+28800df7e768ecec14f116454d560f9b,2026-11-15 18:00:00+00:00,Jacksonville Jaguars,Tennessee Titans,-135.0,114.0,-2.5,2.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.175184+00:00
+1057d50949844ddf483da9c8c20354be,2026-11-15 18:00:00+00:00,Buffalo Bills,New York Jets,-340.0,270.0,-7.0,7.0,46.5,1,DraftKings,2026-09-03T08:47:53.171036+00:00
+3c71d515b726f1096aabb435badb83fd,2026-11-15 18:00:00+00:00,Kansas City Chiefs,Atlanta Falcons,-230.0,190.0,-4.5,4.5,45.5,1,DraftKings,2026-09-03T08:47:53.170234+00:00
+e5aa20e1364dd639f042af1c2281bbe2,2026-11-15 18:00:00+00:00,Carolina Panthers,New Orleans Saints,-102.0,-118.0,1.5,-1.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.171919+00:00
+6c932a965110f3f89ec4a5f1a6ac256e,2026-11-15 21:05:00+00:00,Los Angeles Rams,Arizona Cardinals,-470.0,360.0,-10.5,10.5,47.5,1,DraftKings,2026-09-03T08:47:53.176033+00:00
+6079a5cbabf99b265a17edfc92a1da60,2026-11-15 21:05:00+00:00,Seattle Seahawks,Las Vegas Raiders,-310.0,250.0,-7.0,7.0,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.176840+00:00
+7627192fd89b05120ab6c712aa23fd81,2026-11-15 21:25:00+00:00,San Francisco 49ers,Dallas Cowboys,100.0,-120.0,1.5,-1.5,52.5,1,DraftKings,2026-09-03T08:47:53.177639+00:00
+48e497c230e6c9afcb3b600091d28e17,2026-11-16 01:20:00+00:00,Pittsburgh Steelers,Cincinnati Bengals,160.0,-192.0,3.5,-3.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.178413+00:00
+35e3bdff558b5d1506251e814986f164,2026-11-17 01:15:00+00:00,Los Angeles Chargers,Baltimore Ravens,150.0,-180.0,3.0,-3.0,48.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.179225+00:00
+66f9e83cf025d58acee12bce18661fb3,2026-11-20 01:15:00+00:00,Indianapolis Colts,Houston Texans,200.0,-245.0,5.5,-5.5,45.5,1,DraftKings,2026-09-03T08:47:53.180066+00:00
+41e2dd69bddd65d7e823d9ed61cc2afc,2026-11-22 18:00:00+00:00,Tampa Bay Buccaneers,Detroit Lions,185.0,-225.0,4.5,-4.5,49.5,1,DraftKings,2026-09-03T08:47:53.185062+00:00
+8ba112fabf4e87639338a5f437c5abfe,2026-11-22 18:00:00+00:00,Jacksonville Jaguars,New York Giants,-122.0,102.0,-1.5,1.5,46.5,1,DraftKings,2026-09-03T08:47:53.185955+00:00
+5e63079b678f8c13419adc169fff02d3,2026-11-22 18:00:00+00:00,Tennessee Titans,Dallas Cowboys,235.0,-290.0,6.5,-6.5,48.5,1,DraftKings,2026-09-03T08:47:53.184262+00:00
+4c5b1c0843a260278e95eb93e7787576,2026-11-22 18:00:00+00:00,Miami Dolphins,Buffalo Bills,470.0,-650.0,11.5,-11.5,47.5,1,DraftKings,2026-09-03T08:47:53.182473+00:00
+4527f57f5bc32742d8194af1ccf7da7e,2026-11-22 18:00:00+00:00,Baltimore Ravens,Carolina Panthers,-218.0,180.0,-4.5,4.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.181706+00:00
+403a88701352da05b0710a9e883b803e,2026-11-22 18:00:00+00:00,Arizona Cardinals,Kansas City Chiefs,440.0,-600.0,11.5,-11.5,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.180884+00:00
+3ea90704fb576633bd1e2fa5aafd9ea3,2026-11-22 18:00:00+00:00,New Orleans Saints,Chicago Bears,230.0,-285.0,6.5,-6.5,46.5,1,DraftKings,2026-09-03T08:47:53.183461+00:00
+4b20b742b6168aaca4f25d87f11b1526,2026-11-22 21:05:00+00:00,New York Jets,Los Angeles Chargers,330.0,-425.0,9.5,-9.5,41.5,1,DraftKings,2026-09-03T08:47:53.186770+00:00
+1940706a79cbcbafacdcbf231069716b,2026-11-22 21:25:00+00:00,Las Vegas Raiders,Denver Broncos,270.0,-340.0,7.5,-7.5,41.5,1,DraftKings,2026-09-03T08:47:53.187600+00:00
+cbe45bafcc2615fc1d96cbc12840377a,2026-11-22 21:25:00+00:00,Pittsburgh Steelers,Philadelphia Eagles,195.0,-238.0,5.5,-5.5,42.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.188371+00:00
+60e1d27b083a335b722c2c852ea85612,2026-11-23 01:20:00+00:00,Minnesota Vikings,San Francisco 49ers,168.0,-201.0,3.5,-3.5,46.5,3,"BetUS, DraftKings, FanDuel",2026-09-03T08:47:53.189185+00:00
+3a60ed1d20004aa4d4772b2c1a2272e7,2026-11-24 01:15:00+00:00,Cincinnati Bengals,Washington Commanders,-122.0,102.0,-1.5,1.5,52.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.190141+00:00
+5b612899d6dcdf998107f2c6c6e49a58,2026-11-26 01:00:00+00:00,Green Bay Packers,Los Angeles Rams,191.5,-232.5,5.0,-5.0,48.5,2,"DraftKings, FanDuel",2026-09-03T08:47:53.191203+00:00
+9b825e6518156008da499be041975fdd,2026-11-26 18:00:00+00:00,Chicago Bears,Detroit Lions,115.0,-136.0,2.5,-2.5,53.0,2,"DraftKings, FanDuel",2026-09-03T08:47:53.192075+00:00
+ffaa06af56a7137d4b078c5c46c0b730,2026-11-26 20:30:00+00:00,Philadelphia Eagles,Dallas Cowboys,106.5,-125.5,1.25,-1.25,49.5,4,"BetOnline.ag, DraftKings, FanDuel, LowVig.ag",2026-09-03T08:47:53.192897+00:00
+f36f518585aec40e8cb40e071c0844aa,2026-11-27 01:20:00+00:00,Kansas City Chiefs,Buffalo Bills,127.0,-151.0,2.5,-2.5,50.5,2,"DraftKings, FanDuel",2026-09-03T08:47:53.193708+00:00
+44a3bcf5bd002583ddef2207a92dd977,2026-11-27 20:00:00+00:00,Denver Broncos,Pittsburgh Steelers,-128.5,108.5,-1.5,1.5,39.5,2,"DraftKings, FanDuel",2026-09-03T08:47:53.194479+00:00
+81a8fee5b649a3ad5ad59e9528f2f376,2026-11-29 18:00:00+00:00,Tennessee Titans,Jacksonville Jaguars,190.0,-230.0,5.5,-5.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.199416+00:00
+5ea0e3ea5944b0ad5169f21c0787b331,2026-11-29 18:00:00+00:00,New York Jets,Miami Dolphins,105.0,-125.0,1.5,-1.5,40.5,1,DraftKings,2026-09-03T08:47:53.200253+00:00
+e9da808e36e1b7475698a57465ad4519,2026-11-29 18:00:00+00:00,New York Giants,Indianapolis Colts,114.0,-135.0,2.5,-2.5,47.5,1,DraftKings,2026-09-03T08:47:53.198541+00:00
+60d0c074801985c1062795362a24200e,2026-11-29 18:00:00+00:00,Baltimore Ravens,Houston Texans,102.0,-122.0,1.5,-1.5,45.5,1,DraftKings,2026-09-03T08:47:53.196124+00:00
+f7d3ae7a8fe2438cef7d7d7bc67e31db,2026-11-29 18:00:00+00:00,New Orleans Saints,Cincinnati Bengals,235.0,-290.0,6.5,-6.5,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.196940+00:00
+eaa993c3d62d6b5aeb6142cdd7862fd5,2026-11-29 18:00:00+00:00,Las Vegas Raiders,Cleveland Browns,105.0,-125.0,1.5,-1.5,39.5,1,DraftKings,2026-09-03T08:47:53.197750+00:00
+6a05021bdb6bab24b9bb381ffff10f0c,2026-11-29 18:00:00+00:00,Atlanta Falcons,Minnesota Vikings,180.0,-218.0,4.5,-4.5,43.5,1,DraftKings,2026-09-03T08:47:53.195314+00:00
+69a1dbe9de3d3212c3a7a55be5d204ab,2026-11-29 21:25:00+00:00,Washington Commanders,Arizona Cardinals,-218.0,180.0,-4.5,4.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.201099+00:00
+d68dced0b26726890b9c79bd19a5ffe5,2026-11-29 21:25:00+00:00,Seattle Seahawks,San Francisco 49ers,-110.0,-110.0,0.0,0.0,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.202064+00:00
+c64ceba13ede564e8658693e3171e7f9,2026-11-30 01:20:00+00:00,New England Patriots,Los Angeles Chargers,102.0,-122.0,2.0,-2.0,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.202894+00:00
+2cdaecba7c0bff9b58a48a82e6ee17a7,2026-12-01 01:15:00+00:00,Carolina Panthers,Tampa Bay Buccaneers,164.0,-198.0,3.5,-3.5,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.203754+00:00
+06e52a676b516186989e3b181a37c8a7,2026-12-04 01:15:00+00:00,Kansas City Chiefs,Los Angeles Rams,170.0,-205.0,4.5,-4.5,47.5,1,DraftKings,2026-09-03T08:47:53.204746+00:00
+a5495c3360b3bb13da76ba23a675c9ef,2026-12-06 18:00:00+00:00,San Francisco 49ers,New York Giants,-166.0,140.0,-3.0,3.0,47.5,1,DraftKings,2026-09-03T08:47:53.210396+00:00
+f8a92363386bd337975650879086cca6,2026-12-06 18:00:00+00:00,Los Angeles Chargers,Tampa Bay Buccaneers,-135.0,114.0,-2.0,2.0,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.209623+00:00
+1ccb61b811b7aae4270df22a67e6459f,2026-12-06 18:00:00+00:00,Green Bay Packers,New Orleans Saints,-225.0,185.0,-4.5,4.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.208823+00:00
+ae3429e95ee704c7fd001cade20072d0,2026-12-06 18:00:00+00:00,Washington Commanders,Tennessee Titans,-125.0,105.0,-1.5,1.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.211204+00:00
+b447fab53534af892f98a74eae26c1c6,2026-12-06 18:00:00+00:00,Cincinnati Bengals,Cleveland Browns,-225.0,185.0,-4.5,4.5,45.5,1,DraftKings,2026-09-03T08:47:53.207155+00:00
+0236f9aa68d65ea03bd1ca025b749c20,2026-12-06 18:00:00+00:00,Jacksonville Jaguars,Chicago Bears,130.0,-155.0,3.0,-3.0,47.5,1,DraftKings,2026-09-03T08:47:53.206356+00:00
+c94419ba8fb818fc36a5b21b526aab75,2026-12-06 18:00:00+00:00,Detroit Lions,Atlanta Falcons,-185.0,154.0,-3.5,3.5,48.5,1,DraftKings,2026-09-03T08:47:53.205548+00:00
+9a55467e1cd6310ae2af20d8154612e1,2026-12-06 18:00:00+00:00,Miami Dolphins,Denver Broncos,360.0,-470.0,9.5,-9.5,42.5,1,DraftKings,2026-09-03T08:47:53.208008+00:00
+f4897f48a5351881280f7598bd826408,2026-12-06 21:05:00+00:00,Philadelphia Eagles,Arizona Cardinals,-395.0,310.0,-8.5,8.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.212353+00:00
+4116dbff75ab7957b69c2152f204b74d,2026-12-06 21:25:00+00:00,Buffalo Bills,New England Patriots,102.0,-122.0,1.5,-1.5,48.5,1,DraftKings,2026-09-03T08:47:53.213221+00:00
+c186c605febd6370b292469c9151cfb3,2026-12-06 21:25:00+00:00,Carolina Panthers,Minnesota Vikings,164.0,-198.0,3.5,-3.5,42.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.214038+00:00
+26bf8e165d2d273ed0772a355f07ab16,2026-12-07 01:20:00+00:00,Houston Texans,Pittsburgh Steelers,-122.0,102.0,-1.5,1.5,41.5,1,DraftKings,2026-09-03T08:47:53.214847+00:00
+0db4646c964ecdff19957373fe707546,2026-12-08 01:15:00+00:00,Dallas Cowboys,Seattle Seahawks,185.0,-225.0,4.5,-4.5,48.5,1,DraftKings,2026-09-03T08:47:53.215682+00:00
+01548e41e7ba5318bb25c9bc2a32f73d,2026-12-11 01:15:00+00:00,Minnesota Vikings,New England Patriots,180.0,-218.0,4.5,-4.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.217067+00:00
+f7fba6b1804e02292ee0ce4738484258,2026-12-13 18:00:00+00:00,Atlanta Falcons,Cleveland Browns,105.0,-125.0,1.5,-1.5,40.5,1,DraftKings,2026-09-03T08:47:53.218675+00:00
+bec99e2f2b4c80e345731d69ee38d831,2026-12-13 18:00:00+00:00,Tampa Bay Buccaneers,Baltimore Ravens,210.0,-258.0,6.0,-6.0,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.219560+00:00
+dcc7b377d3b3ec990304612bbef47d3d,2026-12-13 18:00:00+00:00,New Orleans Saints,Carolina Panthers,114.0,-135.0,2.5,-2.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.220349+00:00
+2c6added7199a59f1e9dae8492c29da4,2026-12-13 18:00:00+00:00,Chicago Bears,Miami Dolphins,-245.0,200.0,-5.5,5.5,46.5,1,DraftKings,2026-09-03T08:47:53.221169+00:00
+5185ace33aebc87d39074147940f2fa5,2026-12-13 18:00:00+00:00,Denver Broncos,New York Jets,-230.0,190.0,-5.5,5.5,39.5,1,DraftKings,2026-09-03T08:47:53.222009+00:00
+a31f461ccd92e1072f23ccfae281ae9a,2026-12-13 18:00:00+00:00,Tennessee Titans,Detroit Lions,275.0,-345.0,7.5,-7.5,47.5,1,DraftKings,2026-09-03T08:47:53.222834+00:00
+5dc9cb8fba610d682dc670ae4e7d59f3,2026-12-13 18:00:00+00:00,Houston Texans,Washington Commanders,-122.0,102.0,-1.5,1.5,44.5,1,DraftKings,2026-09-03T08:47:53.223686+00:00
+45203f985f8d1567ad19b0617dd267f8,2026-12-13 18:00:00+00:00,Indianapolis Colts,Philadelphia Eagles,200.0,-245.0,5.5,-5.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.224454+00:00
+484c491dc1dee090d740ba077b7d9709,2026-12-13 21:05:00+00:00,Los Angeles Chargers,Las Vegas Raiders,-230.0,190.0,-5.5,5.5,43.5,1,DraftKings,2026-09-03T08:47:53.225285+00:00
+f5ab9d8455daf9e2a6c4c443fe0cd19f,2026-12-13 21:25:00+00:00,New York Giants,Seattle Seahawks,310.0,-395.0,7.5,-7.5,45.5,1,DraftKings,2026-09-03T08:47:53.227931+00:00
+180b5fa7ea6bd0d2d9ddb9ba5ee38cc0,2026-12-13 21:25:00+00:00,Kansas City Chiefs,Cincinnati Bengals,105.0,-125.0,1.5,-1.5,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.226261+00:00
+6174916c7e2df8d1b80a88cfbd259d44,2026-12-13 21:25:00+00:00,Los Angeles Rams,San Francisco 49ers,-130.0,110.0,-2.5,2.5,49.5,1,DraftKings,2026-09-03T08:47:53.227087+00:00
+c4877c048defcb80e0ab37c0688f37f6,2026-12-14 01:20:00+00:00,Buffalo Bills,Green Bay Packers,105.0,-125.0,1.5,-1.5,49.5,1,DraftKings,2026-09-03T08:47:53.228732+00:00
+690e2ee2ed5f0875f7cbaecdc51373f5,2026-12-15 01:15:00+00:00,Pittsburgh Steelers,Jacksonville Jaguars,136.0,-162.0,3.0,-3.0,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.229514+00:00
+790af233087803c297861901ffa271d7,2026-12-18 01:15:00+00:00,San Francisco 49ers,Los Angeles Chargers,120.0,-142.0,2.5,-2.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.230301+00:00
+171aba127aaad3dcbe32a02fc194eb32,2026-12-19 22:00:00+00:00,Seattle Seahawks,Philadelphia Eagles,105.0,-125.0,1.5,-1.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.231110+00:00
+784568b1df055bf7eb8780c110d5e910,2026-12-20 01:20:00+00:00,Chicago Bears,Buffalo Bills,154.0,-185.0,3.5,-3.5,51.5,1,DraftKings,2026-09-03T08:47:53.231948+00:00
+5931eee49f5f2656a5344e1388a68816,2026-12-20 18:00:00+00:00,Atlanta Falcons,Washington Commanders,150.0,-180.0,3.5,-3.5,46.5,1,DraftKings,2026-09-03T08:47:53.232743+00:00
+2f4b1899c1c278947920e0254b682d90,2026-12-20 18:00:00+00:00,Baltimore Ravens,Pittsburgh Steelers,-148.0,124.0,-2.5,2.5,46.0,2,"BetUS, DraftKings",2026-09-03T08:47:53.233791+00:00
+000fc688beb4fc004ecdad115d9adb1c,2026-12-20 18:00:00+00:00,Cincinnati Bengals,Carolina Panthers,-148.0,124.0,-2.5,2.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.234654+00:00
+1cb23c83ae4af84cffcdae6b31d06e83,2026-12-20 18:00:00+00:00,Cleveland Browns,New York Giants,180.0,-218.0,4.5,-4.5,40.5,1,DraftKings,2026-09-03T08:47:53.235474+00:00
+99719df35bc2efdcc72096f865ed8841,2026-12-20 18:00:00+00:00,Miami Dolphins,Green Bay Packers,470.0,-650.0,10.5,-10.5,45.5,1,DraftKings,2026-09-03T08:47:53.236270+00:00
+29211b6e78461220a2833184233f70e5,2026-12-20 18:00:00+00:00,Jacksonville Jaguars,Houston Texans,130.0,-155.0,3.0,-3.0,43.5,1,DraftKings,2026-09-03T08:47:53.237066+00:00
+3b696c07ff6a1ef461d023a73db17584,2026-12-20 18:00:00+00:00,Indianapolis Colts,Tennessee Titans,-125.0,105.0,-1.5,1.5,47.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.237894+00:00
+e15a91cebf3480ff0b93b4fbacb09797,2026-12-20 18:00:00+00:00,New Orleans Saints,Tampa Bay Buccaneers,164.0,-198.0,3.5,-3.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.238717+00:00
+d8cd12e7684fa2aa39f5b188ef6e62e0,2026-12-20 21:05:00+00:00,New York Jets,Arizona Cardinals,-110.0,-110.0,1.5,-1.5,41.5,1,DraftKings,2026-09-03T08:47:53.239575+00:00
+9f507007b9c0a7082c1471a5fa841336,2026-12-20 21:25:00+00:00,Denver Broncos,Las Vegas Raiders,-205.0,170.0,-4.5,4.5,41.5,1,DraftKings,2026-09-03T08:47:53.241171+00:00
+77396e9d565860fbfd05779028223a8a,2026-12-20 21:25:00+00:00,Dallas Cowboys,Los Angeles Rams,200.0,-245.0,6.0,-6.0,52.5,1,DraftKings,2026-09-03T08:47:53.240351+00:00
+b34897a0368d570291d44e176c0c2331,2026-12-21 01:20:00+00:00,Detroit Lions,Minnesota Vikings,-125.0,105.0,-1.5,1.5,46.5,1,DraftKings,2026-09-03T08:47:53.241995+00:00
+b2759105c27a25289ea1938f290c50fd,2026-12-22 01:15:00+00:00,New England Patriots,Kansas City Chiefs,120.0,-142.0,2.5,-2.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.242827+00:00
+3f226ec5402c6ec4d84a59be80c2fa67,2026-12-25 01:15:00+00:00,Houston Texans,Philadelphia Eagles,113.0,-133.5,2.5,-2.5,38.0,2,"DraftKings, FanDuel",2026-09-03T08:47:53.243716+00:00
+2828c07018dfafbe96aba205809cc7ac,2026-12-25 18:00:00+00:00,Green Bay Packers,Chicago Bears,-1.0,-118.0,1.5,-1.5,47.5,2,"DraftKings, FanDuel",2026-09-03T08:47:53.244485+00:00
+126f27c71e8130ef87de0d137e833d9b,2026-12-25 21:30:00+00:00,Buffalo Bills,Denver Broncos,-131.0,111.0,-1.5,1.5,46.5,2,"DraftKings, FanDuel",2026-09-03T08:47:53.245312+00:00
+f1af9705dbd2bbe4f1555f080ad06ba2,2026-12-26 01:15:00+00:00,Los Angeles Rams,Seattle Seahawks,-4.0,-15.0,0.0,0.0,46.5,2,"DraftKings, FanDuel",2026-09-03T08:47:53.246148+00:00
+669a7b568c2a64f9a136dadb0eda1da8,2026-12-27 18:00:00+00:00,New England Patriots,New York Jets,-278.0,225.0,-6.5,6.5,40.5,1,DraftKings,2026-09-03T08:47:53.253649+00:00
+cf5cefa5556bcd0156bd394171ef6c8e,2026-12-27 18:00:00+00:00,Washington Commanders,Minnesota Vikings,120.0,-142.0,2.5,-2.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.252858+00:00
+fe2eb511d4c2da3a8e88b85b4f4e9f7e,2026-12-27 18:00:00+00:00,Los Angeles Chargers,Miami Dolphins,-375.0,295.0,-7.0,7.0,45.5,1,DraftKings,2026-09-03T08:47:53.252044+00:00
+29425f5c68826d615277cf9be2b82e00,2026-12-27 18:00:00+00:00,Tennessee Titans,Las Vegas Raiders,105.0,-125.0,1.5,-1.5,42.5,1,DraftKings,2026-09-03T08:47:53.251202+00:00
+bd13d00f06ad222b0a1b6ea4d0add763,2026-12-27 18:00:00+00:00,Tampa Bay Buccaneers,Atlanta Falcons,-125.0,105.0,-1.5,1.5,45.5,1,DraftKings,2026-09-03T08:47:53.247994+00:00
+74cb0e112d069cdbda1671ae85531f43,2026-12-27 18:00:00+00:00,Carolina Panthers,Pittsburgh Steelers,160.0,-192.0,3.5,-3.5,41.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.249631+00:00
+0f23afce92c2f0af28973c0a7533763e,2026-12-27 18:00:00+00:00,Cleveland Browns,Baltimore Ravens,330.0,-425.0,9.75,-9.75,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.248832+00:00
+8fd00347b6d77ce384d83cba814430d7,2026-12-27 18:00:00+00:00,Arizona Cardinals,New Orleans Saints,205.0,-250.0,5.5,-5.5,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.246969+00:00
+ca8982dccb6c3ae01525800317287f02,2026-12-27 18:00:00+00:00,Cincinnati Bengals,Indianapolis Colts,-125.0,105.0,-1.5,1.5,52.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.250402+00:00
+fc7cce3ae7c73cc7151357829e11b6d5,2026-12-27 21:25:00+00:00,San Francisco 49ers,Kansas City Chiefs,136.0,-162.0,2.75,-2.75,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.254419+00:00
+b1c4ec04c3398a9efa25492000858384,2026-12-28 01:20:00+00:00,Jacksonville Jaguars,Dallas Cowboys,136.0,-162.0,3.0,-3.0,51.5,1,DraftKings,2026-09-03T08:47:53.255629+00:00
+ca92c191ebf7361ea56f9bbc09a5f51b,2026-12-29 01:15:00+00:00,New York Giants,Detroit Lions,170.0,-205.0,4.5,-4.5,49.5,1,DraftKings,2026-09-03T08:47:53.256408+00:00
+be268ce293cf4fad1c0c867a3ca4c257,2027-01-01 01:15:00+00:00,Baltimore Ravens,Cincinnati Bengals,114.0,-135.0,2.5,-2.5,51.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.257217+00:00
+e5dd9cc3fd5452d55c250949e946743d,2027-01-03 18:00:00+00:00,New Orleans Saints,Atlanta Falcons,102.0,-122.0,1.5,-1.5,44.5,1,DraftKings,2026-09-03T08:47:53.258033+00:00
+d9a186d988a3ede2a33e504f4890fe52,2027-01-03 18:00:00+00:00,Buffalo Bills,Miami Dolphins,-375.0,295.0,-7.5,7.5,47.5,1,DraftKings,2026-09-03T08:47:53.258878+00:00
+b009f04b4f61b264a5163157c3439dc1,2027-01-03 18:00:00+00:00,Seattle Seahawks,Carolina Panthers,-245.0,200.0,-5.5,5.5,42.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.259762+00:00
+f2e03f9b857485bb13211ee0f5eb5935,2027-01-03 18:00:00+00:00,Indianapolis Colts,Cleveland Browns,-135.0,114.0,-2.5,2.5,43.5,1,DraftKings,2026-09-03T08:47:53.260544+00:00
+c8945d476449633912cf51a346ac98ca,2027-01-03 18:00:00+00:00,New York Giants,Dallas Cowboys,180.0,-218.0,4.5,-4.5,49.5,1,DraftKings,2026-09-03T08:47:53.261322+00:00
+f62dba1e231083f489c391271a1f171c,2027-01-03 18:00:00+00:00,Denver Broncos,New England Patriots,114.0,-135.0,2.5,-2.5,42.5,1,DraftKings,2026-09-03T08:47:53.262136+00:00
+c96a3e9e40569b4ed5a546dff131c61d,2027-01-03 18:00:00+00:00,Washington Commanders,Jacksonville Jaguars,160.0,-192.0,3.5,-3.5,48.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.262965+00:00
+419106b9bcc9f7ef39cfc2d1ee9a3f87,2027-01-03 18:00:00+00:00,Los Angeles Rams,Tampa Bay Buccaneers,-218.0,180.0,-4.5,4.5,48.5,1,DraftKings,2026-09-03T08:47:53.263810+00:00
+bfe51fa0034c9d22a69ffd80e2d717f5,2027-01-03 18:00:00+00:00,Minnesota Vikings,New York Jets,-185.0,154.0,-3.5,3.5,39.5,1,DraftKings,2026-09-03T08:47:53.264590+00:00
+d0ffa5ed13cbd7610f9176041464404a,2027-01-03 18:00:00+00:00,Pittsburgh Steelers,Tennessee Titans,-122.0,102.0,-1.5,1.5,42.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.265359+00:00
+08abdb683fcb6d77f66baed136f47283,2027-01-03 21:05:00+00:00,Las Vegas Raiders,Arizona Cardinals,-130.0,110.0,-1.5,1.5,42.5,1,DraftKings,2026-09-03T08:47:53.266296+00:00
+12089441cea51add4694cdde98b4a5b7,2027-01-03 21:25:00+00:00,Detroit Lions,Chicago Bears,102.0,-122.0,1.5,-1.5,49.5,1,DraftKings,2026-09-03T08:47:53.267122+00:00
+67d842cb73300ef923959105698b63bb,2027-01-03 21:25:00+00:00,Kansas City Chiefs,Los Angeles Chargers,105.0,-125.0,1.5,-1.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.267987+00:00
+e7820b1226edbb1ef1fddce6b20f963d,2027-01-04 01:20:00+00:00,Philadelphia Eagles,San Francisco 49ers,105.0,-125.0,1.5,-1.5,45.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.268948+00:00
+37bc346543da471e067b695b862ccfe9,2027-01-05 01:15:00+00:00,Houston Texans,Green Bay Packers,114.0,-135.0,2.5,-2.5,42.5,1,DraftKings,2026-09-03T08:47:53.269783+00:00
+7f809a45bc8baedf0cb0259e7da7cd29,2027-01-10 18:00:00+00:00,Atlanta Falcons,Carolina Panthers,114.0,-135.0,2.5,-2.5,41.5,1,DraftKings,2026-09-03T08:47:53.270572+00:00
+d7da5587a88a7fc35c36b453d3264d5a,2027-01-10 18:00:00+00:00,Pittsburgh Steelers,Baltimore Ravens,190.0,-230.0,5.5,-5.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.271392+00:00
+97cbd9ad26dff1af47192120defe112d,2027-01-10 18:00:00+00:00,New York Jets,Buffalo Bills,370.0,-485.0,10.0,-10.0,43.5,1,DraftKings,2026-09-03T08:47:53.272189+00:00
+d190fb7ea85c33b96a495041dad22142,2027-01-10 18:00:00+00:00,Chicago Bears,Minnesota Vikings,105.0,-125.0,1.5,-1.5,43.5,1,DraftKings,2026-09-03T08:47:53.272980+00:00
+8c16104c8afc72b583531508b2aa1c33,2027-01-10 18:00:00+00:00,Cleveland Browns,Cincinnati Bengals,280.0,-355.0,7.5,-7.5,43.5,1,DraftKings,2026-09-03T08:47:53.273772+00:00
+3f460f14b810d7bf642bdf7b658530c0,2027-01-10 18:00:00+00:00,Dallas Cowboys,Washington Commanders,-122.0,102.0,-1.5,1.5,49.5,1,DraftKings,2026-09-03T08:47:53.274541+00:00
+71d0d10e384393c1e071c39dd3931c19,2027-01-10 18:00:00+00:00,Los Angeles Chargers,Denver Broncos,102.0,-122.0,1.5,-1.5,41.5,1,DraftKings,2026-09-03T08:47:53.275384+00:00
+8f81778bbdb984be44e24a3d55a49b4d,2027-01-10 18:00:00+00:00,Detroit Lions,Green Bay Packers,114.0,-135.0,2.5,-2.5,47.5,1,DraftKings,2026-09-03T08:47:53.276193+00:00
+9bb63096709ba607443c454d2a813b14,2027-01-10 18:00:00+00:00,Tennessee Titans,Houston Texans,235.0,-290.0,7.0,-7.0,39.5,1,DraftKings,2026-09-03T08:47:53.277324+00:00
+bea47af467e217653bba8d69888e4d95,2027-01-10 18:00:00+00:00,Jacksonville Jaguars,Indianapolis Colts,105.0,-125.0,1.5,-1.5,46.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.278151+00:00
+bb66a6f02c535c0cd8b9c689a5513687,2027-01-10 18:00:00+00:00,Las Vegas Raiders,Kansas City Chiefs,310.0,-395.0,8.5,-8.5,40.5,1,DraftKings,2026-09-03T08:47:53.278957+00:00
+f370f9410ef82b37bd15d1719434370b,2027-01-10 18:00:00+00:00,Miami Dolphins,New England Patriots,440.0,-600.0,10.5,-10.5,42.5,1,DraftKings,2026-09-03T08:47:53.279809+00:00
+7b8ce34c0e173e4ff6ccf8e8caa09113,2027-01-10 18:00:00+00:00,Tampa Bay Buccaneers,New Orleans Saints,-125.0,105.0,-1.5,1.5,43.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.280605+00:00
+01baed6f9d6482c5d89d37379c7c63c7,2027-01-10 18:00:00+00:00,Philadelphia Eagles,New York Giants,-155.0,130.0,-3.0,3.0,41.5,1,DraftKings,2026-09-03T08:47:53.281371+00:00
+f1480276ab67dcf60686556ba9336695,2027-01-10 21:05:00+00:00,San Francisco 49ers,Arizona Cardinals,-425.0,330.0,-8.5,8.5,44.5,2,"BetUS, DraftKings",2026-09-03T08:47:53.282174+00:00
+dc2d9177b48e6f3962dabb1407aba7d3,2027-01-10 21:05:00+00:00,Seattle Seahawks,Los Angeles Rams,130.0,-155.0,3.0,-3.0,44.5,1,DraftKings,2026-09-03T08:47:53.282963+00:00

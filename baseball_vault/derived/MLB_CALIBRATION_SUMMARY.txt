@@ -1,0 +1,4 @@
+Graded samples: 45
+Overall lean hit rate: 0.400
+Recommendation: INSUFFICIENT SAMPLE
+NOTE: thresholds are NOT changed automatically.

@@ -1,0 +1,6 @@
+streamlit>=1.62
+requests>=2.34
+python-dotenv>=1.2
+pandas>=3.0
+numpy>=2.0
+pyarrow>=20.0

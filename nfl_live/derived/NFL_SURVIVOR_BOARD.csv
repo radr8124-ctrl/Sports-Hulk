@@ -1,0 +1,17 @@
+start,away_team,home_team,survivor_team,survivor_win_prob,survivor_spread,survivor_grade,sportsbooks
+2026-09-13 20:25:00+00:00,Arizona Cardinals,Los Angeles Chargers,Los Angeles Chargers,0.8133524766690595,-10.0,A+,9
+2026-09-13 17:00:00+00:00,Cleveland Browns,Jacksonville Jaguars,Jacksonville Jaguars,0.7663551401869159,-8.0,A,9
+2026-09-13 17:00:00+00:00,New Orleans Saints,Detroit Lions,Detroit Lions,0.7249575551782682,-7.0,B+,9
+2026-09-13 20:25:00+00:00,Washington Commanders,Philadelphia Eagles,Philadelphia Eagles,0.6742037442256261,-5.0,B,9
+2026-09-13 17:00:00+00:00,Tampa Bay Buccaneers,Cincinnati Bengals,Cincinnati Bengals,0.6482069904675443,-4.0,C,9
+2026-09-11 00:35:00+00:00,San Francisco 49ers,Los Angeles Rams,Los Angeles Rams,0.644729178800233,-4.0,C,9
+2026-09-13 20:25:00+00:00,Miami Dolphins,Las Vegas Raiders,Las Vegas Raiders,0.6274780524656784,-3.5,C,9
+2026-09-10 00:20:00+00:00,New England Patriots,Seattle Seahawks,Seattle Seahawks,0.6261314443132625,-3.5,C,9
+2026-09-13 17:00:00+00:00,Atlanta Falcons,Pittsburgh Steelers,Pittsburgh Steelers,0.6211096075778079,-3.0,C,9
+2026-09-13 17:00:00+00:00,Baltimore Ravens,Indianapolis Colts,Baltimore Ravens,0.6154910096818811,-3.5,C,9
+2026-09-14 00:20:00+00:00,Dallas Cowboys,New York Giants,Dallas Cowboys,0.5859872611464969,-3.0,AVOID,9
+2026-09-13 17:00:00+00:00,Chicago Bears,Carolina Panthers,Chicago Bears,0.5850959973966807,-2.5,AVOID,9
+2026-09-15 00:15:00+00:00,Denver Broncos,Kansas City Chiefs,Kansas City Chiefs,0.5671302866874822,-2.5,AVOID,9
+2026-09-13 17:00:00+00:00,New York Jets,Tennessee Titans,Tennessee Titans,0.5427435387673957,-1.5,AVOID,9
+2026-09-13 20:25:00+00:00,Green Bay Packers,Minnesota Vikings,Minnesota Vikings,0.5226781857451405,-1.5,AVOID,9
+2026-09-13 17:00:00+00:00,Buffalo Bills,Houston Texans,Buffalo Bills,0.5079829696647153,-1.0,AVOID,9

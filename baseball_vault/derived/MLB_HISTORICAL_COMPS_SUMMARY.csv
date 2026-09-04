@@ -1,0 +1,26 @@
+gamePk,away_team,home_team,comp_count,features_used,comp_home_win_rate,comp_avg_total_runs,comp_avg_home_margin,comp_median_distance
+823337,San Francisco Giants,Pittsburgh Pirates,25,11,0.36,9.0,-1.0,0.4303958564497251
+824388,Toronto Blue Jays,Cleveland Guardians,25,11,0.64,7.72,0.76,0.31693546793891936
+824144,Chicago White Sox,Houston Astros,25,11,0.48,8.44,-0.36,0.29394352961291786
+824796,Boston Red Sox,Baltimore Orioles,25,11,0.56,9.92,0.64,0.3260799305069534
+824632,Milwaukee Brewers,Chicago Cubs,25,11,0.56,9.36,0.72,0.6700066061818181
+824069,Miami Marlins,Kansas City Royals,25,11,0.64,8.44,0.52,0.2898548635027445
+822853,Tampa Bay Rays,Texas Rangers,25,11,0.32,9.16,-1.64,0.3503358437579221
+823095,Athletics,Seattle Mariners,25,11,0.44,8.2,-1.24,0.44195414122135707
+823907,St. Louis Cardinals,Los Angeles Dodgers,25,11,0.6,9.08,1.16,0.3946045413198231
+824424,Detroit Tigers,Cleveland Guardians,25,10,0.52,8.52,-0.52,0.4512523647121719
+824387,Detroit Tigers,Cleveland Guardians,25,10,0.52,8.52,-0.52,0.4512523647121719
+824471,Milwaukee Brewers,Cincinnati Reds,25,10,0.56,9.24,0.84,0.3540018857165561
+823418,Atlanta Braves,Philadelphia Phillies,25,10,0.64,8.0,1.04,0.40179679641274785
+823338,Los Angeles Angels,Pittsburgh Pirates,25,10,0.52,7.64,0.76,0.3310829000763027
+824797,Boston Red Sox,Baltimore Orioles,25,10,0.6,8.88,0.32,0.29276834427273035
+823579,San Francisco Giants,New York Mets,25,10,0.44,7.8,-1.4,0.324479537883631
+823824,Chicago Cubs,Miami Marlins,25,10,0.52,8.92,0.2,0.7406029893874706
+824554,Minnesota Twins,Chicago White Sox,25,10,0.48,10.68,-1.24,0.34803039417063647
+822852,Tampa Bay Rays,Texas Rangers,25,10,0.36,10.64,-0.48,0.30251948457399547
+824146,Arizona Diamondbacks,Houston Astros,25,10,0.6,8.4,0.0,0.25365944249276395
+824067,Toronto Blue Jays,Kansas City Royals,25,10,0.64,8.56,0.56,0.25737542404035685
+824311,St. Louis Cardinals,Colorado Rockies,25,10,0.64,9.12,1.2,0.3383468183313762
+823256,New York Yankees,San Diego Padres,25,10,0.48,8.72,-1.04,0.317282248216997
+823905,Washington Nationals,Los Angeles Dodgers,25,10,0.4,7.96,0.04,0.29413799596336765
+823093,Athletics,Seattle Mariners,25,10,0.44,9.04,-0.16,0.3672502118649231

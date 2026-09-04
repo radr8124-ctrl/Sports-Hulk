@@ -1,0 +1,14 @@
+{
+  "dataset": "ngs_passing",
+  "run_at_utc": "2026-09-01T21:43:20.228903+00:00",
+  "records": [
+    {
+      "status": "downloaded",
+      "bytes": 724317,
+      "sha256": "6ccd6207a2af75572f03ce36f4a754f8ab3e862eff69cf0a6b3cb689492287fd",
+      "season": null,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_passing.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/ngs_passing/ngs_passing.parquet"
+    }
+  ]
+}

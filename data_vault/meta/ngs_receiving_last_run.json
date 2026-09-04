@@ -1,0 +1,14 @@
+{
+  "dataset": "ngs_receiving",
+  "run_at_utc": "2026-09-01T21:43:20.547149+00:00",
+  "records": [
+    {
+      "status": "downloaded",
+      "bytes": 1118797,
+      "sha256": "aa5ed2149e85d5e679a756d32480288dc365165569a6b999e88cc8ff83ccf5e7",
+      "season": null,
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_receiving.parquet",
+      "path": "/Users/emma/Downloads/SPORTS_HULK_STARTER/data_vault/raw/ngs_receiving/ngs_receiving.parquet"
+    }
+  ]
+}

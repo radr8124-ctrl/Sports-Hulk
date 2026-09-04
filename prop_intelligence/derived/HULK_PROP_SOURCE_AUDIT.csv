@@ -1,0 +1,6 @@
+source,rows,columns
+nfl_props,4159,event_id|start|away_team|home_team|player|player_id|stat|market_name|side|line|fair_line|open_line|open_fair_line|book_odds|fair_odds|open_book_odds|open_fair_odds|by_bookmaker|odd_id|collected_at
+mlb_props,4365,event_id|start|away_team|home_team|player|player_id|stat|bet_type|side|book_odds|fair_odds|line|fair_line|open_line|open_fair_line|market_name|by_bookmaker|odd_id|collected_at
+prizepicks,4914,projection_id|league|player|team|position|description|stat|stat_type|line|start_time|end_time|status|projection_type|allowed_wager_types|odds_type|adjusted_odds|group_key|rank|trending_count|is_promo|discount_name|discount_percentage|flash_sale_line|game_id|home_team|away_team|updated_at|collected_at
+parlay_nfl,5000,event_id|sport_key|game_date|home_team|away_team|canonical_event_id|commence_time|bookmaker|bookmaker_title|player|market_key|market|line|over_price|under_price|implied_probability|is_dfs_flat_payout|dfs_normalized|last_update|age_seconds|injury
+parlay_mlb,5000,event_id|sport_key|game_date|home_team|away_team|canonical_event_id|commence_time|bookmaker|bookmaker_title|player|market_key|market|line|over_price|under_price|implied_probability|is_dfs_flat_payout|dfs_normalized|last_update|age_seconds|injury.status|injury.description|injury.date|injury.team

@@ -1,0 +1,1493 @@
+[
+  {
+    "path": "/home/ubuntu/sports-hulk/baseball_vault/derived/MLB_MATCHUP_BOARD_INTELLIGENCE.csv",
+    "rows": 24,
+    "columns": [
+      {
+        "name": "gamePk",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "824470",
+          "822686",
+          "822851"
+        ]
+      },
+      {
+        "name": "gameDate",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 19,
+        "sample": [
+          "2026-09-02T16:40:00Z",
+          "2026-09-02T17:05:00Z",
+          "2026-09-02T18:35:00Z"
+        ]
+      },
+      {
+        "name": "away_team",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "San Diego Padres",
+          "Atlanta Braves",
+          "Athletics"
+        ]
+      },
+      {
+        "name": "home_team",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "Cincinnati Reds",
+          "Washington Nationals",
+          "Texas Rangers"
+        ]
+      },
+      {
+        "name": "away_probable_pitcher",
+        "dtype": "str",
+        "non_null": 20,
+        "unique": 20,
+        "sample": [
+          "Casey Mize",
+          "Grant Holmes",
+          "Jacob Lopez"
+        ]
+      },
+      {
+        "name": "home_probable_pitcher",
+        "dtype": "str",
+        "non_null": 20,
+        "unique": 20,
+        "sample": [
+          "Brandon Williamson",
+          "Brad Lord",
+          "Cody Bradford"
+        ]
+      },
+      {
+        "name": "away_starter_vs_home_lineup",
+        "dtype": "float64",
+        "non_null": 20,
+        "unique": 18,
+        "sample": [
+          "0.395",
+          "0.18",
+          "0.061"
+        ]
+      },
+      {
+        "name": "home_starter_vs_away_lineup",
+        "dtype": "float64",
+        "non_null": 19,
+        "unique": 19,
+        "sample": [
+          "-0.114",
+          "0.269",
+          "0.241"
+        ]
+      },
+      {
+        "name": "home_bullpen_workload",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "30.285714285714285",
+          "28.5",
+          "28.33333333333333"
+        ]
+      },
+      {
+        "name": "away_bullpen_workload",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "39.71428571428572",
+          "30.714285714285715",
+          "39.142857142857146"
+        ]
+      },
+      {
+        "name": "bullpen_data_present",
+        "dtype": "bool",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "True",
+          "True",
+          "True"
+        ]
+      },
+      {
+        "name": "both_starter_matchups_present",
+        "dtype": "bool",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "False",
+          "True",
+          "True"
+        ]
+      },
+      {
+        "name": "home_edge_score",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "-0.289",
+          "-0.228",
+          "0.198"
+        ]
+      },
+      {
+        "name": "sample_pitches",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "2886",
+          "4784",
+          "2536"
+        ]
+      },
+      {
+        "name": "pitch_types_matched",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 9,
+        "sample": [
+          "6",
+          "12",
+          "9"
+        ]
+      },
+      {
+        "name": "h2h_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "h2h_median_point",
+        "dtype": "float64",
+        "non_null": 0,
+        "unique": 0,
+        "sample": []
+      },
+      {
+        "name": "h2h_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 12,
+        "sample": [
+          "-9.0",
+          "-10.0",
+          "-12.0"
+        ]
+      },
+      {
+        "name": "spreads_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "spreads_median_point",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 1,
+        "sample": [
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      },
+      {
+        "name": "spreads_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 12,
+        "sample": [
+          "-10.0",
+          "-9.0",
+          "-11.5"
+        ]
+      },
+      {
+        "name": "totals_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "totals_median_point",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 8,
+        "sample": [
+          "9.5",
+          "9.0",
+          "8.0"
+        ]
+      },
+      {
+        "name": "totals_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 7,
+        "sample": [
+          "-110.0",
+          "-110.0",
+          "-110.0"
+        ]
+      },
+      {
+        "name": "confidence",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "LOW",
+          "HIGH",
+          "HIGH"
+        ]
+      },
+      {
+        "name": "lean",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 20,
+        "sample": [
+          "San Diego Padres",
+          "Atlanta Braves",
+          "Texas Rangers"
+        ]
+      },
+      {
+        "name": "decision",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "PASS",
+          "PASS",
+          "PASS"
+        ]
+      },
+      {
+        "name": "venue",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "Great American Ball Park",
+          "Nationals Park",
+          "Globe Life Field"
+        ]
+      },
+      {
+        "name": "venue_id",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "2602",
+          "3309",
+          "5325"
+        ]
+      },
+      {
+        "name": "park_run_factor",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "0.9219341002144668",
+          "1.2249020795123138",
+          "0.8877883927991161"
+        ]
+      },
+      {
+        "name": "park_factor_games",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 12,
+        "sample": [
+          "115",
+          "73",
+          "69"
+        ]
+      },
+      {
+        "name": "park_factor_season",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "2026",
+          "2026",
+          "2026"
+        ]
+      },
+      {
+        "name": "temperature_f",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "95.1",
+          "92.3",
+          "97.4"
+        ]
+      },
+      {
+        "name": "precipitation",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      },
+      {
+        "name": "wind_mph",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "7.4",
+          "2.5",
+          "7.3"
+        ]
+      },
+      {
+        "name": "wind_gust_mph",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 21,
+        "sample": [
+          "10.1",
+          "6.7",
+          "8.9"
+        ]
+      },
+      {
+        "name": "humidity_pct",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "39",
+          "52",
+          "37"
+        ]
+      },
+      {
+        "name": "weather_hour_utc",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 9,
+        "sample": [
+          "2026-09-02T17:00:00+00:00",
+          "2026-09-02T17:00:00+00:00",
+          "2026-09-02T19:00:00+00:00"
+        ]
+      },
+      {
+        "name": "run_environment_flag",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 3,
+        "sample": [
+          "NEUTRAL",
+          "HITTER_FRIENDLY",
+          "PITCHER_FRIENDLY"
+        ]
+      },
+      {
+        "name": "comp_count",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 1,
+        "sample": [
+          "25.0",
+          "25.0",
+          "25.0"
+        ]
+      },
+      {
+        "name": "features_used",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 1,
+        "sample": [
+          "11.0",
+          "11.0",
+          "11.0"
+        ]
+      },
+      {
+        "name": "comp_home_win_rate",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 7,
+        "sample": [
+          "0.36",
+          "0.64",
+          "0.48"
+        ]
+      },
+      {
+        "name": "comp_avg_total_runs",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 8,
+        "sample": [
+          "9.0",
+          "7.72",
+          "8.44"
+        ]
+      },
+      {
+        "name": "comp_avg_home_margin",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 9,
+        "sample": [
+          "-1.0",
+          "0.76",
+          "-0.36"
+        ]
+      },
+      {
+        "name": "comp_median_distance",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 9,
+        "sample": [
+          "0.4303958564497251",
+          "0.3169354679389193",
+          "0.2939435296129178"
+        ]
+      },
+      {
+        "name": "comp_quality_grade",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 4,
+        "sample": [
+          "UNKNOWN",
+          "UNKNOWN",
+          "UNKNOWN"
+        ]
+      },
+      {
+        "name": "comp_side",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 3,
+        "sample": [
+          "NEUTRAL",
+          "NEUTRAL",
+          "NEUTRAL"
+        ]
+      },
+      {
+        "name": "hulk_model_side",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "UNKNOWN",
+          "UNKNOWN",
+          "UNKNOWN"
+        ]
+      },
+      {
+        "name": "comp_alignment",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "UNSCORED",
+          "UNSCORED",
+          "UNSCORED"
+        ]
+      },
+      {
+        "name": "comp_bucket_hist_accuracy",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 3,
+        "sample": [
+          "0.5645161290322581",
+          "0.4833333333333333",
+          "0.4833333333333333"
+        ]
+      },
+      {
+        "name": "comp_bucket_hist_samples",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 3,
+        "sample": [
+          "310.0",
+          "360.0",
+          "360.0"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "/home/ubuntu/sports-hulk/baseball_vault/derived/MLB_MATCHUP_BOARD_FULL.csv",
+    "rows": 24,
+    "columns": [
+      {
+        "name": "gamePk",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "824470",
+          "822686",
+          "822851"
+        ]
+      },
+      {
+        "name": "gameDate",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 19,
+        "sample": [
+          "2026-09-02T16:40:00Z",
+          "2026-09-02T17:05:00Z",
+          "2026-09-02T18:35:00Z"
+        ]
+      },
+      {
+        "name": "away_team",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "San Diego Padres",
+          "Atlanta Braves",
+          "Athletics"
+        ]
+      },
+      {
+        "name": "home_team",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "Cincinnati Reds",
+          "Washington Nationals",
+          "Texas Rangers"
+        ]
+      },
+      {
+        "name": "away_probable_pitcher",
+        "dtype": "str",
+        "non_null": 20,
+        "unique": 20,
+        "sample": [
+          "Casey Mize",
+          "Grant Holmes",
+          "Jacob Lopez"
+        ]
+      },
+      {
+        "name": "home_probable_pitcher",
+        "dtype": "str",
+        "non_null": 20,
+        "unique": 20,
+        "sample": [
+          "Brandon Williamson",
+          "Brad Lord",
+          "Cody Bradford"
+        ]
+      },
+      {
+        "name": "away_starter_vs_home_lineup",
+        "dtype": "float64",
+        "non_null": 20,
+        "unique": 18,
+        "sample": [
+          "0.395",
+          "0.18",
+          "0.061"
+        ]
+      },
+      {
+        "name": "home_starter_vs_away_lineup",
+        "dtype": "float64",
+        "non_null": 19,
+        "unique": 19,
+        "sample": [
+          "-0.114",
+          "0.269",
+          "0.241"
+        ]
+      },
+      {
+        "name": "home_bullpen_workload",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "30.285714285714285",
+          "28.5",
+          "28.33333333333333"
+        ]
+      },
+      {
+        "name": "away_bullpen_workload",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "39.71428571428572",
+          "30.714285714285715",
+          "39.142857142857146"
+        ]
+      },
+      {
+        "name": "bullpen_data_present",
+        "dtype": "bool",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "True",
+          "True",
+          "True"
+        ]
+      },
+      {
+        "name": "both_starter_matchups_present",
+        "dtype": "bool",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "False",
+          "True",
+          "True"
+        ]
+      },
+      {
+        "name": "home_edge_score",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "-0.289",
+          "-0.228",
+          "0.198"
+        ]
+      },
+      {
+        "name": "sample_pitches",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "2886",
+          "4784",
+          "2536"
+        ]
+      },
+      {
+        "name": "pitch_types_matched",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 9,
+        "sample": [
+          "6",
+          "12",
+          "9"
+        ]
+      },
+      {
+        "name": "h2h_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "h2h_median_point",
+        "dtype": "float64",
+        "non_null": 0,
+        "unique": 0,
+        "sample": []
+      },
+      {
+        "name": "h2h_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 12,
+        "sample": [
+          "-9.0",
+          "-10.0",
+          "-12.0"
+        ]
+      },
+      {
+        "name": "spreads_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "spreads_median_point",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 1,
+        "sample": [
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      },
+      {
+        "name": "spreads_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 12,
+        "sample": [
+          "-10.0",
+          "-9.0",
+          "-11.5"
+        ]
+      },
+      {
+        "name": "totals_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "totals_median_point",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 8,
+        "sample": [
+          "9.5",
+          "9.0",
+          "8.0"
+        ]
+      },
+      {
+        "name": "totals_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 7,
+        "sample": [
+          "-110.0",
+          "-110.0",
+          "-110.0"
+        ]
+      },
+      {
+        "name": "confidence",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "LOW",
+          "HIGH",
+          "HIGH"
+        ]
+      },
+      {
+        "name": "lean",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 20,
+        "sample": [
+          "San Diego Padres",
+          "Atlanta Braves",
+          "Texas Rangers"
+        ]
+      },
+      {
+        "name": "decision",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "PASS",
+          "PASS",
+          "PASS"
+        ]
+      },
+      {
+        "name": "venue",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "Great American Ball Park",
+          "Nationals Park",
+          "Globe Life Field"
+        ]
+      },
+      {
+        "name": "venue_id",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "2602",
+          "3309",
+          "5325"
+        ]
+      },
+      {
+        "name": "park_run_factor",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "0.9219341002144668",
+          "1.2249020795123138",
+          "0.8877883927991161"
+        ]
+      },
+      {
+        "name": "park_factor_games",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 12,
+        "sample": [
+          "115",
+          "73",
+          "69"
+        ]
+      },
+      {
+        "name": "park_factor_season",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "2026",
+          "2026",
+          "2026"
+        ]
+      },
+      {
+        "name": "temperature_f",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "95.1",
+          "92.3",
+          "97.4"
+        ]
+      },
+      {
+        "name": "precipitation",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      },
+      {
+        "name": "wind_mph",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "7.4",
+          "2.5",
+          "7.3"
+        ]
+      },
+      {
+        "name": "wind_gust_mph",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 21,
+        "sample": [
+          "10.1",
+          "6.7",
+          "8.9"
+        ]
+      },
+      {
+        "name": "humidity_pct",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "39",
+          "52",
+          "37"
+        ]
+      },
+      {
+        "name": "weather_hour_utc",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 9,
+        "sample": [
+          "2026-09-02T17:00:00+00:00",
+          "2026-09-02T17:00:00+00:00",
+          "2026-09-02T19:00:00+00:00"
+        ]
+      },
+      {
+        "name": "run_environment_flag",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 3,
+        "sample": [
+          "NEUTRAL",
+          "HITTER_FRIENDLY",
+          "PITCHER_FRIENDLY"
+        ]
+      },
+      {
+        "name": "comp_count",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 1,
+        "sample": [
+          "25.0",
+          "25.0",
+          "25.0"
+        ]
+      },
+      {
+        "name": "features_used",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 1,
+        "sample": [
+          "11.0",
+          "11.0",
+          "11.0"
+        ]
+      },
+      {
+        "name": "comp_home_win_rate",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 7,
+        "sample": [
+          "0.36",
+          "0.64",
+          "0.48"
+        ]
+      },
+      {
+        "name": "comp_avg_total_runs",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 8,
+        "sample": [
+          "9.0",
+          "7.72",
+          "8.44"
+        ]
+      },
+      {
+        "name": "comp_avg_home_margin",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 9,
+        "sample": [
+          "-1.0",
+          "0.76",
+          "-0.36"
+        ]
+      },
+      {
+        "name": "comp_median_distance",
+        "dtype": "float64",
+        "non_null": 9,
+        "unique": 9,
+        "sample": [
+          "0.4303958564497251",
+          "0.3169354679389193",
+          "0.2939435296129178"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "/home/ubuntu/sports-hulk/baseball_vault/derived/MLB_MATCHUP_BOARD_ENRICHED.csv",
+    "rows": 24,
+    "columns": [
+      {
+        "name": "gamePk",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "824470",
+          "822686",
+          "822851"
+        ]
+      },
+      {
+        "name": "gameDate",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 19,
+        "sample": [
+          "2026-09-02T16:40:00Z",
+          "2026-09-02T17:05:00Z",
+          "2026-09-02T18:35:00Z"
+        ]
+      },
+      {
+        "name": "away_team",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "San Diego Padres",
+          "Atlanta Braves",
+          "Athletics"
+        ]
+      },
+      {
+        "name": "home_team",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "Cincinnati Reds",
+          "Washington Nationals",
+          "Texas Rangers"
+        ]
+      },
+      {
+        "name": "away_probable_pitcher",
+        "dtype": "str",
+        "non_null": 20,
+        "unique": 20,
+        "sample": [
+          "Casey Mize",
+          "Grant Holmes",
+          "Jacob Lopez"
+        ]
+      },
+      {
+        "name": "home_probable_pitcher",
+        "dtype": "str",
+        "non_null": 20,
+        "unique": 20,
+        "sample": [
+          "Brandon Williamson",
+          "Brad Lord",
+          "Cody Bradford"
+        ]
+      },
+      {
+        "name": "away_starter_vs_home_lineup",
+        "dtype": "float64",
+        "non_null": 20,
+        "unique": 18,
+        "sample": [
+          "0.395",
+          "0.18",
+          "0.061"
+        ]
+      },
+      {
+        "name": "home_starter_vs_away_lineup",
+        "dtype": "float64",
+        "non_null": 19,
+        "unique": 19,
+        "sample": [
+          "-0.114",
+          "0.269",
+          "0.241"
+        ]
+      },
+      {
+        "name": "home_bullpen_workload",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "30.285714285714285",
+          "28.5",
+          "28.33333333333333"
+        ]
+      },
+      {
+        "name": "away_bullpen_workload",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "39.71428571428572",
+          "30.714285714285715",
+          "39.142857142857146"
+        ]
+      },
+      {
+        "name": "bullpen_data_present",
+        "dtype": "bool",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "True",
+          "True",
+          "True"
+        ]
+      },
+      {
+        "name": "both_starter_matchups_present",
+        "dtype": "bool",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "False",
+          "True",
+          "True"
+        ]
+      },
+      {
+        "name": "home_edge_score",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "-0.289",
+          "-0.228",
+          "0.198"
+        ]
+      },
+      {
+        "name": "sample_pitches",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "2886",
+          "4784",
+          "2536"
+        ]
+      },
+      {
+        "name": "pitch_types_matched",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 9,
+        "sample": [
+          "6",
+          "12",
+          "9"
+        ]
+      },
+      {
+        "name": "h2h_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "h2h_median_point",
+        "dtype": "float64",
+        "non_null": 0,
+        "unique": 0,
+        "sample": []
+      },
+      {
+        "name": "h2h_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 12,
+        "sample": [
+          "-9.0",
+          "-10.0",
+          "-12.0"
+        ]
+      },
+      {
+        "name": "spreads_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "spreads_median_point",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 1,
+        "sample": [
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      },
+      {
+        "name": "spreads_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 12,
+        "sample": [
+          "-10.0",
+          "-9.0",
+          "-11.5"
+        ]
+      },
+      {
+        "name": "totals_book_count",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 5,
+        "sample": [
+          "9.0",
+          "6.0",
+          "9.0"
+        ]
+      },
+      {
+        "name": "totals_median_point",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 8,
+        "sample": [
+          "9.5",
+          "9.0",
+          "8.0"
+        ]
+      },
+      {
+        "name": "totals_median_price",
+        "dtype": "float64",
+        "non_null": 21,
+        "unique": 7,
+        "sample": [
+          "-110.0",
+          "-110.0",
+          "-110.0"
+        ]
+      },
+      {
+        "name": "confidence",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "LOW",
+          "HIGH",
+          "HIGH"
+        ]
+      },
+      {
+        "name": "lean",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 20,
+        "sample": [
+          "San Diego Padres",
+          "Atlanta Braves",
+          "Texas Rangers"
+        ]
+      },
+      {
+        "name": "decision",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 2,
+        "sample": [
+          "PASS",
+          "PASS",
+          "PASS"
+        ]
+      },
+      {
+        "name": "venue",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "Great American Ball Park",
+          "Nationals Park",
+          "Globe Life Field"
+        ]
+      },
+      {
+        "name": "venue_id",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "2602",
+          "3309",
+          "5325"
+        ]
+      },
+      {
+        "name": "park_run_factor",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 17,
+        "sample": [
+          "0.9219341002144668",
+          "1.2249020795123138",
+          "0.8877883927991161"
+        ]
+      },
+      {
+        "name": "park_factor_games",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 12,
+        "sample": [
+          "115",
+          "73",
+          "69"
+        ]
+      },
+      {
+        "name": "park_factor_season",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "2026",
+          "2026",
+          "2026"
+        ]
+      },
+      {
+        "name": "temperature_f",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 24,
+        "sample": [
+          "95.1",
+          "92.3",
+          "97.4"
+        ]
+      },
+      {
+        "name": "precipitation",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 1,
+        "sample": [
+          "0.0",
+          "0.0",
+          "0.0"
+        ]
+      },
+      {
+        "name": "wind_mph",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "7.4",
+          "2.5",
+          "7.3"
+        ]
+      },
+      {
+        "name": "wind_gust_mph",
+        "dtype": "float64",
+        "non_null": 24,
+        "unique": 21,
+        "sample": [
+          "10.1",
+          "6.7",
+          "8.9"
+        ]
+      },
+      {
+        "name": "humidity_pct",
+        "dtype": "int64",
+        "non_null": 24,
+        "unique": 22,
+        "sample": [
+          "39",
+          "52",
+          "37"
+        ]
+      },
+      {
+        "name": "weather_hour_utc",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 9,
+        "sample": [
+          "2026-09-02T17:00:00+00:00",
+          "2026-09-02T17:00:00+00:00",
+          "2026-09-02T19:00:00+00:00"
+        ]
+      },
+      {
+        "name": "run_environment_flag",
+        "dtype": "str",
+        "non_null": 24,
+        "unique": 3,
+        "sample": [
+          "NEUTRAL",
+          "HITTER_FRIENDLY",
+          "PITCHER_FRIENDLY"
+        ]
+      }
+    ]
+  }
+]
