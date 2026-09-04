@@ -1475,22 +1475,25 @@ mode = section_mode
 
 if mode == "🎯 Betting":
     menu = [
-        "Dashboard",
+        "Command Center",
         "Today's Slate",
         "Best Bets",
         "Parlay Center",
+        "Game Research",
+        "Bet Tracker",
+        "Performance Lab",
         "Line Movement",
         "Results",
         "Research",
+        "Historical Explorer",
     ]
 
 elif mode == "⚾ MLB":
     menu = [
-        "MLB Dashboard",
         "MLB Best Bets",
+        "MLB Player Props",
         "MLB Parlays",
         "MLB Matchups",
-        "MLB Player Props",
         "Starting Pitching",
         "Weather",
         "MLB Market",
@@ -1499,19 +1502,21 @@ elif mode == "⚾ MLB":
 
 elif mode == "🏈 NFL":
     menu = [
-        "NFL Dashboard",
+        "NFL Command Center",
         "NFL Best Bets",
+        "NFL Player Props",
         "NFL Parlays",
         "NFL Matchups",
-        "NFL Player Props",
         "Survivor",
+        "NFL Weather",
         "NFL Research",
     ]
 
 elif mode == "🏟️ College Football":
     menu = [
-        "CFB Dashboard",
+        "CFB Command Center",
         "CFB Best Bets",
+        "CFB Over / Unders",
         "CFB Parlays",
         "CFB Matchups",
         "CFB Research",
@@ -1522,7 +1527,6 @@ elif mode == "🟣 PrizePicks":
         "PrizePicks Dashboard",
         "NFL PrizePicks",
         "MLB PrizePicks",
-        "CFB PrizePicks",
     ]
 
 elif mode == "🏆 Fantasy":
@@ -1531,6 +1535,7 @@ elif mode == "🏆 Fantasy":
         "League Settings",
         "My Leagues",
         "Draft Kit",
+        "Top 300 Cheat Sheet",
         "Rankings",
         "Tiers",
         "ADP / Value",
@@ -1538,6 +1543,7 @@ elif mode == "🏆 Fantasy":
         "Waiver Wire Weekly",
         "Lineup",
         "Roster Builder",
+        "Trade Finder",
         "NFL Research",
     ]
 
@@ -2414,6 +2420,7 @@ elif mode=="⚾ MLB":
 
 
         render_prop_intelligence("MLB")
+        st.stop()
         title(
             "MLB",
             "MLB Player Props",
@@ -4364,7 +4371,7 @@ elif mode=="🏆 Fantasy":
 
 elif mode=="🏈 NFL":
 
-    if page=="NFL Dashboard":
+    if page in {"NFL Dashboard","NFL Command Center"}:
 
         title(
             "NFL",
@@ -4938,6 +4945,7 @@ elif mode=="🏈 NFL":
 
 
         render_prop_intelligence("NFL")
+        st.stop()
         title(
             "NFL",
             "NFL Player Props",
@@ -5761,7 +5769,7 @@ elif mode=="🏈 NFL":
 
 elif mode=="🏟️ College Football":
 
-    if page=="CFB Dashboard":
+    if page in {"CFB Dashboard","CFB Command Center"}:
         title(
             "COLLEGE FOOTBALL",
             "College Football Dashboard",
