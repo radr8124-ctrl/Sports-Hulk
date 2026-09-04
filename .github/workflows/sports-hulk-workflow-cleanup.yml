@@ -1,0 +1,72 @@
+name: Sports HULK Workflow Cleanup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    name: Remove temporary Sports HULK workflows
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify permanent workflows exist
+        shell: bash
+        run: |
+          test -f .github/workflows/sports-hulk-ci-main.yml
+          test -f .github/workflows/sports-hulk-deploy.yml
+          echo "Permanent CI + Deploy workflows found."
+
+      - name: Remove every temporary workflow, including this cleanup file
+        shell: bash
+        run: |
+          echo "BEFORE:"
+          ls -1 .github/workflows || true
+
+          find .github/workflows -maxdepth 1 -type f \
+            ! -name 'sports-hulk-ci-main.yml' \
+            ! -name 'sports-hulk-deploy.yml' \
+            -delete
+
+          echo
+          echo "AFTER:"
+          ls -1 .github/workflows
+
+          COUNT="$(find .github/workflows -maxdepth 1 -type f | wc -l | tr -d ' ')"
+          if [ "$COUNT" != "2" ]; then
+            echo "Cleanup verification failed: expected exactly 2 workflows, found $COUNT"
+            exit 1
+          fi
+
+      - name: Commit cleanup to main
+        shell: bash
+        run: |
+          git config user.name "Sports HULK Build Bot"
+          git config user.email "actions@github.com"
+          git add -A .github/workflows
+
+          if git diff --cached --quiet; then
+            echo "Nothing to clean."
+          else
+            git commit -m "Clean temporary Sports HULK workflows"
+            git push origin HEAD:main
+          fi
+
+      - name: Confirm clean workflow folder
+        shell: bash
+        run: |
+          echo "Sports HULK workflow cleanup complete."
+          echo "Permanent workflows kept:"
+          echo "  sports-hulk-ci-main.yml"
+          echo "  sports-hulk-deploy.yml"
