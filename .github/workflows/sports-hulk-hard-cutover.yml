@@ -1,0 +1,222 @@
+name: Sports HULK Hard Cutover
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cutover:
+    name: Hard cutover public site to final Sports HULK
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout final tested branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/final-ui-rebuild
+          fetch-depth: 0
+
+      - name: Prove this is the FINAL UI source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          app = Path("app.py").read_text()
+          ui = Path("hulk_final_ui.py").read_text()
+
+          required_app = [
+              '"Command Center"',
+              '"Game Research"',
+              '"Bet Tracker"',
+              '"Performance Lab"',
+              '"Historical Explorer"',
+              '"Top 300 Cheat Sheet"',
+              '"CFB Over / Unders"',
+              '"NFL Weather"',
+          ]
+          required_ui = [
+              "EVERYTHING THAT MATTERS.",
+              "SPORTS INTELLIGENCE COMMAND CENTER",
+              "FANTASY HULK COMMAND CENTER",
+          ]
+
+          missing = [x for x in required_app if x not in app]
+          missing += [x for x in required_ui if x not in ui]
+
+          if missing:
+              raise SystemExit("FINAL UI SOURCE CHECK FAILED: " + repr(missing))
+
+          # The old Betting menu must no longer begin with Dashboard.
+          if 'if mode == "🎯 Betting":\n    menu = [\n        "Dashboard"' in app:
+              raise SystemExit("OLD BETTING DASHBOARD MENU STILL PRESENT")
+
+          print("FINAL UI SOURCE CHECK: PASS")
+          PY
+
+      - name: Stop public app before cutover
+        run: |
+          sudo systemctl stop sports-hulk || true
+          sleep 2
+          sudo pkill -f '/home/ubuntu/sports-hulk/.*streamlit' || true
+          sudo pkill -f 'streamlit.*sports-hulk' || true
+          sleep 2
+
+      - name: Replace live source with final tested branch
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y rsync nginx
+
+          rsync -a \
+            --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.env' \
+            --exclude '.venv/' \
+            --exclude '__pycache__/' \
+            --exclude '*.pyc' \
+            --exclude '*.parquet' \
+            --exclude 'raw/' \
+            --exclude 'history/' \
+            --exclude 'logs/' \
+            --exclude 'backups/' \
+            --exclude '*.db' \
+            --exclude '*.sqlite' \
+            --exclude '*.sqlite3' \
+            --exclude '*.backup' \
+            --exclude '*.backup_*' \
+            --exclude '*.bak' \
+            --exclude '*.bak_*' \
+            --exclude '*.pre_*' \
+            "$GITHUB_WORKSPACE/" \
+            /home/ubuntu/sports-hulk/
+
+      - name: Prove LIVE files are final
+        working-directory: /home/ubuntu/sports-hulk
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          app = Path("app.py").read_text()
+          ui = Path("hulk_final_ui.py").read_text()
+
+          assert '"Command Center"' in app
+          assert '"Game Research"' in app
+          assert '"Bet Tracker"' in app
+          assert '"Performance Lab"' in app
+          assert '"Historical Explorer"' in app
+          assert "EVERYTHING THAT MATTERS." in ui
+          assert "SPORTS INTELLIGENCE COMMAND CENTER" in ui
+
+          if 'if mode == "🎯 Betting":\n    menu = [\n        "Dashboard"' in app:
+              raise SystemExit("OLD LIVE BETTING MENU FOUND")
+
+          print("LIVE FINAL SOURCE CHECK: PASS")
+          PY
+
+          if [ ! -x .venv/bin/python ]; then
+            python3 -m venv .venv
+          fi
+
+          .venv/bin/python -m pip install --upgrade pip
+          if [ -f requirements-oracle.txt ]; then
+            .venv/bin/pip install -r requirements-oracle.txt
+          else
+            .venv/bin/pip install -r requirements.txt
+          fi
+
+          .venv/bin/python -m py_compile app.py
+          .venv/bin/python -m py_compile hulk_final_ui.py
+          .venv/bin/python -m py_compile prop_intelligence/hulk_prop_ui.py
+          .venv/bin/python self_test_ui_contract.py
+
+      - name: Replace Sports HULK systemd service
+        run: |
+          sudo rm -rf /etc/systemd/system/sports-hulk.service.d
+
+          sudo tee /etc/systemd/system/sports-hulk.service >/dev/null <<'EOF'
+          [Unit]
+          Description=Sports HULK Streamlit
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=ubuntu
+          WorkingDirectory=/home/ubuntu/sports-hulk
+          Environment=PYTHONUNBUFFERED=1
+          ExecStart=/home/ubuntu/sports-hulk/.venv/bin/streamlit run /home/ubuntu/sports-hulk/app.py --server.address=127.0.0.1 --server.port=8501 --server.headless=true --browser.gatherUsageStats=false
+          Restart=always
+          RestartSec=3
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          sudo systemctl daemon-reload
+          sudo systemctl enable sports-hulk
+          sudo systemctl restart sports-hulk
+          sleep 8
+          sudo systemctl is-active sports-hulk
+
+      - name: Force Nginx public IP to the same app
+        run: |
+          sudo tee /etc/nginx/sites-available/sports-hulk >/dev/null <<'EOF'
+          server {
+              listen 80 default_server;
+              listen [::]:80 default_server;
+              server_name _;
+
+              location / {
+                  proxy_pass http://127.0.0.1:8501;
+                  proxy_http_version 1.1;
+
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+
+                  proxy_buffering off;
+                  proxy_read_timeout 86400;
+              }
+          }
+          EOF
+
+          sudo rm -f /etc/nginx/sites-enabled/default
+          sudo ln -sfn /etc/nginx/sites-available/sports-hulk /etc/nginx/sites-enabled/sports-hulk
+          sudo nginx -t
+          sudo systemctl enable nginx
+          sudo systemctl reload nginx
+
+      - name: Prove public route and process
+        run: |
+          echo "---- SERVICE ----"
+          sudo systemctl show sports-hulk \
+            --property=ExecStart \
+            --property=WorkingDirectory \
+            --property=MainPID \
+            --no-pager
+
+          echo "---- LISTENERS ----"
+          sudo ss -ltnp | grep -E ':80 |:8501 ' || true
+
+          echo "---- PROCESS ----"
+          pgrep -af 'streamlit.*sports-hulk/app.py'
+
+          echo "---- DIRECT APP ----"
+          curl -fsSI http://127.0.0.1:8501 | head
+
+          echo "---- THROUGH NGINX ----"
+          curl -fsSI http://127.0.0.1 | head
+
+          echo "========================================"
+          echo "SPORTS HULK HARD CUTOVER: PASS"
+          echo "PUBLIC PORT 80 -> 127.0.0.1:8501"
+          echo "8501 -> /home/ubuntu/sports-hulk/app.py"
+          echo "FINAL COMMAND CENTER SOURCE VERIFIED"
+          echo "========================================"
