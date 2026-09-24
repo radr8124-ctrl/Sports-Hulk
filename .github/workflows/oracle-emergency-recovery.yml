@@ -1,0 +1,170 @@
+name: Oracle Emergency Recovery
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    name: Package live Oracle HULKs
+    runs-on:
+      - self-hosted
+      - Linux
+      - ARM64
+
+    timeout-minutes: 30
+
+    steps:
+      - name: Create recovery folder
+        shell: bash
+        run: |
+          set -e
+          RECOVERY="/home/ubuntu/oracle-recovery-$(date +%Y%m%d-%H%M%S)"
+          mkdir -p "$RECOVERY"
+          echo "RECOVERY=$RECOVERY" >> "$GITHUB_ENV"
+
+      - name: Record server inventory
+        shell: bash
+        run: |
+          {
+            echo "=== HOST ==="
+            hostname
+            date -Is
+            uname -a
+
+            echo
+            echo "=== DISK ==="
+            df -h
+
+            echo
+            echo "=== MEMORY ==="
+            free -h
+
+            echo
+            echo "=== HOME DIRECTORIES ==="
+            find /home/ubuntu -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | sort
+
+            echo
+            echo "=== RUNNING HULK SERVICES ==="
+            systemctl --no-pager --type=service --state=running | grep -i hulk || true
+
+            echo
+            echo "=== SYSTEMD TIMERS ==="
+            systemctl list-timers --all --no-pager || true
+
+            echo
+            echo "=== UBUNTU CRONTAB ==="
+            crontab -l 2>/dev/null || true
+          } > "$RECOVERY/server-inventory.txt"
+
+      - name: Save service and web configuration
+        shell: bash
+        run: |
+          mkdir -p "$RECOVERY/server-config"
+
+          sudo cp -a /etc/systemd/system/product-hulk.service \
+            "$RECOVERY/server-config/" 2>/dev/null || true
+
+          sudo cp -a /etc/systemd/system/sports-hulk.service \
+            "$RECOVERY/server-config/" 2>/dev/null || true
+
+          sudo cp -a /etc/systemd/system/sports-hulk-mcp.service \
+            "$RECOVERY/server-config/" 2>/dev/null || true
+
+          sudo cp -a /etc/nginx/sites-enabled \
+            "$RECOVERY/server-config/nginx-sites-enabled" 2>/dev/null || true
+
+          sudo systemctl list-timers --all --no-pager \
+            > "$RECOVERY/server-config/systemd-timers.txt" 2>/dev/null || true
+
+          crontab -l \
+            > "$RECOVERY/server-config/ubuntu-crontab.txt" 2>/dev/null || true
+
+      - name: Package Product HULK
+        shell: bash
+        run: |
+          sudo tar \
+            --exclude='.env' \
+            --exclude='.venv' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            -czf "$RECOVERY/product-hulk-live.tar.gz" \
+            -C /home/ubuntu product-hulk
+
+      - name: Package newer Product recovery builds
+        shell: bash
+        run: |
+          sudo tar \
+            --ignore-failed-read \
+            --exclude='.env' \
+            --exclude='.venv' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            -czf "$RECOVERY/product-hulk-newer-builds.tar.gz" \
+            -C /home/ubuntu \
+            product-hulk-correction1-stage \
+            product-hulk-correction2-stage \
+            product-hulk-correction2-golden-20260921 \
+            product-hulk-correction3-stage \
+            product-hulk-correction3-golden-20260922 \
+            2>/dev/null || true
+
+      - name: Package Sports HULK
+        shell: bash
+        run: |
+          sudo tar \
+            --exclude='.env' \
+            --exclude='.venv' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            -czf "$RECOVERY/sports-hulk-live.tar.gz" \
+            -C /home/ubuntu sports-hulk
+
+      - name: Show recovery package sizes
+        shell: bash
+        run: |
+          echo "=== RECOVERY FILES ==="
+          ls -lh "$RECOVERY"
+
+      - name: Upload Product HULK live backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-product-hulk-live
+          path: ${{ env.RECOVERY }}/product-hulk-live.tar.gz
+          retention-days: 7
+          compression-level: 0
+
+      - name: Upload newer Product builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-product-hulk-newer-builds
+          path: ${{ env.RECOVERY }}/product-hulk-newer-builds.tar.gz
+          retention-days: 7
+          compression-level: 0
+
+      - name: Upload Sports HULK live backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-sports-hulk-live
+          path: ${{ env.RECOVERY }}/sports-hulk-live.tar.gz
+          retention-days: 7
+          compression-level: 0
+
+      - name: Upload server configuration
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracle-server-config
+          path: |
+            ${{ env.RECOVERY }}/server-inventory.txt
+            ${{ env.RECOVERY }}/server-config
+          retention-days: 7
+
+      - name: Recovery complete
+        run: |
+          echo "========================================"
+          echo "ORACLE RECOVERY PACKAGE COMPLETE"
+          echo "No deploy or service restart performed."
+          echo "Secrets were excluded."
+          echo "========================================"
