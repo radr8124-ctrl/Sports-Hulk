@@ -5,6 +5,8 @@ from zoneinfo import ZoneInfo
 import itertools, json, math, re
 import pandas as pd
 
+from prop_intelligence.market_pricing import consensus_for_exact_line
+
 ROOT = Path("/home/ubuntu/sports-hulk")
 OUT = ROOT / "prop_intelligence" / "derived"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -197,32 +199,70 @@ def infer_sport_from_pp(df):
     return {"NFL":df[s.str.contains("NFL")].copy(),"MLB":df[s.str.contains("MLB")].copy()}
 
 def build_consensus(rows):
+    """Build exact-line consensus from same-book two-sided markets.
+
+    Important: each book is de-vigged before aggregation. We never combine an
+    OVER price from one book with an UNDER price from another book.
+    """
     if rows.empty: return pd.DataFrame()
     x=rows.copy()
     x["line"]=pd.to_numeric(x["line"],errors="coerce")
     x=x.dropna(subset=["line"])
-    # dedupe exact provider/book/player/market/line/event combinations
-    x=x.drop_duplicates(subset=["sport","player_key","canonical_market","bookmaker","line","event_id"])
+    x=x.drop_duplicates(
+        subset=["sport","player_key","canonical_market","bookmaker","line","event_id"],
+        keep="last",
+    )
+
     groups=[]
     keys=["sport","player_key","player","canonical_market","event_id","event_time","team","opponent"]
     for k,g in x.groupby(keys,dropna=False):
         lines=g["line"].dropna()
         if lines.empty: continue
-        books=g["bookmaker"].replace("",pd.NA).dropna().nunique()
-        op=pd.to_numeric(g["over_price"],errors="coerce").dropna()
-        up=pd.to_numeric(g["under_price"],errors="coerce").dropna()
-        med=float(lines.median())
-        within=((lines-med).abs()<=max(0.5,abs(med)*0.02)).mean()*100 if len(lines) else 0
+
+        pricing=consensus_for_exact_line(g.to_dict("records"))
+        if pricing.get("status")=="READY":
+            target=float(pricing["target_line"])
+            exact=lines[lines.eq(target)]
+            book_count=int(pricing["paired_book_count"])
+            agreement=100.0*len(exact)/len(lines) if len(lines) else 0.0
+            over_best=pricing.get("best_over_price")
+            under_best=pricing.get("best_under_price")
+        else:
+            # Keep the row for audit/UI visibility, but make it ineligible.
+            target=float(lines.median())
+            book_count=0
+            agreement=0.0
+            over_best=None
+            under_best=None
+
         groups.append({
             **dict(zip(keys,k)),
-            "market_median":med,
+            "market_median":target,
             "market_low":float(lines.min()),
             "market_high":float(lines.max()),
-            "book_count":int(books),
-            "book_agreement_pct":round(float(within),1),
+            "book_count":book_count,
+            "book_agreement_pct":round(float(agreement),1),
             "line_dispersion":round(float(lines.std(ddof=0)),3) if len(lines)>1 else 0.0,
-            "over_price_median":float(op.median()) if not op.empty else None,
-            "under_price_median":float(up.median()) if not up.empty else None,
+            # Compatibility columns now represent best executable prices,
+            # not independently-computed cross-book medians.
+            "over_price_median":over_best,
+            "under_price_median":under_best,
+            "market_pricing_status":pricing.get("status"),
+            "over_fair_probability":pricing.get("over_fair_probability"),
+            "under_fair_probability":pricing.get("under_fair_probability"),
+            "fair_probability_mad":pricing.get("over_fair_probability_mad"),
+            "median_hold":pricing.get("median_hold"),
+            "best_over_price":pricing.get("best_over_price"),
+            "best_over_book":pricing.get("best_over_book"),
+            "best_under_price":pricing.get("best_under_price"),
+            "best_under_book":pricing.get("best_under_book"),
+            "paired_book_count":pricing.get("paired_book_count",0),
+            "fresh_book_count":pricing.get("fresh_book_count",0),
+            "stale_quote_count":pricing.get("stale_count",0),
+            "unknown_freshness_count":pricing.get("unknown_freshness_count",0),
+            "line_mismatch_count":pricing.get("line_mismatch_count",0),
+            "market_data_quality_grade":pricing.get("data_quality_grade","D"),
+            "market_quality_warnings":"|".join(pricing.get("warnings",[])),
         })
     return pd.DataFrame(groups)
 
@@ -291,7 +331,7 @@ def american_prob(odds):
     return 100/(o+100) if o>0 else (-o)/((-o)+100)
 
 def score_signal(r):
-    books=int(r.get("book_count",0) or 0)
+    books=int(r.get("paired_book_count",r.get("book_count",0)) or 0)
     agreement=fl(r.get("book_agreement_pct")) or 0
     gap=fl(r.get("pp_gap"))
     median=fl(r.get("market_median"))
@@ -299,14 +339,15 @@ def score_signal(r):
     if gap is not None and median not in (None,0):
         gap_strength=min(100,abs(gap)/max(1,abs(median))*500)
     depth=min(100,books/7*100)
-    overp=american_prob(r.get("over_price_median"))
-    underp=american_prob(r.get("under_price_median"))
-    pressure=50
+
+    fair_over=fl(r.get("over_fair_probability"))
+    pressure=0
     direction="NEUTRAL"
-    if overp is not None and underp is not None and overp+underp>0:
-        no_vig_over=overp/(overp+underp)
-        pressure=abs(no_vig_over-0.5)*200
-        direction="OVER" if no_vig_over>0.5 else "UNDER"
+    if fair_over is not None:
+        pressure=abs(fair_over-0.5)*200
+        direction="OVER" if fair_over>0.5 else "UNDER"
+
+    # This remains an evidence/ranking score, never a win probability.
     score=0.30*gap_strength+0.25*pressure+0.20*agreement+0.15*depth+0.10*100
     return round(min(100,max(0,score)),1),direction,round(pressure,1)
 
@@ -319,8 +360,15 @@ def build_signals(consensus, nfl_df, mlb_df):
     out["hulk_prop_score"]=scores
     out["market_direction"]=dirs
     out["price_pressure_score"]=press
-    out["coverage_grade"]=out["book_count"].map(lambda n:"STRONG" if n>=7 else "GOOD" if n>=5 else "USABLE" if n>=3 else "LOW")
-    out["signal"]=out.apply(lambda r:"PASS" if r["book_count"]<3 else ("STRONG" if r["hulk_prop_score"]>=80 else "LEAN" if r["hulk_prop_score"]>=65 else "WATCH"),axis=1)
+    out["coverage_grade"]=out["paired_book_count"].map(lambda n:"STRONG" if n>=7 else "GOOD" if n>=5 else "USABLE" if n>=3 else "LOW")
+    out["signal"]=out.apply(
+        lambda r:"PASS"
+        if r.get("market_pricing_status")!="READY"
+        or int(r.get("paired_book_count",0) or 0)<3
+        or str(r.get("market_data_quality_grade","D")).upper()=="D"
+        else ("STRONG" if r["hulk_prop_score"]>=80 else "LEAN" if r["hulk_prop_score"]>=65 else "WATCH"),
+        axis=1,
+    )
     return out
 
 def chemistry(a,b):
