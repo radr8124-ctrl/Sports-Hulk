@@ -415,7 +415,14 @@ def build_parlays(signals):
                 "sports":",".join(sorted({x["sport"] for x in combo})),
                 "leg_summary":" | ".join(f'{x["player"]} {x["canonical_market"]} {x["market_direction"]}' for x in combo),
                 "chemistry":";".join(notes),
-                "source_label":"MARKET-BACKED PROP PARLAY",
+                # Correlation-adjusted joint probability and actual offered
+                # payout are not yet available in this legacy builder.
+                # Therefore this row is research-only and cannot claim EV.
+                "joint_probability":None,
+                "offered_decimal_payout":None,
+                "expected_value_pct":None,
+                "recommendation_status":"RESEARCH_ONLY_NO_JOINT_EV",
+                "source_label":"MARKET-BACKED PROP PARLAY RESEARCH",
             })
     return pd.DataFrame(candidates),pd.DataFrame(rej)
 
