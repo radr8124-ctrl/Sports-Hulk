@@ -173,7 +173,7 @@ test('signed-in active team switches every personalized Fantasy lane and Ask con
     });
   });
 
-  await page.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'networkidle' });
+  await page.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'domcontentloaded' });
 
   await expect(page.getByText('Alpha Team').first()).toBeVisible();
   await page.getByRole('button', { name: 'Start / Sit' }).click();
@@ -267,8 +267,8 @@ test('two simulated users keep independent active team context', async ({ browse
     }
 
     await Promise.all([
-      pageA.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'networkidle' }),
-      pageB.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'networkidle' }),
+      pageA.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'domcontentloaded' }),
+      pageB.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'domcontentloaded' }),
     ]);
 
     await Promise.all([

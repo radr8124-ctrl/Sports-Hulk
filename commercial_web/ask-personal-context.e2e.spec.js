@@ -24,7 +24,7 @@ test('Ask carries the active fantasy league into its request context', async ({ 
     });
   });
 
-  await page.goto('http://127.0.0.1:8510/#ask', { waitUntil: 'networkidle' });
+  await page.goto('http://127.0.0.1:8510/#ask', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Start / Sit' }).click();
 
   await expect(page.getByText('Test personalized answer')).toBeVisible();
