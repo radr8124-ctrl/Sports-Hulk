@@ -15,6 +15,7 @@ const SPORTS_ROOT = path.resolve(__dirname, '..')
 const DFS_BRIDGE = path.join(__dirname, 'dfs_optimizer_bridge.py')
 const RATE_MY_TEAM_BRIDGE = path.join(__dirname, 'rate_my_team_bridge.py')
 const WAIVER_FIT_BRIDGE = path.join(__dirname, 'waiver_fit_bridge.py')
+const IR_STASH_FIT_BRIDGE = path.join(__dirname, 'ir_stash_fit_bridge.py')
 const FORMAT_CONTEXT_BRIDGE = path.join(__dirname, 'format_context_bridge.py')
 const SPORTS_PYTHON = path.join(SPORTS_ROOT, '.venv', 'bin', 'python')
 const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVOR_ENTRIES.json'
@@ -1417,6 +1418,52 @@ function runWaiverFit(payload) {
   })
 }
 
+function runIrStashFit(payload) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(SPORTS_PYTHON, [IR_STASH_FIT_BRIDGE], {
+      cwd: SPORTS_ROOT,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+
+    let stdout = ''
+    let stderr = ''
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL')
+      reject(new Error('IR stash fit timed out'))
+    }, 12000)
+
+    child.stdout.on('data', chunk => {
+      stdout += chunk.toString()
+      if (stdout.length > 2_000_000) {
+        child.kill('SIGKILL')
+        reject(new Error('IR stash fit response exceeded limit'))
+      }
+    })
+    child.stderr.on('data', chunk => {
+      stderr += chunk.toString()
+      if (stderr.length > 200_000) stderr = stderr.slice(-200_000)
+    })
+
+    child.on('error', err => {
+      clearTimeout(timer)
+      reject(err)
+    })
+
+    child.on('close', code => {
+      clearTimeout(timer)
+      let parsed = null
+      try { parsed = JSON.parse(stdout || '{}') } catch {}
+      if (code !== 0 || !parsed || parsed.status === 'ERROR') {
+        reject(new Error(parsed?.error || stderr.trim() || 'IR stash fit failed'))
+        return
+      }
+      resolve(parsed)
+    })
+
+    child.stdin.end(JSON.stringify(payload || {}))
+  })
+}
+
 function runFormatContext(payload) {
   return new Promise((resolve, reject) => {
     const child = spawn(SPORTS_PYTHON, [FORMAT_CONTEXT_BRIDGE], {
@@ -1735,6 +1782,96 @@ const server=http.createServer(async(req,res)=>{
       return json(res,400,{
         status:'ERROR',
         message:'Sports Zenith could not save those league settings.',
+        error:err instanceof Error?err.message:String(err),
+      })
+    }
+  }
+  if(req.method==='GET'&&url.pathname==='/api/fantasy/ir-stash'){
+    try{
+      const user=await authenticatedUser(req)
+      if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to load roster-aware IR stash research.'})
+
+      const client=scopedInsForgeClient(req)
+      if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private fantasy storage is temporarily unavailable.'})
+
+      const requestedLeagueId=String(url.searchParams.get('league_id')||'').trim()
+      let leagueQuery=client.database
+        .from('fantasy_leagues')
+        .select('id,league_name,season,roster_settings,last_synced_at')
+        .eq('owner_id',user.id)
+
+      if(requestedLeagueId){
+        leagueQuery=leagueQuery.eq('id',requestedLeagueId)
+      }else{
+        leagueQuery=leagueQuery.order('last_synced_at',{ascending:false})
+      }
+
+      const {data:leagueRows,error:leagueError}=await leagueQuery.limit(1)
+      if(leagueError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your fantasy league could not be loaded.'})
+      }
+
+      const league=Array.isArray(leagueRows)?leagueRows[0]:null
+      if(!league){
+        return json(res,200,{
+          status:'AUTHENTICATED_NO_TEAM',
+          personalization_level:'NO_SAVED_ROSTER',
+          message:'Save a team in My Teams / Rate My Team first.',
+          roster_injured:[],
+          outside_targets_to_check:[],
+        })
+      }
+
+      const {data:rosterRows,error:rosterError}=await client.database
+        .from('fantasy_rosters')
+        .select('id,team_name,roster,updated_at')
+        .eq('league_id',league.id)
+        .order('updated_at',{ascending:false})
+        .limit(1)
+
+      if(rosterError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your saved roster could not be loaded.'})
+      }
+
+      const savedRoster=Array.isArray(rosterRows)?rosterRows[0]:null
+      const roster=Array.isArray(savedRoster?.roster)?savedRoster.roster:[]
+      if(!roster.length){
+        return json(res,200,{
+          status:'SAVED_TEAM_NO_ROSTER',
+          personalization_level:'NO_SAVED_ROSTER',
+          league:{id:league.id,league_name:league.league_name||null,team_name:savedRoster?.team_name||null},
+          roster_injured:[],
+          outside_targets_to_check:[],
+        })
+      }
+
+      const rosterSettings=league.roster_settings&&typeof league.roster_settings==='object'&&!Array.isArray(league.roster_settings)?league.roster_settings:{}
+      const irSlots=Math.max(0,Math.min(20,Math.round(Number(rosterSettings.ir_slots)||0)))
+      const analysis=await runRateMyTeam({roster})
+      const stashFit=await runIrStashFit({
+        roster,
+        roster_analysis:analysis,
+        ir_slots:irSlots,
+      })
+
+      return json(res,200,{
+        ...stashFit,
+        status:'READY',
+        league:{
+          id:league.id,
+          league_name:league.league_name||null,
+          team_name:savedRoster?.team_name||league.league_name||null,
+          season:league.season||null,
+          ir_slots:irSlots,
+          last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
+        },
+        platform_ir_eligibility_verified:false,
+        league_availability_verified:false,
+      })
+    }catch(err){
+      return json(res,400,{
+        status:'ERROR',
+        message:'Sports Zenith could not build roster-aware IR stash research.',
         error:err instanceof Error?err.message:String(err),
       })
     }
