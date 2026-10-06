@@ -44,3 +44,12 @@ test('Defense shows personal boundary above generic streaming research', async (
   await expect(page.getByText('GENERIC RESEARCH')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Decision research' })).toBeVisible();
 });
+
+test('IDP shows personal boundary above generic IDP research', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: 'IDP' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in for roster-aware IDP research' })).toBeVisible();
+  await expect(page.getByText('League-wide intelligence')).toBeVisible();
+  await expect(page.getByText('GENERIC RESEARCH')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Decision research' })).toBeVisible();
+});

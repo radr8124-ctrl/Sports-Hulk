@@ -14,6 +14,7 @@ const AssistantDrawer = lazy(() => import('./AskSportsHulk').then(module => ({ d
 const DfsLineupLab = lazy(() => import('./DfsLineupLab'))
 const PerformancePanel = lazy(() => import('./PerformancePanel'))
 const PracticeBetting = lazy(() => import('./PracticeBetting'))
+const PersonalIdpPanel = lazy(() => import('./PersonalIdpPanel'))
 
 function LoadingSurface({ label = 'Loading' }) {
   return (
@@ -3216,6 +3217,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
   const [scoringPreset, setScoringPreset] = useState('ppr')
   const [starterSlots, setStarterSlots] = useState({
     qb: 1, rb: 2, wr: 2, te: 1, flex: 1, superflex: 0, dst: 1, k: 1,
+    dl: 0, lb: 0, db: 0, idp_flex: 0,
   })
   const [benchSlots, setBenchSlots] = useState(6)
   const [irSlots, setIrSlots] = useState(1)
@@ -3241,6 +3243,10 @@ function LeagueSettingsPanel({ team, onSaved }) {
       superflex: Number.isFinite(Number(slots.superflex)) ? Number(slots.superflex) : 0,
       dst: Number.isFinite(Number(slots.dst)) ? Number(slots.dst) : 1,
       k: Number.isFinite(Number(slots.k)) ? Number(slots.k) : 1,
+      dl: Number.isFinite(Number(slots.dl)) ? Number(slots.dl) : 0,
+      lb: Number.isFinite(Number(slots.lb)) ? Number(slots.lb) : 0,
+      db: Number.isFinite(Number(slots.db)) ? Number(slots.db) : 0,
+      idp_flex: Number.isFinite(Number(slots.idp_flex)) ? Number(slots.idp_flex) : 0,
     })
     setBenchSlots(Number.isFinite(Number(settings.bench_slots)) ? Number(settings.bench_slots) : 6)
     setIrSlots(Number.isFinite(Number(settings.ir_slots)) ? Number(settings.ir_slots) : 1)
@@ -3307,6 +3313,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
   const slotFields = [
     ['qb', 'QB'], ['rb', 'RB'], ['wr', 'WR'], ['te', 'TE'],
     ['flex', 'FLEX'], ['superflex', 'SUPERFLEX'], ['dst', 'D/ST'], ['k', 'K'],
+    ['dl', 'DL'], ['lb', 'LB'], ['db', 'DB'], ['idp_flex', 'IDP FLEX'],
   ]
 
   return (
@@ -3888,6 +3895,11 @@ function FantasyCommercialPanel() {
           {lane === 'faab' && <PersonalWaiverPanel onOpenMyTeams={() => switchLane('my_teams')} />}
           {lane === 'ir_stash' && <PersonalIrStashPanel onOpenMyTeams={() => switchLane('my_teams')} />}
           {lane === 'defense_streaming' && <PersonalDefenseStreamingPanel onOpenMyTeams={() => switchLane('my_teams')} />}
+          {lane === 'idp' && (
+            <Suspense fallback={<LoadingSurface label="Loading your IDP research" />}>
+              <PersonalIdpPanel onOpenMyTeams={() => switchLane('my_teams')} />
+            </Suspense>
+          )}
           <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
             <div className="flex gap-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-700"><Users size={20} /></div>
@@ -3903,7 +3915,9 @@ function FantasyCommercialPanel() {
                         ? 'Your saved-roster IR/Stash research appears above. Platform IR eligibility and outside-player availability are still not verified.'
                         : lane === 'defense_streaming'
                           ? 'Your saved D/ST comparison appears above. Outside defenses remain research alternatives until league availability is actually verified.'
-                          : 'League-specific recommendations still require scoring and roster context.'}
+                          : lane === 'idp'
+                            ? 'Your saved-roster IDP usage research appears above. Custom IDP fantasy-point scoring and outside-player availability are not yet verified.'
+                            : 'League-specific recommendations still require scoring and roster context.'}
                 </p>
               </div>
             </div>
