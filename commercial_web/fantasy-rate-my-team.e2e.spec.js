@@ -35,3 +35,12 @@ test('IR Stash shows personal boundary above generic stash research', async ({ p
   await expect(page.getByText('GENERIC RESEARCH')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Decision research' })).toBeVisible();
 });
+
+test('Defense shows personal boundary above generic streaming research', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: 'Defense' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in for roster-aware D/ST research' })).toBeVisible();
+  await expect(page.getByText('League-wide intelligence')).toBeVisible();
+  await expect(page.getByText('GENERIC RESEARCH')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Decision research' })).toBeVisible();
+});
