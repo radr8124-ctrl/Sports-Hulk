@@ -2325,9 +2325,216 @@ function FantasyLaneCard({ lane, row }) {
   )
 }
 
+
+function RateMyTeamPanel() {
+  const { user, getAccessToken } = useAuth()
+  const [leagueName, setLeagueName] = useState('My Team')
+  const [teamName, setTeamName] = useState('')
+  const [rosterText, setRosterText] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [result, setResult] = useState(null)
+
+  const rosterNames = useMemo(
+    () => rosterText
+      .split(/\n|,/)
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .slice(0, 60),
+    [rosterText],
+  )
+
+  const analyze = async () => {
+    if (!user || !rosterNames.length) return
+    setBusy(true)
+    setError('')
+    setResult(null)
+
+    try {
+      const token = await getAccessToken()
+      if (!token) throw new Error('Your session expired. Sign in again.')
+
+      const response = await fetch('/api/fantasy/rate-my-team', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          league_name: leagueName.trim() || 'My Team',
+          team_name: teamName.trim() || leagueName.trim() || 'My Team',
+          season: new Date().getUTCFullYear(),
+          roster: rosterNames,
+        }),
+      })
+
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload.message || payload.error || 'Could not rate that roster.')
+      setResult(payload.analysis || null)
+    } catch (err) {
+      setError(err?.message || 'Could not rate that roster.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const indexValue = result?.roster_research_index
+  const strengths = Array.isArray(result?.strengths) ? result.strengths : []
+  const risks = Array.isArray(result?.risks) ? result.risks : []
+  const unmatched = Array.isArray(result?.unmatched) ? result.unmatched : []
+  const recognized = Array.isArray(result?.recognized_without_decision) ? result.recognized_without_decision : []
+
+  return (
+    <section className="grid gap-5 xl:grid-cols-[0.92fr_1.08fr]">
+      <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft md:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="eyebrow">My Teams · Quick setup</p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Rate my team</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Paste your NFL roster and Sports Zenith will match it to current weekly, rest-of-season and defense-streaming research.
+            </p>
+          </div>
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
+            <Users size={20} />
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">League name</span>
+            <input value={leagueName} onChange={(event) => setLeagueName(event.target.value)} maxLength={120} className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50" />
+          </label>
+          <label className="block">
+            <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Team name</span>
+            <input value={teamName} onChange={(event) => setTeamName(event.target.value)} maxLength={120} placeholder="Optional" className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50" />
+          </label>
+        </div>
+
+        <label className="mt-4 block">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Roster</span>
+            <span className="text-[11px] font-bold text-slate-400">{rosterNames.length}/60</span>
+          </div>
+          <textarea
+            value={rosterText}
+            onChange={(event) => setRosterText(event.target.value)}
+            rows={10}
+            placeholder={'One player per line\nJosh Allen\nJahmyr Gibbs\nCeeDee Lamb\nTrey McBride\nDallas Cowboys D/ST'}
+            className="mt-2 w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50"
+          />
+        </label>
+
+        <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-semibold leading-5 text-blue-900">
+          Quick Setup is provider-neutral. It does not require your fantasy-site password. League scoring and starter-slot rules are not applied yet, so the result is a research index—not a projected record or win probability.
+        </div>
+
+        {error && <div className="mt-4 rounded-xl bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700">{error}</div>}
+
+        <div className="mt-4">
+          {user ? (
+            <button
+              type="button"
+              onClick={analyze}
+              disabled={busy || !rosterNames.length}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 text-sm font-black text-white shadow-lg shadow-slate-950/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {busy ? <><Activity size={17} className="animate-pulse" /> Analyzing…</> : <><Brain size={17} /> Analyze & save my team</>}
+            </button>
+          ) : (
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div>
+                <div className="text-sm font-black text-slate-950">Sign in to save a private team</div>
+                <div className="mt-1 text-xs font-semibold leading-5 text-amber-900">Your roster stays attached only to your Sports Zenith account.</div>
+              </div>
+              <AccountButton />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft md:p-6">
+        {!result ? (
+          <div className="flex min-h-[420px] items-center justify-center text-center">
+            <div className="max-w-sm">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><Gauge size={25} /></div>
+              <h3 className="mt-4 text-xl font-black text-slate-950">Your team report will appear here</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-500">Sports Zenith will show coverage, position research, strongest signals and actual risk flags. Missing data stays missing.</p>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+              <div>
+                <p className="eyebrow">Saved to your account</p>
+                <h3 className="mt-2 text-2xl font-black text-slate-950">Team research report</h3>
+              </div>
+              <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700"><CheckCircle2 size={13} className="mr-1 inline" /> Private team saved</span>
+            </div>
+
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              <div className="rounded-2xl bg-slate-950 p-4 text-white">
+                <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Research index</div>
+                <div className="mt-2 text-3xl font-black">{indexValue == null ? '—' : indexValue}</div>
+                <div className="mt-1 text-[10px] font-black text-blue-300">{humanize(result.roster_research_band || 'NO_SCORE')}</div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Matched</div>
+                <div className="mt-2 text-2xl font-black text-slate-950">{result.matched_count ?? 0}/{result.roster_size ?? 0}</div>
+                <div className="mt-1 text-[11px] font-semibold text-slate-500">Decision players</div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Coverage</div>
+                <div className="mt-2 text-2xl font-black text-slate-950">{result.coverage_pct ?? 0}%</div>
+                <div className="mt-1 text-[11px] font-semibold text-slate-500">Recognized roster</div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+                <div className="text-xs font-black uppercase tracking-[0.12em] text-emerald-700">Strongest signals</div>
+                <div className="mt-3 space-y-2">
+                  {strengths.length ? strengths.map((row) => (
+                    <div key={row.player_key || row.player} className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2.5">
+                      <div className="min-w-0"><div className="truncate text-sm font-black text-slate-950">{row.player}</div><div className="text-[11px] font-semibold text-slate-400">{row.position} · {row.team || '—'}</div></div>
+                      <div className="text-sm font-black text-emerald-700">{row.research_index ?? '—'}</div>
+                    </div>
+                  )) : <div className="text-xs font-semibold text-slate-500">No scored strengths yet.</div>}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
+                <div className="text-xs font-black uppercase tracking-[0.12em] text-amber-700">Risk flags</div>
+                <div className="mt-3 space-y-2">
+                  {risks.length ? risks.map((row) => (
+                    <div key={row.player_key || row.player} className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2.5">
+                      <div className="min-w-0"><div className="truncate text-sm font-black text-slate-950">{row.player}</div><div className="text-[11px] font-semibold text-slate-400">{humanize(row.weekly_tier || row.research_band)}</div></div>
+                      <div className="text-sm font-black text-amber-700">{row.research_index ?? '—'}</div>
+                    </div>
+                  )) : <div className="text-xs font-semibold text-slate-500">No sub-60 research flags in the matched roster.</div>}
+                </div>
+              </div>
+            </div>
+
+            {!!(unmatched.length || recognized.length) && (
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Coverage notes</div>
+                {recognized.length > 0 && <div className="mt-2 text-xs font-semibold leading-5 text-slate-600">Recognized but not currently scored: {recognized.map((row) => row.player).join(', ')}</div>}
+                {unmatched.length > 0 && <div className="mt-2 text-xs font-semibold leading-5 text-rose-700">Needs review: {unmatched.map((row) => row.input).join(', ')}</div>}
+              </div>
+            )}
+
+            <div className="mt-4 text-[11px] font-semibold leading-5 text-slate-400">{result.index_note}</div>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 function FantasyCommercialPanel() {
   const [mode, setMode] = useState('Season-Long')
-  const [lane, setLane] = useState('weekly')
+  const [lane, setLane] = useState('my_teams')
   const [sport, setSport] = useState('NFL')
   const current = useJsonEndpoint('/fantasy_v2_current.json', { lanes: {} })
   const decisions = useJsonEndpoint('/fantasy_decisions.json', { personalization: {}, lanes: {} })
@@ -2348,6 +2555,7 @@ function FantasyCommercialPanel() {
     ['IDP', forward.idp],
   ]
   const laneTabs = [
+    ['my_teams', 'My Teams / Rate My Team'],
     ['weekly', 'Start / Sit'],
     ['faab', 'Waivers & FAAB'],
     ['ir_stash', 'IR Stash'],
@@ -2382,13 +2590,25 @@ function FantasyCommercialPanel() {
 
       {mode === 'Season-Long' ? (
         <>
+          <section className="rounded-2xl border border-slate-200 bg-white p-2 shadow-soft">
+            <div className="flex gap-2 overflow-x-auto">
+              {laneTabs.map(([key,label]) => (
+                <button key={key} onClick={() => switchLane(key)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black ${lane === key ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{label}</button>
+              ))}
+            </div>
+          </section>
+
+          {lane === 'my_teams' ? (
+            <RateMyTeamPanel />
+          ) : (
+            <>
           <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
             <div className="flex gap-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-700"><Users size={20} /></div>
               <div>
                 <div className="flex flex-wrap items-center gap-2"><div className="text-lg font-black text-slate-950">Generic intelligence is live</div><span className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-blue-700">PERSONALIZATION WAITING</span></div>
                 <p className="mt-2 text-sm leading-6 text-blue-950">No personal league, roster or scoring format is connected to this commercial session yet. Start/Sit, FAAB and IDP results below are research boards — not personalized lineup instructions.</p>
-                <p className="mt-2 text-xs font-semibold text-blue-800">Rate My Team, personalized trades and league-specific bids stay blocked until that connection is actually wired.</p>
+                <p className="mt-2 text-xs font-semibold text-blue-800">Quick Rate My Team is available in the first tab. League-specific Start/Sit, trades and FAAB still require scoring and starter-slot context.</p>
               </div>
             </div>
           </section>
@@ -2415,11 +2635,6 @@ function FantasyCommercialPanel() {
               <div><p className="eyebrow">This week</p><h2>Decision research</h2></div>
               <span className="health-pill">{laneBlock.source_rows || 0} SOURCE ROWS</span>
             </div>
-            <div className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-soft">
-              {laneTabs.map(([key,label]) => (
-                <button key={key} onClick={() => switchLane(key)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black ${lane === key ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{label}</button>
-              ))}
-            </div>
             {!!sports.length && (
               <div className="mt-4 flex gap-2 overflow-x-auto">
                 {sports.map((item) => (
@@ -2433,6 +2648,8 @@ function FantasyCommercialPanel() {
           </section>
 
           <FantasyNewsPanel />
+            </>
+          )}
         </>
       ) : (
         <>
