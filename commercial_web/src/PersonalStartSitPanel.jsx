@@ -67,7 +67,7 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <p className="eyebrow text-amber-700">My Start / Sit</p>
-            <h2 className="mt-2 text-xl font-black text-slate-950">Sign in for roster-aware research</h2>
+            <h2 className="mt-2 text-xl font-black text-slate-950">Sign in for roster-aware Start/Sit research</h2>
             <p className="mt-2 text-sm leading-6 text-amber-950">Sports Zenith can filter this week’s research to only the players saved on your team.</p>
           </div>
           <div className="shrink-0"><AccountButton /></div>

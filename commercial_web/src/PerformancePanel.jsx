@@ -941,9 +941,10 @@ function FantasyV2Panel({ brain }) {
         <div className="flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
           <ShieldCheck size={20} className="mt-0.5 shrink-0" />
           <div>
-            Weekly, waiver-add quality, source-supported stash utility, defense streaming and IDP usage now have separate
-            forward proof ledgers. Personalized FAAB bids, league-specific IDP points, trades and Rate My Team still require the
-            user&apos;s real league settings, roster state and transaction context.
+            Weekly, waiver-add quality, source-supported stash utility, defense streaming and IDP usage have separate
+            forward proof ledgers. Private saved-team context now powers Rate My Team, Start/Sit, waiver need and FAAB-budget translation,
+            IR capacity, Defense and IDP usage research. Live league free-agent availability, winning-bid prediction, full custom IDP
+            point scoring, trades and automatic provider sync remain separate unresolved dependencies.
           </div>
         </div>
 
@@ -1025,7 +1026,8 @@ function FantasyV2Panel({ brain }) {
 
         <div className="mt-4 text-xs leading-5 text-slate-500">
           Review-candidate status requires at least six independent weeks in every forward-tested Fantasy lane.
-          FAAB bid percentages, league-specific IDP scoring, trades and Rate My Team remain blocked until the needed league data is actually connected.
+          Personalized roster research and saved-budget FAAB translation are live, but actual league free-agent availability and winning-bid prediction are not.
+          Full custom IDP fantasy-point scoring, trades and automatic provider sync remain blocked until the required data is connected.
           No Fantasy lane changes recommendations automatically.
         </div>
       </div>

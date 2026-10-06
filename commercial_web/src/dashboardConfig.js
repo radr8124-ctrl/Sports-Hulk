@@ -23,8 +23,3 @@ export const nflSections = [
   'Best Bets', 'Player Props', 'Parlays', 'Matchups',
   'Survivor', 'Weather', 'Results', 'Deep Dive',
 ]
-
-export const fantasySections = [
-  'My Teams / Rate My Team', 'Start / Sit', 'Waivers & FAAB', 'Trades',
-  'IR Stash', 'Defense Streaming', 'IDP', 'DFS Lineup Lab',
-]

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { insforgeConfigured } from './insforge'
 import { AccountButton, useAuth } from './AuthShell'
-import { bettingNavItems, fantasySections, navItems, nflSections, scoreLeagues, statusCards } from './dashboardConfig'
+import { bettingNavItems, navItems, nflSections, scoreLeagues, statusCards } from './dashboardConfig'
 import { PUBLIC_BRAND, PUBLIC_BRAND_WORD_1, PUBLIC_BRAND_WORD_2, PUBLIC_TAGLINE } from './brandConfig'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
@@ -1141,49 +1141,6 @@ function FantasyNewsPanel() {
   )
 }
 
-function FantasyCommandCenter() {
-  const [mode, setMode] = useState('Season-Long')
-
-  return (
-    <div className="space-y-8">
-      <section>
-        <div className="section-heading">
-          <div><p className="eyebrow">Fantasy</p><h2>Fantasy command center</h2></div>
-          <span className="health-pill emerald">SEASON-LONG + DFS</span>
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {['Season-Long', 'DFS Lineup Lab'].map(item => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => setMode(item)}
-              className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm font-black transition ${mode === item ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600'}`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {mode === 'DFS Lineup Lab' ? (
-        <Suspense fallback={<LoadingSurface label="Loading DFS Lineup Lab" />}><DfsLineupLab /></Suspense>
-      ) : (
-        <>
-          <section>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Start / Sit</div><div className="mt-2 text-lg font-black text-slate-950">Use news + usage + matchup</div><div className="mt-2 text-sm leading-6 text-slate-500">Late injury news, practice status, snap trends, targets and opponent context should change recommendations immediately.</div></div>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Waivers</div><div className="mt-2 text-lg font-black text-slate-950">Find opportunity before rankings</div><div className="mt-2 text-sm leading-6 text-slate-500">Roster moves, injuries, depth-chart changes and usage spikes feed the waiver watch instead of relying on generic ranks.</div></div>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Trades</div><div className="mt-2 text-lg font-black text-slate-950">Value changes with context</div><div className="mt-2 text-sm leading-6 text-slate-500">News, role changes, schedule and league settings become part of trade analysis rather than a static chart.</div></div>
-            </div>
-          </section>
-          <SectionGrid title="Fantasy tools" items={fantasySections} />
-          <FantasyNewsPanel />
-        </>
-      )}
-    </div>
-  )
-}
-
 function SectionGrid({ title, items }) {
   return (
     <section>
@@ -2276,7 +2233,7 @@ function FantasyLaneCard({ lane, row }) {
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.adds_24h == null ? '—' : Number(row.adds_24h).toLocaleString()}</div><div className="mt-1 text-slate-400">Adds 24h</div></div>
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.suggested_faab_low_pct ?? '—'}–{row.suggested_faab_high_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Research FAAB</div></div>
         </div>
-        <div className="mt-4 text-xs leading-5 text-slate-500">FAAB is a research range, not a prediction of your league’s winning bid. Personal budget and roster need are not connected yet.</div>
+        <div className="mt-4 text-xs leading-5 text-slate-500">This league-wide FAAB board is generic by design. Personalized roster need and saved-budget translation appear above for the active saved team; winning-bid prediction is still not claimed.</div>
       </div>
     )
   }
@@ -3160,15 +3117,15 @@ function FantasyCommercialPanel() {
                 <p className="mt-2 text-sm leading-6 text-blue-950">The board below stays league-wide so you can compare your roster against the broader player pool. It never silently becomes personalized.</p>
                 <p className="mt-2 text-xs font-semibold text-blue-800">
                   {lane === 'weekly'
-                    ? 'Your saved-roster Start/Sit research appears above. Final lineup optimization still waits for league scoring and starter-slot rules.'
+                    ? 'Your active-team Start/Sit research appears above with saved scoring and starter-slot context when configured. The board below remains league-wide research.'
                     : lane === 'faab'
-                      ? 'Your saved-roster waiver targets appear above. Actual free-agent availability and league-specific bid strategy still require league/budget context.'
+                      ? 'Your active-team waiver research appears above with roster need and saved-budget translation when configured. Actual league free-agent availability is still not verified.'
                       : lane === 'ir_stash'
-                        ? 'Your saved-roster IR/Stash research appears above. Platform IR eligibility and outside-player availability are still not verified.'
+                        ? 'Your active-team IR/Stash research appears above with saved IR capacity. Platform IR eligibility and outside-player availability are still not verified.'
                         : lane === 'defense_streaming'
-                          ? 'Your saved D/ST comparison appears above. Outside defenses remain research alternatives until league availability is actually verified.'
+                          ? 'Your active-team D/ST comparison appears above. Outside defenses remain research alternatives until league availability is actually verified.'
                           : lane === 'idp'
-                            ? 'Your saved-roster IDP usage research appears above. Custom IDP fantasy-point scoring and outside-player availability are not yet verified.'
+                            ? 'Your active-team IDP usage research appears above with saved IDP slots when configured. Custom IDP fantasy-point scoring and outside-player availability are not verified.'
                             : 'League-specific recommendations still require scoring and roster context.'}
                 </p>
               </div>
