@@ -15,6 +15,7 @@ const SPORTS_ROOT = path.resolve(__dirname, '..')
 const DFS_BRIDGE = path.join(__dirname, 'dfs_optimizer_bridge.py')
 const RATE_MY_TEAM_BRIDGE = path.join(__dirname, 'rate_my_team_bridge.py')
 const WAIVER_FIT_BRIDGE = path.join(__dirname, 'waiver_fit_bridge.py')
+const FORMAT_CONTEXT_BRIDGE = path.join(__dirname, 'format_context_bridge.py')
 const SPORTS_PYTHON = path.join(SPORTS_ROOT, '.venv', 'bin', 'python')
 const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVOR_ENTRIES.json'
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
@@ -1416,6 +1417,52 @@ function runWaiverFit(payload) {
   })
 }
 
+function runFormatContext(payload) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(SPORTS_PYTHON, [FORMAT_CONTEXT_BRIDGE], {
+      cwd: SPORTS_ROOT,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+
+    let stdout = ''
+    let stderr = ''
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL')
+      reject(new Error('Scoring-format context timed out'))
+    }, 12000)
+
+    child.stdout.on('data', chunk => {
+      stdout += chunk.toString()
+      if (stdout.length > 2_000_000) {
+        child.kill('SIGKILL')
+        reject(new Error('Scoring-format context response exceeded limit'))
+      }
+    })
+    child.stderr.on('data', chunk => {
+      stderr += chunk.toString()
+      if (stderr.length > 200_000) stderr = stderr.slice(-200_000)
+    })
+
+    child.on('error', err => {
+      clearTimeout(timer)
+      reject(err)
+    })
+
+    child.on('close', code => {
+      clearTimeout(timer)
+      let parsed = null
+      try { parsed = JSON.parse(stdout || '{}') } catch {}
+      if (code !== 0 || !parsed || parsed.status === 'ERROR') {
+        reject(new Error(parsed?.error || stderr.trim() || 'Scoring-format context failed'))
+        return
+      }
+      resolve(parsed)
+    })
+
+    child.stdin.end(JSON.stringify(payload || {}))
+  })
+}
+
 async function serveStatic(req,res,pathname) {
   let requested=pathname==='/'?'/index.html':pathname, filePath=path.resolve(DIST,'.'+requested)
   if(!filePath.startsWith(path.resolve(DIST))){res.writeHead(403,SECURITY_HEADERS);res.end('Forbidden');return}
@@ -1881,19 +1928,54 @@ const server=http.createServer(async(req,res)=>{
         : {}
       const scoringConnected=['ppr','half_ppr','standard'].includes(String(scoring.preset||'').toLowerCase())
       const slotContextConnected=Object.keys(starterSlots).length>0
+      const scoringFormat=String(scoring.preset||'').toLowerCase()
+      let formatContext=null
+      let formatContextError=null
 
+      if(scoringConnected){
+        try{
+          formatContext=await runFormatContext({
+            players:scoredPlayers.filter(row=>['QB','RB','WR','TE'].includes(String(row.position||'').toUpperCase())),
+            scoring_format:scoringFormat,
+          })
+          const byIdentity=new Map()
+          for(const row of formatContext?.players||[]){
+            const key=String(row.player_key||row.player||'').toLowerCase()
+            if(key) byIdentity.set(key,row)
+          }
+          for(const row of scoredPlayers){
+            const key=String(row.player_key||row.player||'').toLowerCase()
+            const enriched=byIdentity.get(key)
+            if(enriched) Object.assign(row,enriched)
+          }
+        }catch(err){
+          formatContextError=err instanceof Error?err.message:String(err)
+        }
+      }
+
+      const closeCallWeeklyWindow=3.0
+      const formatCoverage=Number(formatContext?.coverage?.context_available||0)
       const lineupResearch={
         status:slotContextConnected?'SLOT_AWARE_RESEARCH':'SLOT_CONTEXT_WAITING',
-        scoring_format:String(scoring.preset||'').toLowerCase()||null,
+        scoring_format:scoringFormat||null,
         scoring_format_connected:scoringConnected,
         scoring_format_applied_to_score:false,
+        scoring_format_context_is_projection:false,
+        scoring_format_tiebreaker_status:scoringConnected
+          ? (formatContextError?'FORMAT_CONTEXT_DEGRADED':formatCoverage>0?'READY':'NO_FORMAT_CONTEXT')
+          : 'SCORING_FORMAT_WAITING',
+        scoring_format_used_as_tiebreaker:false,
+        close_call_weekly_window:closeCallWeeklyWindow,
+        format_context_coverage:formatCoverage,
+        format_context_error:formatContextError,
+        tiebreakers:[],
         starter_slots:starterSlots,
         starter_candidates:[],
         bench_candidates:[],
         open_slots:[],
         unscored_slots:[],
         note:slotContextConnected
-          ? 'Starter candidates are allocated to saved lineup slots using Sports Zenith weekly research scores. These are not fantasy-point projections, and scoring format is not yet applied to the player scores.'
+          ? 'Starter candidates are allocated primarily by Sports Zenith weekly research. Saved scoring format can only break close calls within a 3-point weekly-score window using historical season-average format context. It does not change the weekly score and is not a fantasy-point projection.'
           : 'Save starter-slot settings before Sports Zenith can build slot-aware lineup research.',
       }
 
@@ -1904,10 +1986,73 @@ const server=http.createServer(async(req,res)=>{
           .filter(row=>positions.includes(String(row.position||'').toUpperCase())&&!used.has(playerId(row)))
           .sort((a,b)=>Number(b.weekly_research_score??-1)-Number(a.weekly_research_score??-1))
 
+        const chooseCloseCallCandidate=(slot,positions,slotIndex)=>{
+          const rows=eligibleRows(positions)
+          const weeklyTop=rows[0]||null
+          if(!weeklyTop) return {candidate:null,tiebreaker:null}
+
+          const topWeekly=Number(weeklyTop.weekly_research_score??-1)
+          const closeGroup=rows.filter(row=>
+            topWeekly-Number(row.weekly_research_score??-1)<=closeCallWeeklyWindow
+          )
+
+          if(!scoringConnected||formatContextError||closeGroup.length<2||!weeklyTop.format_context_available){
+            return {candidate:weeklyTop,tiebreaker:null}
+          }
+
+          const contextual=closeGroup.filter(row=>
+            row.format_context_available&&
+            Number.isFinite(Number(row.historical_format_points_per_game))&&
+            Number.isFinite(Number(row.format_context_position_percentile))
+          )
+          if(contextual.length<2){
+            return {candidate:weeklyTop,tiebreaker:null}
+          }
+
+          const crossPosition=new Set(positions).size>1
+          const metric=crossPosition?'historical_format_points_per_game':'format_context_position_percentile'
+          const ranked=[...contextual].sort((a,b)=>
+            Number(b[metric]??-1)-Number(a[metric]??-1) ||
+            Number(b.weekly_research_score??-1)-Number(a.weekly_research_score??-1)
+          )
+          const chosen=ranked[0]||weeklyTop
+          const applied=playerId(chosen)!==playerId(weeklyTop)
+          const tiebreaker={
+            slot,
+            slot_index:slotIndex,
+            weekly_window:closeCallWeeklyWindow,
+            eligible_positions:positions,
+            scoring_format:scoringFormat,
+            metric,
+            weekly_top:{
+              player:weeklyTop.player,
+              weekly_research_score:weeklyTop.weekly_research_score,
+              context_value:weeklyTop[metric]??null,
+            },
+            selected:{
+              player:chosen.player,
+              weekly_research_score:chosen.weekly_research_score,
+              context_value:chosen[metric]??null,
+            },
+            close_group:contextual.map(row=>({
+              player:row.player,
+              position:row.position,
+              weekly_research_score:row.weekly_research_score,
+              context_value:row[metric]??null,
+            })),
+            applied,
+            context_is_projection:false,
+          }
+          lineupResearch.tiebreakers.push(tiebreaker)
+          if(applied) lineupResearch.scoring_format_used_as_tiebreaker=true
+          return {candidate:chosen,tiebreaker}
+        }
+
         const fillSlots=(slot,positions,count)=>{
           const total=Math.max(0,Math.min(30,Math.round(Number(count)||0)))
           for(let index=1;index<=total;index+=1){
-            const candidate=eligibleRows(positions)[0]||null
+            const decision=chooseCloseCallCandidate(slot,positions,index)
+            const candidate=decision.candidate
             if(!candidate){
               lineupResearch.open_slots.push({slot,slot_index:index,eligible_positions:positions,reason:'NO_SCORED_ELIGIBLE_PLAYER'})
               continue
@@ -1918,6 +2063,9 @@ const server=http.createServer(async(req,res)=>{
               assigned_slot:slot,
               slot_index:index,
               lineup_research_status:'STARTER_CANDIDATE',
+              close_call_tiebreaker_considered:Boolean(decision.tiebreaker),
+              close_call_tiebreaker_applied:Boolean(decision.tiebreaker?.applied),
+              close_call_tiebreaker_metric:decision.tiebreaker?.metric||null,
             })
           }
         }
@@ -1954,7 +2102,17 @@ const server=http.createServer(async(req,res)=>{
         status:'READY',
         personalization_level:slotContextConnected?'SLOT_AWARE_RESEARCH':'ROSTER_AWARE_RESEARCH',
         context_status:slotContextConnected
-          ? (scoringConnected?'SLOT_CONTEXT_APPLIED_SCORING_FORMAT_CONTEXT_ONLY':'SLOT_CONTEXT_APPLIED_SCORING_WAITING')
+          ? (
+              scoringConnected
+                ? (
+                    lineupResearch.scoring_format_used_as_tiebreaker
+                      ? 'SLOT_CONTEXT_APPLIED_FORMAT_TIEBREAKER_USED'
+                      : lineupResearch.scoring_format_tiebreaker_status==='READY'
+                        ? 'SLOT_CONTEXT_APPLIED_FORMAT_TIEBREAKER_READY'
+                        : 'SLOT_CONTEXT_APPLIED_FORMAT_CONTEXT_DEGRADED'
+                  )
+                : 'SLOT_CONTEXT_APPLIED_SCORING_WAITING'
+            )
           : 'SCORING_AND_SLOT_CONTEXT_WAITING',
         is_official_lineup:false,
         score_is_probability:false,

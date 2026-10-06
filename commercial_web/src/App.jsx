@@ -2653,6 +2653,8 @@ function PersonalStartSitPanel({ onOpenMyTeams }) {
   const benchCandidates = Array.isArray(lineup.bench_candidates) ? lineup.bench_candidates : []
   const openSlots = Array.isArray(lineup.open_slots) ? lineup.open_slots : []
   const unscoredSlots = Array.isArray(lineup.unscored_slots) ? lineup.unscored_slots : []
+  const tiebreakers = Array.isArray(lineup.tiebreakers) ? lineup.tiebreakers : []
+  const appliedTiebreakers = tiebreakers.filter((row) => row.applied)
   const slotAware = lineup.status === 'SLOT_AWARE_RESEARCH'
 
   const tierTone = (tier) => {
@@ -2697,10 +2699,18 @@ function PersonalStartSitPanel({ onOpenMyTeams }) {
             <div>
               <div className="text-xs font-black uppercase tracking-[0.12em] text-blue-700">Slot-aware lineup research</div>
               <div className="mt-1 text-sm font-semibold leading-5 text-slate-500">
-                Saved starter slots are applied. {league.scoring_format ? humanize(league.scoring_format) + ' scoring is saved as context' : 'Scoring format is not saved'}; player scores are still research rankings, not fantasy-point projections.
+                Weekly research stays primary. {league.scoring_format ? humanize(league.scoring_format) + ' historical context can only break close calls within ' + (lineup.close_call_weekly_window ?? 3) + ' weekly-score points.' : 'Save a scoring format to enable close-call format context.'} These are not fantasy-point projections.
               </div>
             </div>
-            <span className="rounded-full bg-slate-950 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-white">Not official lineup</span>
+            <div className="flex flex-wrap justify-end gap-2">
+              {tiebreakers.length > 0 && (
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-blue-700">{tiebreakers.length} format {tiebreakers.length === 1 ? 'check' : 'checks'}</span>
+              )}
+              {appliedTiebreakers.length > 0 && (
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-emerald-700">{appliedTiebreakers.length} changed {appliedTiebreakers.length === 1 ? 'slot' : 'slots'}</span>
+              )}
+              <span className="rounded-full bg-slate-950 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-white">Not official lineup</span>
+            </div>
           </div>
 
           <div className="mt-4">
@@ -2715,6 +2725,16 @@ function PersonalStartSitPanel({ onOpenMyTeams }) {
                   <div className="mt-2 truncate text-sm font-black text-slate-950">{row.player}</div>
                   <div className="mt-1 text-[10px] font-semibold text-slate-400">{row.position} · {row.team || '—'} · vs {row.opponent || '—'}</div>
                   <div className="mt-2 text-[9px] font-black uppercase tracking-wide text-slate-500">{humanize(row.weekly_tier || 'UNKNOWN')}</div>
+                  {row.format_context_available && (
+                    <div className="mt-2 rounded-lg border border-slate-200 bg-white px-2 py-2 text-[10px] font-semibold leading-4 text-slate-500">
+                      <div>{humanize(row.format_context_scoring || league.scoring_format || 'SCORING')} historical context: {row.historical_format_points_per_game ?? '—'} pts/game · {row.format_context_position_percentile ?? '—'}th position percentile</div>
+                      {row.close_call_tiebreaker_considered && (
+                        <div className={row.close_call_tiebreaker_applied ? 'mt-1 font-black text-emerald-700' : 'mt-1 font-black text-blue-700'}>
+                          {row.close_call_tiebreaker_applied ? 'Close-call format tiebreaker changed this slot.' : 'Format checked; weekly research order held.'}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
