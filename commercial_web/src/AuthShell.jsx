@@ -126,13 +126,15 @@ export function useAuth() {
 }
 
 function AccountModal({ onClose }) {
-  const { configured, user, authConfig, sendOtp, verifyOtp, signOut } = useAuth()
+  const { configured, user, authConfig, sendOtp, verifyOtp, signOut, getAccessToken } = useAuth()
   const [step, setStep] = useState('email')
   const [email, setEmail] = useState(user?.email || '')
   const [otp, setOtp] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [accountSummary, setAccountSummary] = useState(null)
+  const [accountLoading, setAccountLoading] = useState(false)
 
   useEffect(() => {
     const close = (event) => {
@@ -141,6 +143,37 @@ function AccountModal({ onClose }) {
     window.addEventListener('keydown', close)
     return () => window.removeEventListener('keydown', close)
   }, [onClose])
+
+  useEffect(() => {
+    let active = true
+    if (!user) {
+      setAccountSummary(null)
+      setAccountLoading(false)
+      return () => { active = false }
+    }
+
+    const load = async () => {
+      setAccountLoading(true)
+      try {
+        const token = await getAccessToken()
+        if (!token) throw new Error('No authenticated session')
+        const response = await fetch('/api/account/summary', {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error('Account summary unavailable')
+        const payload = await response.json()
+        if (active) setAccountSummary(payload)
+      } catch {
+        if (active) setAccountSummary(null)
+      } finally {
+        if (active) setAccountLoading(false)
+      }
+    }
+
+    load()
+    return () => { active = false }
+  }, [user, getAccessToken])
 
   const maskedEmail = useMemo(() => {
     const [name = '', domain = ''] = email.split('@')
@@ -236,7 +269,39 @@ function AccountModal({ onClose }) {
                 </div>
                 <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-700"><CheckCircle2 size={15} /> {user.emailVerified ? 'Email verified' : 'Signed in'}</div>
               </div>
-              <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-900">This verified account is the identity for your private Survivor data, future fantasy connections, saved preferences and subscription access.</div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Survivor</div>
+                  <div className="mt-2 truncate text-sm font-black text-slate-950">
+                    {accountLoading
+                      ? 'Checking…'
+                      : accountSummary?.survivor?.linked
+                        ? accountSummary.survivor.active_entry
+                        : 'Not linked'}
+                  </div>
+                  <div className="mt-1 text-[11px] font-semibold leading-4 text-slate-400">
+                    {accountSummary?.survivor?.linked
+                      ? `Week ${accountSummary.survivor.current_week ?? '—'} · ${accountSummary.survivor.used_team_count ?? 0} used`
+                      : 'Connect a pool entry when ready'}
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Fantasy</div>
+                  <div className="mt-2 text-sm font-black text-slate-950">
+                    {accountLoading
+                      ? 'Checking…'
+                      : accountSummary?.fantasy?.league_count
+                        ? `${accountSummary.fantasy.league_count} connected`
+                        : 'Not connected'}
+                  </div>
+                  <div className="mt-1 text-[11px] font-semibold leading-4 text-slate-400">
+                    {accountSummary?.fantasy?.league_count
+                      ? 'Private league context available'
+                      : 'League connections will live here'}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-900">This verified account keeps each member’s private sports data separate and provides the identity foundation for future subscription access.</div>
               <button type="button" disabled={busy} onClick={doSignOut} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 disabled:opacity-50"><LogOut size={16} /> Sign out</button>
             </>
           ) : step === 'email' ? (

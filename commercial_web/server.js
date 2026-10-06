@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createClient } from '@insforge/sdk'
+import { createAdminClient, createClient } from '@insforge/sdk'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -78,17 +78,36 @@ function readLocalEnv() {
 const LOCAL_ENV = readLocalEnv()
 const INSFORGE_URL = process.env.INSFORGE_URL || LOCAL_ENV.VITE_INSFORGE_URL || ''
 
+function readInsForgeAdminKey() {
+  try {
+    const metadata = JSON.parse(readFileSync(path.join(SPORTS_ROOT, '.insforge', 'project.parent.json'), 'utf8'))
+    return String(metadata?.api_key || '').trim()
+  } catch {
+    return ''
+  }
+}
+
+const INSFORGE_API_KEY = process.env.INSFORGE_API_KEY || readInsForgeAdminKey()
+const INSFORGE_ADMIN = INSFORGE_URL && INSFORGE_API_KEY
+  ? createAdminClient({ baseUrl: INSFORGE_URL, apiKey: INSFORGE_API_KEY })
+  : null
+
 function bearerToken(req) {
   const value = String(req.headers.authorization || '')
   const match = value.match(/^Bearer\s+(.+)$/i)
   return match ? match[1].trim() : null
 }
 
-async function authenticatedUser(req) {
+function scopedInsForgeClient(req) {
   const token = bearerToken(req)
   if (!token || !INSFORGE_URL) return null
+  return createClient({ baseUrl: INSFORGE_URL, accessToken: token, isServerMode: true })
+}
+
+async function authenticatedUser(req) {
+  const client = scopedInsForgeClient(req)
+  if (!client) return null
   try {
-    const client = createClient({ baseUrl: INSFORGE_URL, accessToken: token, isServerMode: true })
     const { data, error } = await client.auth.getCurrentUser()
     if (error || !data?.user) return null
     return data.user
@@ -97,8 +116,22 @@ async function authenticatedUser(req) {
   }
 }
 
-async function linkedSurvivorEntry(userId) {
+async function linkedSurvivorEntry(req, userId) {
   if (!userId) return null
+
+  const client = scopedInsForgeClient(req)
+  if (client) {
+    try {
+      const { data, error } = await client.database
+        .from('survivor_entries')
+        .select('entry_name')
+        .eq('owner_id', userId)
+        .eq('is_active', true)
+        .limit(1)
+      if (!error && Array.isArray(data) && data[0]?.entry_name) return data[0].entry_name
+    } catch {}
+  }
+
   const links = await loadExternalJson(MEMBER_LINKS_PATH)
   return links?.survivor_entries?.[userId] || null
 }
@@ -1277,6 +1310,55 @@ const server=http.createServer(async(req,res)=>{
       return json(res,400,{status:'ERROR',error:err instanceof Error?err.message:String(err)})
     }
   }
+  if(req.method==='GET'&&url.pathname==='/api/account/summary'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to load your account.'})
+
+    const client=scopedInsForgeClient(req)
+    if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage is temporarily unavailable.'})
+
+    const linkedName=await linkedSurvivorEntry(req,user.id)
+    const survivorState=await loadExternalJson(SURVIVOR_ENTRIES_PATH)
+    const linkedEntry=linkedName ? (survivorState?.entries||{})[linkedName]||null : null
+
+    let leagues=[]
+    let fantasyStatus='READY'
+    try{
+      const {data,error}=await client.database
+        .from('fantasy_leagues')
+        .select('id,platform,league_name,sync_status')
+        .order('created_at',{ascending:false})
+        .limit(20)
+      if(error) fantasyStatus='UNAVAILABLE'
+      else leagues=Array.isArray(data)?data:[]
+    }catch{
+      fantasyStatus='UNAVAILABLE'
+    }
+
+    return json(res,200,{
+      status:'READY',
+      account:{
+        email_verified:Boolean(user.emailVerified),
+      },
+      survivor:{
+        linked:Boolean(linkedName),
+        active_entry:linkedName||null,
+        entry_status:linkedEntry?.status||null,
+        used_team_count:Array.isArray(linkedEntry?.used_teams)?linkedEntry.used_teams.length:0,
+        current_week:Number(survivorState?.pool_current_week||linkedEntry?.current_week||0)||null,
+      },
+      fantasy:{
+        status:fantasyStatus,
+        league_count:leagues.length,
+        leagues:leagues.map(row=>({
+          id:row.id,
+          platform:row.platform||null,
+          league_name:row.league_name||null,
+          sync_status:row.sync_status||null,
+        })),
+      },
+    })
+  }
   if(req.method==='POST'&&url.pathname==='/api/survivor/link-entry'){
     try{
       const user=await authenticatedUser(req)
@@ -1315,6 +1397,51 @@ const server=http.createServer(async(req,res)=>{
         return json(res,403,{status:'INVALID_CLAIM_CODE',message:'The claim code is not valid for that entry.'})
       }
 
+      if(!INSFORGE_ADMIN){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage is temporarily unavailable. Please try again.'})
+      }
+
+      const { data: dbOwners, error: dbOwnersError } = await INSFORGE_ADMIN.database
+        .from('survivor_entries')
+        .select('owner_id,entry_name,is_active')
+        .eq('entry_name', entryName)
+        .limit(10)
+      if(dbOwnersError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage could not be verified. Please try again.'})
+      }
+      const dbOtherOwner=(dbOwners||[]).find(row=>row.owner_id && row.owner_id!==user.id && row.is_active!==false)
+      if(dbOtherOwner){
+        return json(res,409,{status:'ENTRY_ALREADY_CLAIMED',message:'That Survivor entry is already linked to another account.'})
+      }
+
+      const { data: dbUserEntries, error: dbUserEntriesError } = await INSFORGE_ADMIN.database
+        .from('survivor_entries')
+        .select('id,entry_name,is_active')
+        .eq('owner_id', user.id)
+        .limit(10)
+      if(dbUserEntriesError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage could not be verified. Please try again.'})
+      }
+
+      const dbDifferentEntry=(dbUserEntries||[]).find(row=>row.entry_name!==entryName && row.is_active!==false)
+      if(dbDifferentEntry){
+        return json(res,409,{status:'ACCOUNT_ALREADY_LINKED',message:'This account is already linked to a different Survivor entry.'})
+      }
+
+      const dbExisting=(dbUserEntries||[]).find(row=>row.entry_name===entryName)
+      const dbPayload={
+        owner_id:user.id,
+        entry_name:entryName,
+        is_active:true,
+        used_teams:Array.isArray(entry.used_teams)?entry.used_teams:[],
+      }
+      const dbWrite=dbExisting
+        ? await INSFORGE_ADMIN.database.from('survivor_entries').update(dbPayload).eq('id',dbExisting.id).select('id')
+        : await INSFORGE_ADMIN.database.from('survivor_entries').insert(dbPayload).select('id')
+      if(dbWrite.error){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'The entry was verified but could not be attached to the account. Please try again.'})
+      }
+
       links.survivor_entries[user.id]=entryName
       claim.claimed_by=user.id
       claim.claimed_at=new Date().toISOString()
@@ -1341,7 +1468,7 @@ const server=http.createServer(async(req,res)=>{
 
     const data=await loadAll()
     const state=data.survivorUser||{}
-    const linkedName=await linkedSurvivorEntry(user.id)
+    const linkedName=await linkedSurvivorEntry(req,user.id)
     const entry=linkedName ? (state.entries||{})[linkedName]||null : null
 
     if(!entry) return json(res,200,{
