@@ -31,6 +31,17 @@ PIPELINES = [
     ("ARCHIVE","sports-hulk-intelligence-archive.service",90,"intelligence_warehouse/registry/SNAPSHOT_RUNS.csv"),
 ]
 
+# Runtime catalog.json is intentionally broader and may be regenerated. Keep
+# critical commercial Fantasy decision datasets registered here as a durable
+# floor so freshness coverage cannot silently disappear after recovery.
+REQUIRED_DATASETS = [
+    {
+        "sport":"FANTASY_DECISIONS",
+        "lane":"weekly",
+        "path":"intelligence_warehouse/fantasy_decisions/FANTASY_WEEKLY_DECISIONS_CURRENT.csv",
+    },
+]
+
 def file_age_minutes(path):
     if not path.exists():
         return None
@@ -167,16 +178,11 @@ def nfl_governance_mode():
 def build_datasets():
     cfg=json.loads(CATALOG.read_text())
     catalog_files=list(cfg.get("files",[]))
-    required_fantasy_weekly={
-        "sport":"FANTASY_DECISIONS",
-        "lane":"weekly",
-        "path":"intelligence_warehouse/fantasy_decisions/FANTASY_WEEKLY_DECISIONS_CURRENT.csv",
-    }
-    if not any(
-        entry.get("path")==required_fantasy_weekly["path"]
-        for entry in catalog_files
-    ):
-        catalog_files.append(required_fantasy_weekly)
+    known_paths={str(entry.get("path") or "") for entry in catalog_files}
+    for required in REQUIRED_DATASETS:
+        if required["path"] not in known_paths:
+            catalog_files.append(required)
+            known_paths.add(required["path"])
 
     rows=[]
     nfl_mode=nfl_governance_mode()

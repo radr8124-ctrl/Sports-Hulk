@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { AccountButton, useAuth } from './AuthShell'
 import FantasyResearchFreshness from './FantasyResearchFreshness'
-import FantasyResearchFreshness from './FantasyResearchFreshness'
 
 function humanize(value) {
   return String(value || '')

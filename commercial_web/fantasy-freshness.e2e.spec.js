@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-function fakeJwt() {
+function fakeJwt(subject) {
   const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
   const now = Math.floor(Date.now() / 1000);
-  return `${encode({ alg: 'none', typ: 'JWT' })}.${encode({ sub: 'fresh-user', exp: now + 3600, iat: now })}.sig`;
+  return `${encode({ alg: 'none', typ: 'JWT' })}.${encode({ sub: subject, exp: now + 3600, iat: now })}.test-signature`;
 }
 
-async function installSession(page) {
-  const token = fakeJwt();
+async function installSignedInSession(page) {
+  const token = fakeJwt('freshness-user');
   await page.addInitScript(() => {
     window.localStorage.setItem('sports-zenith-auth-session', '1');
     window.localStorage.setItem('sports-zenith-active-fantasy-league', 'league-fresh');
@@ -17,7 +17,12 @@ async function installSession(page) {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ emailVerificationRequired: true, verificationMethod: 'code', allowSignup: true, oauthProviders: [] }),
+      body: JSON.stringify({
+        emailVerificationRequired: true,
+        verificationMethod: 'code',
+        allowSignup: true,
+        oauthProviders: [],
+      }),
     });
   });
 
@@ -27,7 +32,7 @@ async function installSession(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         accessToken: token,
-        user: { id: 'fresh-user', email: 'fresh-user@example.test', name: 'Fresh User' },
+        user: { id: 'freshness-user', email: 'freshness@example.test', name: 'Freshness User' },
       }),
     });
   });
@@ -43,26 +48,33 @@ const team = {
   sync_status: 'manual',
   roster: ['Josh Allen', 'CeeDee Lamb', 'Dallas Cowboys D/ST'],
   scoring: { preset: 'ppr', reception_points: 1 },
-  roster_settings: { starting_slots: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, dst: 1, k: 1 }, ir_slots: 1 },
+  roster_settings: {
+    starting_slots: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, dst: 1, k: 1, dl: 1, lb: 1, db: 1 },
+    ir_slots: 1,
+  },
 };
 
-function freshness(status, age, rows, extras = {}) {
+function freshness(status, age, extra = {}) {
   return {
-    lane: extras.lane || 'weekly',
+    lane: extra.lane || 'test',
     status,
     source_available: status !== 'MISSING',
     source_timestamp: '2026-10-06T23:00:00.000Z',
     age_minutes: age,
     max_age_minutes: 30,
-    row_count: rows,
-    row_state: status === 'MISSING' ? 'UNKNOWN' : 'HAS_ROWS',
-    roster_updated_at: '2026-10-06T23:05:00.000Z',
-    roster_newer_than_research: Boolean(extras.rosterNewer),
-    roster_ahead_minutes: extras.rosterNewer ? 5 : 0,
+    row_count: status === 'MISSING' ? 0 : 100,
+    row_state: status === 'MISSING' ? 'EMPTY_REVIEW' : 'HAS_ROWS',
+    manifest_checked_at: '2026-10-06T23:10:00.000Z',
+    roster_updated_at: '2026-10-06T23:12:00.000Z',
+    roster_newer_than_research: false,
+    roster_ahead_minutes: 0,
+    ...extra,
   };
 }
 
-async function mockBase(page) {
+test('Fantasy lanes display honest research freshness and roster-newer warnings', async ({ page }) => {
+  await installSignedInSession(page);
+
   await page.route('**/api/fantasy/my-teams', async (route) => {
     await route.fulfill({
       status: 200,
@@ -77,15 +89,28 @@ async function mockBase(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         status: 'READY',
-        research_freshness: freshness('FRESH', 8.2, 474, { rosterNewer: true, lane: 'weekly' }),
-        league: { id: 'league-fresh', team_name: 'Freshness Team', scoring_connected: true, scoring_format: 'ppr', slot_context_connected: true },
+        research_freshness: freshness('FRESH', 8, { lane: 'weekly', row_count: 474 }),
+        league: {
+          id: 'league-fresh',
+          team_name: 'Freshness Team',
+          scoring_connected: true,
+          scoring_format: 'ppr',
+          slot_context_connected: true,
+        },
         coverage: { roster_size: 3, matched_count: 3, unmatched_count: 0, coverage_pct: 100, decision_coverage_pct: 100 },
         groups: [],
         players: [],
         unmatched: [],
         recognized_without_decision: [],
-        lineup_research: { status: 'SLOT_AWARE_RESEARCH', starter_candidates: [], bench_candidates: [], open_slots: [], unscored_slots: [], tiebreakers: [] },
-        note: 'Fresh Start/Sit snapshot',
+        lineup_research: {
+          status: 'SLOT_AWARE_RESEARCH',
+          starter_candidates: [],
+          bench_candidates: [],
+          open_slots: [],
+          unscored_slots: [],
+          tiebreakers: [],
+        },
+        note: 'Fresh weekly research',
       }),
     });
   });
@@ -96,7 +121,7 @@ async function mockBase(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         status: 'READY',
-        research_freshness: freshness('AGING', 44.8, 310, { lane: 'faab' }),
+        research_freshness: freshness('AGING', 44, { lane: 'faab', row_count: 310 }),
         league: { id: 'league-fresh', team_name: 'Freshness Team' },
         position_needs: [],
         targets: [],
@@ -113,9 +138,15 @@ async function mockBase(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         status: 'READY',
-        research_freshness: freshness('STALE', 78.4, 1083, { lane: 'ir_stash' }),
+        research_freshness: freshness('STALE', 75, { lane: 'ir_stash', row_count: 1083 }),
         league: { id: 'league-fresh', team_name: 'Freshness Team', ir_slots: 1 },
-        ir_capacity: { saved_ir_slots: 1, likely_open_slots: 1, likely_overflow_count: 0 },
+        ir_capacity: {
+          saved_ir_slots: 1,
+          likely_ir_designation_count: 0,
+          possible_ir_eligibility_count: 0,
+          likely_open_slots: 1,
+          likely_overflow_count: 0,
+        },
         roster_injured: [],
         outside_targets_to_check: [],
         outside_source_conflicts: [],
@@ -129,7 +160,13 @@ async function mockBase(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         status: 'READY',
-        research_freshness: freshness('MISSING', null, null, { lane: 'defense_streaming' }),
+        research_freshness: freshness('MISSING', null, {
+          lane: 'defense_streaming',
+          source_available: false,
+          source_timestamp: null,
+          row_count: 0,
+          row_state: 'EMPTY_REVIEW',
+        }),
         league: { id: 'league-fresh', team_name: 'Freshness Team', dst_slots: 1 },
         saved_defenses: [],
         alternatives_to_check: [],
@@ -143,10 +180,20 @@ async function mockBase(page) {
       contentType: 'application/json',
       body: JSON.stringify({
         status: 'READY',
-        research_freshness: { ...freshness('UNKNOWN', null, null, { lane: 'idp_opportunity' }), source_available: false },
-        league: { id: 'league-fresh', team_name: 'Freshness Team', idp_slots: { dl: 0, lb: 0, db: 0, idp_flex: 0 } },
-        slot_aware: false,
-        idp_slots: { DL: 0, LB: 0, DB: 0, IDP_FLEX: 0 },
+        research_freshness: freshness('UNKNOWN', null, {
+          lane: 'idp_opportunity',
+          source_timestamp: null,
+          roster_newer_than_research: true,
+          roster_ahead_minutes: 12.4,
+          row_count: 788,
+        }),
+        league: {
+          id: 'league-fresh',
+          team_name: 'Freshness Team',
+          idp_slots: { dl: 1, lb: 1, db: 1, idp_flex: 0 },
+        },
+        slot_aware: true,
+        idp_slots: { DL: 1, LB: 1, DB: 1, IDP_FLEX: 0 },
         matched_idp: [],
         starter_candidates: [],
         bench_candidates: [],
@@ -158,35 +205,29 @@ async function mockBase(page) {
       }),
     });
   });
-}
-
-test('personalized Fantasy lanes show real freshness states consistently', async ({ page }) => {
-  await installSession(page);
-  await mockBase(page);
 
   await page.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'domcontentloaded' });
 
   await page.getByRole('button', { name: 'Start / Sit' }).click();
-  await expect(page.getByText('Fresh research')).toBeVisible();
-  await expect(page.getByText('updated 8 min ago')).toBeVisible();
-  await expect(page.getByText('474 research rows')).toBeVisible();
-  await expect(page.getByText(/Roster newer than research/)).toBeVisible();
-  await expect(page.getByText(/changed 5 min after this research snapshot/)).toBeVisible();
+  await expect(page.getByText('Research current')).toBeVisible();
+  await expect(page.getByText('8 min old')).toBeVisible();
+  await expect(page.getByText('target ≤ 30 min')).toBeVisible();
 
   await page.getByRole('button', { name: 'Waivers & FAAB' }).click();
   await expect(page.getByText('Research aging')).toBeVisible();
-  await expect(page.getByText('updated 45 min ago')).toBeVisible();
-  await expect(page.getByText('310 research rows')).toBeVisible();
+  await expect(page.getByText('44 min old')).toBeVisible();
 
   await page.getByRole('button', { name: 'IR Stash' }).click();
   await expect(page.getByText('Research stale')).toBeVisible();
-  await expect(page.getByText('updated 1.3 hr ago')).toBeVisible();
+  await expect(page.getByText('1.3 hr old')).toBeVisible();
 
   await page.getByRole('button', { name: 'Defense', exact: true }).click();
   await expect(page.getByText('Research source missing')).toBeVisible();
-  await expect(page.getByText('age unknown')).toBeVisible();
+  await expect(page.getByText('Source file unavailable')).toBeVisible();
+  await expect(page.getByText(/Source state: EMPTY REVIEW/)).toBeVisible();
 
   await page.getByRole('button', { name: 'IDP', exact: true }).click();
   await expect(page.getByText('Freshness unknown')).toBeVisible();
-  await expect(page.getByText('age unknown')).toBeVisible();
+  await expect(page.getByText(/saved roster is newer than this research snapshot/i)).toBeVisible();
+  await expect(page.getByText(/about 12 min/)).toBeVisible();
 });
