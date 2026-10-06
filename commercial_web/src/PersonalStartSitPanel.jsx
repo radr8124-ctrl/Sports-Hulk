@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { AccountButton, useAuth } from './AuthShell'
+import FantasyResearchFreshness from './FantasyResearchFreshness'
+import FantasyResearchFreshness from './FantasyResearchFreshness'
 
 function humanize(value) {
   return String(value || '')
@@ -154,6 +156,8 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
           </div>
         </div>
       </div>
+
+      <FantasyResearchFreshness freshness={payload.research_freshness} />
 
       {unmatched.length > 0 && (
         <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-semibold leading-5 text-amber-950">

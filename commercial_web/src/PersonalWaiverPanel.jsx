@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle, Gauge, Target } from 'lucide-react'
 import { AccountButton, useAuth } from './AuthShell'
+import FantasyResearchFreshness from './FantasyResearchFreshness'
 
 function humanize(value) {
   return String(value || '')
@@ -137,6 +138,8 @@ export default function PersonalWaiverPanel({ onOpenMyTeams, leagueId = null }) 
           </div>
         </div>
       </div>
+
+      <FantasyResearchFreshness freshness={payload.research_freshness} />
 
       {budget.connected && (
         <div className="mt-5 grid gap-3 sm:grid-cols-4">

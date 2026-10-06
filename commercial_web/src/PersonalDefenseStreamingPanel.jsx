@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle, ShieldCheck } from 'lucide-react'
 import { AccountButton, useAuth } from './AuthShell'
+import FantasyResearchFreshness from './FantasyResearchFreshness'
 
 function humanize(value) {
   return String(value || '')
@@ -138,6 +139,8 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
           </div>
         </div>
       </div>
+
+      <FantasyResearchFreshness freshness={payload.research_freshness} />
 
       <div className="mt-5">
         <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Your saved defense</div>

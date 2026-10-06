@@ -160,9 +160,9 @@ export default function FantasyTeamControl({
           <div className="mt-1 text-[10px] font-semibold text-slate-400">{faabConnected ? 'Budget translation enabled' : 'Generic % research only'}</div>
         </div>
         <div className="bg-white px-4 py-3">
-          <div className="text-[9px] font-black uppercase tracking-[0.12em] text-slate-400">Research refresh</div>
+          <div className="text-[9px] font-black uppercase tracking-[0.12em] text-slate-400">Team analysis</div>
           <div className="mt-1 text-sm font-black text-slate-950">{lastAnalysis ? formatDate(lastAnalysis) : 'Not analyzed yet'}</div>
-          <div className="mt-1 text-[10px] font-semibold text-slate-400">{manual ? 'Re-run Rate My Team after roster changes' : 'Provider sync + research refresh'}</div>
+          <div className="mt-1 text-[10px] font-semibold text-slate-400">{manual ? 'Re-run Rate My Team after roster changes' : 'Last saved team-analysis run'}</div>
         </div>
       </div>
 

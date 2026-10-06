@@ -22,6 +22,7 @@ const FORMAT_CONTEXT_BRIDGE = path.join(__dirname, 'format_context_bridge.py')
 const SPORTS_PYTHON = path.join(SPORTS_ROOT, '.venv', 'bin', 'python')
 const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVOR_ENTRIES.json'
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
+const DATASET_FRESHNESS_PATH = path.join(SPORTS_ROOT, 'intelligence_warehouse', 'freshness', 'DATASET_FRESHNESS_CURRENT.csv')
 
 const JSON_FILES = {
   nflScores: 'nfl_scores.json',
@@ -77,6 +78,111 @@ async function loadJson(name) {
 async function loadExternalJson(filename) {
   try { return JSON.parse(await readFile(filename, 'utf8')) }
   catch { return null }
+}
+
+
+function parseSimpleCsvLine(line) {
+  return String(line || '').split(',')
+}
+
+async function fantasyResearchFreshness(lane, rosterUpdatedAt = null) {
+  const requestedLane = String(lane || '').trim().toLowerCase()
+  const unknown = {
+    lane: requestedLane || null,
+    status: 'UNKNOWN',
+    source_available: false,
+    source_timestamp: null,
+    age_minutes: null,
+    max_age_minutes: null,
+    row_count: null,
+    row_state: 'UNKNOWN',
+    manifest_checked_at: null,
+    roster_updated_at: rosterUpdatedAt || null,
+    roster_newer_than_research: null,
+    roster_ahead_minutes: null,
+    freshness_basis: 'ACTUAL_SOURCE_FILE_MTIME_AT_REQUEST_WITH_DATASET_FRESHNESS_POLICY',
+  }
+
+  if (!requestedLane) return unknown
+
+  try {
+    const raw = await readFile(DATASET_FRESHNESS_PATH, 'utf8')
+    const lines = raw.split(/\r?\n/).filter(Boolean)
+    if (lines.length < 2) return unknown
+
+    const headers = parseSimpleCsvLine(lines[0])
+    let match = null
+    for (const line of lines.slice(1)) {
+      const values = parseSimpleCsvLine(line)
+      const row = Object.fromEntries(headers.map((key, index) => [key, values[index] ?? '']))
+      if (
+        String(row.sport || '').toUpperCase() === 'FANTASY_DECISIONS' &&
+        String(row.lane || '').toLowerCase() === requestedLane
+      ) {
+        match = row
+        break
+      }
+    }
+
+    if (!match) return unknown
+
+    const rosterMs = Date.parse(rosterUpdatedAt || '')
+    const maxAge = Number(match.max_age_minutes)
+    const nowMs = Date.now()
+    const relativeSourcePath = String(match.path || '').trim()
+    const resolvedSourcePath = relativeSourcePath ? path.resolve(SPORTS_ROOT, relativeSourcePath) : ''
+    const rootPrefix = path.resolve(SPORTS_ROOT) + path.sep
+    let sourceMs = Number.NaN
+    let exists = false
+
+    if (resolvedSourcePath && resolvedSourcePath.startsWith(rootPrefix)) {
+      try {
+        const sourceStat = await stat(resolvedSourcePath)
+        exists = sourceStat.isFile()
+        if (exists) sourceMs = sourceStat.mtimeMs
+      } catch {}
+    }
+
+    const ageMinutes = Number.isFinite(sourceMs)
+      ? Math.max(0, (nowMs - sourceMs) / 60000)
+      : null
+
+    let status = 'UNKNOWN'
+    if (!exists) {
+      status = 'MISSING'
+    } else if (ageMinutes != null && Number.isFinite(maxAge)) {
+      status = ageMinutes <= maxAge
+        ? 'FRESH'
+        : ageMinutes <= maxAge * 2
+          ? 'AGING'
+          : 'STALE'
+    }
+
+    const rosterNewer = Number.isFinite(sourceMs) && Number.isFinite(rosterMs)
+      ? rosterMs > sourceMs
+      : null
+    const rosterAheadMinutes = rosterNewer
+      ? Math.max(0, (rosterMs - sourceMs) / 60000)
+      : 0
+
+    return {
+      lane: requestedLane,
+      status,
+      source_available: exists,
+      source_timestamp: Number.isFinite(sourceMs) ? new Date(sourceMs).toISOString() : null,
+      age_minutes: ageMinutes == null ? null : Math.round(ageMinutes * 10) / 10,
+      max_age_minutes: Number.isFinite(maxAge) ? maxAge : null,
+      row_count: Number.isFinite(Number(match.row_count)) ? Number(match.row_count) : null,
+      row_state: match.row_state || 'UNKNOWN',
+      manifest_checked_at: match.checked_at || null,
+      roster_updated_at: Number.isFinite(rosterMs) ? new Date(rosterMs).toISOString() : (rosterUpdatedAt || null),
+      roster_newer_than_research: rosterNewer,
+      roster_ahead_minutes: rosterNewer ? Math.round(rosterAheadMinutes * 10) / 10 : 0,
+      freshness_basis: 'ACTUAL_SOURCE_FILE_MTIME_AT_REQUEST_WITH_DATASET_FRESHNESS_POLICY',
+    }
+  } catch {
+    return unknown
+  }
 }
 
 const MEMBER_LINKS_PATH = path.join(__dirname, 'private_member_links.json')
@@ -1946,6 +2052,51 @@ function personalizedIdpAnswer(snapshot) {
   })
 }
 
+
+function attachPersonalFantasyFreshness(answer, snapshot) {
+  if (!answer || typeof answer !== 'object') return answer
+  const freshness = snapshot?.research_freshness
+  if (!freshness || typeof freshness !== 'object') return answer
+
+  const status = String(freshness.status || 'UNKNOWN').toUpperCase()
+  const age = freshness.age_minutes == null || freshness.age_minutes === '' ? null : Number(freshness.age_minutes)
+  const maxAge = freshness.max_age_minutes == null || freshness.max_age_minutes === '' ? null : Number(freshness.max_age_minutes)
+  const why = [...(Array.isArray(answer.why) ? answer.why : [])]
+  const risk = [...(Array.isArray(answer.risk) ? answer.risk : [])]
+
+  const ageText = Number.isFinite(age) ? `${age} min old` : 'age unknown'
+  why.push(
+    `Research freshness: ${status} · ${ageText}${Number.isFinite(maxAge) ? ` · target ≤ ${maxAge} min` : ''}.`
+  )
+
+  if (['AGING','STALE','MISSING','UNKNOWN'].includes(status)) {
+    risk.push(
+      status === 'AGING'
+        ? 'This Fantasy research is aging past its normal freshness target; newer source data may change the result.'
+        : status === 'STALE'
+          ? 'This Fantasy research is stale; treat the recommendation as provisional until the source refreshes.'
+          : status === 'MISSING'
+            ? 'The Fantasy research source is missing, so this answer may be incomplete.'
+            : 'The Fantasy research source freshness could not be verified.'
+    )
+  }
+
+  if (freshness.roster_newer_than_research === true) {
+    const delta = Number(freshness.roster_ahead_minutes)
+    risk.push(
+      `Your saved roster changed${Number.isFinite(delta) ? ` ${delta} min` : ''} after this research snapshot; the roster selection is current, but the player research predates that edit.`
+    )
+  }
+
+  return {
+    ...answer,
+    why,
+    risk,
+    updated_at:freshness.source_timestamp || answer.updated_at || null,
+    research_freshness:freshness,
+  }
+}
+
 async function personalizedFantasyAsk(req, question, context={}) {
   const intent=personalFantasyIntent(question)
   const leagueId=String(context?.fantasy_league_id||'').trim()
@@ -1963,12 +2114,14 @@ async function personalizedFantasyAsk(req, question, context={}) {
   const snapshot=await privateFantasySnapshot(req,endpoint,leagueId)
   if(!snapshot) return null
 
-  if(intent==='start_sit') return personalizedStartSitAnswer(question,snapshot)
-  if(intent==='waivers') return personalizedWaiverAnswer(req,question,snapshot,leagueId)
-  if(intent==='ir_stash') return personalizedIrAnswer(question,snapshot)
-  if(intent==='defense_streaming') return personalizedDefenseAnswer(snapshot)
-  if(intent==='idp') return personalizedIdpAnswer(snapshot)
-  return null
+  let answer=null
+  if(intent==='start_sit') answer=personalizedStartSitAnswer(question,snapshot)
+  else if(intent==='waivers') answer=await personalizedWaiverAnswer(req,question,snapshot,leagueId)
+  else if(intent==='ir_stash') answer=personalizedIrAnswer(question,snapshot)
+  else if(intent==='defense_streaming') answer=personalizedDefenseAnswer(snapshot)
+  else if(intent==='idp') answer=personalizedIdpAnswer(snapshot)
+
+  return answer ? attachPersonalFantasyFreshness(answer,snapshot) : null
 }
 
 async function serveStatic(req,res,pathname) {
@@ -2329,10 +2482,12 @@ const server=http.createServer(async(req,res)=>{
         roster,
         idp_slots:idpSlots,
       })
+      const researchFreshness=await fantasyResearchFreshness('idp_opportunity',savedRoster?.updated_at)
 
       return json(res,200,{
         ...idpFit,
         status:'READY',
+        research_freshness:researchFreshness,
         league:{
           id:league.id,
           league_name:league.league_name||null,
@@ -2341,6 +2496,7 @@ const server=http.createServer(async(req,res)=>{
           idp_slots:idpSlots,
           idp_slot_context_connected:Object.values(idpSlots).some(value=>value>0),
           last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
+          roster_updated_at:savedRoster?.updated_at||null,
         },
         fantasy_points_projection_available:false,
         user_league_availability_verified:false,
@@ -2419,10 +2575,12 @@ const server=http.createServer(async(req,res)=>{
       const dstSlots=Math.max(0,Math.min(4,Math.round(Number(starterSlots.dst)||0)))
       const analysis=await runRateMyTeam({roster})
       const defenseFit=await runDefenseStreamFit({roster_analysis:analysis})
+      const researchFreshness=await fantasyResearchFreshness('defense_streaming',savedRoster?.updated_at)
 
       return json(res,200,{
         ...defenseFit,
         status:'READY',
+        research_freshness:researchFreshness,
         league:{
           id:league.id,
           league_name:league.league_name||null,
@@ -2430,6 +2588,7 @@ const server=http.createServer(async(req,res)=>{
           season:league.season||null,
           dst_slots:dstSlots,
           last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
+          roster_updated_at:savedRoster?.updated_at||null,
         },
         user_league_availability_verified:false,
       })
@@ -2508,10 +2667,12 @@ const server=http.createServer(async(req,res)=>{
         roster_analysis:analysis,
         ir_slots:irSlots,
       })
+      const researchFreshness=await fantasyResearchFreshness('ir_stash',savedRoster?.updated_at)
 
       return json(res,200,{
         ...stashFit,
         status:'READY',
+        research_freshness:researchFreshness,
         league:{
           id:league.id,
           league_name:league.league_name||null,
@@ -2519,6 +2680,7 @@ const server=http.createServer(async(req,res)=>{
           season:league.season||null,
           ir_slots:irSlots,
           last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
+          roster_updated_at:savedRoster?.updated_at||null,
         },
         platform_ir_eligibility_verified:false,
         league_availability_verified:false,
@@ -2605,16 +2767,19 @@ const server=http.createServer(async(req,res)=>{
         faab_budget:budgetContextConnected?faabBudget:null,
         faab_remaining:budgetContextConnected?faabRemaining:null,
       })
+      const researchFreshness=await fantasyResearchFreshness('faab',savedRoster?.updated_at)
 
       return json(res,200,{
         ...waiverFit,
         status:'READY',
+        research_freshness:researchFreshness,
         league:{
           id:league.id,
           league_name:league.league_name||null,
           team_name:savedRoster?.team_name||league.league_name||null,
           season:league.season||null,
           last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
+          roster_updated_at:savedRoster?.updated_at||null,
           faab_budget:budgetContextConnected?faabBudget:null,
           faab_remaining:budgetContextConnected?faabRemaining:null,
         },
@@ -2890,8 +3055,11 @@ const server=http.createServer(async(req,res)=>{
           .map(row=>({...row,lineup_research_status:'BENCH_CANDIDATE'}))
       }
 
+      const researchFreshness=await fantasyResearchFreshness('weekly',savedRoster?.updated_at)
+
       return json(res,200,{
         status:'READY',
+        research_freshness:researchFreshness,
         personalization_level:slotContextConnected?'SLOT_AWARE_RESEARCH':'ROSTER_AWARE_RESEARCH',
         context_status:slotContextConnected
           ? (
@@ -2918,6 +3086,7 @@ const server=http.createServer(async(req,res)=>{
           slot_context_connected:slotContextConnected,
           starter_slots:starterSlots,
           last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
+          roster_updated_at:savedRoster?.updated_at||null,
         },
         coverage:{
           roster_size:analysis.roster_size,

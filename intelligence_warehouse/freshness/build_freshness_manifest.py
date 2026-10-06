@@ -166,13 +166,25 @@ def nfl_governance_mode():
 
 def build_datasets():
     cfg=json.loads(CATALOG.read_text())
+    catalog_files=list(cfg.get("files",[]))
+    required_fantasy_weekly={
+        "sport":"FANTASY_DECISIONS",
+        "lane":"weekly",
+        "path":"intelligence_warehouse/fantasy_decisions/FANTASY_WEEKLY_DECISIONS_CURRENT.csv",
+    }
+    if not any(
+        entry.get("path")==required_fantasy_weekly["path"]
+        for entry in catalog_files
+    ):
+        catalog_files.append(required_fantasy_weekly)
+
     rows=[]
     nfl_mode=nfl_governance_mode()
     nfl_paid_lanes={
         "game_decision","game_finalists","prop_decision",
         "pickem_decision","market","decision_receipt","parlay_receipt"
     }
-    for entry in cfg["files"]:
+    for entry in catalog_files:
         sport=entry["sport"]
         if str(sport).upper()=="FRESHNESS":
             continue
