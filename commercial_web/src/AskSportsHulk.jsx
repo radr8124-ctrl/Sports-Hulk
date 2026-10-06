@@ -3,6 +3,7 @@ import {
   Activity, AlertTriangle, BarChart3, Bot, Brain, ChevronRight,
   MessageCircle, Send, ShieldCheck, Sparkles, Target, Trophy, Users, X, Zap,
 } from 'lucide-react'
+import { useAuth } from './AuthShell'
 
 const quickPrompts = [
   ['Start / Sit', 'Who should I start this week?'],
@@ -204,17 +205,32 @@ function LiveRail() {
   )
 }
 
-async function askQuestion(question, context = {}) {
+function activeFantasyLeagueId() {
+  try { return window.localStorage.getItem('sports-zenith-active-fantasy-league') || null }
+  catch { return null }
+}
+
+async function askQuestion(question, context = {}, accessToken = null) {
+  const headers = { 'Content-Type': 'application/json' }
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`
+
   const response = await fetch('/api/ask', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, context }),
+    headers,
+    body: JSON.stringify({
+      question,
+      context: {
+        ...context,
+        fantasy_league_id: context.fantasy_league_id || activeFantasyLeagueId(),
+      },
+    }),
   })
   if (!response.ok) throw new Error('The sports analyst is unavailable')
   return response.json()
 }
 
 export function AskSportsHulkPage() {
+  const { user, getAccessToken } = useAuth()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -231,7 +247,8 @@ export function AskSportsHulkPage() {
     setInput('')
     setLoading(true)
     try {
-      const answer = await askQuestion(q, { page: 'Ask' })
+      const token = user ? await getAccessToken() : null
+      const answer = await askQuestion(q, { page: 'Ask' }, token)
       setMessages(prev => [...prev, { role: 'assistant', answer }])
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', answer: {
@@ -309,6 +326,7 @@ export function AskSportsHulkPage() {
 }
 
 export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home' }) {
+  const { user, getAccessToken } = useAuth()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -322,7 +340,8 @@ export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home' }) 
     setInput('')
     setLoading(true)
     try {
-      const answer = await askQuestion(q, { page })
+      const token = user ? await getAccessToken() : null
+      const answer = await askQuestion(q, { page }, token)
       setMessages(prev => [...prev, { role: 'assistant', answer }])
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', answer: { take: 'Assistant unavailable.', confidence: 'WAITING', risk: [error.message] } }])

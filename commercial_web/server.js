@@ -1604,6 +1604,373 @@ function runFormatContext(payload) {
   })
 }
 
+
+function personalFantasyIntent(question) {
+  const q=qtext(question)
+  if(
+    /\b(defense stream|d\/st|dst|streaming defense|defense to stream)\b/.test(q)
+    || (/\b(defense|d\/st|dst)\b/.test(q) && /\b(stream|streaming|hold|drop|rotate|add)\b/.test(q))
+  ) return 'defense_streaming'
+  if(/\b(ir stash|stash|stashes|returning from ir|return window|ir slot|ir spots?|room on ir|injured reserve)\b/.test(q)) return 'ir_stash'
+  if(/\b(idp|linebacker|linebackers|defensive back|defensive backs|edge rusher|edge rushers|defensive line|dl\b|lb\b|db\b)\b/.test(q)) return 'idp'
+  if(/\b(start|starts|sit|sits|flex|start\/sit|lineup)\b/.test(q)) return 'start_sit'
+  if(/\b(waiver|waivers|faab|free agent|free agents|add|adds|drop|drops|cut|cuts)\b/.test(q)) return 'waivers'
+  return null
+}
+
+async function privateFantasySnapshot(req, endpoint, leagueId) {
+  const authorization=String(req.headers.authorization||'').trim()
+  const id=String(leagueId||'').trim()
+  if(!authorization||!id) return null
+  try{
+    const response=await fetch(
+      `http://127.0.0.1:${PORT}${endpoint}?league_id=${encodeURIComponent(id)}`,
+      {headers:{authorization}}
+    )
+    if(!response.ok) return null
+    const payload=await response.json()
+    return payload?.status==='READY'?payload:null
+  }catch{
+    return null
+  }
+}
+
+function privateFantasySource(snapshot, lane) {
+  const team=snapshot?.league?.team_name||snapshot?.league?.league_name||'Saved team'
+  return [{
+    label:`${team} · ${lane}`,
+    source:'PRIVATE_SAVED_FANTASY_TEAM',
+  }]
+}
+
+function personalizedStartSitAnswer(question, snapshot) {
+  const q=qtext(question)
+  const league=snapshot.league||{}
+  const team=league.team_name||league.league_name||'your saved team'
+  const lineup=snapshot.lineup_research||{}
+  const players=Array.isArray(snapshot.players)?snapshot.players:[]
+  const matched=players.filter(row=>{
+    const name=String(row.player||'').trim().toLowerCase()
+    return name&&name.length>=3&&q.includes(name)
+  }).sort((a,b)=>num(b.weekly_research_score,-999)-num(a.weekly_research_score,-999))
+
+  if(matched.length){
+    const top=matched[0]
+    const second=matched[1]||null
+    const starter=(lineup.starter_candidates||[]).find(row=>String(row.player_key||row.player)===String(top.player_key||top.player))
+    return response({
+      intent:'personal_start_sit',
+      take:second
+        ? `For ${team}, start ${top.player} over ${second.player} on the current personalized research.`
+        : `For ${team}, ${top.player} is the stronger current Start/Sit research option.`,
+      confidence:'PERSONAL ROSTER RESEARCH',
+      status:'PERSONALIZED_RESEARCH',
+      why:[
+        `Weekly research score ${top.weekly_research_score??'—'} · ${nice(top.weekly_tier||'UNKNOWN')}.`,
+        starter?`Fits your saved ${starter.assigned_slot}${starter.slot_index>1?' '+starter.slot_index:''} research slot.`:null,
+        top.research_reasons||null,
+      ].filter(Boolean),
+      risk:[
+        'This is research, not a fantasy-point projection or guaranteed result.',
+        lineup.scoring_format_used_as_tiebreaker
+          ? `${nice(lineup.scoring_format)} historical context was only allowed to break close calls within the saved guardrail.`
+          : 'Weekly research remains the primary signal.',
+      ],
+      cards:matched.slice(0,5).map(row=>({
+        type:'personal_fantasy',
+        title:row.player,
+        opponent:row.opponent,
+        score:row.weekly_research_score,
+        tier:row.weekly_tier,
+        role:row.role_signal,
+      })),
+      sources:privateFantasySource(snapshot,'Start / Sit'),
+      updated_at:league.last_synced_at,
+    })
+  }
+
+  const starters=Array.isArray(lineup.starter_candidates)?lineup.starter_candidates:[]
+  if(starters.length){
+    const labels=starters.slice(0,8).map(row=>`${row.assigned_slot}: ${row.player}`)
+    return response({
+      intent:'personal_start_sit',
+      take:`For ${team}, your current slot-aware starter research is ${labels.join(' · ')}.`,
+      confidence:'PERSONAL SLOT-AWARE RESEARCH',
+      status:'PERSONALIZED_RESEARCH',
+      why:[
+        `${starters.length} starter candidate${starters.length===1?'':'s'} filled from your saved roster and starter slots.`,
+        `Saved scoring format: ${nice(lineup.scoring_format||'NOT SET')}.`,
+      ],
+      risk:['These are research-ranked starter candidates, not fantasy-point projections or an official platform lineup.'],
+      cards:starters.slice(0,6).map(row=>({
+        type:'personal_fantasy',
+        title:row.player,
+        selection:row.assigned_slot,
+        opponent:row.opponent,
+        score:row.weekly_research_score,
+        tier:row.weekly_tier,
+      })),
+      sources:privateFantasySource(snapshot,'Start / Sit'),
+      updated_at:league.last_synced_at,
+    })
+  }
+
+  return response({
+    intent:'personal_start_sit',
+    take:`I found ${team}, but I need saved starter-slot context or specific player names to make this Start/Sit comparison personal.`,
+    confidence:'PERSONAL CONTEXT PARTIAL',
+    status:'PERSONALIZED_RESEARCH',
+    risk:['No generic player is being substituted for your saved roster.'],
+    sources:privateFantasySource(snapshot,'Start / Sit'),
+    updated_at:league.last_synced_at,
+  })
+}
+
+async function personalizedWaiverAnswer(req, question, snapshot, leagueId) {
+  const q=qtext(question)
+  const league=snapshot.league||{}
+  const team=league.team_name||league.league_name||'your saved team'
+  const wantsDrop=/\b(drop|drops|cut|cuts|who should i get rid|who can i drop)\b/.test(q)
+
+  if(wantsDrop){
+    const startSit=await privateFantasySnapshot(req,'/api/fantasy/start-sit',leagueId)
+    const bench=startSit?.lineup_research?.bench_candidates||[]
+    const pool=(bench.length?bench:(startSit?.players||[]))
+      .filter(row=>row&&row.player)
+      .sort((a,b)=>
+        num(a.research_index,999)-num(b.research_index,999)
+        || num(a.ros_research_score,999)-num(b.ros_research_score,999)
+        || num(a.weekly_research_score,999)-num(b.weekly_research_score,999)
+      )
+    const candidate=pool[0]||null
+    if(candidate){
+      return response({
+        intent:'personal_drop_review',
+        take:`For ${team}, ${candidate.player} is the first drop-review candidate from your current roster research — not an automatic drop.`,
+        confidence:'DROP REVIEW RESEARCH',
+        status:'PERSONALIZED_RESEARCH',
+        why:[
+          candidate.research_index!=null?`Roster research index ${candidate.research_index}.`:null,
+          candidate.ros_research_score!=null?`ROS research score ${candidate.ros_research_score}.`:null,
+          candidate.weekly_research_score!=null?`Weekly research score ${candidate.weekly_research_score}.`:null,
+        ].filter(Boolean),
+        risk:[
+          'A low research rank does not automatically mean the player should be dropped.',
+          'Sports Zenith has not verified which waiver replacements are actually available in your league.',
+        ],
+        cards:[{
+          type:'personal_drop_review',
+          title:candidate.player,
+          team:candidate.team,
+          position:candidate.position,
+          score:candidate.research_index??candidate.ros_research_score??candidate.weekly_research_score,
+        }],
+        sources:privateFantasySource(snapshot,'Waivers / Drop review'),
+        updated_at:league.last_synced_at,
+      })
+    }
+  }
+
+  const targets=Array.isArray(snapshot.targets)?snapshot.targets:[]
+  const top=targets[0]||null
+  if(!top){
+    return response({
+      intent:'personal_waivers',
+      take:`I loaded ${team}, but no roster-aware waiver target cleared the current filter.`,
+      confidence:'WAITING / NO TARGET',
+      status:'PERSONALIZED_RESEARCH',
+      risk:['No waiver add is being invented to fill an empty result.'],
+      sources:privateFantasySource(snapshot,'Waivers'),
+      updated_at:league.last_synced_at,
+    })
+  }
+
+  const budget=top.budget_planning||{}
+  return response({
+    intent:'personal_waivers',
+    take:`For ${team}, ${top.player} is the top roster-aware waiver target to check right now.`,
+    confidence:'PERSONAL WAIVER RESEARCH',
+    status:'PERSONALIZED_RESEARCH',
+    why:[
+      `${top.position||'—'} roster need score ${top.roster_need_score??'—'} · waiver research ${top.waiver_research_score??'—'}.`,
+      `Generic FAAB research range ${top.research_faab_low_pct??'—'}–${top.research_faab_high_pct??'—'}%.`,
+      budget.connected?`Saved-budget translation ${budget.research_low_units??'—'}–${budget.research_high_units??'—'} units · ${nice(budget.budget_pressure)}.`:null,
+    ].filter(Boolean),
+    risk:[
+      'Sports Zenith has not verified that this player is available in your league.',
+      'FAAB percentage and budget translation are research planning ranges, not winning-bid predictions.',
+    ],
+    cards:targets.slice(0,6).map(row=>({
+      type:'personal_waiver',
+      title:row.player,
+      team:row.team,
+      position:row.position,
+      score:row.roster_fit_research_score,
+      priority:row.waiver_priority,
+    })),
+    sources:privateFantasySource(snapshot,'Waivers'),
+    updated_at:league.last_synced_at,
+  })
+}
+
+function personalizedIrAnswer(question, snapshot) {
+  const q=qtext(question)
+  const league=snapshot.league||{}
+  const team=league.team_name||league.league_name||'your saved team'
+  const capacity=snapshot.ir_capacity||{}
+  const wantsRoom=/\b(room|open|space|slot|spot|spots|capacity)\b/.test(q)
+  if(wantsRoom){
+    const open=Number(capacity.likely_open_slots||0)
+    return response({
+      intent:'personal_ir_capacity',
+      take:open>0
+        ? `For ${team}, you appear to have ${open} likely open IR slot${open===1?'':'s'} based on your saved settings.`
+        : `For ${team}, there are no likely open IR slots based on the current saved roster and IR-slot count.`,
+      confidence:'PERSONAL IR CAPACITY RESEARCH',
+      status:'PERSONALIZED_RESEARCH',
+      why:[
+        `${capacity.saved_ir_slots??0} saved IR slot${Number(capacity.saved_ir_slots||0)===1?'':'s'}.`,
+        `${capacity.likely_ir_designation_count??0} roster player${Number(capacity.likely_ir_designation_count||0)===1?'':'s'} with likely IR/PUP designation context.`,
+      ],
+      risk:['Actual IR eligibility depends on the fantasy platform and league rules and is not verified here.'],
+      sources:privateFantasySource(snapshot,'IR / Stash'),
+      updated_at:league.last_synced_at,
+    })
+  }
+
+  const rosterInjured=Array.isArray(snapshot.roster_injured)?snapshot.roster_injured:[]
+  const top=rosterInjured[0]||null
+  const outside=(snapshot.outside_targets_to_check||[])[0]||null
+  return response({
+    intent:'personal_ir_stash',
+    take:top
+      ? `For ${team}, ${top.player} is the first roster injury/stash case to review: ${nice(top.roster_action_research)}.`
+      : outside
+        ? `Your saved roster has no matched stash case; ${outside.player} is the top outside stash name to check.`
+        : `No current IR/stash target cleared the personalized filter for ${team}.`,
+    confidence:'PERSONAL IR/STASH RESEARCH',
+    status:'PERSONALIZED_RESEARCH',
+    why:top?[
+      `Status ${nice(top.status||'UNKNOWN')} · stash research ${top.stash_research_score??'—'}.`,
+      `Return window ${nice(top.return_window||'UNKNOWN')}.`,
+    ]:[],
+    risk:[
+      'Return dates are not guarantees.',
+      'Platform IR eligibility and outside-player league availability are not verified.',
+    ],
+    cards:rosterInjured.slice(0,5).map(row=>({
+      type:'personal_ir',
+      title:row.player,
+      team:row.team,
+      position:row.position,
+      status:row.status,
+      score:row.stash_research_score,
+    })),
+    sources:privateFantasySource(snapshot,'IR / Stash'),
+    updated_at:league.last_synced_at,
+  })
+}
+
+function personalizedDefenseAnswer(snapshot) {
+  const league=snapshot.league||{}
+  const team=league.team_name||league.league_name||'your saved team'
+  const saved=(snapshot.saved_defenses||[])[0]||null
+  const alternative=(snapshot.alternatives_to_check||[])[0]||null
+  if(!saved){
+    return response({
+      intent:'personal_defense_stream',
+      take:`I loaded ${team}, but no D/ST was recognized on the saved roster.`,
+      confidence:'PERSONAL CONTEXT PARTIAL',
+      status:'PERSONALIZED_RESEARCH',
+      risk:['Add the defense to My Teams to enable a direct personalized comparison.'],
+      sources:privateFantasySource(snapshot,'Defense streaming'),
+      updated_at:league.last_synced_at,
+    })
+  }
+
+  const compare=String(saved.research_action||'').includes('COMPARE')
+  return response({
+    intent:'personal_defense_stream',
+    take:compare&&alternative
+      ? `For ${team}, ${saved.player} is a ${nice(saved.research_action)} case; ${alternative.player} is the top outside defense to check.`
+      : `For ${team}, ${saved.player} currently rates ${nice(saved.research_action||'HOLD OR COMPARE RESEARCH')}.`,
+    confidence:'PERSONAL DEFENSE RESEARCH',
+    status:'PERSONALIZED_RESEARCH',
+    why:[
+      `Weekly stream score ${saved.weekly_stream_score??'—'} · rank #${saved.weekly_rank??'—'}.`,
+      `Multi-week hold score ${saved.multiweek_hold_score??'—'} · rank #${saved.multiweek_rank??'—'}.`,
+      `Next opponent ${saved.next_opponent||'—'} · ${nice(saved.future_schedule_signal||'UNKNOWN')} future schedule.`,
+    ],
+    risk:[
+      'This is not an automatic drop command.',
+      'Sports Zenith has not verified that any outside defense is available in your league.',
+    ],
+    cards:[
+      {type:'personal_defense',title:saved.player,opponent:saved.next_opponent,score:saved.weekly_stream_score,tier:saved.weekly_stream_tier},
+      ...(alternative?[{type:'defense_to_check',title:alternative.player,opponent:alternative.next_opponent,score:alternative.weekly_stream_score,tier:alternative.weekly_stream_tier}]:[]),
+    ],
+    sources:privateFantasySource(snapshot,'Defense streaming'),
+    updated_at:league.last_synced_at,
+  })
+}
+
+function personalizedIdpAnswer(snapshot) {
+  const league=snapshot.league||{}
+  const team=league.team_name||league.league_name||'your saved team'
+  const starters=Array.isArray(snapshot.starter_candidates)?snapshot.starter_candidates:[]
+  const open=Array.isArray(snapshot.open_slots)?snapshot.open_slots:[]
+  const targets=Array.isArray(snapshot.outside_targets_to_check)?snapshot.outside_targets_to_check:[]
+  const top=starters[0]||snapshot.matched_idp?.[0]||null
+  return response({
+    intent:'personal_idp',
+    take:top
+      ? `For ${team}, ${top.player} is your strongest current IDP usage research signal${top.assigned_slot?' for '+top.assigned_slot:''}.`
+      : `I loaded ${team}, but no saved IDP player matched the current usage board.`,
+    confidence:'PERSONAL IDP USAGE RESEARCH',
+    status:'PERSONALIZED_RESEARCH',
+    why:top?[
+      `IDP usage score ${top.idp_usage_score??'—'} · ${nice(top.idp_usage_tier||'UNKNOWN')}.`,
+      `Snap share ${top.snap_pct??'—'}% · snap change ${top.snap_pct_change??'—'} points.`,
+      open.length?`${open.length} saved IDP slot${open.length===1?' is':'s are'} still open in the research lineup.`:null,
+    ].filter(Boolean):[],
+    risk:[
+      'IDP output is usage/snap research, not a fantasy-points projection.',
+      'Custom tackle/sack/turnover scoring and outside-player availability are not verified.',
+    ],
+    cards:[
+      ...starters.slice(0,5).map(row=>({type:'personal_idp',title:row.player,selection:row.assigned_slot,score:row.idp_usage_score,tier:row.idp_usage_tier})),
+      ...targets.slice(0,1).map(row=>({type:'idp_to_check',title:row.player,score:row.idp_usage_score,tier:row.idp_usage_tier})),
+    ],
+    sources:privateFantasySource(snapshot,'IDP'),
+    updated_at:league.last_synced_at,
+  })
+}
+
+async function personalizedFantasyAsk(req, question, context={}) {
+  const intent=personalFantasyIntent(question)
+  const leagueId=String(context?.fantasy_league_id||'').trim()
+  if(!intent||!leagueId||!bearerToken(req)) return null
+
+  const endpoint={
+    start_sit:'/api/fantasy/start-sit',
+    waivers:'/api/fantasy/waivers',
+    ir_stash:'/api/fantasy/ir-stash',
+    defense_streaming:'/api/fantasy/defense-streaming',
+    idp:'/api/fantasy/idp',
+  }[intent]
+  if(!endpoint) return null
+
+  const snapshot=await privateFantasySnapshot(req,endpoint,leagueId)
+  if(!snapshot) return null
+
+  if(intent==='start_sit') return personalizedStartSitAnswer(question,snapshot)
+  if(intent==='waivers') return personalizedWaiverAnswer(req,question,snapshot,leagueId)
+  if(intent==='ir_stash') return personalizedIrAnswer(question,snapshot)
+  if(intent==='defense_streaming') return personalizedDefenseAnswer(snapshot)
+  if(intent==='idp') return personalizedIdpAnswer(snapshot)
+  return null
+}
+
 async function serveStatic(req,res,pathname) {
   let requested=pathname==='/'?'/index.html':pathname, filePath=path.resolve(DIST,'.'+requested)
   if(!filePath.startsWith(path.resolve(DIST))){res.writeHead(403,SECURITY_HEADERS);res.end('Forbidden');return}
@@ -3008,7 +3375,15 @@ const server=http.createServer(async(req,res)=>{
     })
   }
   if(req.method==='POST'&&url.pathname==='/api/ask'){
-    try{const body=await readBody(req),question=String(body.question||body.message||'').trim(),context=body.context&&typeof body.context==='object'?body.context:{},data=await loadAll(),answer=routeAsk(question,data,context);return json(res,200,{question,context,...answer,generated_at:new Date().toISOString()})}
+    try{
+      const body=await readBody(req)
+      const question=String(body.question||body.message||'').trim()
+      const context=body.context&&typeof body.context==='object'?body.context:{}
+      const data=await loadAll()
+      const personalAnswer=await personalizedFantasyAsk(req,question,context)
+      const answer=personalAnswer||routeAsk(question,data,context)
+      return json(res,200,{question,context,...answer,generated_at:new Date().toISOString()})
+    }
     catch(err){return json(res,400,{status:'ERROR',take:'The sports analyst could not process that request.',error:err instanceof Error?err.message:String(err)})}
   }
   if(req.method==='POST'&&url.pathname==='/api/dfs/optimize'){

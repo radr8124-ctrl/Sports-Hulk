@@ -2954,13 +2954,16 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
 }
 
 function FantasyCommercialPanel() {
-  const { user, getAccessToken } = useAuth()
+  const { user, getAccessToken, loading: authLoading } = useAuth()
   const [mode, setMode] = useState('Season-Long')
   const [lane, setLane] = useState('my_teams')
   const [sport, setSport] = useState('NFL')
   const [teamOptions, setTeamOptions] = useState([])
   const [teamOptionsLoading, setTeamOptionsLoading] = useState(false)
-  const [selectedLeagueId, setSelectedLeagueId] = useState(null)
+  const [selectedLeagueId, setSelectedLeagueId] = useState(() => {
+    try { return window.localStorage.getItem('sports-zenith-active-fantasy-league') || null }
+    catch { return null }
+  })
   const current = useJsonEndpoint('/fantasy_v2_current.json', { lanes: {} })
   const decisions = useJsonEndpoint('/fantasy_decisions.json', { personalization: {}, lanes: {} })
   const brain = useJsonEndpoint('/brain_performance.json', { fantasy_v2: {}, dfs: {} })
@@ -2990,6 +2993,10 @@ function FantasyCommercialPanel() {
 
   useEffect(() => {
     let active = true
+
+    if (authLoading) {
+      return () => { active = false }
+    }
 
     if (!user) {
       setTeamOptions([])
@@ -3033,7 +3040,7 @@ function FantasyCommercialPanel() {
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken])
+  }, [user, getAccessToken, authLoading])
 
   const upsertTeamOption = (team) => {
     if (!team?.league_id) return
@@ -3043,6 +3050,13 @@ function FantasyCommercialPanel() {
     ])
     setSelectedLeagueId(team.league_id)
   }
+
+  useEffect(() => {
+    try {
+      if (selectedLeagueId) window.localStorage.setItem('sports-zenith-active-fantasy-league', selectedLeagueId)
+      else window.localStorage.removeItem('sports-zenith-active-fantasy-league')
+    } catch {}
+  }, [selectedLeagueId])
 
   const selectedTeamOption = teamOptions.find((team) => team.league_id === selectedLeagueId) || null
 
