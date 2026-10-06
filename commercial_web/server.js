@@ -1871,14 +1871,85 @@ const server=http.createServer(async(req,res)=>{
       const rosterSettings=league.roster_settings&&typeof league.roster_settings==='object'&&!Array.isArray(league.roster_settings)?league.roster_settings:{}
       const starters=Array.isArray(savedRoster?.starters)?savedRoster.starters:[]
       const bench=Array.isArray(savedRoster?.bench)?savedRoster.bench:[]
-      const scoringConnected=Object.keys(scoring).length>0
-      const slotContextConnected=Object.keys(rosterSettings).length>0 || starters.length>0 || bench.length>0
+      const starterSlots=rosterSettings.starting_slots&&typeof rosterSettings.starting_slots==='object'&&!Array.isArray(rosterSettings.starting_slots)
+        ? rosterSettings.starting_slots
+        : {}
+      const scoringConnected=['ppr','half_ppr','standard'].includes(String(scoring.preset||'').toLowerCase())
+      const slotContextConnected=Object.keys(starterSlots).length>0
+
+      const lineupResearch={
+        status:slotContextConnected?'SLOT_AWARE_RESEARCH':'SLOT_CONTEXT_WAITING',
+        scoring_format:String(scoring.preset||'').toLowerCase()||null,
+        scoring_format_connected:scoringConnected,
+        scoring_format_applied_to_score:false,
+        starter_slots:starterSlots,
+        starter_candidates:[],
+        bench_candidates:[],
+        open_slots:[],
+        unscored_slots:[],
+        note:slotContextConnected
+          ? 'Starter candidates are allocated to saved lineup slots using Sports Zenith weekly research scores. These are not fantasy-point projections, and scoring format is not yet applied to the player scores.'
+          : 'Save starter-slot settings before Sports Zenith can build slot-aware lineup research.',
+      }
+
+      if(slotContextConnected){
+        const used=new Set()
+        const playerId=row=>String(row.player_key||row.player||'')
+        const eligibleRows=(positions)=>scoredPlayers
+          .filter(row=>positions.includes(String(row.position||'').toUpperCase())&&!used.has(playerId(row)))
+          .sort((a,b)=>Number(b.weekly_research_score??-1)-Number(a.weekly_research_score??-1))
+
+        const fillSlots=(slot,positions,count)=>{
+          const total=Math.max(0,Math.min(30,Math.round(Number(count)||0)))
+          for(let index=1;index<=total;index+=1){
+            const candidate=eligibleRows(positions)[0]||null
+            if(!candidate){
+              lineupResearch.open_slots.push({slot,slot_index:index,eligible_positions:positions,reason:'NO_SCORED_ELIGIBLE_PLAYER'})
+              continue
+            }
+            used.add(playerId(candidate))
+            lineupResearch.starter_candidates.push({
+              ...candidate,
+              assigned_slot:slot,
+              slot_index:index,
+              lineup_research_status:'STARTER_CANDIDATE',
+            })
+          }
+        }
+
+        fillSlots('QB',['QB'],starterSlots.qb)
+        fillSlots('RB',['RB'],starterSlots.rb)
+        fillSlots('WR',['WR'],starterSlots.wr)
+        fillSlots('TE',['TE'],starterSlots.te)
+        fillSlots('DST',['DST'],starterSlots.dst)
+        fillSlots('SUPERFLEX',['QB','RB','WR','TE'],starterSlots.superflex)
+        fillSlots('FLEX',['RB','WR','TE'],starterSlots.flex)
+
+        const kickerSlots=Math.max(0,Math.min(10,Math.round(Number(starterSlots.k)||0)))
+        const kickers=(analysis.recognized_without_decision||[])
+          .filter(row=>String(row.position||'').toUpperCase()==='K')
+        for(let index=1;index<=kickerSlots;index+=1){
+          const kicker=kickers[index-1]||null
+          lineupResearch.unscored_slots.push({
+            slot:'K',
+            slot_index:index,
+            player:kicker?.player||null,
+            team:kicker?.team||null,
+            reason:kicker?'NO_CURRENT_KICKER_DECISION_SCORE':'NO_KICKER_RECOGNIZED',
+          })
+        }
+
+        lineupResearch.bench_candidates=scoredPlayers
+          .filter(row=>!used.has(playerId(row)))
+          .sort((a,b)=>Number(b.weekly_research_score??-1)-Number(a.weekly_research_score??-1))
+          .map(row=>({...row,lineup_research_status:'BENCH_CANDIDATE'}))
+      }
 
       return json(res,200,{
         status:'READY',
-        personalization_level:'ROSTER_AWARE_RESEARCH',
-        context_status:scoringConnected&&slotContextConnected
-          ? 'LEAGUE_CONTEXT_PRESENT_NOT_YET_APPLIED'
+        personalization_level:slotContextConnected?'SLOT_AWARE_RESEARCH':'ROSTER_AWARE_RESEARCH',
+        context_status:slotContextConnected
+          ? (scoringConnected?'SLOT_CONTEXT_APPLIED_SCORING_FORMAT_CONTEXT_ONLY':'SLOT_CONTEXT_APPLIED_SCORING_WAITING')
           : 'SCORING_AND_SLOT_CONTEXT_WAITING',
         is_official_lineup:false,
         score_is_probability:false,
@@ -1888,7 +1959,9 @@ const server=http.createServer(async(req,res)=>{
           team_name:savedRoster?.team_name||league.league_name||null,
           season:league.season||null,
           scoring_connected:scoringConnected,
+          scoring_format:String(scoring.preset||'').toLowerCase()||null,
           slot_context_connected:slotContextConnected,
+          starter_slots:starterSlots,
           last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
         },
         coverage:{
@@ -1900,12 +1973,13 @@ const server=http.createServer(async(req,res)=>{
           decision_coverage_pct:analysis.decision_coverage_pct,
         },
         groups,
+        lineup_research:lineupResearch,
         players:scoredPlayers,
         recognized_without_decision:analysis.recognized_without_decision||[],
         unmatched:analysis.unmatched||[],
-        note:scoringConnected&&slotContextConnected
-          ? 'This is roster-aware Sports Zenith weekly research. Saved league context exists, but scoring/slot rules are not yet applied to lineup optimization.'
-          : 'This is roster-aware Sports Zenith weekly research. League scoring and starter-slot rules are still missing, so this is not an official lineup recommendation.',
+        note:slotContextConnected
+          ? 'This is slot-aware Sports Zenith lineup research built from your saved roster settings. It uses weekly research scores, not fantasy-point projections, so scoring format is context only and the lineup is not official.'
+          : 'This is roster-aware Sports Zenith weekly research. Save starter-slot settings to build slot-aware lineup research.',
       })
     }catch(err){
       return json(res,400,{

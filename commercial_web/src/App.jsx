@@ -2594,6 +2594,12 @@ function PersonalStartSitPanel({ onOpenMyTeams }) {
   const groups = Array.isArray(payload.groups) ? payload.groups : []
   const coverage = payload.coverage || {}
   const league = payload.league || {}
+  const lineup = payload.lineup_research || {}
+  const starterCandidates = Array.isArray(lineup.starter_candidates) ? lineup.starter_candidates : []
+  const benchCandidates = Array.isArray(lineup.bench_candidates) ? lineup.bench_candidates : []
+  const openSlots = Array.isArray(lineup.open_slots) ? lineup.open_slots : []
+  const unscoredSlots = Array.isArray(lineup.unscored_slots) ? lineup.unscored_slots : []
+  const slotAware = lineup.status === 'SLOT_AWARE_RESEARCH'
 
   const tierTone = (tier) => {
     const value = String(tier || '')
@@ -2630,6 +2636,64 @@ function PersonalStartSitPanel({ onOpenMyTeams }) {
           </div>
         </div>
       </div>
+
+      {slotAware && (
+        <div className="mt-5 rounded-2xl border border-blue-200 bg-white p-4">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.12em] text-blue-700">Slot-aware lineup research</div>
+              <div className="mt-1 text-sm font-semibold leading-5 text-slate-500">
+                Saved starter slots are applied. {league.scoring_format ? humanize(league.scoring_format) + ' scoring is saved as context' : 'Scoring format is not saved'}; player scores are still research rankings, not fantasy-point projections.
+              </div>
+            </div>
+            <span className="rounded-full bg-slate-950 px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-white">Not official lineup</span>
+          </div>
+
+          <div className="mt-4">
+            <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Starter candidates</div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              {starterCandidates.map((row) => (
+                <div key={[row.assigned_slot, row.slot_index, row.player_key || row.player].join('-')} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-blue-700">{row.assigned_slot}{row.slot_index > 1 ? ' ' + row.slot_index : ''}</span>
+                    <span className="text-sm font-black text-slate-950">{row.weekly_research_score ?? '—'}</span>
+                  </div>
+                  <div className="mt-2 truncate text-sm font-black text-slate-950">{row.player}</div>
+                  <div className="mt-1 text-[10px] font-semibold text-slate-400">{row.position} · {row.team || '—'} · vs {row.opponent || '—'}</div>
+                  <div className="mt-2 text-[9px] font-black uppercase tracking-wide text-slate-500">{humanize(row.weekly_tier || 'UNKNOWN')}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {benchCandidates.length > 0 && (
+            <div className="mt-4">
+              <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Bench candidates</div>
+              <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+                {benchCandidates.map((row) => (
+                  <div key={row.player_key || row.player} className="min-w-[165px] rounded-xl border border-slate-200 bg-white p-3">
+                    <div className="truncate text-sm font-black text-slate-950">{row.player}</div>
+                    <div className="mt-1 text-[10px] font-semibold text-slate-400">{row.position} · {row.team || '—'}</div>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <span className="text-[9px] font-black uppercase tracking-wide text-slate-500">{humanize(row.weekly_tier || 'UNKNOWN')}</span>
+                      <span className="text-sm font-black text-slate-700">{row.weekly_research_score ?? '—'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!!(openSlots.length || unscoredSlots.length) && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-950">
+              {openSlots.length > 0 && <div><span className="font-black">Open scored slots:</span> {openSlots.map((slot) => slot.slot + (slot.slot_index > 1 ? ' ' + slot.slot_index : '')).join(', ')}</div>}
+              {unscoredSlots.length > 0 && <div className={openSlots.length ? 'mt-1' : ''}><span className="font-black">Unscored slots:</span> {unscoredSlots.map((slot) => slot.slot + (slot.player ? ' — ' + slot.player : '')).join(', ')}.</div>}
+            </div>
+          )}
+
+          <div className="mt-3 text-[10px] font-semibold leading-4 text-slate-400">{lineup.note}</div>
+        </div>
+      )}
 
       <div className="mt-5 grid gap-4 xl:grid-cols-2">
         {groups.map((group) => (
