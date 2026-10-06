@@ -1752,7 +1752,6 @@ const server=http.createServer(async(req,res)=>{
       }
 
       const analysis=await runRateMyTeam({roster})
-      const waiverFit=await runWaiverFit({roster,roster_analysis:analysis})
 
       const scoring=league.scoring&&typeof league.scoring==='object'&&!Array.isArray(league.scoring)?league.scoring:{}
       const rosterSettings=league.roster_settings&&typeof league.roster_settings==='object'&&!Array.isArray(league.roster_settings)?league.roster_settings:{}
@@ -1760,7 +1759,13 @@ const server=http.createServer(async(req,res)=>{
       const rawRemaining=scoring.faab_remaining ?? rosterSettings.faab_remaining ?? null
       const faabBudget=Number(rawBudget)
       const faabRemaining=Number(rawRemaining)
-      const budgetContextConnected=Number.isFinite(faabBudget)&&faabBudget>0&&Number.isFinite(faabRemaining)&&faabRemaining>=0
+      const budgetContextConnected=Number.isFinite(faabBudget)&&faabBudget>0&&Number.isFinite(faabRemaining)&&faabRemaining>=0&&faabRemaining<=faabBudget
+      const waiverFit=await runWaiverFit({
+        roster,
+        roster_analysis:analysis,
+        faab_budget:budgetContextConnected?faabBudget:null,
+        faab_remaining:budgetContextConnected?faabRemaining:null,
+      })
 
       return json(res,200,{
         ...waiverFit,
@@ -1774,7 +1779,7 @@ const server=http.createServer(async(req,res)=>{
           faab_budget:budgetContextConnected?faabBudget:null,
           faab_remaining:budgetContextConnected?faabRemaining:null,
         },
-        budget_context_status:budgetContextConnected?'CONNECTED_NOT_YET_APPLIED':'WAITING',
+        budget_context_status:budgetContextConnected?'CONNECTED_TRANSLATION_ONLY':'WAITING',
         budget_context_connected:budgetContextConnected,
         league_availability_status:'NOT_VERIFIED',
         user_league_availability_verified:false,

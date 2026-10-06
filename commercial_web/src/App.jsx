@@ -2417,6 +2417,12 @@ function PersonalWaiverPanel({ onOpenMyTeams }) {
   const targets = Array.isArray(payload.targets) ? payload.targets : []
   const cautions = Array.isArray(payload.availability_cautions) ? payload.availability_cautions : []
   const league = payload.league || {}
+  const budget = payload.budget_context || {}
+  const formatFaab = (value) => {
+    const number = Number(value)
+    if (!Number.isFinite(number)) return '—'
+    return Number.isInteger(number) ? String(number) : number.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
+  }
 
   return (
     <section className="rounded-[28px] border border-violet-200 bg-violet-50/50 p-5 md:p-6">
@@ -2429,11 +2435,38 @@ function PersonalWaiverPanel({ onOpenMyTeams }) {
           <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">{league.team_name || league.league_name || 'My Team'}</h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-violet-950">These are waiver candidates to check based on your roster’s current research profile. Sports Zenith has not verified that they are actually available in your league.</p>
         </div>
-        <div className="rounded-2xl border border-violet-100 bg-white px-4 py-3 text-center">
-          <div className="text-xl font-black text-slate-950">{targets.length}</div>
-          <div className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">Targets to check</div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-2xl border border-violet-100 bg-white px-4 py-3 text-center">
+            <div className="text-xl font-black text-slate-950">{targets.length}</div>
+            <div className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">Targets to check</div>
+          </div>
+          <div className="rounded-2xl border border-violet-100 bg-white px-4 py-3 text-center">
+            <div className="text-xl font-black text-slate-950">{budget.connected ? '$' + formatFaab(budget.remaining_budget) : '—'}</div>
+            <div className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">FAAB remaining</div>
+          </div>
         </div>
       </div>
+
+      {budget.connected && (
+        <div className="mt-5 grid gap-3 sm:grid-cols-4">
+          <div className="rounded-2xl border border-violet-100 bg-white p-3">
+            <div className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">Total budget</div>
+            <div className="mt-1 text-lg font-black text-slate-950">{'$'}{formatFaab(budget.total_budget)}</div>
+          </div>
+          <div className="rounded-2xl border border-violet-100 bg-white p-3">
+            <div className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">Remaining</div>
+            <div className="mt-1 text-lg font-black text-slate-950">{'$'}{formatFaab(budget.remaining_budget)}</div>
+          </div>
+          <div className="rounded-2xl border border-violet-100 bg-white p-3">
+            <div className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">Spent</div>
+            <div className="mt-1 text-lg font-black text-slate-950">{'$'}{formatFaab(budget.spent_budget)}</div>
+          </div>
+          <div className="rounded-2xl border border-violet-100 bg-white p-3">
+            <div className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">Budget left</div>
+            <div className="mt-1 text-lg font-black text-slate-950">{budget.remaining_pct_of_total ?? '—'}%</div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-5">
         <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Roster need research</div>
@@ -2472,7 +2505,28 @@ function PersonalWaiverPanel({ onOpenMyTeams }) {
               <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-violet-700">{humanize(row.waiver_priority)}</span>
               <span className="text-[11px] font-black text-slate-600">{row.research_faab_low_pct ?? '—'}–{row.research_faab_high_pct ?? '—'}% research FAAB</span>
             </div>
-            <div className="mt-3 text-[10px] font-semibold leading-4 text-slate-400">Check availability in your league before acting. FAAB range is not a predicted winning bid.</div>
+
+            {row.budget_planning?.connected && (
+              <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-[0.1em] text-blue-700">Saved-budget translation</div>
+                    <div className="mt-1 text-sm font-black text-slate-950">
+                      {'$'}{formatFaab(row.budget_planning.research_low_units)}–{'$'}{formatFaab(row.budget_planning.research_high_units)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">Pressure</div>
+                    <div className="mt-1 text-[10px] font-black text-slate-700">{humanize(row.budget_planning.budget_pressure)}</div>
+                  </div>
+                </div>
+                <div className="mt-2 text-[10px] font-semibold leading-4 text-blue-900">
+                  {humanize(row.budget_planning.range_status)} · upper range = {row.budget_planning.high_as_pct_of_remaining ?? '—'}% of remaining FAAB.
+                </div>
+              </div>
+            )}
+
+            <div className="mt-3 text-[10px] font-semibold leading-4 text-slate-400">Check availability in your league before acting. Percentage and dollar translation are research planning ranges—not predicted winning bids.</div>
           </div>
         ))}
       </div>
@@ -2487,7 +2541,7 @@ function PersonalWaiverPanel({ onOpenMyTeams }) {
         <div className="flex gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4">
           <Gauge size={18} className="mt-0.5 shrink-0 text-blue-700" />
           <div className="text-xs font-semibold leading-5 text-blue-950">
-            <span className="font-black">FAAB is still generic research.</span> {payload.budget_context_connected ? 'A budget is saved, but Sports Zenith is not applying it to bid optimization yet.' : 'Connect budget/league settings later for league-specific bid strategy.'}
+            <span className="font-black">FAAB remains research, not a winning-bid prediction.</span> {payload.budget_context_connected ? 'Sports Zenith now translates the generic percentage range against your saved total and remaining budget, but it does not change the player ranking or claim that the translated amount will win.' : 'Save FAAB total and remaining balance in League Settings to add budget-pressure context.'}
           </div>
         </div>
       </div>

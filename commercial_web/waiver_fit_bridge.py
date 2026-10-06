@@ -43,6 +43,58 @@ def need_tier(score):
         return "LOW_ROSTER_NEED_RESEARCH"
     return "DEPTH_LOOK_ONLY"
 
+def budget_pressure(high_units, remaining):
+    if remaining is None or remaining <= 0:
+        return "NO_REMAINING_BUDGET"
+    ratio = high_units / remaining
+    if ratio <= 0.10:
+        return "LOW_BUDGET_PRESSURE"
+    if ratio <= 0.25:
+        return "MODERATE_BUDGET_PRESSURE"
+    if ratio <= 0.50:
+        return "HIGH_BUDGET_PRESSURE"
+    return "VERY_HIGH_BUDGET_PRESSURE"
+
+def budget_translation(low_pct, high_pct, budget, remaining):
+    if budget is None or remaining is None or budget <= 0 or remaining < 0:
+        return {
+            "connected": False,
+            "status": "BUDGET_CONTEXT_WAITING",
+            "is_bid_recommendation": False,
+        }
+
+    low_pct = max(0.0, float(low_pct or 0.0))
+    high_pct = max(low_pct, float(high_pct or 0.0))
+    low_units = round(budget * low_pct / 100.0, 2)
+    high_units = round(budget * high_pct / 100.0, 2)
+
+    if remaining <= 0:
+        range_status = "NO_REMAINING_BUDGET"
+    elif low_units > remaining:
+        range_status = "GENERIC_RANGE_ABOVE_REMAINING_BUDGET"
+    elif high_units > remaining:
+        range_status = "GENERIC_RANGE_PARTIALLY_ABOVE_REMAINING_BUDGET"
+    else:
+        range_status = "GENERIC_RANGE_WITHIN_REMAINING_BUDGET"
+
+    return {
+        "connected": True,
+        "status": "BUDGET_TRANSLATION_ONLY",
+        "total_budget": round(budget, 2),
+        "remaining_budget": round(remaining, 2),
+        "research_low_pct": round(low_pct, 1),
+        "research_high_pct": round(high_pct, 1),
+        "research_low_units": low_units,
+        "research_high_units": high_units,
+        "remaining_cap_units": round(min(high_units, remaining), 2),
+        "low_as_pct_of_remaining": round(low_units / remaining * 100.0, 1) if remaining > 0 else None,
+        "high_as_pct_of_remaining": round(high_units / remaining * 100.0, 1) if remaining > 0 else None,
+        "range_status": range_status,
+        "budget_pressure": budget_pressure(high_units, remaining),
+        "is_bid_recommendation": False,
+        "winning_bid_prediction": False,
+    }
+
 def main():
     try:
         payload = json.load(sys.stdin)
@@ -52,6 +104,13 @@ def main():
 
     roster = payload.get("roster") or []
     analysis = payload.get("roster_analysis") or {}
+    budget = num(payload.get("faab_budget"))
+    remaining = num(payload.get("faab_remaining"))
+    budget_connected = (
+        budget is not None and budget > 0
+        and remaining is not None and remaining >= 0
+        and remaining <= budget
+    )
     if not isinstance(roster, list) or not roster:
         print(json.dumps({"status":"ERROR","error":"roster must be a non-empty list"}))
         return 2
@@ -109,6 +168,8 @@ def main():
 
         need = need_scores.get(pos, 50.0)
         fit = round(0.75 * waiver + 0.25 * need, 1)
+        low_pct = num(row.get("suggested_faab_low_pct"))
+        high_pct = num(row.get("suggested_faab_high_pct"))
         item = {
             "player": player,
             "player_key": row.get("player_key") or None,
@@ -122,8 +183,14 @@ def main():
             "roster_need_score": need,
             "roster_need_tier": need_tier(need),
             "roster_fit_research_score": fit,
-            "research_faab_low_pct": num(row.get("suggested_faab_low_pct")),
-            "research_faab_high_pct": num(row.get("suggested_faab_high_pct")),
+            "research_faab_low_pct": low_pct,
+            "research_faab_high_pct": high_pct,
+            "budget_planning": budget_translation(
+                low_pct,
+                high_pct,
+                budget if budget_connected else None,
+                remaining if budget_connected else None,
+            ),
             "user_league_availability_verified": False,
             "faab_is_league_specific_bid": False,
             "score_is_probability": False,
@@ -149,11 +216,20 @@ def main():
         "sport": "NFL",
         "personalization_level": "ROSTER_AWARE_WAIVER_RESEARCH",
         "league_availability_status": "NOT_VERIFIED",
-        "budget_context_status": "WAITING",
+        "budget_context_status": "CONNECTED_TRANSLATION_ONLY" if budget_connected else "WAITING",
+        "budget_context": {
+            "connected": budget_connected,
+            "total_budget": round(budget, 2) if budget_connected else None,
+            "remaining_budget": round(remaining, 2) if budget_connected else None,
+            "spent_budget": round(budget - remaining, 2) if budget_connected else None,
+            "remaining_pct_of_total": round(remaining / budget * 100.0, 1) if budget_connected else None,
+            "used_for_target_ranking": False,
+            "used_for_winning_bid_prediction": False,
+        },
         "score_is_probability": False,
         "faab_is_league_specific_bid": False,
         "note": "Targets are roster-aware research candidates to check. Sports Zenith has not verified that these players are available in the user's league.",
-        "faab_note": "FAAB percentages are generic research ranges from market/role signals, not a prediction of the winning bid in the user's league.",
+        "faab_note": "FAAB percentages are generic research ranges from market/role signals. Saved budget converts them into planning units only; neither the percentage nor the translated amount predicts the winning bid.",
         "position_needs": needs,
         "targets": focused,
         "availability_cautions": cautions[:5],
