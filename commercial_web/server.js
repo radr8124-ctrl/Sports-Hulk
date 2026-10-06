@@ -1446,6 +1446,85 @@ const server=http.createServer(async(req,res)=>{
       },
     })
   }
+  if(req.method==='GET'&&url.pathname==='/api/fantasy/my-teams'){
+    try{
+      const user=await authenticatedUser(req)
+      if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to load your fantasy teams.'})
+
+      const client=scopedInsForgeClient(req)
+      if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private fantasy storage is temporarily unavailable.'})
+
+      const {data:leagueRows,error:leagueError}=await client.database
+        .from('fantasy_leagues')
+        .select('id,platform,provider_league_id,league_name,season,scoring,roster_settings,sync_status,last_synced_at,provenance,created_at')
+        .order('last_synced_at',{ascending:false})
+        .limit(20)
+
+      if(leagueError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your saved fantasy teams could not be loaded.'})
+      }
+
+      const leagues=Array.isArray(leagueRows)?leagueRows:[]
+      if(!leagues.length){
+        return json(res,200,{status:'READY',team_count:0,teams:[]})
+      }
+
+      const leagueIds=leagues.map(row=>row.id).filter(Boolean)
+      const {data:rosterRows,error:rosterError}=await client.database
+        .from('fantasy_rosters')
+        .select('id,league_id,provider_team_id,team_name,roster,starters,bench,updated_at')
+        .in('league_id',leagueIds)
+        .order('updated_at',{ascending:false})
+        .limit(50)
+
+      if(rosterError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your saved fantasy rosters could not be loaded.'})
+      }
+
+      const rosterByLeague=new Map()
+      for(const row of Array.isArray(rosterRows)?rosterRows:[]){
+        if(!rosterByLeague.has(row.league_id)) rosterByLeague.set(row.league_id,row)
+      }
+
+      const teams=leagues.map(league=>{
+        const roster=rosterByLeague.get(league.id)||null
+        const latest=league?.provenance?.last_rate_my_team||null
+        return {
+          league_id:league.id,
+          roster_id:roster?.id||null,
+          platform:league.platform||null,
+          league_name:league.league_name||null,
+          season:league.season||null,
+          sync_status:league.sync_status||null,
+          last_synced_at:league.last_synced_at||roster?.updated_at||league.created_at||null,
+          team_name:roster?.team_name||league.league_name||null,
+          roster:Array.isArray(roster?.roster)?roster.roster:[],
+          starters:Array.isArray(roster?.starters)?roster.starters:[],
+          bench:Array.isArray(roster?.bench)?roster.bench:[],
+          scoring:league.scoring&&typeof league.scoring==='object'?league.scoring:{},
+          roster_settings:league.roster_settings&&typeof league.roster_settings==='object'?league.roster_settings:{},
+          last_analysis:latest&&typeof latest==='object'?{
+            generated_at:latest.generated_at||null,
+            roster_size:latest.roster_size??null,
+            matched_count:latest.matched_count??null,
+            coverage_pct:latest.coverage_pct??null,
+            decision_coverage_pct:latest.decision_coverage_pct??null,
+            roster_research_index:latest.roster_research_index??null,
+            roster_research_band:latest.roster_research_band||null,
+            score_is_probability:false,
+          }:null,
+        }
+      })
+
+      return json(res,200,{status:'READY',team_count:teams.length,teams})
+    }catch(err){
+      return json(res,400,{
+        status:'ERROR',
+        message:'Sports Zenith could not load your saved teams.',
+        error:err instanceof Error?err.message:String(err),
+      })
+    }
+  }
   if(req.method==='POST'&&url.pathname==='/api/fantasy/rate-my-team'){
     try{
       const user=await authenticatedUser(req)

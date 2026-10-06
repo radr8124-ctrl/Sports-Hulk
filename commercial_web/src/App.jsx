@@ -2334,6 +2334,10 @@ function RateMyTeamPanel() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  const [savedTeams, setSavedTeams] = useState([])
+  const [savedTeamsLoading, setSavedTeamsLoading] = useState(false)
+  const [selectedLeagueId, setSelectedLeagueId] = useState(null)
+  const [savedSummary, setSavedSummary] = useState(null)
 
   const rosterNames = useMemo(
     () => rosterText
@@ -2343,6 +2347,71 @@ function RateMyTeamPanel() {
       .slice(0, 60),
     [rosterText],
   )
+
+  const rosterItemName = (item) => {
+    if (typeof item === 'string') return item.trim()
+    if (item && typeof item === 'object') return String(item.name || item.player || '').trim()
+    return ''
+  }
+
+  const loadSavedTeam = (team) => {
+    if (!team) return
+    setSelectedLeagueId(team.league_id || null)
+    setLeagueName(team.league_name || 'My Team')
+    setTeamName(team.team_name || '')
+    setRosterText((team.roster || []).map(rosterItemName).filter(Boolean).join('\n'))
+    setSavedSummary(team.last_analysis || null)
+    setResult(null)
+    setError('')
+  }
+
+  useEffect(() => {
+    let active = true
+
+    if (!user) {
+      setSavedTeams([])
+      setSelectedLeagueId(null)
+      setSavedSummary(null)
+      return () => { active = false }
+    }
+
+    const load = async () => {
+      setSavedTeamsLoading(true)
+      try {
+        const token = await getAccessToken()
+        if (!token) throw new Error('No authenticated session')
+
+        const response = await fetch('/api/fantasy/my-teams', {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error('Saved teams unavailable')
+
+        const payload = await response.json()
+        const teams = Array.isArray(payload?.teams) ? payload.teams : []
+        if (!active) return
+
+        setSavedTeams(teams)
+        if (teams.length) {
+          loadSavedTeam(teams[0])
+        } else {
+          setSelectedLeagueId(null)
+          setSavedSummary(null)
+        }
+      } catch {
+        if (active) {
+          setSavedTeams([])
+          setSelectedLeagueId(null)
+          setSavedSummary(null)
+        }
+      } finally {
+        if (active) setSavedTeamsLoading(false)
+      }
+    }
+
+    load()
+    return () => { active = false }
+  }, [user, getAccessToken])
 
   const analyze = async () => {
     if (!user || !rosterNames.length) return
@@ -2370,7 +2439,44 @@ function RateMyTeamPanel() {
 
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(payload.message || payload.error || 'Could not rate that roster.')
-      setResult(payload.analysis || null)
+
+      const analysis = payload.analysis || null
+      const savedLeagueId = payload?.league?.id || selectedLeagueId || null
+      const latestSummary = analysis ? {
+        generated_at: new Date().toISOString(),
+        roster_size: analysis.roster_size ?? rosterNames.length,
+        matched_count: analysis.matched_count ?? null,
+        coverage_pct: analysis.coverage_pct ?? null,
+        decision_coverage_pct: analysis.decision_coverage_pct ?? null,
+        roster_research_index: analysis.roster_research_index ?? null,
+        roster_research_band: analysis.roster_research_band || null,
+        score_is_probability: false,
+      } : null
+
+      setResult(analysis)
+      setSavedSummary(latestSummary)
+      setSelectedLeagueId(savedLeagueId)
+
+      if (savedLeagueId) {
+        const savedTeam = {
+          league_id: savedLeagueId,
+          roster_id: payload.roster_id || null,
+          platform: 'manual',
+          league_name: payload?.league?.league_name || leagueName.trim() || 'My Team',
+          team_name: payload?.league?.team_name || teamName.trim() || leagueName.trim() || 'My Team',
+          season: payload?.league?.season || new Date().getUTCFullYear(),
+          sync_status: 'manual',
+          last_synced_at: latestSummary?.generated_at || null,
+          roster: rosterNames,
+          starters: [],
+          bench: [],
+          last_analysis: latestSummary,
+        }
+        setSavedTeams((current) => [
+          savedTeam,
+          ...current.filter((team) => team.league_id !== savedLeagueId),
+        ])
+      }
     } catch (err) {
       setError(err?.message || 'Could not rate that roster.')
     } finally {
@@ -2399,6 +2505,61 @@ function RateMyTeamPanel() {
             <Users size={20} />
           </div>
         </div>
+
+        {user && (
+          <div className="mt-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">Saved teams</div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedLeagueId(null)
+                  setLeagueName('My Team')
+                  setTeamName('')
+                  setRosterText('')
+                  setSavedSummary(null)
+                  setResult(null)
+                  setError('')
+                }}
+                className="text-xs font-black text-blue-700"
+              >
+                + New team
+              </button>
+            </div>
+
+            {savedTeamsLoading ? (
+              <div className="mt-2 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs font-bold text-slate-500">
+                <Activity size={14} className="animate-pulse" /> Loading saved teams…
+              </div>
+            ) : savedTeams.length ? (
+              <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+                {savedTeams.map((team) => {
+                  const selected = selectedLeagueId === team.league_id
+                  return (
+                    <button
+                      key={team.league_id}
+                      type="button"
+                      onClick={() => loadSavedTeam(team)}
+                      className={`min-w-[190px] rounded-2xl border px-4 py-3 text-left transition ${selected ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-white hover:border-blue-200'}`}
+                    >
+                      <div className="truncate text-sm font-black text-slate-950">{team.team_name || team.league_name || 'My Team'}</div>
+                      <div className="mt-1 truncate text-[11px] font-semibold text-slate-400">{team.league_name || 'Manual league'} · {team.season || '—'}</div>
+                      <div className="mt-2 text-[10px] font-black uppercase tracking-[0.1em] text-blue-700">
+                        {team.last_analysis?.roster_research_index == null
+                          ? 'Saved roster'
+                          : `Index ${team.last_analysis.roster_research_index} · ${humanize(team.last_analysis.roster_research_band || 'NO_SCORE')}`}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="mt-2 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-xs font-semibold text-slate-500">
+                No saved teams yet. Your first analysis will appear here automatically.
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <label className="block">
@@ -2455,13 +2616,50 @@ function RateMyTeamPanel() {
 
       <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft md:p-6">
         {!result ? (
-          <div className="flex min-h-[420px] items-center justify-center text-center">
-            <div className="max-w-sm">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><Gauge size={25} /></div>
-              <h3 className="mt-4 text-xl font-black text-slate-950">Your team report will appear here</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Sports Zenith will show coverage, position research, strongest signals and actual risk flags. Missing data stays missing.</p>
+          savedSummary ? (
+            <div className="flex min-h-[420px] items-center justify-center">
+              <div className="w-full max-w-md">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="eyebrow">Last saved snapshot</p>
+                    <h3 className="mt-2 text-2xl font-black text-slate-950">{teamName || leagueName || 'My Team'}</h3>
+                  </div>
+                  <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-blue-700">Saved team</span>
+                </div>
+
+                <div className="mt-5 grid grid-cols-3 gap-3">
+                  <div className="rounded-2xl bg-slate-950 p-4 text-white">
+                    <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Research index</div>
+                    <div className="mt-2 text-3xl font-black">{savedSummary.roster_research_index == null ? '—' : savedSummary.roster_research_index}</div>
+                    <div className="mt-1 text-[10px] font-black text-blue-300">{humanize(savedSummary.roster_research_band || 'NO_SCORE')}</div>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Matched</div>
+                    <div className="mt-2 text-2xl font-black text-slate-950">{savedSummary.matched_count ?? '—'}/{savedSummary.roster_size ?? rosterNames.length}</div>
+                    <div className="mt-1 text-[11px] font-semibold text-slate-500">Last analysis</div>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Coverage</div>
+                    <div className="mt-2 text-2xl font-black text-slate-950">{savedSummary.coverage_pct == null ? '—' : String(savedSummary.coverage_pct) + '%'}</div>
+                    <div className="mt-1 text-[11px] font-semibold text-slate-500">Saved snapshot</div>
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-950">
+                  Your saved roster has been loaded. Press <span className="font-black">Analyze & save my team</span> to refresh it against the newest Sports Zenith fantasy signals.
+                </div>
+                <div className="mt-3 text-[11px] font-semibold leading-5 text-slate-400">The saved index is historical context only. Current research can change as roles, injuries, matchups and schedules update.</div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex min-h-[420px] items-center justify-center text-center">
+              <div className="max-w-sm">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><Gauge size={25} /></div>
+                <h3 className="mt-4 text-xl font-black text-slate-950">Your team report will appear here</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Sports Zenith will show coverage, position research, strongest signals and actual risk flags. Missing data stays missing.</p>
+              </div>
+            </div>
+          )
         ) : (
           <div>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
