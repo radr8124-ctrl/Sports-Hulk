@@ -19,6 +19,7 @@ const PersonalDefenseStreamingPanel = lazy(() => import('./PersonalDefenseStream
 const PersonalIrStashPanel = lazy(() => import('./PersonalIrStashPanel'))
 const PersonalWaiverPanel = lazy(() => import('./PersonalWaiverPanel'))
 const PersonalStartSitPanel = lazy(() => import('./PersonalStartSitPanel'))
+const FantasyTeamControl = lazy(() => import('./FantasyTeamControl'))
 
 function LoadingSurface({ label = 'Loading' }) {
   return (
@@ -2520,7 +2521,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
           <button type="button" onClick={save} disabled={busy} className="mt-4 flex h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white disabled:opacity-40">
             {busy ? 'Saving…' : 'Save league settings'}
           </button>
-          <div className="mt-2 text-[10px] font-semibold leading-4 text-slate-400">These settings stay private to this saved league. They will be used by league-specific lineup and FAAB logic in the next intelligence pass.</div>
+          <div className="mt-2 text-[10px] font-semibold leading-4 text-slate-400">These settings stay private to this saved league and are used across personalized Start/Sit, Waivers, IR, Defense, IDP and Ask where applicable.</div>
         </div>
       )}
     </div>
@@ -2574,12 +2575,25 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
   }
 
   const updateSavedTeamSettings = ({ league_id, scoring, roster_settings }) => {
+    const baseTeam = savedTeams.find((team) => team.league_id === league_id) || selectedTeam
+    const updatedTeam = baseTeam
+      ? { ...baseTeam, scoring: scoring || {}, roster_settings: roster_settings || {} }
+      : null
+
     setSavedTeams((current) => current.map((team) => (
       team.league_id === league_id
         ? { ...team, scoring: scoring || {}, roster_settings: roster_settings || {} }
         : team
     )))
+
+    if (updatedTeam) onTeamUpsert?.(updatedTeam)
   }
+
+  useEffect(() => {
+    if (!preferredLeagueId || preferredLeagueId === selectedLeagueId) return
+    const preferred = savedTeams.find((team) => team.league_id === preferredLeagueId)
+    if (preferred) loadSavedTeam(preferred)
+  }, [preferredLeagueId, savedTeams, selectedLeagueId])
 
   useEffect(() => {
     let active = true
@@ -3058,8 +3072,6 @@ function FantasyCommercialPanel() {
     } catch {}
   }, [selectedLeagueId])
 
-  const selectedTeamOption = teamOptions.find((team) => team.league_id === selectedLeagueId) || null
-
   const switchLane = (next) => {
     setLane(next)
     const laneSports = Array.from(new Set((decisions.lanes?.[next]?.rows || []).map((row) => row.sport).filter(Boolean))).sort()
@@ -3095,48 +3107,16 @@ function FantasyCommercialPanel() {
             </div>
           </section>
 
-          {user && lane !== 'my_teams' && (
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Active fantasy team</div>
-                  <div className="mt-1 text-sm font-black text-slate-950">
-                    {teamOptionsLoading
-                      ? 'Loading saved teams…'
-                      : selectedTeamOption
-                        ? selectedTeamOption.team_name || selectedTeamOption.league_name || 'My Team'
-                        : 'No saved team selected'}
-                  </div>
-                  <div className="mt-1 text-[11px] font-semibold text-slate-500">This team controls Start/Sit, Waivers, IR Stash, Defense and IDP.</div>
-                </div>
-
-                {teamOptions.length > 0 ? (
-                  <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
-                    {teamOptions.map((team) => {
-                      const selected = team.league_id === selectedLeagueId
-                      return (
-                        <button
-                          key={team.league_id}
-                          type="button"
-                          onClick={() => setSelectedLeagueId(team.league_id)}
-                          className={`min-w-[165px] rounded-xl border px-3 py-2 text-left transition ${selected ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-slate-50 hover:border-blue-200'}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {selected && <CheckCircle2 size={13} className="shrink-0 text-blue-700" />}
-                            <div className="truncate text-xs font-black text-slate-950">{team.team_name || team.league_name || 'My Team'}</div>
-                          </div>
-                          <div className="mt-1 truncate text-[10px] font-semibold text-slate-400">{team.league_name || 'Manual league'} · {team.season || '—'}</div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                ) : !teamOptionsLoading ? (
-                  <button type="button" onClick={() => switchLane('my_teams')} className="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white">
-                    Save a team
-                  </button>
-                ) : null}
-              </div>
-            </section>
+          {user && (
+            <Suspense fallback={<LoadingSurface label="Loading Fantasy Team Control" />}>
+              <FantasyTeamControl
+                teams={teamOptions}
+                selectedLeagueId={selectedLeagueId}
+                loading={teamOptionsLoading}
+                onSelect={setSelectedLeagueId}
+                onManage={() => switchLane('my_teams')}
+              />
+            </Suspense>
           )}
 
           {lane === 'my_teams' ? (

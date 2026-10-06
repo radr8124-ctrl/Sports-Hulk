@@ -2099,6 +2099,8 @@ const server=http.createServer(async(req,res)=>{
           season:league.season||null,
           sync_status:league.sync_status||null,
           last_synced_at:league.last_synced_at||roster?.updated_at||league.created_at||null,
+          roster_updated_at:roster?.updated_at||null,
+          settings_updated_at:league?.provenance?.league_settings_updated_at||null,
           team_name:roster?.team_name||league.league_name||null,
           roster:Array.isArray(roster?.roster)?roster.roster:[],
           starters:Array.isArray(roster?.starters)?roster.starters:[],

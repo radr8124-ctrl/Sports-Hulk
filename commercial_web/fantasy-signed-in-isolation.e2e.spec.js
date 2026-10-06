@@ -49,12 +49,13 @@ const teams = [
     team_name: 'Alpha Team',
     season: 2026,
     sync_status: 'manual',
+    last_synced_at: '2026-10-06T20:00:00Z',
     roster: ['Josh Allen', 'CeeDee Lamb', 'Dallas Cowboys D/ST'],
     starters: [],
     bench: [],
-    scoring: { preset: 'ppr', reception_points: 1 },
+    scoring: { preset: 'ppr', reception_points: 1, faab_budget: 100, faab_remaining: 62 },
     roster_settings: { starting_slots: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, dst: 1, k: 1 }, ir_slots: 1 },
-    last_analysis: { roster_research_index: 78.2, roster_research_band: 'STRONG_RESEARCH', matched_count: 3, roster_size: 3, coverage_pct: 100 },
+    last_analysis: { generated_at: '2026-10-06T20:05:00Z', roster_research_index: 78.2, roster_research_band: 'STRONG_RESEARCH', matched_count: 3, roster_size: 3, coverage_pct: 100 },
   },
   {
     league_id: 'league-b',
@@ -64,12 +65,13 @@ const teams = [
     team_name: 'Beta Team',
     season: 2026,
     sync_status: 'manual',
+    last_synced_at: '2026-10-06T20:10:00Z',
     roster: ['Jalen Hurts', 'Amon-Ra St. Brown', 'Minnesota Vikings D/ST'],
     starters: [],
     bench: [],
-    scoring: { preset: 'half_ppr', reception_points: 0.5 },
+    scoring: { preset: 'half_ppr', reception_points: 0.5, faab_budget: 200, faab_remaining: 140 },
     roster_settings: { starting_slots: { qb: 1, rb: 2, wr: 2, te: 1, flex: 1, dst: 1, k: 1, dl: 1, lb: 1, db: 1 }, ir_slots: 2 },
-    last_analysis: { roster_research_index: 72.1, roster_research_band: 'STRONG_RESEARCH', matched_count: 3, roster_size: 3, coverage_pct: 100 },
+    last_analysis: { generated_at: '2026-10-06T20:12:00Z', roster_research_index: 72.1, roster_research_band: 'STRONG_RESEARCH', matched_count: 3, roster_size: 3, coverage_pct: 100 },
   },
 ];
 
@@ -175,9 +177,21 @@ test('signed-in active team switches every personalized Fantasy lane and Ask con
 
   await page.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'domcontentloaded' });
 
+  await expect(page.getByText('Fantasy Team Control')).toBeVisible();
   await expect(page.getByText('Alpha Team').first()).toBeVisible();
+  await expect(page.getByText('PPR', { exact: true })).toBeVisible();
+  await expect(page.getByText('9 saved slots')).toBeVisible();
+  await expect(page.getByText('1 slot', { exact: true })).toBeVisible();
+  await expect(page.getByText('62 / 100 left')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Switch active fantasy team to Beta Team' }).click();
+  await expect(page.getByLabel('Team name')).toHaveValue('Beta Team');
+  await expect(page.getByText('Half-PPR', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Switch active fantasy team to Alpha Team' }).click();
+  await expect(page.getByLabel('Team name')).toHaveValue('Alpha Team');
+
   await page.getByRole('button', { name: 'Start / Sit' }).click();
-  await expect(page.getByText('Active fantasy team')).toBeVisible();
+  await expect(page.getByText('Fantasy Team Control')).toBeVisible();
   await expect(page.getByText('Alpha Team').first()).toBeVisible();
 
   await expect.poll(() => requests.some((row) => row.path === '/api/fantasy/start-sit' && row.leagueId === 'league-a')).toBe(true);
@@ -187,6 +201,10 @@ test('signed-in active team switches every personalized Fantasy lane and Ask con
 
   await expect.poll(() => requests.some((row) => row.path === '/api/fantasy/start-sit' && row.leagueId === 'league-b')).toBe(true);
   await expect(page.getByText('Beta Team').first()).toBeVisible();
+  await expect(page.getByText('Half-PPR', { exact: true })).toBeVisible();
+  await expect(page.getByText('12 saved slots')).toBeVisible();
+  await expect(page.getByText('2 slots', { exact: true })).toBeVisible();
+  await expect(page.getByText('140 / 200 left')).toBeVisible();
 
   const lanes = [
     ['Waivers & FAAB', '/api/fantasy/waivers'],
