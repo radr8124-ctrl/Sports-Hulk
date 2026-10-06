@@ -1,0 +1,9 @@
+[Unit]
+Description=Sports HULK MLB Refresh
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/mlb_live/run_mlb_refresh.sh

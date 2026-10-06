@@ -1,0 +1,9 @@
+[Unit]
+Description=Sports HULK Annie G Week 3 Result Tracker
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/.venv/bin/python /home/ubuntu/sports-hulk/nfl_live/update_annie_week3_results.py

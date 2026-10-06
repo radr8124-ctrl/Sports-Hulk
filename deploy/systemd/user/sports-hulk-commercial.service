@@ -1,0 +1,15 @@
+[Unit]
+Description=Sports HULK Commercial Web
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/sports-hulk/commercial_web
+Environment=PORT=8510
+ExecStart=/usr/bin/node /home/ubuntu/sports-hulk/commercial_web/server.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

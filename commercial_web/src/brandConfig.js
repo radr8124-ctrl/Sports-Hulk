@@ -1,0 +1,5 @@
+export const PUBLIC_BRAND = 'Sports Zenith'
+export const PUBLIC_BRAND_WORD_1 = 'SPORTS'
+export const PUBLIC_BRAND_WORD_2 = 'ZENITH'
+export const PUBLIC_TAGLINE = 'Sports Intelligence'
+export const ASSISTANT_ROUTE = 'Ask'

@@ -31,6 +31,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# PREMIUM_UI_BUILD_1
+from premium_ui.theme import apply_premium_theme
+apply_premium_theme()
+
+
 
 # ============================================================
 # CSS

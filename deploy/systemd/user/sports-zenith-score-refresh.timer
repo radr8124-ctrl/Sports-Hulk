@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh Sports Zenith cross-sport scores every 5 minutes
+
+[Timer]
+OnBootSec=45s
+OnUnitActiveSec=5min
+AccuracySec=20s
+Unit=sports-zenith-score-refresh.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

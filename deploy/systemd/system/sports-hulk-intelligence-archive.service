@@ -1,0 +1,11 @@
+[Unit]
+Description=Sports HULK Intelligence State Archive
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/sports-hulk
+Environment=SPORTS_LABEL=intelligence-archive
+Environment=SPORTS_MAX_SECONDS=30
+ExecStart=/home/ubuntu/sports-hulk/scripts/sports-safe-run.sh /home/ubuntu/sports-hulk/.venv/bin/python /home/ubuntu/sports-hulk/intelligence_warehouse/archive_hulk_state.py

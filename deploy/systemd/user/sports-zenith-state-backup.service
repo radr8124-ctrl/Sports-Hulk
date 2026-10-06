@@ -1,0 +1,7 @@
+[Unit]
+Description=Sports Zenith protected-state backup
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/scripts/backup_sports_zenith_state.sh

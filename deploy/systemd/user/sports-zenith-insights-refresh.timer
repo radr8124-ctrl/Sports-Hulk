@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh Sports Zenith editorial briefs every 15 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+AccuracySec=30s
+Unit=sports-zenith-insights-refresh.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

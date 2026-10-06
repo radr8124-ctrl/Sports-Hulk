@@ -1,0 +1,8 @@
+[Unit]
+Description=Sports Zenith editorial brief refresh
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/.venv/bin/python /home/ubuntu/sports-hulk/commercial_web/build_insight_drafts.py

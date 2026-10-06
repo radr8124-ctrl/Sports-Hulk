@@ -1,0 +1,9 @@
+[Unit]
+Description=Sports HULK NHL Refresh
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/nhl_live/run_nhl_refresh.sh

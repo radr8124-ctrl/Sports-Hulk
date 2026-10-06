@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Sports HULK performance snapshot hourly
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+Persistent=true
+Unit=sports-hulk-performance-refresh.service
+
+[Install]
+WantedBy=timers.target

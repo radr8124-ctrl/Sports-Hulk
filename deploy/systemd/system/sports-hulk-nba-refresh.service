@@ -1,0 +1,9 @@
+[Unit]
+Description=Sports HULK NBA Refresh
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/nba_live/run_nba_refresh.sh

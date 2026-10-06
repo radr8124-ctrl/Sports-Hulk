@@ -1,0 +1,11 @@
+[Unit]
+Description=Sports HULK Intelligence Archive Timer
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

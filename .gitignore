@@ -1,0 +1,64 @@
+# Secrets / local credentials
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Agent / local tool state
+.insforge/
+.agent/
+.agents/
+.augment/
+.claude/
+.cline/
+.github/copilot*
+.kilocode/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.windsurf/
+.superdesign/tmp/
+
+# Sports Zenith private account state
+commercial_web/private_member_links.json
+
+# Dependencies / build output
+**/node_modules/
+commercial_web/dist/
+commercial_web/test-results/
+**/__pycache__/
+*.pyc
+
+# Generated Sports Zenith runtime snapshots
+commercial_web/public/*.json
+
+# Runtime logs
+commercial_web/*.log
+logs/
+*.log
+
+# Local screenshots / visual test captures
+commercial_web/*.png
+live_*.png
+tmp_render_*.png
+
+# Temporary / OS files
+*.tmp
+.DS_Store
+
+# Large/persistent runtime data never belongs in source control
+*.parquet
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+backups/
+sports-zenith-backups/

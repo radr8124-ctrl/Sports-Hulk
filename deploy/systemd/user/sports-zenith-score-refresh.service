@@ -1,0 +1,8 @@
+[Unit]
+Description=Sports Zenith cross-sport score refresh
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/.venv/bin/python /home/ubuntu/sports-hulk/commercial_web/sync_cross_sport_scores.py

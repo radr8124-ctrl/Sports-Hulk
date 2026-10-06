@@ -50,10 +50,37 @@ df["away_moneyline"] = df["away_moneyline"].apply(clean_price)
 # ------------------------------------------------------------
 
 first_start = df["start"].min()
-slate_end = first_start + pd.Timedelta(days=7)
+
+# ------------------------------------------------------------
+# CURRENT NFL WEEK BOUNDARY
+#
+# Anchor the remaining slate to the first upcoming Sunday.
+# Keep future games through early Tuesday ET so Sunday games
+# and Monday Night Football remain included, but the following
+# Thursday/Sunday do not leak into this week's Survivor board.
+# ------------------------------------------------------------
+
+start_et = df["start"].dt.tz_convert("America/New_York")
+
+sunday_mask = start_et.dt.weekday == 6
+
+if sunday_mask.any():
+    first_sunday = start_et[sunday_mask].min()
+    sunday_date = first_sunday.normalize()
+
+    slate_end_et = (
+        sunday_date
+        + pd.Timedelta(days=2)
+        + pd.Timedelta(hours=6)
+    )
+
+    slate_end = slate_end_et.tz_convert("UTC")
+else:
+    # Conservative fallback if no Sunday game is present.
+    slate_end = first_start + pd.Timedelta(days=3)
 
 week = df[
-    (df["start"] >= first_start) &
+    (df["start"] >= now) &
     (df["start"] < slate_end)
 ].copy()
 
@@ -145,17 +172,28 @@ week.to_parquet(
     index=False
 )
 
+survivor_columns = [
+    "start",
+    "away_team",
+    "home_team",
+    "survivor_team",
+    "survivor_win_prob",
+    "survivor_spread",
+    "survivor_grade",
+    "sportsbooks",
+]
+
+# Preserve market provenance when supplied by the collector.
+for optional_col in [
+    "market_source",
+    "market_status",
+    "collected_at",
+]:
+    if optional_col in week.columns:
+        survivor_columns.append(optional_col)
+
 survivor = week[
-    [
-        "start",
-        "away_team",
-        "home_team",
-        "survivor_team",
-        "survivor_win_prob",
-        "survivor_spread",
-        "survivor_grade",
-        "sportsbooks",
-    ]
+    survivor_columns
 ].sort_values(
     "survivor_win_prob",
     ascending=False

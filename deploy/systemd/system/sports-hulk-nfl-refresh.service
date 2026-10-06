@@ -1,0 +1,9 @@
+[Unit]
+Description=Sports HULK NFL Governed Intelligence Refresh
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/nfl_live/decision/run_nfl_production_refresh.sh

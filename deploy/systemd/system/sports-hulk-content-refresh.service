@@ -1,0 +1,9 @@
+[Unit]
+Description=Sports HULK News and Article Refresh
+After=network.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/sports-hulk
+ExecStart=/home/ubuntu/sports-hulk/sports_content/run_content_refresh.sh

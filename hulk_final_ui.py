@@ -1559,7 +1559,23 @@ def nfl_weather_page():
 
 
 def survivor_page():
+    from nfl_live.survivor_hulk_ui import render_hulk_survivor_decision
+
     css(); topbar("🏈 NFL","Multi-entry Survivor manager")
+
+    from nfl_live.survivor_pool_ui import render_survivor_pool_import
+
+    render_survivor_pool_import()
+
+    from nfl_live.annie_week3_status_ui import render_annie_week3_status
+    render_annie_week3_status()
+
+    # HULK live market + context intelligence board.
+    # This does not replace the existing multi-entry manager.
+    render_hulk_survivor_decision()
+
+    from nfl_live.survivor_strategy_ui import render_survivor_strategy
+    render_survivor_strategy()
     data=survivor_data(); entries=data.get("entries",{})
     st.markdown('<div class="sport-banner"><div><div class="sport-name">Survivor / Suicide Pool</div><div class="sport-sub">Every entry keeps its own used teams, current pick and future plan.</div></div><div class="source-pill">MULTI-ENTRY</div></div>',unsafe_allow_html=True)
     if entries:
@@ -1847,10 +1863,37 @@ def cfb_research_clean_page():
 
 
 def feature(mode,page):
+    # PREMIUM_UI_BUILD_2_ROUTER
+    from premium_ui.pages import dispatch_premium_page
+    if dispatch_premium_page(page):
+        return True
+
     if mode=="🎯 Betting" and page=="Today's Slate": betting_slate_page(); return True
     if mode=="🎯 Betting" and page=="Line Movement": line_movement_clean_page(); return True
     if mode=="🎯 Betting" and page=="Results": betting_results_clean_page(); return True
     if mode=="🎯 Betting" and page=="Research": research_clean_page(); return True
+
+    # SPORTS HULK NFL DECISION V2
+    if page=="NFL Best Bets":
+        from nfl_live.decision.nfl_decision_ui import render_nfl_best_bets
+        render_nfl_best_bets()
+        return True
+
+    if page=="NFL Player Props":
+        from nfl_live.decision.nfl_decision_ui import render_nfl_player_props
+        render_nfl_player_props()
+        return True
+
+    if page=="NFL Parlays":
+        from nfl_live.decision.nfl_decision_ui import render_nfl_parlays
+        render_nfl_parlays()
+        return True
+
+    if page=="NFL PrizePicks":
+        from nfl_live.decision.nfl_decision_ui import render_nfl_prizepicks
+        render_nfl_prizepicks()
+        return True
+
     if page=="MLB Best Bets": mlb_best_bets_page(); return True
     if page=="CFB Best Bets": cfb_best_bets_page(); return True
     if page=="Game Research": game_research_page(); return True
