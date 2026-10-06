@@ -13,6 +13,7 @@ const DIST = path.join(__dirname, 'dist')
 const PORT = Number(process.env.PORT || 8510)
 const SPORTS_ROOT = path.resolve(__dirname, '..')
 const DFS_BRIDGE = path.join(__dirname, 'dfs_optimizer_bridge.py')
+const RATE_MY_TEAM_BRIDGE = path.join(__dirname, 'rate_my_team_bridge.py')
 const SPORTS_PYTHON = path.join(SPORTS_ROOT, '.venv', 'bin', 'python')
 const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVOR_ENTRIES.json'
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
@@ -1322,6 +1323,52 @@ function runDfsOptimizer(payload) {
   })
 }
 
+function runRateMyTeam(payload) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(SPORTS_PYTHON, [RATE_MY_TEAM_BRIDGE], {
+      cwd: SPORTS_ROOT,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+
+    let stdout = ''
+    let stderr = ''
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL')
+      reject(new Error('Rate My Team timed out'))
+    }, 12000)
+
+    child.stdout.on('data', chunk => {
+      stdout += chunk.toString()
+      if (stdout.length > 2_000_000) {
+        child.kill('SIGKILL')
+        reject(new Error('Rate My Team response exceeded limit'))
+      }
+    })
+    child.stderr.on('data', chunk => {
+      stderr += chunk.toString()
+      if (stderr.length > 200_000) stderr = stderr.slice(-200_000)
+    })
+
+    child.on('error', err => {
+      clearTimeout(timer)
+      reject(err)
+    })
+
+    child.on('close', code => {
+      clearTimeout(timer)
+      let parsed = null
+      try { parsed = JSON.parse(stdout || '{}') } catch {}
+      if (code !== 0 || !parsed || parsed.status === 'ERROR') {
+        reject(new Error(parsed?.error || stderr.trim() || 'Rate My Team failed'))
+        return
+      }
+      resolve(parsed)
+    })
+
+    child.stdin.end(JSON.stringify(payload || {}))
+  })
+}
+
 async function serveStatic(req,res,pathname) {
   let requested=pathname==='/'?'/index.html':pathname, filePath=path.resolve(DIST,'.'+requested)
   if(!filePath.startsWith(path.resolve(DIST))){res.writeHead(403,SECURITY_HEADERS);res.end('Forbidden');return}
@@ -1398,6 +1445,205 @@ const server=http.createServer(async(req,res)=>{
         })),
       },
     })
+  }
+  if(req.method==='POST'&&url.pathname==='/api/fantasy/rate-my-team'){
+    try{
+      const user=await authenticatedUser(req)
+      if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in before saving a fantasy team.'})
+
+      const rateLimit=consumeRateLimit(`rate-my-team:${user.id}:${clientIp(req)}`,30,15*60*1000)
+      if(!rateLimit.ok){
+        return json(
+          res,
+          429,
+          {status:'RATE_LIMITED',message:'Too many team-analysis requests. Wait a few minutes and try again.'},
+          {'retry-after':String(Math.ceil(rateLimit.retryAfterMs/1000))}
+        )
+      }
+
+      const body=await readBody(req)
+      const rawRoster=Array.isArray(body.roster)?body.roster:[]
+      if(!rawRoster.length) return json(res,400,{status:'MISSING_ROSTER',message:'Add at least one player before rating the team.'})
+      if(rawRoster.length>60) return json(res,400,{status:'ROSTER_TOO_LARGE',message:'A fantasy roster cannot exceed 60 entries.'})
+
+      const sanitizeRosterItem=item=>{
+        if(typeof item==='string') return item.trim().slice(0,160)
+        if(item && typeof item==='object' && !Array.isArray(item)){
+          return {
+            name:String(item.name||item.player||'').trim().slice(0,160),
+            team:String(item.team||'').trim().slice(0,24),
+            position:String(item.position||'').trim().slice(0,16),
+          }
+        }
+        return ''
+      }
+      const validRosterItem=item=>typeof item==='string'?Boolean(item):Boolean(item?.name)
+      const roster=rawRoster.map(sanitizeRosterItem).filter(validRosterItem)
+      if(!roster.length) return json(res,400,{status:'MISSING_ROSTER',message:'No valid roster entries were provided.'})
+
+      const leagueName=String(body.league_name||'My Team').trim()||'My Team'
+      const teamName=String(body.team_name||leagueName).trim()||leagueName
+      if(leagueName.length>120 || teamName.length>120){
+        return json(res,400,{status:'INVALID_FIELDS',message:'League and team names must be 120 characters or fewer.'})
+      }
+
+      const seasonRaw=Number(body.season)
+      const season=Number.isInteger(seasonRaw) && seasonRaw>=2020 && seasonRaw<=2100
+        ? seasonRaw
+        : new Date().getUTCFullYear()
+
+      const scoring=body.scoring && typeof body.scoring==='object' && !Array.isArray(body.scoring)
+        ? body.scoring
+        : null
+      const rosterSettings=body.roster_settings && typeof body.roster_settings==='object' && !Array.isArray(body.roster_settings)
+        ? body.roster_settings
+        : null
+      const starters=Array.isArray(body.starters)
+        ? body.starters.slice(0,40).map(sanitizeRosterItem).filter(validRosterItem)
+        : []
+      const bench=Array.isArray(body.bench)
+        ? body.bench.slice(0,40).map(sanitizeRosterItem).filter(validRosterItem)
+        : []
+
+      const analysis=await runRateMyTeam({roster})
+
+      const client=scopedInsForgeClient(req)
+      if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private fantasy storage is temporarily unavailable.'})
+
+      const {data:leagueRows,error:leagueReadError}=await client.database
+        .from('fantasy_leagues')
+        .select('id,scoring,roster_settings,provenance')
+        .eq('owner_id',user.id)
+        .eq('platform','manual')
+        .eq('league_name',leagueName)
+        .eq('season',season)
+        .limit(1)
+
+      if(leagueReadError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your fantasy account could not be loaded.'})
+      }
+
+      const existingLeague=Array.isArray(leagueRows)?leagueRows[0]:null
+      const generatedAt=new Date().toISOString()
+      const provenance={
+        ...(existingLeague?.provenance && typeof existingLeague.provenance==='object' ? existingLeague.provenance : {}),
+        setup_method:'quick_roster',
+        last_rate_my_team:{
+          generated_at:generatedAt,
+          roster_size:analysis.roster_size,
+          matched_count:analysis.matched_count,
+          coverage_pct:analysis.coverage_pct,
+          decision_coverage_pct:analysis.decision_coverage_pct,
+          roster_research_index:analysis.roster_research_index,
+          roster_research_band:analysis.roster_research_band,
+          score_is_probability:false,
+        },
+      }
+
+      const leaguePayload={
+        owner_id:user.id,
+        platform:'manual',
+        provider_league_id:null,
+        league_name:leagueName,
+        season,
+        scoring:scoring ?? existingLeague?.scoring ?? {},
+        roster_settings:rosterSettings ?? existingLeague?.roster_settings ?? {},
+        sync_status:'manual',
+        last_synced_at:generatedAt,
+        provenance,
+      }
+
+      let leagueId=existingLeague?.id||null
+      let createdLeague=false
+      if(existingLeague){
+        const {error}=await client.database
+          .from('fantasy_leagues')
+          .update(leaguePayload)
+          .eq('id',existingLeague.id)
+        if(error) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your fantasy league could not be updated.'})
+      }else{
+        const {data,error}=await client.database
+          .from('fantasy_leagues')
+          .insert(leaguePayload)
+          .select('id')
+        if(error || !Array.isArray(data) || !data[0]?.id){
+          return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your fantasy league could not be saved.'})
+        }
+        leagueId=data[0].id
+        createdLeague=true
+      }
+
+      const rollbackNewLeague=async()=>{
+        if(!createdLeague || !leagueId) return
+        try{ await client.database.from('fantasy_leagues').delete().eq('id',leagueId) }catch{}
+      }
+
+      const {data:rosterRows,error:rosterReadError}=await client.database
+        .from('fantasy_rosters')
+        .select('id')
+        .eq('league_id',leagueId)
+        .eq('provider_team_id','manual-primary')
+        .limit(1)
+
+      if(rosterReadError){
+        await rollbackNewLeague()
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your saved roster could not be loaded.'})
+      }
+
+      const rosterPayload={
+        league_id:leagueId,
+        provider_team_id:'manual-primary',
+        team_name:teamName,
+        roster,
+        starters,
+        bench,
+        available_players:[],
+        updated_at:generatedAt,
+      }
+
+      const existingRoster=Array.isArray(rosterRows)?rosterRows[0]:null
+      let rosterId=existingRoster?.id||null
+      if(existingRoster){
+        const {error}=await client.database
+          .from('fantasy_rosters')
+          .update(rosterPayload)
+          .eq('id',existingRoster.id)
+        if(error){
+          await rollbackNewLeague()
+          return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your roster could not be updated.'})
+        }
+      }else{
+        const {data,error}=await client.database
+          .from('fantasy_rosters')
+          .insert(rosterPayload)
+          .select('id')
+        if(error || !Array.isArray(data) || !data[0]?.id){
+          await rollbackNewLeague()
+          return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your roster could not be saved.'})
+        }
+        rosterId=data[0].id
+      }
+
+      return json(res,200,{
+        status:'READY',
+        saved:true,
+        league:{
+          id:leagueId,
+          league_name:leagueName,
+          team_name:teamName,
+          platform:'manual',
+          season,
+        },
+        roster_id:rosterId,
+        analysis,
+      })
+    }catch(err){
+      return json(res,400,{
+        status:'ERROR',
+        message:'Sports Zenith could not rate that roster.',
+        error:err instanceof Error?err.message:String(err),
+      })
+    }
   }
   if(req.method==='POST'&&url.pathname==='/api/survivor/link-entry'){
     try{
