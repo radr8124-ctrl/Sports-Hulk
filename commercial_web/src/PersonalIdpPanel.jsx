@@ -89,6 +89,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -127,7 +128,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken, leagueId])
+  }, [user, getAccessToken, leagueId, retryKey])
 
   if (!user) {
     return (
@@ -153,6 +154,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
       <section className="rounded-3xl border border-rose-200 bg-rose-50 p-5">
         <div className="text-sm font-black text-rose-800">Your roster-aware IDP research could not load.</div>
         <div className="mt-1 text-xs font-semibold leading-5 text-rose-700">{error}</div>
+        <button type="button" onClick={() => setRetryKey((value) => value + 1)} className="mt-3 rounded-xl bg-rose-700 px-3 py-2 text-xs font-black text-white">Try again</button>
       </section>
     )
   }
@@ -220,11 +222,20 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
       </div>
 
       {!slotAware && (
-        <div className="mt-4 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-700" />
-          <div className="text-xs font-semibold leading-5 text-amber-950">
-            <span className="font-black">IDP starter slots are not saved yet.</span> Add DL/LB/DB/IDP FLEX counts in My Teams → League Settings to unlock slot-aware IDP starter candidates.
+        <div className="mt-4 flex flex-col justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center">
+          <div className="flex gap-3">
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-700" />
+            <div className="text-xs font-semibold leading-5 text-amber-950">
+              <span className="font-black">IDP starter slots are not saved yet.</span> Add DL/LB/DB/IDP FLEX counts to unlock slot-aware IDP starter candidates.
+            </div>
           </div>
+          <button type="button" onClick={onOpenMyTeams} className="shrink-0 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white">Open league settings</button>
+        </div>
+      )}
+
+      {matched.length === 0 && (
+        <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-4 text-xs font-semibold leading-5 text-slate-600">
+          <span className="font-black text-slate-950">No IDP player on this saved roster matched the current IDP opportunity board.</span> Add defensive players to My Teams or review unmatched names below if this league uses IDP.
         </div>
       )}
 
@@ -303,6 +314,11 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
 
       <div className="mt-5">
         <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Outside IDP names to check</div>
+        {targets.length === 0 && (
+          <div className="mt-2 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-4 text-xs font-semibold leading-5 text-slate-500">
+            No outside IDP research target cleared the current usage filter. Sports Zenith will not invent a pickup just to fill this section.
+          </div>
+        )}
         <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {targets.slice(0, 8).map((row) => (
             <div key={row.player_key || row.player} className="rounded-2xl border border-slate-200 bg-white p-4">

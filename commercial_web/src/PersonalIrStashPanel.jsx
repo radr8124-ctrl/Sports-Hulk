@@ -21,6 +21,7 @@ export default function PersonalIrStashPanel({ onOpenMyTeams, leagueId = null })
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -59,7 +60,7 @@ export default function PersonalIrStashPanel({ onOpenMyTeams, leagueId = null })
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken, leagueId])
+  }, [user, getAccessToken, leagueId, retryKey])
 
   if (!user) {
     return (
@@ -83,6 +84,7 @@ export default function PersonalIrStashPanel({ onOpenMyTeams, leagueId = null })
       <section className="rounded-3xl border border-rose-200 bg-rose-50 p-5">
         <div className="text-sm font-black text-rose-800">Your roster-aware IR stash research could not load.</div>
         <div className="mt-1 text-xs font-semibold leading-5 text-rose-700">{error}</div>
+        <button type="button" onClick={() => setRetryKey((value) => value + 1)} className="mt-3 rounded-xl bg-rose-700 px-3 py-2 text-xs font-black text-white">Try again</button>
       </section>
     )
   }
@@ -135,6 +137,23 @@ export default function PersonalIrStashPanel({ onOpenMyTeams, leagueId = null })
           </div>
         </div>
       </div>
+
+      {Number(capacity.saved_ir_slots || 0) === 0 ? (
+        <div className="mt-4 flex flex-col justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center">
+          <div className="text-xs font-semibold leading-5 text-amber-950">
+            <span className="font-black">No IR slots are saved for this league.</span> IR stash names can still be researched, but Sports Zenith cannot plan IR capacity until the league setting is added.
+          </div>
+          <button type="button" onClick={onOpenMyTeams} className="shrink-0 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white">Edit league settings</button>
+        </div>
+      ) : Number(capacity.likely_overflow_count || 0) > 0 ? (
+        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold leading-5 text-rose-800">
+          <span className="font-black">Likely IR capacity is overfilled by {capacity.likely_overflow_count}.</span> Platform eligibility is not verified, so review each designation before moving or dropping anyone.
+        </div>
+      ) : Number(capacity.likely_open_slots || 0) === 0 ? (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-semibold leading-5 text-amber-950">
+          <span className="font-black">No likely open IR capacity.</span> Based on the saved slot count and current likely IR/PUP designations, all saved IR capacity is accounted for. Platform rules still control actual eligibility.
+        </div>
+      ) : null}
 
       <div className="mt-5">
         <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Players already on your roster</div>

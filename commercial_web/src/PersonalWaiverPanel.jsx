@@ -21,6 +21,7 @@ export default function PersonalWaiverPanel({ onOpenMyTeams, leagueId = null }) 
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -59,7 +60,7 @@ export default function PersonalWaiverPanel({ onOpenMyTeams, leagueId = null }) 
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken, leagueId])
+  }, [user, getAccessToken, leagueId, retryKey])
 
   if (!user) {
     return (
@@ -83,6 +84,7 @@ export default function PersonalWaiverPanel({ onOpenMyTeams, leagueId = null }) 
       <section className="rounded-3xl border border-rose-200 bg-rose-50 p-5">
         <div className="text-sm font-black text-rose-800">Your roster-aware waiver research could not load.</div>
         <div className="mt-1 text-xs font-semibold leading-5 text-rose-700">{error}</div>
+        <button type="button" onClick={() => setRetryKey((value) => value + 1)} className="mt-3 rounded-xl bg-rose-700 px-3 py-2 text-xs font-black text-white">Try again</button>
       </section>
     )
   }
@@ -159,19 +161,31 @@ export default function PersonalWaiverPanel({ onOpenMyTeams, leagueId = null }) 
 
       <div className="mt-5">
         <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Roster need research</div>
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-          {needs.map((need) => (
-            <div key={need.position} className="min-w-[150px] rounded-2xl border border-violet-100 bg-white p-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-sm font-black text-slate-950">{need.position}</div>
-                <div className="text-sm font-black text-violet-700">{need.roster_need_score}</div>
+        {needs.length > 0 ? (
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+            {needs.map((need) => (
+              <div key={need.position} className="min-w-[150px] rounded-2xl border border-violet-100 bg-white p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-sm font-black text-slate-950">{need.position}</div>
+                  <div className="text-sm font-black text-violet-700">{need.roster_need_score}</div>
+                </div>
+                <div className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">{humanize(need.roster_need_tier)}</div>
+                <div className="mt-2 text-[10px] font-semibold text-slate-500">{need.roster_count} scored roster {need.roster_count === 1 ? 'player' : 'players'}</div>
               </div>
-              <div className="mt-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">{humanize(need.roster_need_tier)}</div>
-              <div className="mt-2 text-[10px] font-semibold text-slate-500">{need.roster_count} scored roster {need.roster_count === 1 ? 'player' : 'players'}</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-2 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-4 text-xs font-semibold text-slate-500">
+            No scored QB/RB/WR/TE roster-need rows are available for this saved team right now.
+          </div>
+        )}
       </div>
+
+      {targets.length === 0 && (
+        <div className="mt-5 rounded-2xl border border-dashed border-violet-200 bg-white px-4 py-4 text-xs font-semibold leading-5 text-slate-600">
+          <span className="font-black text-slate-950">No personalized waiver target cleared the current filter.</span> That is a valid result. Sports Zenith is not filling the page with low-quality adds just to produce a recommendation.
+        </div>
+      )}
 
       <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
         {targets.map((row) => (

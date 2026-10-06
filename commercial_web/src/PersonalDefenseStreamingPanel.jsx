@@ -21,6 +21,7 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -59,7 +60,7 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken, leagueId])
+  }, [user, getAccessToken, leagueId, retryKey])
 
   if (!user) {
     return (
@@ -83,6 +84,7 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
       <section className="rounded-3xl border border-rose-200 bg-rose-50 p-5">
         <div className="text-sm font-black text-rose-800">Your roster-aware defense streaming research could not load.</div>
         <div className="mt-1 text-xs font-semibold leading-5 text-rose-700">{error}</div>
+        <button type="button" onClick={() => setRetryKey((value) => value + 1)} className="mt-3 rounded-xl bg-rose-700 px-3 py-2 text-xs font-black text-white">Try again</button>
       </section>
     )
   }
@@ -181,6 +183,11 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
 
       <div className="mt-5">
         <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Alternatives to check</div>
+        {alternatives.length === 0 && (
+          <div className="mt-2 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-4 text-xs font-semibold leading-5 text-slate-500">
+            No outside D/ST alternative is available in the current defense-streaming research snapshot. Sports Zenith will not invent a replacement.
+          </div>
+        )}
         <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {alternatives.slice(0, 8).map((row) => (
             <div key={row.team} className="rounded-2xl border border-slate-200 bg-white p-4">

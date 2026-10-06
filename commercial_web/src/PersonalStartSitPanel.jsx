@@ -21,6 +21,7 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState('')
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -59,7 +60,7 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken, leagueId])
+  }, [user, getAccessToken, leagueId, retryKey])
 
   if (!user) {
     return (
@@ -85,6 +86,7 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
       <section className="rounded-3xl border border-rose-200 bg-rose-50 p-5">
         <div className="text-sm font-black text-rose-800">Your roster-aware Start/Sit research could not load.</div>
         <div className="mt-1 text-xs font-semibold leading-5 text-rose-700">{error}</div>
+        <button type="button" onClick={() => setRetryKey((value) => value + 1)} className="mt-3 rounded-xl bg-rose-700 px-3 py-2 text-xs font-black text-white">Try again</button>
       </section>
     )
   }
@@ -112,6 +114,7 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
   const benchCandidates = Array.isArray(lineup.bench_candidates) ? lineup.bench_candidates : []
   const openSlots = Array.isArray(lineup.open_slots) ? lineup.open_slots : []
   const unscoredSlots = Array.isArray(lineup.unscored_slots) ? lineup.unscored_slots : []
+  const unmatched = Array.isArray(payload.unmatched) ? payload.unmatched : []
   const tiebreakers = Array.isArray(lineup.tiebreakers) ? lineup.tiebreakers : []
   const appliedTiebreakers = tiebreakers.filter((row) => row.applied)
   const slotAware = lineup.status === 'SLOT_AWARE_RESEARCH'
@@ -151,6 +154,18 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
           </div>
         </div>
       </div>
+
+      {unmatched.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-semibold leading-5 text-amber-950">
+          <span className="font-black">Partial roster coverage.</span> These saved roster names were not matched to the current Sports Zenith player board: {unmatched.map((row) => row.input || row.player || 'Unknown').join(' · ')}.
+        </div>
+      )}
+
+      {groups.length === 0 && (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-xs font-semibold leading-5 text-slate-600">
+          No QB/RB/WR/TE/DST player on this saved roster has a current Start/Sit decision score. Sports Zenith will not manufacture starter rankings when the decision board has no matched player signal.
+        </div>
+      )}
 
       {slotAware && (
         <div className="mt-5 rounded-2xl border border-blue-200 bg-white p-4">
@@ -264,11 +279,14 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
       </div>
 
       {(!league.scoring_connected || !league.slot_context_connected) && (
-        <div className="mt-4 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-700" />
-          <div className="text-xs font-semibold leading-5 text-amber-950">
-            <span className="font-black">Not an official lineup yet.</span> Add league scoring and starter-slot settings later so Sports Zenith can compare players against the actual rules of your league.
+        <div className="mt-4 flex flex-col justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center">
+          <div className="flex gap-3">
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-700" />
+            <div className="text-xs font-semibold leading-5 text-amber-950">
+              <span className="font-black">League setup is incomplete.</span> Save scoring and starter-slot settings so Sports Zenith can compare your roster against the actual structure of this league.
+            </div>
           </div>
+          <button type="button" onClick={onOpenMyTeams} className="shrink-0 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white">Open league settings</button>
         </div>
       )}
     </section>
