@@ -42,9 +42,22 @@ const MIME = {
   '.jpeg': 'image/jpeg', '.ico': 'image/x-icon',
 }
 
-function json(res, status, payload) {
+const SECURITY_HEADERS = {
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+}
+
+function json(res, status, payload, extraHeaders = {}) {
   const body = JSON.stringify(payload)
-  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'content-length': Buffer.byteLength(body), 'cache-control': 'no-store' })
+  res.writeHead(status, {
+    ...SECURITY_HEADERS,
+    ...extraHeaders,
+    'content-type': 'application/json; charset=utf-8',
+    'content-length': Buffer.byteLength(body),
+    'cache-control': 'no-store',
+  })
   res.end(body)
 }
 
@@ -1243,6 +1256,29 @@ async function fetchEspnBoxscore(league, eventId) {
   }
 }
 
+const RATE_LIMIT_BUCKETS = new Map()
+
+function clientIp(req) {
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+  return forwarded || req.socket?.remoteAddress || 'unknown'
+}
+
+function consumeRateLimit(key, limit, windowMs) {
+  const now = Date.now()
+  const current = RATE_LIMIT_BUCKETS.get(key)
+  if (!current || current.resetAt <= now) {
+    RATE_LIMIT_BUCKETS.set(key, { count: 1, resetAt: now + windowMs })
+    return { ok: true, remaining: limit - 1, retryAfterMs: 0 }
+  }
+
+  if (current.count >= limit) {
+    return { ok: false, remaining: 0, retryAfterMs: Math.max(1, current.resetAt - now) }
+  }
+
+  current.count += 1
+  return { ok: true, remaining: Math.max(0, limit - current.count), retryAfterMs: 0 }
+}
+
 async function readBody(req) {
   let body=''
   for await (const chunk of req) { body+=chunk; if(body.length>1_000_000) throw new Error('request too large') }
@@ -1288,10 +1324,14 @@ function runDfsOptimizer(payload) {
 
 async function serveStatic(req,res,pathname) {
   let requested=pathname==='/'?'/index.html':pathname, filePath=path.resolve(DIST,'.'+requested)
-  if(!filePath.startsWith(path.resolve(DIST))){res.writeHead(403);res.end('Forbidden');return}
+  if(!filePath.startsWith(path.resolve(DIST))){res.writeHead(403,SECURITY_HEADERS);res.end('Forbidden');return}
   try{const info=await stat(filePath); if(info.isDirectory()) filePath=path.join(filePath,'index.html')}catch{filePath=path.join(DIST,'index.html')}
   const ext=path.extname(filePath).toLowerCase()
-  res.writeHead(200,{'content-type':MIME[ext]||'application/octet-stream','cache-control':ext==='.html'?'no-cache':'public, max-age=300'})
+  res.writeHead(200,{
+    ...SECURITY_HEADERS,
+    'content-type':MIME[ext]||'application/octet-stream',
+    'cache-control':ext==='.html'?'no-cache':'public, max-age=300',
+  })
   createReadStream(filePath).pipe(res)
 }
 
@@ -1364,10 +1404,21 @@ const server=http.createServer(async(req,res)=>{
       const user=await authenticatedUser(req)
       if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in before linking a Survivor entry.'})
 
+      const claimLimit=consumeRateLimit(`survivor-claim:${user.id}:${clientIp(req)}`,8,15*60*1000)
+      if(!claimLimit.ok){
+        return json(
+          res,
+          429,
+          {status:'RATE_LIMITED',message:'Too many claim attempts. Wait a few minutes and try again.'},
+          {'retry-after':String(Math.ceil(claimLimit.retryAfterMs/1000))}
+        )
+      }
+
       const body=await readBody(req)
       const entryName=String(body.entry_name||'').trim()
       const claimCode=String(body.claim_code||'').trim().toUpperCase()
       if(!entryName || !claimCode) return json(res,400,{status:'MISSING_FIELDS',message:'Entry name and claim code are required.'})
+      if(entryName.length>160 || claimCode.length>128) return json(res,400,{status:'INVALID_FIELDS',message:'Entry name or claim code is too long.'})
 
       const state=await loadExternalJson(SURVIVOR_ENTRIES_PATH)
       const entry=(state?.entries||{})[entryName]
