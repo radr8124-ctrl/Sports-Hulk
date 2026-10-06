@@ -62,3 +62,6 @@ tmp_render_*.png
 *.db-wal
 backups/
 sports-zenith-backups/
+
+# Local backup/edit copies
+*.bak*

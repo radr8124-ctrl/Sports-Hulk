@@ -1,0 +1,551 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "/": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "baselineDraftId": "07c52044-7b4a-4483-b0ed-c68c9f8c0740",
+      "activeDraftId": "07c52044-7b4a-4483-b0ed-c68c9f8c0740",
+      "designSystemPath": ".superdesign/design-system.md",
+      "referenceIds": [
+        "b8c4952b-5b77-407a-858c-32d426d607ef",
+        "369a1ac6-0c7b-4240-bc4d-12a776d9b175",
+        "b1dd2219-89eb-4f78-b06a-b3f9de77d0f2",
+        "757da874-e950-4b30-9b02-cc386cc63ccd",
+        "a911e9f6-7bff-41c2-a043-ec7984646609",
+        "39611e67-9281-4d94-b6f7-3635c42cccdf",
+        "c4e97adf-1505-411c-94eb-755fc9a0ff5e"
+      ],
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "drafts": {
+        "07c52044-7b4a-4483-b0ed-c68c9f8c0740": {
+          "title": "Sports HULK Home \u2014 Task-First Command Center",
+          "visualDirection": "task-first consumer sports intelligence shell, refined mobile hierarchy",
+          "currentVersion": 3
+        }
+      },
+      "updatedAt": "2026-10-05T23:34:46.765179+00:00"
+    },
+    "/brain-record": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "activeDraftId": "314e3562-4a94-436a-b66b-39ba9ccef348",
+      "designSystemPath": ".superdesign/design-system.md",
+      "referenceIds": [
+        "369a1ac6-0c7b-4240-bc4d-12a776d9b175",
+        "c4e97adf-1505-411c-94eb-755fc9a0ff5e"
+      ],
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "drafts": {
+        "314e3562-4a94-436a-b66b-39ba9ccef348": {
+          "title": "Sports HULK \u2014 Brain Record Redesign",
+          "visualDirection": "consumer accountability summary with progressive disclosure",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-05T23:24:08.743581+00:00"
+    },
+    "mobile:bets-shell": {
+      "targetKind": "new-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "activeDraftId": "7f42e794-a8f2-49bb-8c3a-7a4ca0653950",
+      "referenceIds": [
+        "39611e67-9281-4d94-b6f7-3635c42cccdf",
+        "c4e97adf-1505-411c-94eb-755fc9a0ff5e"
+      ],
+      "sourceTarget": "/",
+      "sourceDraftId": "07c52044-7b4a-4483-b0ed-c68c9f8c0740",
+      "drafts": {
+        "7f42e794-a8f2-49bb-8c3a-7a4ca0653950": {
+          "title": "Sports HULK \u2014 Mobile Bets Shell",
+          "visualDirection": "task-first mobile bets shell",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-05T23:26:15.934644+00:00"
+    },
+    "mobile:more-sheet": {
+      "targetKind": "new-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "activeDraftId": "fb8d4a10-70b2-42ed-b5e3-6bcc06b51562",
+      "referenceIds": [
+        "39611e67-9281-4d94-b6f7-3635c42cccdf"
+      ],
+      "sourceTarget": "mobile:bets-shell",
+      "sourceDraftId": "7f42e794-a8f2-49bb-8c3a-7a4ca0653950",
+      "drafts": {
+        "fb8d4a10-70b2-42ed-b5e3-6bcc06b51562": {
+          "title": "Sports HULK \u2014 Mobile More Sheet",
+          "visualDirection": "mobile secondary-destination bottom sheet",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-05T23:26:15.934679+00:00"
+    },
+    "/survivor": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "activeDraftId": "50e087c9-1be4-487d-9f5e-e010166101e0",
+      "referenceIds": [
+        "757da874-e950-4b30-9b02-cc386cc63ccd"
+      ],
+      "drafts": {
+        "50e087c9-1be4-487d-9f5e-e010166101e0": {
+          "title": "Sports HULK \u2014 Survivor Redesign",
+          "visualDirection": "entry-first Survivor decision board",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-05T23:34:46.765179+00:00"
+    },
+    "/fantasy": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "activeDraftId": "8e89c118-1797-44be-a0d1-9c92ad65cbe4",
+      "referenceIds": [
+        "b1dd2219-89eb-4f78-b06a-b3f9de77d0f2"
+      ],
+      "drafts": {
+        "8e89c118-1797-44be-a0d1-9c92ad65cbe4": {
+          "title": "Sports HULK \u2014 Fantasy + DFS Redesign",
+          "visualDirection": "weekly fantasy command center with DFS sibling mode",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-05T23:34:46.765179+00:00"
+    },
+    "/props": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "activeDraftId": "89f600ea-5ce0-433c-9a6e-8f16ebd19439",
+      "referenceIds": [
+        "b8c4952b-5b77-407a-858c-32d426d607ef"
+      ],
+      "drafts": {
+        "89f600ea-5ce0-433c-9a6e-8f16ebd19439": {
+          "title": "Sports HULK \u2014 Props Redesign",
+          "visualDirection": "research-first props page with explicit pass reasons",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-05T23:34:46.765179+00:00"
+    },
+    "/prizepicks": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "activeDraftId": "467bdde5-d86c-4f93-b913-f63f6efb8b76",
+      "referenceIds": [
+        "b8c4952b-5b77-407a-858c-32d426d607ef"
+      ],
+      "drafts": {
+        "467bdde5-d86c-4f93-b913-f63f6efb8b76": {
+          "title": "Sports HULK \u2014 PrizePicks Redesign",
+          "visualDirection": "shadow-monitor PrizePicks page with entry economics separation",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-05T23:34:46.765179+00:00"
+    },
+    "/parlays": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/dashboardConfig.js",
+        "commercial_web/src/App.jsx:21:296",
+        "commercial_web/src/App.jsx:859:1001",
+        "commercial_web/src/AskSportsHulk.jsx:361:383"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
+        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
+        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb"
+      },
+      "components": [
+        {
+          "name": "BrandHeader",
+          "id": "c794f557-1164-463e-b038-a6cedd109f17",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "TopNav",
+          "id": "99a5deda-e244-4b65-a62a-6368d8702adc",
+          "sourcePath": "commercial_web/src/App.jsx"
+        },
+        {
+          "name": "AssistantLauncher",
+          "id": "326377c2-9c78-4ea9-8503-2aeccb06c528",
+          "sourcePath": "commercial_web/src/AskSportsHulk.jsx"
+        }
+      ],
+      "activeDraftId": "db95bd58-2473-4c5b-9a7f-2569a4b4ec58",
+      "referenceIds": [
+        "b8c4952b-5b77-407a-858c-32d426d607ef"
+      ],
+      "drafts": {
+        "db95bd58-2473-4c5b-9a7f-2569a4b4ec58": {
+          "title": "Sports HULK \u2014 Parlays Redesign",
+          "visualDirection": "proof-funnel parlay page with source-leg and price blockers",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-05T23:34:46.765179+00:00"
+    },
+    "auth:desktop": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "baselineDraftId": "9c03df34-28d1-4ea8-95b2-c6d32d7b9e1b",
+      "activeDraftId": "b6b84308-b93f-4ea0-97e8-8293ffab8f43",
+      "designSystemPath": ".superdesign/design-system.md",
+      "referenceIds": [],
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/AuthShell.jsx:123:302",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/App.jsx:2580:2610",
+        "commercial_web/src/brandConfig.js"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/AuthShell.jsx": "555aed5498fb2b38ba5cd51ad3c97a3031307aafb8a1886dcccf1762b275acbc",
+        "commercial_web/src/styles.css": "f7516f19418a132e840619035c13171018d04c3058d40c55252141aa1f55b05b",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/App.jsx": "c5d469f00f9783dad42a5b78244c656e5285ca81bf29afff08b369ca3222581c",
+        "commercial_web/src/brandConfig.js": "dca8197774269edf388e981a6206619f5959cc714557911c954be929527796af"
+      },
+      "components": [],
+      "drafts": {
+        "9c03df34-28d1-4ea8-95b2-c6d32d7b9e1b": {
+          "title": "Sports Zenith \u2014 Account Modal Baseline",
+          "visualDirection": "faithful current account modal baseline",
+          "currentVersion": 1
+        },
+        "b6b84308-b93f-4ea0-97e8-8293ffab8f43": {
+          "title": "Sports Zenith \u2014 Passwordless Sign In Desktop",
+          "visualDirection": "simple premium email-first passwordless sign-in",
+          "parentDraftId": "9c03df34-28d1-4ea8-95b2-c6d32d7b9e1b",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-06T08:57:58.822727+00:00"
+    },
+    "auth:mobile": {
+      "targetKind": "existing-ui",
+      "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
+      "activeDraftId": "c041f454-336d-465b-bd3d-3c56c82a002f",
+      "designSystemPath": ".superdesign/design-system.md",
+      "referenceIds": [],
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "commercial_web/src/AuthShell.jsx:123:302",
+        "commercial_web/src/styles.css",
+        "commercial_web/tailwind.config.js",
+        "commercial_web/src/App.jsx:2580:2610",
+        "commercial_web/src/brandConfig.js"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
+        "commercial_web/src/AuthShell.jsx": "555aed5498fb2b38ba5cd51ad3c97a3031307aafb8a1886dcccf1762b275acbc",
+        "commercial_web/src/styles.css": "f7516f19418a132e840619035c13171018d04c3058d40c55252141aa1f55b05b",
+        "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe",
+        "commercial_web/src/App.jsx": "c5d469f00f9783dad42a5b78244c656e5285ca81bf29afff08b369ca3222581c",
+        "commercial_web/src/brandConfig.js": "dca8197774269edf388e981a6206619f5959cc714557911c954be929527796af"
+      },
+      "components": [],
+      "sourceTarget": "auth:desktop",
+      "sourceDraftId": "b6b84308-b93f-4ea0-97e8-8293ffab8f43",
+      "drafts": {
+        "c041f454-336d-465b-bd3d-3c56c82a002f": {
+          "title": "Sports Zenith \u2014 Passwordless Sign In Mobile",
+          "visualDirection": "simple premium mobile bottom-sheet passwordless sign-in",
+          "parentDraftId": "b6b84308-b93f-4ea0-97e8-8293ffab8f43",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-10-06T08:57:58.822727+00:00"
+    }
+  }
+}
