@@ -17,3 +17,12 @@ test('Start Sit shows personal boundary above league-wide research', async ({ pa
   await expect(page.getByText('GENERIC RESEARCH')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Decision research' })).toBeVisible();
 });
+
+test('Waivers shows personal boundary above generic FAAB research', async ({ page }) => {
+  await page.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: 'Waivers & FAAB' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in for roster-aware waiver research' })).toBeVisible();
+  await expect(page.getByText('League-wide intelligence')).toBeVisible();
+  await expect(page.getByText('GENERIC RESEARCH')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Decision research' })).toBeVisible();
+});

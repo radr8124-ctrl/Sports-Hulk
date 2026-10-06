@@ -14,6 +14,7 @@ const PORT = Number(process.env.PORT || 8510)
 const SPORTS_ROOT = path.resolve(__dirname, '..')
 const DFS_BRIDGE = path.join(__dirname, 'dfs_optimizer_bridge.py')
 const RATE_MY_TEAM_BRIDGE = path.join(__dirname, 'rate_my_team_bridge.py')
+const WAIVER_FIT_BRIDGE = path.join(__dirname, 'waiver_fit_bridge.py')
 const SPORTS_PYTHON = path.join(SPORTS_ROOT, '.venv', 'bin', 'python')
 const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVOR_ENTRIES.json'
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
@@ -1369,6 +1370,52 @@ function runRateMyTeam(payload) {
   })
 }
 
+function runWaiverFit(payload) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(SPORTS_PYTHON, [WAIVER_FIT_BRIDGE], {
+      cwd: SPORTS_ROOT,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+
+    let stdout = ''
+    let stderr = ''
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL')
+      reject(new Error('Waiver fit timed out'))
+    }, 12000)
+
+    child.stdout.on('data', chunk => {
+      stdout += chunk.toString()
+      if (stdout.length > 2_000_000) {
+        child.kill('SIGKILL')
+        reject(new Error('Waiver fit response exceeded limit'))
+      }
+    })
+    child.stderr.on('data', chunk => {
+      stderr += chunk.toString()
+      if (stderr.length > 200_000) stderr = stderr.slice(-200_000)
+    })
+
+    child.on('error', err => {
+      clearTimeout(timer)
+      reject(err)
+    })
+
+    child.on('close', code => {
+      clearTimeout(timer)
+      let parsed = null
+      try { parsed = JSON.parse(stdout || '{}') } catch {}
+      if (code !== 0 || !parsed || parsed.status === 'ERROR') {
+        reject(new Error(parsed?.error || stderr.trim() || 'Waiver fit failed'))
+        return
+      }
+      resolve(parsed)
+    })
+
+    child.stdin.end(JSON.stringify(payload || {}))
+  })
+}
+
 async function serveStatic(req,res,pathname) {
   let requested=pathname==='/'?'/index.html':pathname, filePath=path.resolve(DIST,'.'+requested)
   if(!filePath.startsWith(path.resolve(DIST))){res.writeHead(403,SECURITY_HEADERS);res.end('Forbidden');return}
@@ -1521,6 +1568,101 @@ const server=http.createServer(async(req,res)=>{
       return json(res,400,{
         status:'ERROR',
         message:'Sports Zenith could not load your saved teams.',
+        error:err instanceof Error?err.message:String(err),
+      })
+    }
+  }
+  if(req.method==='GET'&&url.pathname==='/api/fantasy/waivers'){
+    try{
+      const user=await authenticatedUser(req)
+      if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to load roster-aware waiver research.'})
+
+      const client=scopedInsForgeClient(req)
+      if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private fantasy storage is temporarily unavailable.'})
+
+      const requestedLeagueId=String(url.searchParams.get('league_id')||'').trim()
+      let leagueQuery=client.database
+        .from('fantasy_leagues')
+        .select('id,league_name,season,scoring,roster_settings,sync_status,last_synced_at,provenance')
+        .eq('owner_id',user.id)
+
+      if(requestedLeagueId){
+        leagueQuery=leagueQuery.eq('id',requestedLeagueId)
+      }else{
+        leagueQuery=leagueQuery.order('last_synced_at',{ascending:false})
+      }
+
+      const {data:leagueRows,error:leagueError}=await leagueQuery.limit(1)
+      if(leagueError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your fantasy league could not be loaded.'})
+      }
+
+      const league=Array.isArray(leagueRows)?leagueRows[0]:null
+      if(!league){
+        return json(res,200,{
+          status:'AUTHENTICATED_NO_TEAM',
+          personalization_level:'NO_SAVED_ROSTER',
+          message:'Save a team in My Teams / Rate My Team first.',
+          position_needs:[],
+          targets:[],
+        })
+      }
+
+      const {data:rosterRows,error:rosterError}=await client.database
+        .from('fantasy_rosters')
+        .select('id,team_name,roster,starters,bench,updated_at')
+        .eq('league_id',league.id)
+        .order('updated_at',{ascending:false})
+        .limit(1)
+
+      if(rosterError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your saved roster could not be loaded.'})
+      }
+
+      const savedRoster=Array.isArray(rosterRows)?rosterRows[0]:null
+      const roster=Array.isArray(savedRoster?.roster)?savedRoster.roster:[]
+      if(!roster.length){
+        return json(res,200,{
+          status:'SAVED_TEAM_NO_ROSTER',
+          personalization_level:'NO_SAVED_ROSTER',
+          league:{id:league.id,league_name:league.league_name||null,team_name:savedRoster?.team_name||null},
+          position_needs:[],
+          targets:[],
+        })
+      }
+
+      const analysis=await runRateMyTeam({roster})
+      const waiverFit=await runWaiverFit({roster,roster_analysis:analysis})
+
+      const scoring=league.scoring&&typeof league.scoring==='object'&&!Array.isArray(league.scoring)?league.scoring:{}
+      const rosterSettings=league.roster_settings&&typeof league.roster_settings==='object'&&!Array.isArray(league.roster_settings)?league.roster_settings:{}
+      const rawBudget=scoring.faab_budget ?? rosterSettings.faab_budget ?? null
+      const rawRemaining=scoring.faab_remaining ?? rosterSettings.faab_remaining ?? null
+      const faabBudget=Number(rawBudget)
+      const faabRemaining=Number(rawRemaining)
+      const budgetContextConnected=Number.isFinite(faabBudget)&&faabBudget>0&&Number.isFinite(faabRemaining)&&faabRemaining>=0
+
+      return json(res,200,{
+        ...waiverFit,
+        status:'READY',
+        league:{
+          id:league.id,
+          league_name:league.league_name||null,
+          team_name:savedRoster?.team_name||league.league_name||null,
+          season:league.season||null,
+          last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
+          faab_budget:budgetContextConnected?faabBudget:null,
+          faab_remaining:budgetContextConnected?faabRemaining:null,
+        },
+        budget_context_status:budgetContextConnected?'CONNECTED_NOT_YET_APPLIED':'WAITING',
+        budget_context_connected:budgetContextConnected,
+        league_availability_status:'NOT_VERIFIED',
+        user_league_availability_verified:false,
+      })
+    }catch(err){
+      return json(res,400,{
+        status:'ERROR',
+        message:'Sports Zenith could not build roster-aware waiver research.',
         error:err instanceof Error?err.message:String(err),
       })
     }
