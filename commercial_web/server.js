@@ -1525,6 +1525,134 @@ const server=http.createServer(async(req,res)=>{
       })
     }
   }
+  if(req.method==='GET'&&url.pathname==='/api/fantasy/start-sit'){
+    try{
+      const user=await authenticatedUser(req)
+      if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to load roster-aware Start/Sit research.'})
+
+      const client=scopedInsForgeClient(req)
+      if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private fantasy storage is temporarily unavailable.'})
+
+      const requestedLeagueId=String(url.searchParams.get('league_id')||'').trim()
+      let leagueQuery=client.database
+        .from('fantasy_leagues')
+        .select('id,league_name,season,scoring,roster_settings,sync_status,last_synced_at,provenance')
+        .eq('owner_id',user.id)
+
+      if(requestedLeagueId){
+        leagueQuery=leagueQuery.eq('id',requestedLeagueId)
+      }else{
+        leagueQuery=leagueQuery.order('last_synced_at',{ascending:false})
+      }
+
+      const {data:leagueRows,error:leagueError}=await leagueQuery.limit(1)
+      if(leagueError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your fantasy league could not be loaded.'})
+      }
+
+      const league=Array.isArray(leagueRows)?leagueRows[0]:null
+      if(!league){
+        return json(res,200,{
+          status:'AUTHENTICATED_NO_TEAM',
+          personalization_level:'NO_SAVED_ROSTER',
+          message:'Save a team in My Teams / Rate My Team first.',
+          groups:[],
+          players:[],
+        })
+      }
+
+      const {data:rosterRows,error:rosterError}=await client.database
+        .from('fantasy_rosters')
+        .select('id,team_name,roster,starters,bench,updated_at')
+        .eq('league_id',league.id)
+        .order('updated_at',{ascending:false})
+        .limit(1)
+
+      if(rosterError){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your saved roster could not be loaded.'})
+      }
+
+      const savedRoster=Array.isArray(rosterRows)?rosterRows[0]:null
+      const roster=Array.isArray(savedRoster?.roster)?savedRoster.roster:[]
+      if(!roster.length){
+        return json(res,200,{
+          status:'SAVED_TEAM_NO_ROSTER',
+          personalization_level:'NO_SAVED_ROSTER',
+          league:{id:league.id,league_name:league.league_name||null,team_name:savedRoster?.team_name||null},
+          groups:[],
+          players:[],
+        })
+      }
+
+      const analysis=await runRateMyTeam({roster})
+      const scoredPlayers=(analysis.players||[])
+        .filter(row=>['QB','RB','WR','TE','DST'].includes(String(row.position||'').toUpperCase()))
+        .map(row=>({...row}))
+
+      const positionOrder=['QB','RB','WR','TE','DST']
+      const groups=[]
+      for(const position of positionOrder){
+        const rows=scoredPlayers
+          .filter(row=>String(row.position||'').toUpperCase()===position)
+          .sort((a,b)=>Number(b.weekly_research_score??-1)-Number(a.weekly_research_score??-1))
+
+        if(!rows.length) continue
+        rows.forEach((row,index)=>{
+          row.roster_position_rank=index+1
+          row.roster_position_count=rows.length
+          row.roster_priority=index===0?'TOP_ROSTER_OPTION':'ROSTER_OPTION'
+        })
+        groups.push({position,count:rows.length,players:rows})
+      }
+
+      const scoring=league.scoring&&typeof league.scoring==='object'&&!Array.isArray(league.scoring)?league.scoring:{}
+      const rosterSettings=league.roster_settings&&typeof league.roster_settings==='object'&&!Array.isArray(league.roster_settings)?league.roster_settings:{}
+      const starters=Array.isArray(savedRoster?.starters)?savedRoster.starters:[]
+      const bench=Array.isArray(savedRoster?.bench)?savedRoster.bench:[]
+      const scoringConnected=Object.keys(scoring).length>0
+      const slotContextConnected=Object.keys(rosterSettings).length>0 || starters.length>0 || bench.length>0
+
+      return json(res,200,{
+        status:'READY',
+        personalization_level:'ROSTER_AWARE_RESEARCH',
+        context_status:scoringConnected&&slotContextConnected
+          ? 'LEAGUE_CONTEXT_PRESENT_NOT_YET_APPLIED'
+          : 'SCORING_AND_SLOT_CONTEXT_WAITING',
+        is_official_lineup:false,
+        score_is_probability:false,
+        league:{
+          id:league.id,
+          league_name:league.league_name||null,
+          team_name:savedRoster?.team_name||league.league_name||null,
+          season:league.season||null,
+          scoring_connected:scoringConnected,
+          slot_context_connected:slotContextConnected,
+          last_synced_at:league.last_synced_at||savedRoster?.updated_at||null,
+        },
+        coverage:{
+          roster_size:analysis.roster_size,
+          matched_count:analysis.matched_count,
+          recognized_without_decision_count:analysis.recognized_without_decision_count,
+          unmatched_count:analysis.unmatched_count,
+          coverage_pct:analysis.coverage_pct,
+          decision_coverage_pct:analysis.decision_coverage_pct,
+        },
+        groups,
+        players:scoredPlayers,
+        recognized_without_decision:analysis.recognized_without_decision||[],
+        unmatched:analysis.unmatched||[],
+        note:scoringConnected&&slotContextConnected
+          ? 'This is roster-aware Sports Zenith weekly research. Saved league context exists, but scoring/slot rules are not yet applied to lineup optimization.'
+          : 'This is roster-aware Sports Zenith weekly research. League scoring and starter-slot rules are still missing, so this is not an official lineup recommendation.',
+      })
+    }catch(err){
+      return json(res,400,{
+        status:'ERROR',
+        message:'Sports Zenith could not build roster-aware Start/Sit research.',
+        error:err instanceof Error?err.message:String(err),
+      })
+    }
+  }
   if(req.method==='POST'&&url.pathname==='/api/fantasy/rate-my-team'){
     try{
       const user=await authenticatedUser(req)

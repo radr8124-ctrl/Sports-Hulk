@@ -9,9 +9,11 @@ test('Fantasy opens on My Teams / Rate My Team for signed-out users', async ({ p
   await expect(page.getByRole('textbox', { name: 'Roster' })).toBeVisible();
 });
 
-test('Fantasy research tabs still switch away from My Teams', async ({ page }) => {
+test('Start Sit shows personal boundary above league-wide research', async ({ page }) => {
   await page.goto('http://127.0.0.1:8510/#fantasy', { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: 'Start / Sit' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in for roster-aware research' })).toBeVisible();
+  await expect(page.getByText('League-wide intelligence')).toBeVisible();
+  await expect(page.getByText('GENERIC RESEARCH')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Decision research' })).toBeVisible();
-  await expect(page.getByText('Generic intelligence is live')).toBeVisible();
 });
