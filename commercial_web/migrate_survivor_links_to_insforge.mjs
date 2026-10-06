@@ -40,6 +40,9 @@ let migrated = 0
 let alreadyPresent = 0
 let skipped = 0
 let conflicts = 0
+let claimsMigrated = 0
+let claimsUpdated = 0
+let claimsSkipped = 0
 
 for (const [ownerId, entryName] of Object.entries(links.survivor_entries || {})) {
   const entry = survivorState?.entries?.[entryName]
@@ -81,6 +84,38 @@ for (const [ownerId, entryName] of Object.entries(links.survivor_entries || {}))
   }
 }
 
+for (const [entryName, claim] of Object.entries(links.survivor_claims || {})) {
+  if (!claim || typeof claim !== 'object' || !claim.code_sha256) {
+    claimsSkipped += 1
+    continue
+  }
+
+  const { data: existingClaims, error: existingClaimsError } = await admin.database
+    .from('survivor_claims')
+    .select('entry_name')
+    .eq('entry_name', entryName)
+    .limit(1)
+  if (existingClaimsError) throw existingClaimsError
+
+  const payload = {
+    entry_name: entryName,
+    code_sha256: String(claim.code_sha256),
+    claimed_by: claim.claimed_by || null,
+    claimed_at: claim.claimed_at || null,
+    expires_at: claim.expires_at || null,
+  }
+
+  if (Array.isArray(existingClaims) && existingClaims.length) {
+    const { error } = await admin.database.from('survivor_claims').update(payload).eq('entry_name', entryName)
+    if (error) throw error
+    claimsUpdated += 1
+  } else {
+    const { error } = await admin.database.from('survivor_claims').insert(payload)
+    if (error) throw error
+    claimsMigrated += 1
+  }
+}
+
 const { data: adminRows, error: adminReadError } = await admin.database
   .from('survivor_entries')
   .select('id')
@@ -100,13 +135,38 @@ if (!publicInsertError) {
   throw new Error('RLS probe unexpectedly allowed anonymous insert')
 }
 
+const { data: adminClaimRows, error: adminClaimReadError } = await admin.database
+  .from('survivor_claims')
+  .select('entry_name')
+if (adminClaimReadError) throw adminClaimReadError
+
+const { data: publicClaimRows, error: publicClaimReadError } = await publicClient.database
+  .from('survivor_claims')
+  .select('entry_name')
+
+const { error: publicClaimInsertError } = await publicClient.database
+  .from('survivor_claims')
+  .insert({ entry_name: '__CLAIM_RLS_PROBE__', code_sha256: '0'.repeat(64) })
+
+if (!publicClaimInsertError) {
+  await admin.database.from('survivor_claims').delete().eq('entry_name', '__CLAIM_RLS_PROBE__')
+  throw new Error('Claim RLS probe unexpectedly allowed anonymous insert')
+}
+
 console.log(JSON.stringify({
   migrated,
   alreadyPresent,
   skipped,
   conflicts,
+  claims_migrated: claimsMigrated,
+  claims_updated: claimsUpdated,
+  claims_skipped: claimsSkipped,
   admin_row_count: Array.isArray(adminRows) ? adminRows.length : 0,
+  admin_claim_row_count: Array.isArray(adminClaimRows) ? adminClaimRows.length : 0,
   anonymous_read_row_count: Array.isArray(publicRows) ? publicRows.length : 0,
   anonymous_read_blocked_or_empty: Boolean(publicReadError) || (Array.isArray(publicRows) && publicRows.length === 0),
   anonymous_insert_blocked: Boolean(publicInsertError),
+  anonymous_claim_read_row_count: Array.isArray(publicClaimRows) ? publicClaimRows.length : 0,
+  anonymous_claim_read_blocked_or_empty: Boolean(publicClaimReadError) || (Array.isArray(publicClaimRows) && publicClaimRows.length === 0),
+  anonymous_claim_insert_blocked: Boolean(publicClaimInsertError),
 }, null, 2))

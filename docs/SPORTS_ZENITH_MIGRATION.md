@@ -15,7 +15,7 @@ These are not disposable build artifacts:
 - `data/sports_members.sqlite3`
 - `commercial_web/private_member_links.json` (temporary compatibility fallback during member migration)
 - InsForge users/sessions/profile records
-- InsForge member-owned tables: `survivor_entries`, `survivor_decisions`, `fantasy_leagues`, `fantasy_rosters`, `fantasy_advice`
+- InsForge member/account tables: `survivor_entries`, `survivor_decisions`, private `survivor_claims`, `fantasy_leagues`, `fantasy_rosters`, `fantasy_advice`
 - Future subscription/account entitlement tables
 - Official forward ledgers / accountability history under `intelligence_warehouse/`
 - Survivor ownership/rule/history inputs that cannot be regenerated from public feeds

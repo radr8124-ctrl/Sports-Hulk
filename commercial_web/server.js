@@ -1387,9 +1387,37 @@ const server=http.createServer(async(req,res)=>{
         return json(res,409,{status:'ENTRY_ALREADY_CLAIMED',message:'That Survivor entry is already linked to another account.'})
       }
 
-      const claim=links.survivor_claims[entryName]
+      if(!INSFORGE_ADMIN){
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage is temporarily unavailable. Please try again.'})
+      }
+
+      let claim=null
+      let claimFromDatabase=false
+      try{
+        const {data:claimRows,error:claimReadError}=await INSFORGE_ADMIN.database
+          .from('survivor_claims')
+          .select('entry_name,code_sha256,claimed_by,claimed_at,expires_at')
+          .eq('entry_name',entryName)
+          .limit(1)
+        if(claimReadError){
+          return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'The private claim store could not be verified. Please try again.'})
+        }
+        if(Array.isArray(claimRows) && claimRows[0]){
+          claim=claimRows[0]
+          claimFromDatabase=true
+        }
+      }catch{
+        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'The private claim store could not be verified. Please try again.'})
+      }
+
+      if(!claim){
+        claim=links.survivor_claims[entryName]||null
+      }
       if(!claim || claim.claimed_by){
         return json(res,403,{status:'CLAIM_UNAVAILABLE',message:'No unused claim code is available for that entry.'})
+      }
+      if(claim.expires_at && Date.parse(claim.expires_at) <= Date.now()){
+        return json(res,403,{status:'CLAIM_EXPIRED',message:'That claim code has expired. Request a new claim code.'})
       }
 
       const submittedHash=sha256(claimCode)
@@ -1397,8 +1425,20 @@ const server=http.createServer(async(req,res)=>{
         return json(res,403,{status:'INVALID_CLAIM_CODE',message:'The claim code is not valid for that entry.'})
       }
 
-      if(!INSFORGE_ADMIN){
-        return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage is temporarily unavailable. Please try again.'})
+      if(!claimFromDatabase){
+        const {error:claimSyncError}=await INSFORGE_ADMIN.database
+          .from('survivor_claims')
+          .insert({
+            entry_name:entryName,
+            code_sha256:claim.code_sha256,
+            claimed_by:null,
+            claimed_at:null,
+            expires_at:claim.expires_at||null,
+          })
+        if(claimSyncError){
+          return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'The claim record could not be secured. Please try again.'})
+        }
+        claimFromDatabase=true
       }
 
       const { data: dbOwners, error: dbOwnersError } = await INSFORGE_ADMIN.database
@@ -1442,9 +1482,45 @@ const server=http.createServer(async(req,res)=>{
         return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'The entry was verified but could not be attached to the account. Please try again.'})
       }
 
+      const claimedAt=new Date().toISOString()
+      const claimWrite=await INSFORGE_ADMIN.database
+        .from('survivor_claims')
+        .update({claimed_by:user.id,claimed_at:claimedAt})
+        .eq('entry_name',entryName)
+        .is('claimed_by',null)
+        .select('entry_name,claimed_by')
+
+      let claimCommitted=!claimWrite.error && Array.isArray(claimWrite.data) && claimWrite.data.some(row=>row.claimed_by===user.id)
+      if(!claimCommitted){
+        try{
+          const {data:claimVerify}=await INSFORGE_ADMIN.database
+            .from('survivor_claims')
+            .select('claimed_by')
+            .eq('entry_name',entryName)
+            .limit(1)
+          claimCommitted=Array.isArray(claimVerify) && claimVerify[0]?.claimed_by===user.id
+        }catch{}
+      }
+
+      if(!claimCommitted){
+        if(!dbExisting){
+          try{
+            await INSFORGE_ADMIN.database
+              .from('survivor_entries')
+              .delete()
+              .eq('owner_id',user.id)
+              .eq('entry_name',entryName)
+          }catch{}
+        }
+        return json(res,409,{status:'CLAIM_UNAVAILABLE',message:'That Survivor entry was claimed before this request completed. Refresh your account and try again.'})
+      }
+
       links.survivor_entries[user.id]=entryName
-      claim.claimed_by=user.id
-      claim.claimed_at=new Date().toISOString()
+      const localClaim=links.survivor_claims[entryName]
+      if(localClaim){
+        localClaim.claimed_by=user.id
+        localClaim.claimed_at=claimedAt
+      }
       await saveMemberLinks(links)
 
       return json(res,200,{
