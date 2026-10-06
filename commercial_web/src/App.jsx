@@ -2678,6 +2678,193 @@ function PersonalStartSitPanel({ onOpenMyTeams }) {
   )
 }
 
+
+function LeagueSettingsPanel({ team, onSaved }) {
+  const { user, getAccessToken } = useAuth()
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+  const [scoringPreset, setScoringPreset] = useState('ppr')
+  const [starterSlots, setStarterSlots] = useState({
+    qb: 1, rb: 2, wr: 2, te: 1, flex: 1, superflex: 0, dst: 1, k: 1,
+  })
+  const [benchSlots, setBenchSlots] = useState(6)
+  const [irSlots, setIrSlots] = useState(1)
+  const [faabBudget, setFaabBudget] = useState('')
+  const [faabRemaining, setFaabRemaining] = useState('')
+
+  useEffect(() => {
+    const scoring = team?.scoring && typeof team.scoring === 'object' ? team.scoring : {}
+    const settings = team?.roster_settings && typeof team.roster_settings === 'object' ? team.roster_settings : {}
+    const slots = settings.starting_slots && typeof settings.starting_slots === 'object' ? settings.starting_slots : {}
+
+    const receptionPoints = Number(scoring.reception_points)
+    const inferredPreset = scoring.preset
+      || (receptionPoints === 0 ? 'standard' : receptionPoints === 0.5 ? 'half_ppr' : 'ppr')
+
+    setScoringPreset(['ppr', 'half_ppr', 'standard'].includes(inferredPreset) ? inferredPreset : 'ppr')
+    setStarterSlots({
+      qb: Number.isFinite(Number(slots.qb)) ? Number(slots.qb) : 1,
+      rb: Number.isFinite(Number(slots.rb)) ? Number(slots.rb) : 2,
+      wr: Number.isFinite(Number(slots.wr)) ? Number(slots.wr) : 2,
+      te: Number.isFinite(Number(slots.te)) ? Number(slots.te) : 1,
+      flex: Number.isFinite(Number(slots.flex)) ? Number(slots.flex) : 1,
+      superflex: Number.isFinite(Number(slots.superflex)) ? Number(slots.superflex) : 0,
+      dst: Number.isFinite(Number(slots.dst)) ? Number(slots.dst) : 1,
+      k: Number.isFinite(Number(slots.k)) ? Number(slots.k) : 1,
+    })
+    setBenchSlots(Number.isFinite(Number(settings.bench_slots)) ? Number(settings.bench_slots) : 6)
+    setIrSlots(Number.isFinite(Number(settings.ir_slots)) ? Number(settings.ir_slots) : 1)
+
+    const budget = scoring.faab_budget ?? settings.faab_budget
+    const remaining = scoring.faab_remaining ?? settings.faab_remaining
+    setFaabBudget(budget == null ? '' : String(budget))
+    setFaabRemaining(remaining == null ? '' : String(remaining))
+    setError('')
+    setSaved(false)
+  }, [team?.league_id])
+
+  if (!user || !team?.league_id) return null
+
+  const setSlot = (key, value) => {
+    const parsed = Number(value)
+    setStarterSlots((current) => ({
+      ...current,
+      [key]: Number.isFinite(parsed) ? Math.max(0, Math.min(30, Math.round(parsed))) : 0,
+    }))
+  }
+
+  const save = async () => {
+    setBusy(true)
+    setError('')
+    setSaved(false)
+    try {
+      const token = await getAccessToken()
+      if (!token) throw new Error('Your session expired. Sign in again.')
+
+      const response = await fetch('/api/fantasy/league-settings', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          league_id: team.league_id,
+          scoring_preset: scoringPreset,
+          starter_slots: starterSlots,
+          bench_slots: benchSlots,
+          ir_slots: irSlots,
+          faab_budget: faabBudget === '' ? null : Number(faabBudget),
+          faab_remaining: faabRemaining === '' ? null : Number(faabRemaining),
+        }),
+      })
+
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload.message || payload.error || 'Could not save league settings.')
+
+      onSaved?.({
+        league_id: team.league_id,
+        scoring: payload.scoring || {},
+        roster_settings: payload.roster_settings || {},
+      })
+      setSaved(true)
+    } catch (err) {
+      setError(err?.message || 'Could not save league settings.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const slotFields = [
+    ['qb', 'QB'], ['rb', 'RB'], ['wr', 'WR'], ['te', 'TE'],
+    ['flex', 'FLEX'], ['superflex', 'SUPERFLEX'], ['dst', 'D/ST'], ['k', 'K'],
+  ]
+
+  return (
+    <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-center justify-between gap-3 text-left"
+      >
+        <div>
+          <div className="text-sm font-black text-slate-950">League settings</div>
+          <div className="mt-1 text-[11px] font-semibold text-slate-500">Scoring · starter slots · bench/IR · FAAB budget</div>
+        </div>
+        <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-blue-700">{open ? 'Close' : 'Edit'}</span>
+      </button>
+
+      {open && (
+        <div className="mt-4 border-t border-slate-200 pt-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Scoring format</div>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {[
+              ['ppr', 'PPR'],
+              ['half_ppr', 'Half-PPR'],
+              ['standard', 'Standard'],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setScoringPreset(value)}
+                className={`rounded-xl border px-3 py-2.5 text-xs font-black ${scoringPreset === value ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-4 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Starting lineup slots</div>
+          <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-8">
+            {slotFields.map(([key, label]) => (
+              <label key={key} className="rounded-xl border border-slate-200 bg-white p-2 text-center">
+                <div className="text-[9px] font-black uppercase tracking-wide text-slate-400">{label}</div>
+                <input
+                  aria-label={`${label} starter slots`}
+                  type="number"
+                  min="0"
+                  max="30"
+                  value={starterSlots[key]}
+                  onChange={(event) => setSlot(key, event.target.value)}
+                  className="mt-1 w-full bg-transparent text-center text-sm font-black text-slate-950 outline-none"
+                />
+              </label>
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-4">
+            <label>
+              <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Bench</span>
+              <input aria-label="Bench slots" type="number" min="0" max="30" value={benchSlots} onChange={(event) => setBenchSlots(Math.max(0, Math.min(30, Number(event.target.value) || 0)))} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
+            </label>
+            <label>
+              <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">IR</span>
+              <input aria-label="IR slots" type="number" min="0" max="20" value={irSlots} onChange={(event) => setIrSlots(Math.max(0, Math.min(20, Number(event.target.value) || 0)))} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
+            </label>
+            <label>
+              <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">FAAB total</span>
+              <input aria-label="FAAB total budget" type="number" min="0" max="100000" value={faabBudget} onChange={(event) => setFaabBudget(event.target.value)} placeholder="100" className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
+            </label>
+            <label>
+              <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">FAAB left</span>
+              <input aria-label="FAAB remaining" type="number" min="0" max="100000" value={faabRemaining} onChange={(event) => setFaabRemaining(event.target.value)} placeholder="100" className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
+            </label>
+          </div>
+
+          {error && <div className="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">{error}</div>}
+          {saved && <div className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">League settings saved to your Sports Zenith account.</div>}
+
+          <button type="button" onClick={save} disabled={busy} className="mt-4 flex h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-black text-white disabled:opacity-40">
+            {busy ? 'Saving…' : 'Save league settings'}
+          </button>
+          <div className="mt-2 text-[10px] font-semibold leading-4 text-slate-400">These settings stay private to this saved league. They will be used by league-specific lineup and FAAB logic in the next intelligence pass.</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function RateMyTeamPanel() {
   const { user, getAccessToken } = useAuth()
   const [leagueName, setLeagueName] = useState('My Team')
@@ -2700,6 +2887,11 @@ function RateMyTeamPanel() {
     [rosterText],
   )
 
+  const selectedTeam = useMemo(
+    () => savedTeams.find((team) => team.league_id === selectedLeagueId) || null,
+    [savedTeams, selectedLeagueId],
+  )
+
   const rosterItemName = (item) => {
     if (typeof item === 'string') return item.trim()
     if (item && typeof item === 'object') return String(item.name || item.player || '').trim()
@@ -2715,6 +2907,14 @@ function RateMyTeamPanel() {
     setSavedSummary(team.last_analysis || null)
     setResult(null)
     setError('')
+  }
+
+  const updateSavedTeamSettings = ({ league_id, scoring, roster_settings }) => {
+    setSavedTeams((current) => current.map((team) => (
+      team.league_id === league_id
+        ? { ...team, scoring: scoring || {}, roster_settings: roster_settings || {} }
+        : team
+    )))
   }
 
   useEffect(() => {
@@ -2822,6 +3022,8 @@ function RateMyTeamPanel() {
           roster: rosterNames,
           starters: [],
           bench: [],
+          scoring: selectedTeam?.scoring || {},
+          roster_settings: selectedTeam?.roster_settings || {},
           last_analysis: latestSummary,
         }
         setSavedTeams((current) => [
@@ -2912,6 +3114,8 @@ function RateMyTeamPanel() {
             )}
           </div>
         )}
+
+        <LeagueSettingsPanel team={selectedTeam} onSaved={updateSavedTeamSettings} />
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <label className="block">

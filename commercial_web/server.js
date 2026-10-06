@@ -1572,6 +1572,126 @@ const server=http.createServer(async(req,res)=>{
       })
     }
   }
+  if(req.method==='POST'&&url.pathname==='/api/fantasy/league-settings'){
+    try{
+      const user=await authenticatedUser(req)
+      if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in before changing league settings.'})
+
+      const client=scopedInsForgeClient(req)
+      if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private fantasy storage is temporarily unavailable.'})
+
+      const body=await readBody(req)
+      const leagueId=String(body.league_id||'').trim()
+      if(!leagueId) return json(res,400,{status:'MISSING_LEAGUE',message:'Choose a saved team before editing league settings.'})
+
+      const preset=String(body.scoring_preset||'').trim().toLowerCase()
+      const receptionPointsMap={ppr:1,half_ppr:0.5,standard:0}
+      if(!Object.prototype.hasOwnProperty.call(receptionPointsMap,preset)){
+        return json(res,400,{status:'INVALID_SCORING',message:'Scoring must be PPR, Half-PPR or Standard.'})
+      }
+
+      const clampInt=(value,min,max,fallback=0)=>{
+        const parsed=Number(value)
+        if(!Number.isFinite(parsed)) return fallback
+        return Math.max(min,Math.min(max,Math.round(parsed)))
+      }
+      const starterSlots={
+        qb:clampInt(body?.starter_slots?.qb,0,4,1),
+        rb:clampInt(body?.starter_slots?.rb,0,8,2),
+        wr:clampInt(body?.starter_slots?.wr,0,8,2),
+        te:clampInt(body?.starter_slots?.te,0,4,1),
+        flex:clampInt(body?.starter_slots?.flex,0,6,1),
+        superflex:clampInt(body?.starter_slots?.superflex,0,4,0),
+        dst:clampInt(body?.starter_slots?.dst,0,4,1),
+        k:clampInt(body?.starter_slots?.k,0,4,1),
+      }
+      const benchSlots=clampInt(body.bench_slots,0,30,6)
+      const irSlots=clampInt(body.ir_slots,0,20,1)
+
+      const faabBudgetRaw=body.faab_budget
+      const faabRemainingRaw=body.faab_remaining
+      const faabBudget=faabBudgetRaw==null||faabBudgetRaw===''?null:Number(faabBudgetRaw)
+      const faabRemaining=faabRemainingRaw==null||faabRemainingRaw===''?null:Number(faabRemainingRaw)
+      if(faabBudget!=null&&(!Number.isFinite(faabBudget)||faabBudget<0||faabBudget>100000)){
+        return json(res,400,{status:'INVALID_FAAB',message:'FAAB budget must be between 0 and 100,000.'})
+      }
+      if(faabRemaining!=null&&(!Number.isFinite(faabRemaining)||faabRemaining<0||faabRemaining>100000)){
+        return json(res,400,{status:'INVALID_FAAB',message:'FAAB remaining must be between 0 and 100,000.'})
+      }
+      if(faabBudget!=null&&faabRemaining!=null&&faabRemaining>faabBudget){
+        return json(res,400,{status:'INVALID_FAAB',message:'FAAB remaining cannot be greater than the total budget.'})
+      }
+
+      const {data:rows,error:readError}=await client.database
+        .from('fantasy_leagues')
+        .select('id,scoring,roster_settings,provenance')
+        .eq('id',leagueId)
+        .eq('owner_id',user.id)
+        .limit(1)
+
+      if(readError) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your fantasy league could not be loaded.'})
+      const league=Array.isArray(rows)?rows[0]:null
+      if(!league) return json(res,404,{status:'LEAGUE_NOT_FOUND',message:'That saved fantasy team was not found in your account.'})
+
+      const scoring={
+        ...(league.scoring&&typeof league.scoring==='object'&&!Array.isArray(league.scoring)?league.scoring:{}),
+        preset,
+        reception_points:receptionPointsMap[preset],
+      }
+      if(faabBudget!=null) scoring.faab_budget=faabBudget
+      else delete scoring.faab_budget
+      if(faabRemaining!=null) scoring.faab_remaining=faabRemaining
+      else delete scoring.faab_remaining
+
+      const rosterSettings={
+        ...(league.roster_settings&&typeof league.roster_settings==='object'&&!Array.isArray(league.roster_settings)?league.roster_settings:{}),
+        starting_slots:starterSlots,
+        bench_slots:benchSlots,
+        ir_slots:irSlots,
+      }
+      if(faabBudget!=null) rosterSettings.faab_budget=faabBudget
+      else delete rosterSettings.faab_budget
+      if(faabRemaining!=null) rosterSettings.faab_remaining=faabRemaining
+      else delete rosterSettings.faab_remaining
+
+      const provenance={
+        ...(league.provenance&&typeof league.provenance==='object'&&!Array.isArray(league.provenance)?league.provenance:{}),
+        league_settings_updated_at:new Date().toISOString(),
+      }
+
+      const {error:updateError}=await client.database
+        .from('fantasy_leagues')
+        .update({
+          scoring,
+          roster_settings:rosterSettings,
+          provenance,
+          last_synced_at:new Date().toISOString(),
+        })
+        .eq('id',leagueId)
+        .eq('owner_id',user.id)
+
+      if(updateError) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Your league settings could not be saved.'})
+
+      return json(res,200,{
+        status:'SAVED',
+        league_id:leagueId,
+        scoring,
+        roster_settings:rosterSettings,
+        settings_ready:{
+          scoring:true,
+          starter_slots:true,
+          faab_budget:faabBudget!=null,
+          faab_remaining:faabRemaining!=null,
+        },
+      })
+    }catch(err){
+      return json(res,400,{
+        status:'ERROR',
+        message:'Sports Zenith could not save those league settings.',
+        error:err instanceof Error?err.message:String(err),
+      })
+    }
+  }
   if(req.method==='GET'&&url.pathname==='/api/fantasy/waivers'){
     try{
       const user=await authenticatedUser(req)
