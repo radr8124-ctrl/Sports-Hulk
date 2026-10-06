@@ -84,7 +84,7 @@ function UsageCard({ row, slotLabel = null }) {
   )
 }
 
-export default function PersonalIdpPanel({ onOpenMyTeams }) {
+export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
   const { user, getAccessToken } = useAuth()
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
@@ -107,7 +107,8 @@ export default function PersonalIdpPanel({ onOpenMyTeams }) {
         const token = await getAccessToken()
         if (!token) throw new Error('Your session expired. Sign in again.')
 
-        const response = await fetch('/api/fantasy/idp', {
+        const endpoint = leagueId ? '/api/fantasy/idp?league_id=' + encodeURIComponent(leagueId) : '/api/fantasy/idp'
+        const response = await fetch(endpoint, {
           cache: 'no-store',
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -126,7 +127,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams }) {
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken])
+  }, [user, getAccessToken, leagueId])
 
   if (!user) {
     return (

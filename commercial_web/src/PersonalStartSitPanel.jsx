@@ -16,7 +16,7 @@ function LoadingPanel({ label = 'Loading' }) {
   )
 }
 
-export default function PersonalStartSitPanel({ onOpenMyTeams }) {
+export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }) {
   const { user, getAccessToken } = useAuth()
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
@@ -39,7 +39,8 @@ export default function PersonalStartSitPanel({ onOpenMyTeams }) {
         const token = await getAccessToken()
         if (!token) throw new Error('Your session expired. Sign in again.')
 
-        const response = await fetch('/api/fantasy/start-sit', {
+        const endpoint = leagueId ? '/api/fantasy/start-sit?league_id=' + encodeURIComponent(leagueId) : '/api/fantasy/start-sit'
+        const response = await fetch(endpoint, {
           cache: 'no-store',
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -58,7 +59,7 @@ export default function PersonalStartSitPanel({ onOpenMyTeams }) {
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken])
+  }, [user, getAccessToken, leagueId])
 
   if (!user) {
     return (

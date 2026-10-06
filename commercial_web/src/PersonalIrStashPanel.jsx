@@ -16,7 +16,7 @@ function LoadingPanel({ label = 'Loading' }) {
   )
 }
 
-export default function PersonalIrStashPanel({ onOpenMyTeams }) {
+export default function PersonalIrStashPanel({ onOpenMyTeams, leagueId = null }) {
   const { user, getAccessToken } = useAuth()
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
@@ -39,7 +39,8 @@ export default function PersonalIrStashPanel({ onOpenMyTeams }) {
         const token = await getAccessToken()
         if (!token) throw new Error('Your session expired. Sign in again.')
 
-        const response = await fetch('/api/fantasy/ir-stash', {
+        const endpoint = leagueId ? '/api/fantasy/ir-stash?league_id=' + encodeURIComponent(leagueId) : '/api/fantasy/ir-stash'
+        const response = await fetch(endpoint, {
           cache: 'no-store',
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -58,7 +59,7 @@ export default function PersonalIrStashPanel({ onOpenMyTeams }) {
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken])
+  }, [user, getAccessToken, leagueId])
 
   if (!user) {
     return (

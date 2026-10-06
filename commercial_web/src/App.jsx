@@ -2527,7 +2527,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
   )
 }
 
-function RateMyTeamPanel() {
+function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onTeamUpsert }) {
   const { user, getAccessToken } = useAuth()
   const [leagueName, setLeagueName] = useState('My Team')
   const [teamName, setTeamName] = useState('')
@@ -2562,7 +2562,9 @@ function RateMyTeamPanel() {
 
   const loadSavedTeam = (team) => {
     if (!team) return
-    setSelectedLeagueId(team.league_id || null)
+    const nextLeagueId = team.league_id || null
+    setSelectedLeagueId(nextLeagueId)
+    onSelectedLeagueChange?.(nextLeagueId)
     setLeagueName(team.league_name || 'My Team')
     setTeamName(team.team_name || '')
     setRosterText((team.roster || []).map(rosterItemName).filter(Boolean).join('\n'))
@@ -2607,7 +2609,8 @@ function RateMyTeamPanel() {
 
         setSavedTeams(teams)
         if (teams.length) {
-          loadSavedTeam(teams[0])
+          const preferred = teams.find((team) => team.league_id === preferredLeagueId) || teams[0]
+          loadSavedTeam(preferred)
         } else {
           setSelectedLeagueId(null)
           setSavedSummary(null)
@@ -2692,6 +2695,8 @@ function RateMyTeamPanel() {
           savedTeam,
           ...current.filter((team) => team.league_id !== savedLeagueId),
         ])
+        onTeamUpsert?.(savedTeam)
+        onSelectedLeagueChange?.(savedLeagueId)
       }
     } catch (err) {
       setError(err?.message || 'Could not rate that roster.')
@@ -2949,9 +2954,13 @@ function RateMyTeamPanel() {
 }
 
 function FantasyCommercialPanel() {
+  const { user, getAccessToken } = useAuth()
   const [mode, setMode] = useState('Season-Long')
   const [lane, setLane] = useState('my_teams')
   const [sport, setSport] = useState('NFL')
+  const [teamOptions, setTeamOptions] = useState([])
+  const [teamOptionsLoading, setTeamOptionsLoading] = useState(false)
+  const [selectedLeagueId, setSelectedLeagueId] = useState(null)
   const current = useJsonEndpoint('/fantasy_v2_current.json', { lanes: {} })
   const decisions = useJsonEndpoint('/fantasy_decisions.json', { personalization: {}, lanes: {} })
   const brain = useJsonEndpoint('/brain_performance.json', { fantasy_v2: {}, dfs: {} })
@@ -2978,6 +2987,64 @@ function FantasyCommercialPanel() {
     ['defense_streaming', 'Defense'],
     ['idp', 'IDP'],
   ]
+
+  useEffect(() => {
+    let active = true
+
+    if (!user) {
+      setTeamOptions([])
+      setSelectedLeagueId(null)
+      setTeamOptionsLoading(false)
+      return () => { active = false }
+    }
+
+    const load = async () => {
+      setTeamOptionsLoading(true)
+      try {
+        const token = await getAccessToken()
+        if (!token) throw new Error('No authenticated session')
+
+        const response = await fetch('/api/fantasy/my-teams', {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error('Saved teams unavailable')
+
+        const payload = await response.json()
+        const teams = Array.isArray(payload?.teams) ? payload.teams : []
+        if (!active) return
+
+        setTeamOptions(teams)
+        setSelectedLeagueId((currentLeagueId) => {
+          if (currentLeagueId && teams.some((team) => team.league_id === currentLeagueId)) {
+            return currentLeagueId
+          }
+          return teams[0]?.league_id || null
+        })
+      } catch {
+        if (active) {
+          setTeamOptions([])
+          setSelectedLeagueId(null)
+        }
+      } finally {
+        if (active) setTeamOptionsLoading(false)
+      }
+    }
+
+    load()
+    return () => { active = false }
+  }, [user, getAccessToken])
+
+  const upsertTeamOption = (team) => {
+    if (!team?.league_id) return
+    setTeamOptions((current) => [
+      team,
+      ...current.filter((row) => row.league_id !== team.league_id),
+    ])
+    setSelectedLeagueId(team.league_id)
+  }
+
+  const selectedTeamOption = teamOptions.find((team) => team.league_id === selectedLeagueId) || null
 
   const switchLane = (next) => {
     setLane(next)
@@ -3014,33 +3081,81 @@ function FantasyCommercialPanel() {
             </div>
           </section>
 
+          {user && lane !== 'my_teams' && (
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Active fantasy team</div>
+                  <div className="mt-1 text-sm font-black text-slate-950">
+                    {teamOptionsLoading
+                      ? 'Loading saved teams…'
+                      : selectedTeamOption
+                        ? selectedTeamOption.team_name || selectedTeamOption.league_name || 'My Team'
+                        : 'No saved team selected'}
+                  </div>
+                  <div className="mt-1 text-[11px] font-semibold text-slate-500">This team controls Start/Sit, Waivers, IR Stash, Defense and IDP.</div>
+                </div>
+
+                {teamOptions.length > 0 ? (
+                  <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
+                    {teamOptions.map((team) => {
+                      const selected = team.league_id === selectedLeagueId
+                      return (
+                        <button
+                          key={team.league_id}
+                          type="button"
+                          onClick={() => setSelectedLeagueId(team.league_id)}
+                          className={`min-w-[165px] rounded-xl border px-3 py-2 text-left transition ${selected ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-slate-50 hover:border-blue-200'}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {selected && <CheckCircle2 size={13} className="shrink-0 text-blue-700" />}
+                            <div className="truncate text-xs font-black text-slate-950">{team.team_name || team.league_name || 'My Team'}</div>
+                          </div>
+                          <div className="mt-1 truncate text-[10px] font-semibold text-slate-400">{team.league_name || 'Manual league'} · {team.season || '—'}</div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                ) : !teamOptionsLoading ? (
+                  <button type="button" onClick={() => switchLane('my_teams')} className="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white">
+                    Save a team
+                  </button>
+                ) : null}
+              </div>
+            </section>
+          )}
+
           {lane === 'my_teams' ? (
-            <RateMyTeamPanel />
+            <RateMyTeamPanel
+              preferredLeagueId={selectedLeagueId}
+              onSelectedLeagueChange={setSelectedLeagueId}
+              onTeamUpsert={upsertTeamOption}
+            />
           ) : (
             <>
           {lane === 'weekly' && (
             <Suspense fallback={<LoadingSurface label="Loading your Start / Sit research" />}>
-              <PersonalStartSitPanel onOpenMyTeams={() => switchLane('my_teams')} />
+              <PersonalStartSitPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} />
             </Suspense>
           )}
           {lane === 'faab' && (
             <Suspense fallback={<LoadingSurface label="Loading your waiver research" />}>
-              <PersonalWaiverPanel onOpenMyTeams={() => switchLane('my_teams')} />
+              <PersonalWaiverPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} />
             </Suspense>
           )}
           {lane === 'ir_stash' && (
             <Suspense fallback={<LoadingSurface label="Loading your IR stash research" />}>
-              <PersonalIrStashPanel onOpenMyTeams={() => switchLane('my_teams')} />
+              <PersonalIrStashPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} />
             </Suspense>
           )}
           {lane === 'defense_streaming' && (
             <Suspense fallback={<LoadingSurface label="Loading your defense streaming research" />}>
-              <PersonalDefenseStreamingPanel onOpenMyTeams={() => switchLane('my_teams')} />
+              <PersonalDefenseStreamingPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} />
             </Suspense>
           )}
           {lane === 'idp' && (
             <Suspense fallback={<LoadingSurface label="Loading your IDP research" />}>
-              <PersonalIdpPanel onOpenMyTeams={() => switchLane('my_teams')} />
+              <PersonalIdpPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} />
             </Suspense>
           )}
           <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
