@@ -135,6 +135,8 @@ Compatibility summaries may aggregate model inventory by lane_key, but no aggreg
 
 ### 6.3 Current candidates
 
+For NBA, the explicit regime source is ESPN Core event metadata. `nba_live/build_nba_core.py` must dereference both the event `season` and `seasonType` references so `NBA_GAMES_CURRENT.csv` receives the explicit numeric/name season type. `nba_live/decision/build_nba_decision_brain.py` must then join that explicit event regime into `NBA_GAME_DECISIONS.csv` before Betting V2 reads it. No calendar/date inference is allowed.
+
 Current decision rows receive competition_regime from explicit upstream game/decision data.
 
 Every current candidate carries:
@@ -219,18 +221,20 @@ The framework is generic, but the first clean rebaseline is NBA.
 
 Rollout sequence:
 
-1. Add regime normalizer and tests.
-2. Propagate regime through all-markets historical/current outputs.
-3. Partition NBA proof lanes by regime.
-4. Add a regime-schema/proof version without globally restarting non-NBA evidence.
-5. Version NBA forward evidence so new regime-aware rows cannot merge with legacy rows while non-NBA forward keys remain stable.
-6. Propagate regime and proof version into price/CLV records.
-7. Regenerate Betting V2 artifacts.
-8. Verify current NBA preseason candidates are PRESEASON.
-9. Verify regular-season proof count is zero until explicit REGULAR rows arrive.
-10. Verify CFB REGULAR behavior remains functionally unchanged apart from new metadata.
-11. Rebuild Brain Record and commercial artifacts.
-12. Run focused and full regression checks.
+1. Repair NBA core season/seasonType parsing and add explicit-source tests.
+2. Carry season_type into NBA_GAME_DECISIONS.csv.
+3. Add regime normalizer and tests.
+4. Propagate regime through all-markets historical/current outputs.
+5. Partition NBA proof lanes by regime.
+6. Add a regime-schema/proof version without globally restarting non-NBA evidence.
+7. Version NBA forward evidence so new regime-aware rows cannot merge with legacy rows while non-NBA forward keys remain stable.
+8. Propagate regime and proof version into price/CLV records.
+9. Regenerate NBA core/decision and Betting V2 artifacts.
+10. Verify current NBA preseason candidates are PRESEASON from explicit ESPN metadata.
+11. Verify regular-season proof count is zero until explicit REGULAR rows arrive.
+12. Verify CFB REGULAR behavior remains functionally unchanged apart from new metadata.
+13. Rebuild Brain Record and commercial artifacts.
+14. Run focused and full regression checks.
 
 ## 8. Migration and immutability
 
@@ -355,15 +359,17 @@ This checkpoint is accepted only when all are true:
 ## 13. Expected files touched during implementation
 
 Likely core files:
+- nba_live/build_nba_core.py
+- nba_live/decision/build_nba_decision_brain.py
 - intelligence_warehouse/betting_v2/build_betting_v2_all_markets.py
 - intelligence_warehouse/betting_v2/build_betting_v2_all_markets_forward.py
-- intelligence_warehouse/betting_v2/build_betting_v2_line_clv.py and/or the active CLV tracker
-- intelligence_warehouse/brain_performance builder(s)
+- intelligence_warehouse/betting_v2/build_betting_v2_line_clv.py
+- intelligence_warehouse/brain_performance/build_brain_performance.py
 - focused new regime helper module
 - focused unit/regression tests
 - generated current/validation/model/forward-summary/Brain Record artifacts as required
 
-The implementation plan must inspect the active CLV and Brain Record builders before naming their exact write targets.
+Confirmed active downstream targets for this checkpoint are `build_betting_v2_all_markets_forward.py`, `build_betting_v2_line_clv.py`, and `build_brain_performance.py`; the older `build_clv_tracker.py` belongs to the legacy Betting V2 pipeline and is out of scope.
 
 ## 14. Design decisions
 
