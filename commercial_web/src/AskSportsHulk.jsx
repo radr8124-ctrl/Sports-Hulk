@@ -36,6 +36,15 @@ function relativeTime(value) {
   }
 }
 
+function safeSourceUrl(value) {
+  try {
+    const url = new URL(String(value || ''))
+    return ['http:', 'https:'].includes(url.protocol) ? url.toString() : null
+  } catch {
+    return null
+  }
+}
+
 function AskCard({ answer, compact = false }) {
   if (!answer) return null
   return (
@@ -99,7 +108,24 @@ function AskCard({ answer, compact = false }) {
       <div className="mt-5 border-t border-white/10 pt-3">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-slate-500">
           {!!answer.sources?.length && (
-            <span>Sources: {answer.sources.map(s => s.source || s.label).filter(Boolean).slice(0, 3).join(' · ')}</span>
+            <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+              <span>Sources:</span>
+              {answer.sources.slice(0, 3).map((source, index) => {
+                const label = source.source || source.label || `Source ${index + 1}`
+                const href = safeSourceUrl(source.url)
+                return href ? (
+                  <a
+                    key={`${label}-${href}`}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="font-black text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200"
+                  >
+                    {label}
+                  </a>
+                ) : <span key={`${label}-${index}`}>{label}</span>
+              })}
+            </span>
           )}
           <span>Updated: {relativeTime(answer.updated_at || answer.generated_at)}</span>
         </div>
