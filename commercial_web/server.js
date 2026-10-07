@@ -19,6 +19,7 @@ import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
 import { askClaimCoverage } from './ask_claim_coverage.js'
+import { reportingConsensus } from './reporting_consensus.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -1787,12 +1788,16 @@ function reportingAnswer(question, data) {
   const sources=reportingEvidenceSources(events.slice(0,6),facts.slice(0,6),8)
   if(!sources.length) sources.push(...updatedSources(data,['askRetrieval']))
   const claimSources=reportingClaimSources(events,facts)
+  const sourceAgreement=reportingConsensus(events,facts)
+  const confidence=sourceAgreement.status==='MULTI_SOURCE_AGREEMENT'
+    ? 'MULTI-SOURCE AGREEMENT'
+    : hit.exact_entity_match?'ENTITY-LINKED REPORTING':'ATTRIBUTED REPORTING'
 
   return {
     ...response({
       intent:'reporting',
       take:topEvent ? topEvent.title : topFact.fact_text,
-      confidence:hit.exact_entity_match?'ENTITY-LINKED REPORTING':'ATTRIBUTED REPORTING',
+      confidence,
       why:why.slice(0,4),
       risk:['Reporting can be superseded by newer official status updates. Structured verified facts take precedence when they conflict.'],
       cards,
@@ -1801,6 +1806,7 @@ function reportingAnswer(question, data) {
       followups:['What does this mean for fantasy?','Any injury update?','What changed most recently?'],
     }),
     claim_sources:claimSources,
+    ...(sourceAgreement.status==='MULTI_SOURCE_AGREEMENT'?{source_agreement:sourceAgreement}:{}),
   }
 }
 

@@ -1,0 +1,47 @@
+{
+  "generated_at": "2026-10-07T12:00:00Z",
+  "source": "Deterministic consensus fixture",
+  "news_events": [
+    {
+      "event_node_id": "NEWS:consensus-official",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "LOW",
+      "title": "Consensus Runner official practice update",
+      "detail": "Consensus Runner returned to full practice.",
+      "source": "Test Team Official",
+      "source_tier": "OFFICIAL_NEWS",
+      "source_url": "https://team.example/consensus-runner",
+      "published_or_effective_at": "2026-10-07T10:00:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    },
+    {
+      "event_node_id": "NEWS:consensus-beat",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "LOW",
+      "title": "Consensus Runner beat report",
+      "detail": "Consensus Runner returned to full practice.",
+      "source": "Test Trusted Beat",
+      "source_tier": "EXTERNAL_NEWS",
+      "source_url": "https://beat.example/consensus-runner",
+      "published_or_effective_at": "2026-10-07T09:55:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    }
+  ],
+  "entity_links": [],
+  "facts": [],
+  "entity_index": {
+    "consensus runner": [
+      "NEWS:consensus-official",
+      "NEWS:consensus-beat"
+    ]
+  },
+  "counts": {
+    "facts": 0,
+    "news_events": 2
+  },
+  "truth_rules": {}
+}
