@@ -16,6 +16,7 @@ CURRENT = OUT_DIR / "PROP_V2_CURRENT.json"
 LEDGER = OUT_DIR / "PROP_V2_FORWARD_LEDGER.jsonl"
 SUMMARY = OUT_DIR / "PROP_V2_FORWARD_SUMMARY.json"
 PUBLIC = ROOT / "commercial_web" / "public" / "prop_v2_forward.json"
+NHL_BOX_RECEIPT = OUT_DIR / "NHL_OFFICIAL_BOX_FORWARD_RECEIPT.json"
 DIST = ROOT / "commercial_web" / "dist" / "prop_v2_forward.json"
 
 if str(OUT_DIR) not in sys.path:
@@ -879,10 +880,50 @@ def build_summary(capture_result, settled_now):
     return payload
 
 
+def settle_nhl_official_box():
+    try:
+        from .nhl_official_box_forward import (
+            plan_nhl_settlement, file_digests,
+        )
+    except ImportError:
+        from nhl_official_box_forward import (
+            plan_nhl_settlement, file_digests,
+        )
+
+    receipt, planned = plan_nhl_settlement(ROOT, canonical())
+    status = receipt.get("status")
+    if status == "READY":
+        # NHL core refresh may be writing a source file concurrently.
+        # In that case settle nothing and retry at the next hourly pass.
+        if file_digests(ROOT) != receipt.get("source_digests"):
+            receipt["status"] = "SOURCE_CHANGED_BEFORE_SETTLEMENT"
+        else:
+            for row in planned:
+                append_jsonl(LEDGER, row)
+            receipt["settled_now"] = len(planned)
+    else:
+        receipt["settled_now"] = 0
+    receipt.setdefault("settled_now", 0)
+    write_json(NHL_BOX_RECEIPT, receipt)
+    if receipt["status"] == "INTEGRITY_HOLD_CONTRADICTORY_SETTLEMENT":
+        raise RuntimeError("NHL official box disagrees with existing forward grade; no new NHL settlements written")
+    return receipt
+
+
 def main():
     capture_result = capture()
-    settled_now = settle()
+    generic_settled_now = settle()
+    nhl_receipt = settle_nhl_official_box()
+    settled_now = generic_settled_now + int(nhl_receipt.get("settled_now") or 0)
     payload = build_summary(capture_result, settled_now)
+    payload["nhl_official_box"] = {
+        "status": nhl_receipt.get("status"),
+        "settled_now": nhl_receipt.get("settled_now", 0),
+        "existing_verified": nhl_receipt.get("existing_verified", 0),
+        "conflicting_previous_grades_count": nhl_receipt.get("conflicting_previous_grades_count", 0),
+        "official_result_not_platform_payout": True,
+        "automatic_model_promotion": False,
+    }
     write_json(SUMMARY, payload)
     write_json(PUBLIC, payload)
     if DIST.exists():
@@ -892,6 +933,7 @@ def main():
         "status": payload["status"],
         "capture": capture_result,
         "settled_now": settled_now,
+        "nhl_official_box": payload["nhl_official_box"],
         "all_predictions": payload["all_predictions"],
         "monitor_selection": payload["monitor_selection"],
         "by_lane": {
