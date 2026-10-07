@@ -12,6 +12,7 @@ import { preferencePresentation, watchlistNewsHits } from './preference_presenta
 import { faabBudgetLines } from './faab_presentation.js'
 import { buildLinkedSurvivorSummaries } from './survivor_linked_entries.js'
 import { diversifySurvivorEntries } from './survivor_diversification.js'
+import { addSurvivorLink, survivorEntryOwnedByOther, survivorLinkNames } from './survivor_link_registry.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -277,8 +278,7 @@ async function linkedSurvivorEntries(req, userId) {
 
   const links = await loadExternalJson(MEMBER_LINKS_PATH)
   const stored=links?.survivor_entries?.[userId]
-  if(Array.isArray(stored)) return [...new Set(stored.map(value=>String(value||'').trim()).filter(Boolean))]
-  return stored ? [String(stored).trim()].filter(Boolean) : []
+  return survivorLinkNames(stored)
 }
 
 async function linkedSurvivorEntry(req, userId) {
@@ -4398,13 +4398,7 @@ const server=http.createServer(async(req,res)=>{
       links.survivor_entries ||= {}
       links.survivor_claims ||= {}
 
-      const existingForUser=links.survivor_entries[user.id]
-      if(existingForUser && existingForUser !== entryName){
-        return json(res,409,{status:'ACCOUNT_ALREADY_LINKED',message:'This account is already linked to a different Survivor entry.'})
-      }
-
-      const existingOwner=Object.entries(links.survivor_entries).find(([userId,name])=>userId!==user.id && name===entryName)
-      if(existingOwner){
+      if(survivorEntryOwnedByOther(links.survivor_entries,user.id,entryName)){
         return json(res,409,{status:'ENTRY_ALREADY_CLAIMED',message:'That Survivor entry is already linked to another account.'})
       }
 
@@ -4479,14 +4473,9 @@ const server=http.createServer(async(req,res)=>{
         .from('survivor_entries')
         .select('id,entry_name,is_active')
         .eq('owner_id', user.id)
-        .limit(10)
+        .limit(20)
       if(dbUserEntriesError){
         return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage could not be verified. Please try again.'})
-      }
-
-      const dbDifferentEntry=(dbUserEntries||[]).find(row=>row.entry_name!==entryName && row.is_active!==false)
-      if(dbDifferentEntry){
-        return json(res,409,{status:'ACCOUNT_ALREADY_LINKED',message:'This account is already linked to a different Survivor entry.'})
       }
 
       const dbExisting=(dbUserEntries||[]).find(row=>row.entry_name===entryName)
@@ -4536,7 +4525,7 @@ const server=http.createServer(async(req,res)=>{
         return json(res,409,{status:'CLAIM_UNAVAILABLE',message:'That Survivor entry was claimed before this request completed. Refresh your account and try again.'})
       }
 
-      links.survivor_entries[user.id]=entryName
+      links.survivor_entries=addSurvivorLink(links.survivor_entries,user.id,entryName)
       const localClaim=links.survivor_claims[entryName]
       if(localClaim){
         localClaim.claimed_by=user.id
@@ -4544,10 +4533,13 @@ const server=http.createServer(async(req,res)=>{
       }
       await saveMemberLinks(links)
 
+      const linkedEntryNames=survivorLinkNames(links.survivor_entries[user.id])
       return json(res,200,{
         status:'LINKED',
         entry_linked:true,
         active_entry:entryName,
+        linked_entry_count:linkedEntryNames.length,
+        linked_entries:linkedEntryNames,
         entry_status:entry.status||null,
         pool_current_week:Number(state.pool_current_week||entry.current_week||0)||null,
       })
