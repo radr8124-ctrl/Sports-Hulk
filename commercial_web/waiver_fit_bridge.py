@@ -176,6 +176,7 @@ def main():
             "team": row.get("team") or None,
             "position": pos,
             "availability_status": availability or "UNKNOWN",
+            "player_status": availability or "UNKNOWN",
             "role_signal": row.get("role_signal") or None,
             "market_activity_signal": row.get("market_activity_signal") or None,
             "waiver_research_score": waiver,

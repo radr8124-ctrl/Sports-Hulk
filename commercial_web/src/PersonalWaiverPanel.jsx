@@ -9,6 +9,14 @@ function humanize(value) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
+function playerStatusTone(value) {
+  const status = String(value || 'UNKNOWN').toUpperCase()
+  if (['OUT', 'IR', 'PUP', 'DOUBTFUL'].includes(status)) return 'bg-rose-50 text-rose-700'
+  if (['QUESTIONABLE', 'DAY_TO_DAY'].includes(status)) return 'bg-amber-50 text-amber-700'
+  if (status === 'AVAILABLE') return 'bg-blue-50 text-blue-700'
+  return 'bg-slate-100 text-slate-600'
+}
+
 function LoadingPanel({ label = 'Loading' }) {
   return (
     <section role="status" aria-live="polite" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
@@ -198,12 +206,12 @@ export default function PersonalWaiverPanel({ onOpenMyTeams, leagueId = null }) 
                 <div className="text-[10px] font-black uppercase tracking-[0.12em] text-violet-700">{row.position} · {row.team || '—'}</div>
                 <div className="mt-1 truncate text-lg font-black text-slate-950">{row.player}</div>
               </div>
-              <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-emerald-700">{humanize(row.availability_status)}</span>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wide ${playerStatusTone(row.player_status || row.availability_status)}`}>Player status · {humanize(row.player_status || row.availability_status || 'UNKNOWN')}</span>
             </div>
 
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
               <div className="rounded-lg bg-slate-50 px-2 py-2"><div className="text-sm font-black text-slate-950">{row.roster_fit_research_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Roster fit</div></div>
-              <div className="rounded-lg bg-slate-50 px-2 py-2"><div className="text-sm font-black text-slate-950">{row.waiver_research_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Waiver</div></div>
+              <div className="rounded-lg bg-slate-50 px-2 py-2"><div className="text-sm font-black text-slate-950">{row.waiver_research_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Waiver research</div></div>
               <div className="rounded-lg bg-slate-50 px-2 py-2"><div className="text-sm font-black text-slate-950">{row.roster_need_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Need</div></div>
             </div>
 
@@ -254,9 +262,9 @@ export default function PersonalWaiverPanel({ onOpenMyTeams, leagueId = null }) 
 
       {cautions.length > 0 && (
         <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Availability cautions</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Player-status cautions</div>
           <div className="mt-2 text-xs font-semibold leading-5 text-slate-600">
-            {cautions.slice(0, 5).map((row) => `${row.player} (${humanize(row.availability_status)})`).join(' · ')}
+            {cautions.slice(0, 5).map((row) => `${row.player} (${humanize(row.player_status || row.availability_status || 'UNKNOWN')})`).join(' · ')}
           </div>
         </div>
       )}

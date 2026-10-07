@@ -780,13 +780,13 @@ function startSitAnswer(question, data) {
   if(!chosen.length){ const positions=['QB','RB','WR','TE']; chosen=positions.map(pos=>rows.find(row=>String(row.position).toUpperCase()===pos && String(row.weekly_tier)!=='INACTIVE')).filter(Boolean) }
   if(!chosen.length) return response({intent:'start_sit',take:'The weekly fantasy decision board is not available.',confidence:'WAITING',status:'WAITING',sources:updatedSources(data,['askContext'])})
   chosen=[...chosen].sort((a,b)=>num(b.weekly_research_score,0)-num(a.weekly_research_score,0)); const top=chosen[0], comparison=chosen.length>1?` over ${chosen[1].player}`:''
-  return response({ intent:'start_sit', take:`Start ${top.player}${comparison}.`, confidence:nice(top.weekly_tier||'RESEARCH'), why:[top.research_reasons||null,`Role: ${nice(top.role_signal||'UNKNOWN')}`,top.defensive_pressure_context?`Matchup pressure: ${nice(top.defensive_pressure_context)}`:null,top.snap_pct!=null?`Snap share ${Number(top.snap_pct*(top.snap_pct<=1?100:1)).toFixed(0)}%`:null].filter(Boolean), risk:[top.availability_status&&!['ACTIVE','CLEAR','NONE'].includes(String(top.availability_status).toUpperCase())?`Availability: ${nice(top.availability_status)}`:'Recheck inactives and late news before lock.'], cards:chosen.slice(0,5).map(row=>({type:'fantasy',title:row.player,team:row.team,position:row.position,opponent:row.opponent,tier:row.weekly_tier,score:row.weekly_research_score,role:row.role_signal,matchup:row.defensive_pressure_context,reasons:row.research_reasons})), sources:updatedSources(data,['askContext']), updated_at:data.askContext?.generated_at, followups:['Show me waiver adds','Who is an IR stash?','Best defense to stream?'] })
+  return response({ intent:'start_sit', take:`Start ${top.player}${comparison}.`, confidence:nice(top.weekly_tier||'RESEARCH'), why:[top.research_reasons||null,`Role: ${nice(top.role_signal||'UNKNOWN')}`,top.defensive_pressure_context?`Matchup pressure: ${nice(top.defensive_pressure_context)}`:null,top.snap_pct!=null?`Snap share ${Number(top.snap_pct*(top.snap_pct<=1?100:1)).toFixed(0)}%`:null].filter(Boolean), risk:[top.availability_status&&!['ACTIVE','CLEAR','NONE'].includes(String(top.availability_status).toUpperCase())?`Player status: ${nice(top.availability_status)}`:'Recheck inactives and late news before lock.'], cards:chosen.slice(0,5).map(row=>({type:'fantasy',title:row.player,team:row.team,position:row.position,opponent:row.opponent,tier:row.weekly_tier,score:row.weekly_research_score,role:row.role_signal,matchup:row.defensive_pressure_context,reasons:row.research_reasons})), sources:updatedSources(data,['askContext']), updated_at:data.askContext?.generated_at, followups:['Show me waiver adds','Who is an IR stash?','Best defense to stream?'] })
 }
 
 function waiversAnswer(data) {
   const rows=[...(data.askContext?.datasets?.waivers||[])].filter(row=>!String(row.waiver_priority||'').includes('STASH')).sort((a,b)=>num(b.waiver_research_score,0)-num(a.waiver_research_score,0)).slice(0,6), top=rows[0]
   if(!top) return response({intent:'waivers',take:'No waiver board is available.',confidence:'WAITING',status:'WAITING'})
-  return response({ intent:'waivers', take:`${top.player} is the top current waiver/FAAB research add.`, confidence:nice(top.waiver_priority), why:[`FAAB research range ${top.suggested_faab_low_pct ?? 0}–${top.suggested_faab_high_pct ?? 0}%`,top.add_rank_24h!=null?`24h add rank ${top.add_rank_24h}`:null,`Role: ${nice(top.role_signal||'UNKNOWN')}`].filter(Boolean), risk:['FAAB range is a research budget range, not a prediction of league bidding.',top.availability_status?`Availability: ${nice(top.availability_status)}`:null].filter(Boolean), cards:rows.map(row=>({type:'waiver',title:row.player,team:row.team,position:row.position,priority:row.waiver_priority,faab_low:row.suggested_faab_low_pct,faab_high:row.suggested_faab_high_pct,add_rank:row.add_rank_24h,role:row.role_signal})), sources:updatedSources(data,['askContext']), updated_at:data.askContext?.generated_at })
+  return response({ intent:'waivers', take:`${top.player} is the top current waiver/FAAB research candidate to check.`, confidence:nice(top.waiver_priority), why:[`FAAB research range ${top.suggested_faab_low_pct ?? 0}–${top.suggested_faab_high_pct ?? 0}%`,top.add_rank_24h!=null?`24h add rank ${top.add_rank_24h}`:null,`Role: ${nice(top.role_signal||'UNKNOWN')}`].filter(Boolean), risk:['FAAB range is a research budget range, not a prediction of league bidding.','League free-agent availability is not verified in generic Ask.',top.availability_status?`Player status: ${nice(top.availability_status)}`:null].filter(Boolean), cards:rows.map(row=>({type:'waiver',title:row.player,team:row.team,position:row.position,priority:row.waiver_priority,faab_low:row.suggested_faab_low_pct,faab_high:row.suggested_faab_high_pct,add_rank:row.add_rank_24h,role:row.role_signal})), sources:updatedSources(data,['askContext']), updated_at:data.askContext?.generated_at })
 }
 
 function stashAnswer(data) {
@@ -798,7 +798,7 @@ function stashAnswer(data) {
 function defenseAnswer(data) {
   const rows=[...(data.askContext?.datasets?.defense_streaming||[])].sort((a,b)=>num(b.weekly_stream_score,0)-num(a.weekly_stream_score,0)).slice(0,6), top=rows[0]
   if(!top) return response({intent:'defense_stream',take:'No defense streaming board is available.',confidence:'WAITING',status:'WAITING'})
-  return response({ intent:'defense_stream', take:`${top.dst_player||top.team} is the top current D/ST stream.`, confidence:nice(top.weekly_stream_tier), why:[`Next opponent: ${top.next_opponent||'—'}`,`Weekly stream score ${top.weekly_stream_score ?? '—'}`,`Multi-week hold score ${top.multiweek_hold_score ?? '—'}`], risk:[top.market_data_available?'Market/add-drop context is available.':'Market add/drop data is not available for this team.'], cards:rows.map(row=>({type:'defense',title:row.dst_player||row.team,opponent:row.next_opponent,weekly_score:row.weekly_stream_score,weekly_tier:row.weekly_stream_tier,hold_score:row.multiweek_hold_score,hold_tier:row.multiweek_hold_tier})), sources:updatedSources(data,['askContext']), updated_at:data.askContext?.generated_at })
+  return response({ intent:'defense_stream', take:`${top.dst_player||top.team} is the top current D/ST streaming research option to check.`, confidence:nice(top.weekly_stream_tier), why:[`Next opponent: ${top.next_opponent||'—'}`,`Weekly stream score ${top.weekly_stream_score ?? '—'}`,`Multi-week hold score ${top.multiweek_hold_score ?? '—'}`], risk:[top.market_data_available?'Generic market/add-drop context is available, but your league availability is not verified.':'Market add/drop context is not available for this team; league availability is not verified.'], cards:rows.map(row=>({type:'defense',title:row.dst_player||row.team,opponent:row.next_opponent,weekly_score:row.weekly_stream_score,weekly_tier:row.weekly_stream_tier,hold_score:row.multiweek_hold_score,hold_tier:row.multiweek_hold_tier})), sources:updatedSources(data,['askContext']), updated_at:data.askContext?.generated_at })
 }
 
 function dfsAnswer(question, data) {
@@ -886,7 +886,7 @@ function startSitAnswerV2(question, data) {
     ].filter(Boolean),
     risk:[
       top.availability_status&&!['ACTIVE','CLEAR','NONE'].includes(String(top.availability_status).toUpperCase())
-        ? 'Availability: ' + nice(top.availability_status)
+        ? 'Player status: ' + nice(top.availability_status)
         : 'Recheck inactives and late news before lock.'
     ],
     cards:chosen.slice(0,5).map(cardFor),
@@ -917,7 +917,7 @@ function startSitAnswerV3(question, data) {
       ].filter(Boolean),
       risk:[
         top.availability_status&&!['ACTIVE','CLEAR','NONE'].includes(String(top.availability_status).toUpperCase())
-          ? 'Availability: ' + nice(top.availability_status)
+          ? 'Player status: ' + nice(top.availability_status)
           : 'Recheck inactives and late news before lock.'
       ],
       cards:chosen.slice(0,5).map(row=>({
@@ -1253,10 +1253,10 @@ function routeAsk(question, data, context = {}) {
   if(page==='News & Insights') return newsAnswerV2(question,data)
   if(page==='Fantasy') return response({
     intent:'fantasy_context',
-    take:'Fantasy research is live, but personalized lineup advice still requires your league, roster and scoring settings.',
-    confidence:'GENERIC RESEARCH',
-    why:['Weekly, FAAB, IR stash, defense streaming and IDP lanes are connected.','Personal roster context is not connected to this commercial session yet.'],
-    risk:['Generic rankings should not be presented as personalized start/sit or bid instructions.'],
+    take:'Fantasy research is live. Signed-in users with an active saved team get private roster-aware context where that lane supports it; otherwise Sports Zenith stays on the generic research board.',
+    confidence:'FANTASY RESEARCH',
+    why:['Weekly, FAAB, IR stash, defense streaming and IDP lanes are connected.','Start/Sit, Waivers, IR, Defense and IDP can use the active saved team when authenticated.'],
+    risk:['Generic rankings are never silently presented as personalized start/sit, free-agent availability or bid instructions.'],
     followups:['Top waiver adds','Best defense stream','Who should I start?','Show IR stash candidates'],
     sources:updatedSources(data,['askContext']),
     updated_at:data.askContext?.generated_at,

@@ -158,9 +158,9 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
                 </div>
 
                 <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-                  <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">{row.weekly_stream_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Weekly</div></div>
+                  <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">{row.weekly_stream_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Weekly stream</div></div>
                   <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">#{row.weekly_rank ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Weekly rank</div></div>
-                  <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">{row.multiweek_hold_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Multi-week</div></div>
+                  <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">{row.multiweek_hold_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Multi-week hold</div></div>
                   <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">#{row.multiweek_rank ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Hold rank</div></div>
                 </div>
 

@@ -2204,15 +2204,24 @@ function NewsInsightsPanel() {
 
 function FantasyLaneCard({ lane, row }) {
   const base = "rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"
+  const weeklyTierTone = (tier) => {
+    const value = String(tier || '').toUpperCase()
+    if (value.includes('CORE_START')) return 'bg-emerald-50 text-emerald-700'
+    if (value.includes('START_LEAN')) return 'bg-blue-50 text-blue-700'
+    if (value.includes('FLEX_START')) return 'bg-sky-50 text-sky-700'
+    if (value.includes('MATCHUP')) return 'bg-amber-50 text-amber-700'
+    if (value.includes('SIT') || value.includes('INACTIVE')) return 'bg-rose-50 text-rose-700'
+    return 'bg-slate-100 text-slate-600'
+  }
   if (lane === 'weekly') {
     return (
       <div className={base}>
         <div className="flex items-start justify-between gap-3">
           <div><div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">{row.team} · {row.position}</div><div className="mt-2 text-xl font-black text-slate-950">{row.player}</div><div className="mt-1 text-xs font-semibold text-slate-400">vs {row.opponent || '—'}</div></div>
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black text-emerald-700">{humanize(row.weekly_tier)}</span>
+          <span className={`rounded-full px-3 py-1 text-[10px] font-black ${weeklyTierTone(row.weekly_tier)}`}>{humanize(row.weekly_tier)}</span>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.weekly_research_score ?? '—'}</div><div className="mt-1 text-slate-400">Weekly</div></div>
+          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.weekly_research_score ?? '—'}</div><div className="mt-1 text-slate-400">Weekly research</div></div>
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.ros_research_score ?? '—'}</div><div className="mt-1 text-slate-400">ROS</div></div>
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.snap_pct == null ? '—' : `${row.snap_pct}%`}</div><div className="mt-1 text-slate-400">Snaps</div></div>
         </div>
@@ -2229,7 +2238,7 @@ function FantasyLaneCard({ lane, row }) {
           <span className="rounded-full bg-violet-50 px-3 py-1 text-[10px] font-black text-violet-700">{humanize(row.waiver_priority)}</span>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.waiver_research_score ?? '—'}</div><div className="mt-1 text-slate-400">Research</div></div>
+          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.waiver_research_score ?? '—'}</div><div className="mt-1 text-slate-400">Waiver research</div></div>
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.adds_24h == null ? '—' : Number(row.adds_24h).toLocaleString()}</div><div className="mt-1 text-slate-400">Adds 24h</div></div>
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.suggested_faab_low_pct ?? '—'}–{row.suggested_faab_high_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Research FAAB</div></div>
         </div>
@@ -2246,7 +2255,7 @@ function FantasyLaneCard({ lane, row }) {
           <span className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black text-amber-700">{humanize(row.stash_tier)}</span>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.stash_research_score ?? '—'}</div><div className="mt-1 text-slate-400">Stash score</div></div>
+          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.stash_research_score ?? '—'}</div><div className="mt-1 text-slate-400">Stash research</div></div>
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.source_count ?? '—'}</div><div className="mt-1 text-slate-400">Sources</div></div>
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{humanize(row.return_window || 'UNKNOWN')}</div><div className="mt-1 text-slate-400">Window</div></div>
         </div>
@@ -2263,8 +2272,8 @@ function FantasyLaneCard({ lane, row }) {
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black text-emerald-700">{humanize(row.weekly_stream_tier)}</span>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.weekly_stream_score ?? '—'}</div><div className="mt-1 text-slate-400">This week</div></div>
-          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.multiweek_hold_score ?? '—'}</div><div className="mt-1 text-slate-400">Multiweek</div></div>
+          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.weekly_stream_score ?? '—'}</div><div className="mt-1 text-slate-400">Weekly stream</div></div>
+          <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.multiweek_hold_score ?? '—'}</div><div className="mt-1 text-slate-400">Multi-week hold</div></div>
           <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.rest_days ?? '—'}</div><div className="mt-1 text-slate-400">Rest days</div></div>
         </div>
         <div className="mt-4 text-xs leading-5 text-slate-500">{humanize(row.future_schedule_signal)} · {humanize(row.multiweek_hold_tier)}</div>
@@ -2279,7 +2288,7 @@ function FantasyLaneCard({ lane, row }) {
         <span className="rounded-full bg-sky-50 px-3 py-1 text-[10px] font-black text-sky-700">{humanize(row.idp_usage_tier)}</span>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-        <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.idp_usage_score ?? '—'}</div><div className="mt-1 text-slate-400">Usage</div></div>
+        <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.idp_usage_score ?? '—'}</div><div className="mt-1 text-slate-400">Usage research</div></div>
         <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.snap_pct == null ? '—' : `${Math.round(Number(row.snap_pct) * (Number(row.snap_pct) <= 1 ? 100 : 1))}%`}</div><div className="mt-1 text-slate-400">Snaps</div></div>
         <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.snap_pct_change == null ? '—' : `${Math.round(Number(row.snap_pct_change) * 100)} pts`}</div><div className="mt-1 text-slate-400">Snap change</div></div>
       </div>

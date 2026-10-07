@@ -269,7 +269,7 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
                     <span className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wide ${tierTone(row.weekly_tier)}`}>{humanize(row.weekly_tier || 'UNKNOWN')}</span>
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-lg bg-white px-2 py-2"><div className="text-sm font-black text-slate-950">{row.weekly_research_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Weekly</div></div>
+                    <div className="rounded-lg bg-white px-2 py-2"><div className="text-sm font-black text-slate-950">{row.weekly_research_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Weekly research</div></div>
                     <div className="rounded-lg bg-white px-2 py-2"><div className="text-sm font-black text-slate-950">{row.ros_research_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">ROS</div></div>
                     <div className="rounded-lg bg-white px-2 py-2"><div className="text-[11px] font-black text-slate-950">{humanize(row.role_signal || 'UNKNOWN')}</div><div className="text-[9px] font-bold text-slate-400">Role</div></div>
                   </div>

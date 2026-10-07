@@ -58,7 +58,7 @@ function UsageCard({ row, slotLabel = null }) {
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-lg bg-slate-50 p-2">
           <div className="text-sm font-black text-slate-950">{row.idp_usage_score ?? '—'}</div>
-          <div className="text-[9px] font-bold text-slate-400">Usage</div>
+          <div className="text-[9px] font-bold text-slate-400">Usage research</div>
         </div>
         <div className="rounded-lg bg-slate-50 p-2">
           <div className="text-sm font-black text-slate-950">{row.snap_pct == null ? '—' : row.snap_pct + '%'}</div>
@@ -339,7 +339,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
               <div className="mt-3 grid grid-cols-2 gap-2 text-center">
                 <div className="rounded-lg bg-slate-50 p-2">
                   <div className="text-sm font-black text-slate-950">{row.idp_usage_score ?? '—'}</div>
-                  <div className="text-[9px] font-bold text-slate-400">Usage</div>
+                  <div className="text-[9px] font-bold text-slate-400">Usage research</div>
                 </div>
                 <div className="rounded-lg bg-slate-50 p-2">
                   <div className="text-sm font-black text-slate-950">{row.snap_pct == null ? '—' : row.snap_pct + '%'}</div>
