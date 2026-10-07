@@ -13,6 +13,7 @@ import ScoreGameCenter from './ScoreGameCenter'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
 const AssistantDrawer = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AssistantDrawer })))
+const AssistantLauncher = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AssistantLauncher })))
 const DfsLineupLab = lazy(() => import('./DfsLineupLab'))
 const PerformancePanel = lazy(() => import('./PerformancePanel'))
 const PracticeBetting = lazy(() => import('./PracticeBetting'))
@@ -3476,6 +3477,12 @@ export default function App() {
           </>
         )}
       </main>
+
+      {!assistantOpen && !isAsk && (
+        <Suspense fallback={null}>
+          <AssistantLauncher onClick={() => setAssistantOpen(true)} />
+        </Suspense>
+      )}
 
       {assistantOpen && !isAsk && (
         <Suspense fallback={null}>

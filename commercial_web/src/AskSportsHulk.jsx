@@ -390,8 +390,8 @@ export function AssistantLauncher({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      aria-label="Open sports analyst"
-      title="Ask"
+      aria-label="Open Game Scout"
+      title="Game Scout"
       className="fixed bottom-5 right-5 z-40 hidden items-center md:flex gap-3 rounded-[22px] border border-emerald-300/30 bg-slate-950 p-2.5 pr-3 text-white shadow-2xl shadow-emerald-950/30 transition hover:-translate-y-1 hover:border-emerald-300/60"
     >
       <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/30 bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-violet-400/20">
@@ -402,8 +402,8 @@ export function AssistantLauncher({ onClick }) {
         <span className="absolute -bottom-0.5 left-1/2 h-1.5 w-5 -translate-x-1/2 rounded-full bg-emerald-300/70" />
       </span>
       <span className="hidden text-left sm:block">
-        <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-emerald-300">Sports Intelligence</span>
-        <span className="mt-0.5 block text-sm font-black">Ask</span>
+        <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-emerald-300">Sports Zenith</span>
+        <span className="mt-0.5 block text-sm font-black">Game Scout</span>
       </span>
     </button>
   )
