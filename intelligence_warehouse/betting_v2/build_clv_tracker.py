@@ -571,14 +571,9 @@ def build_output():
             sport,
         )
         proof_key = clean(row.get("proof_lane_key"))
-        if not proof_key:
-            proof_key = regime_proof_lane_key(
-                sport,
-                "MONEYLINE",
-                regime,
-            )
         regime_groups.setdefault(regime, []).append(row)
-        proof_groups.setdefault(proof_key, []).append(row)
+        if proof_key:
+            proof_groups.setdefault(proof_key, []).append(row)
 
     for regime in sorted(regime_groups):
         by_regime[regime] = summarize_group(regime_groups[regime])

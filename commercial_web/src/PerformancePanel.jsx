@@ -3,6 +3,7 @@ import {
   AlertTriangle, BarChart3, Brain, CheckCircle2, Clock3, Gauge,
   ShieldCheck, Target, TrendingUp, Trophy, Zap,
 } from 'lucide-react'
+import { allMarketsProofRows } from './allMarketsProofRows.js'
 
 const SPORTS = ['ALL', 'NFL', 'CFB', 'MLB', 'NBA', 'NHL']
 
@@ -527,23 +528,19 @@ function BettingV2Panel({ brain }) {
 function AllMarketsV2Panel({ brain }) {
   const bundle = brain?.betting_v2_all_markets || {}
   const current = bundle.current || {}
-  const validation = bundle.validation?.lanes || {}
   const forward = bundle.forward || {}
-  const byLane = current.by_lane || {}
-  const forwardByLane = forward.by_lane || {}
   const summary = current.summary || {}
   const forwardAll = forward.all_predictions || {}
   const gameChallengers = bundle.challengers?.lanes || {}
   const cfbTotalChallenger = gameChallengers.CFB_TOTAL || {}
   const challengerForward = bundle.challenger_forward?.forward || {}
 
-  const lanes = Object.keys({ ...validation, ...byLane })
-    .filter(key => {
-      const v = validation[key] || {}
-      const live = byLane[key] || {}
-      return Number(v.history_n || 0) > 0 || Number(live.candidates || 0) > 0
+  const lanes = allMarketsProofRows(bundle)
+    .filter(row => {
+      const v = row.validation || {}
+      const live = row.live || {}
+      return Number(v.history_n ?? live.history_n ?? 0) > 0 || Number(live.candidates || 0) > 0
     })
-    .sort((a, b) => a.localeCompare(b))
 
   return (
     <section>
@@ -631,15 +628,23 @@ function AllMarketsV2Panel({ brain }) {
               </tr>
             </thead>
             <tbody>
-              {lanes.map(key => {
-                const v = validation[key] || {}
-                const live = byLane[key] || {}
-                const fw = forwardByLane[key] || {}
+              {lanes.map(row => {
+                const key = row.key
+                const v = row.validation || {}
+                const live = row.live || {}
+                const fw = row.forward || {}
                 const all = fw.all_predictions || {}
                 const promo = fw.promotion || {}
                 return (
                   <tr key={key} className="border-b border-slate-100 align-top">
-                    <td className="px-4 py-3 font-black text-slate-950">{pretty(key)}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-black text-slate-950">{pretty(row.laneKey || key)}</div>
+                      {row.competitionRegime ? (
+                        <div className="mt-1 text-[10px] font-black uppercase tracking-wide text-blue-600">
+                          {pretty(row.competitionRegime)}
+                        </div>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-3 font-semibold text-slate-700">{integer(v.history_n ?? live.history_n)}</td>
                     <td className="px-4 py-3 font-semibold text-slate-700">{integer(v.independent_blocks ?? live.independent_blocks)}</td>
                     <td className="px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-600">{pretty(v.deployment_probability_source || live.probability_source || 'WAITING')}</td>

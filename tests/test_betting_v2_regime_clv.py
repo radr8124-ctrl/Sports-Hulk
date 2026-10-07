@@ -252,6 +252,47 @@ class BettingV2RegimeClvTests(unittest.TestCase):
             1,
         )
 
+    def test_legacy_nba_rows_do_not_enter_authoritative_unknown_proof_lane(self):
+        legacy = {
+            "event_type": "ENTRY",
+            "pick_key": "NBA|LEGACY_GAME|HOME",
+            "sport": "NBA",
+            "game_key": "LEGACY_GAME",
+            "selection": "Legacy Team",
+            "side": "HOME",
+            "status": "OPEN",
+        }
+        unknown = self._row(
+            "NBA",
+            "UNKNOWN",
+            game_key="UNKNOWN_GAME",
+        )
+        unknown_key = clv.regime_clv_key(unknown)
+        regime_entry = {
+            "event_type": "ENTRY",
+            "pick_key": unknown_key,
+            "sport": "NBA",
+            "game_key": unknown["game_key"],
+            "selection": unknown["selection"],
+            "side": unknown["side"],
+            "competition_regime": "UNKNOWN",
+            "proof_lane_key": unknown["proof_lane_key"],
+            "proof_version": unknown["proof_version"],
+            "status": "OPEN",
+        }
+        clv.PICK_LEDGER.write_text(
+            json.dumps(legacy) + "\n" + json.dumps(regime_entry) + "\n"
+        )
+
+        output = clv.build_output()
+
+        self.assertEqual(output["summary"]["tracked"], 2)
+        self.assertEqual(output["by_regime"]["UNKNOWN"]["tracked"], 2)
+        self.assertEqual(
+            output["by_proof_lane"]["NBA_MONEYLINE|UNKNOWN"]["tracked"],
+            1,
+        )
+
     def test_main_enriches_missing_nba_regime_from_all_markets_current(self):
         legacy = self._row("NBA", "PRESEASON")
         legacy.pop("competition_regime")

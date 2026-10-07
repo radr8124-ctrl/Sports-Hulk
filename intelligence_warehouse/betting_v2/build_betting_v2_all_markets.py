@@ -793,6 +793,21 @@ def fit_final(frame, validation):
     }
 
 
+REGIME_SOURCE_COLUMNS = (
+    "season_type",
+    "competition_regime",
+    "season_phase",
+    "competition_phase",
+)
+
+
+def explicit_regime_value(row, columns):
+    for column in REGIME_SOURCE_COLUMNS:
+        if column in columns and clean(row.get(column)):
+            return row.get(column)
+    return None
+
+
 def current_schema(sport, frame):
     regime_column = next(
         (
@@ -1008,10 +1023,9 @@ def build_current(models, validations):
             ref_p = fair_p if fair_p is not None else raw_p
 
             lane_key = f"{sport}_{market}"
-            explicit_regime = (
-                row.get(schema["regime"])
-                if schema.get("regime")
-                else None
+            explicit_regime = explicit_regime_value(
+                row,
+                frame.columns,
             )
             competition_regime = normalize_competition_regime(
                 explicit_regime,
@@ -1408,16 +1422,32 @@ def main():
 
     current_rows = build_current(models, validations)
     by_proof_lane = {}
-    for proof_key in sorted(validations):
+    proof_keys = set(validations)
+    proof_keys.update(
+        clean(row.get("proof_lane_key"))
+        for row in current_rows
+        if clean(row.get("proof_lane_key"))
+    )
+    for proof_key in sorted(proof_keys):
         proof_rows = [
             r for r in current_rows
             if r.get("proof_lane_key") == proof_key
         ]
-        model = models[proof_key]
+        model = models.get(proof_key, {})
+        current_example = proof_rows[0] if proof_rows else {}
         by_proof_lane[proof_key] = {
-            "lane_key": model.get("lane_key"),
-            "competition_regime": model.get("competition_regime"),
-            "proof_version": model.get("proof_version"),
+            "lane_key": (
+                model.get("lane_key")
+                or current_example.get("lane_key")
+            ),
+            "competition_regime": (
+                model.get("competition_regime")
+                or current_example.get("competition_regime")
+            ),
+            "proof_version": (
+                model.get("proof_version")
+                or current_example.get("proof_version")
+            ),
             "candidates": len(proof_rows),
             "shadow_plays": sum(
                 r["shadow_decision"] == "SHADOW_PLAY"
@@ -1431,14 +1461,17 @@ def main():
             "independent_blocks": int(
                 model.get("independent_blocks") or 0
             ),
-            "probability_source": model.get(
-                "deployment_probability_source"
+            "probability_source": (
+                model.get("deployment_probability_source")
+                or current_example.get("probability_source")
             ),
-            "historical_edge_confidence": model.get(
-                "historical_edge_confidence"
+            "historical_edge_confidence": (
+                model.get("historical_edge_confidence")
+                or current_example.get("historical_edge_confidence")
             ),
-            "selection_rule_status": model.get(
-                "selection_rule_status"
+            "selection_rule_status": (
+                model.get("selection_rule_status")
+                or current_example.get("selection_rule_status")
             ),
         }
 

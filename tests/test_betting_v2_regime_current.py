@@ -44,6 +44,7 @@ class BettingV2RegimeCurrentTests(unittest.TestCase):
             "away_team",
             "home_team",
             "season_type",
+            "competition_regime",
         ]
         with path.open("w", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -198,6 +199,29 @@ class BettingV2RegimeCurrentTests(unittest.TestCase):
             row["probability_source"],
             "MARKET_REFERENCE_INSUFFICIENT_HISTORY",
         )
+
+    def test_secondary_explicit_regime_is_used_when_season_type_is_blank(self):
+        row = self._row("NBA_SECONDARY_REGIME", "")
+        row["competition_regime"] = "REGULAR"
+        self._write_current("NBA", [row])
+
+        key = "NBA_MONEYLINE|REGULAR"
+        models = {
+            key: self._strong_model(
+                "NBA",
+                "REGULAR",
+                "NBA_MONEYLINE",
+            ),
+        }
+        validations = {key: self._validation()}
+
+        rows = all_markets.build_current(models, validations)
+
+        self.assertEqual(len(rows), 1)
+        current = rows[0]
+        self.assertEqual(current["competition_regime"], "REGULAR")
+        self.assertEqual(current["proof_lane_key"], key)
+        self.assertEqual(current["probability_source"], "MARKET_PLUS_HULK")
 
     def test_main_summary_includes_current_only_regular_proof_lane(self):
         root = Path(self.temp_dir.name)
