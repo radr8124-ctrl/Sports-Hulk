@@ -550,9 +550,17 @@ function resolveSessionQuestion(question, context = {}) {
   const history=Array.isArray(context?.session_history)?context.session_history.slice(-8):[]
   if(!history.length) return {question:original,resolved:false}
 
-  const lastAssistant=[...history].reverse().find(item=>item?.role==='assistant' && item?.answer)
+  const lastAssistantIndex=[...history].map((item,index)=>({item,index})).reverse().find(entry=>entry.item?.role==='assistant' && entry.item?.answer)?.index
+  const lastAssistant=Number.isInteger(lastAssistantIndex)?history[lastAssistantIndex]:null
   const answer=lastAssistant?.answer||null
   if(!answer) return {question:original,resolved:false}
+
+  if(/^\s*(why|why\?|why is that|why that|explain|explain why)\s*$/i.test(original)){
+    const priorUser=[...history.slice(0,lastAssistantIndex)].reverse().find(item=>item?.role==='user' && item?.text)
+    if(priorUser?.text){
+      return {question:`${String(priorUser.text).trim()} why`,resolved:true}
+    }
+  }
 
   const cards=Array.isArray(answer.cards)?answer.cards.slice(0,4):[]
   const playerCards=cards.filter(card=>['fantasy','prop','prop_research','prizepicks_research','waiver','stash','player_history','dfs'].includes(String(card?.type||'')))

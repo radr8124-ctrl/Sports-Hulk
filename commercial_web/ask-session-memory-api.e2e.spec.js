@@ -77,3 +77,46 @@ test('session memory resolves that game while structured score data remains the 
   expect(follow.intent).toBe('live_score');
   expect(['LIVE', 'FINAL', 'UPCOMING']).toContain(follow.status);
 });
+
+
+test('session memory resolves Why by re-running the prior governed question', async ({ request }) => {
+  const firstQuestion = 'Who do the Eagles play next?'
+  const firstResponse = await request.post(`${BASE}/api/ask`, {
+    data: {
+      question: firstQuestion,
+      context: { page: 'Ask' },
+    },
+  });
+  expect(firstResponse.ok()).toBeTruthy();
+  const first = await firstResponse.json();
+
+  const followResponse = await request.post(`${BASE}/api/ask`, {
+    data: {
+      question: 'Why?',
+      context: {
+        page: 'Ask',
+        session_history: [
+          { role: 'user', text: firstQuestion },
+          {
+            role: 'assistant',
+            answer: {
+              intent: first.intent,
+              status: first.status,
+              confidence: first.confidence,
+              take: first.take,
+              cards: first.cards,
+            },
+          },
+        ],
+      },
+    },
+  });
+  expect(followResponse.ok()).toBeTruthy();
+  const follow = await followResponse.json();
+
+  expect(follow.session_reference_resolved).toBe(true);
+  expect(follow.resolved_question).toContain(firstQuestion);
+  expect(follow.intent).toBe('schedule');
+  expect(follow.status).toBe('CURRENT');
+  expect(follow.why?.length).toBeGreaterThan(0);
+});
