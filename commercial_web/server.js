@@ -24,6 +24,7 @@ const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVO
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
 const DATASET_FRESHNESS_PATH = path.join(SPORTS_ROOT, 'intelligence_warehouse', 'freshness', 'DATASET_FRESHNESS_CURRENT.csv')
 const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FAILED_QUESTION_QUEUE.jsonl')
+const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_EVALUATION_LEDGER.jsonl')
 
 const JSON_FILES = {
   nflScores: 'nfl_scores.json',
@@ -326,6 +327,62 @@ function shouldQueueAskReview(answer) {
   return ['INSUFFICIENT_EVIDENCE','UNKNOWN','ERROR'].includes(status)
     || confidence==='INSUFFICIENT EVIDENCE'
     || confidence==='UNKNOWN'
+}
+
+async function recordAskEvaluation(question, context, answer, latencyMs, error = null) {
+  const cleanQuestion=String(question||'').trim().replace(/\s+/g,' ').slice(0,500)
+  const sources=Array.isArray(answer?.sources)?answer.sources:[]
+  const record={
+    recorded_at:new Date().toISOString(),
+    question_hash:cleanQuestion?sha256(cleanQuestion.toLowerCase()):null,
+    page:String(context?.page||'').slice(0,80)||null,
+    has_game_context:Boolean(context?.game_context?.event_id),
+    intent:answer?.intent||null,
+    status:error?'ERROR':answer?.status||null,
+    confidence:error?'ERROR':answer?.confidence||null,
+    source_count:sources.length,
+    citation_url_count:sources.filter(source=>Boolean(source?.url)).length,
+    latency_ms:Number.isFinite(Number(latencyMs))?Math.max(0,Math.round(Number(latencyMs))):null,
+    error:Boolean(error),
+  }
+  try {
+    await appendFile(ASK_EVAL_LEDGER_PATH, JSON.stringify(record)+'\n', { encoding:'utf8', mode:0o600 })
+  } catch {
+    // Evaluation telemetry must never break the user-facing Ask response.
+  }
+}
+
+async function askEvaluationSummary(limit = 500) {
+  let raw=''
+  try { raw=await readFile(ASK_EVAL_LEDGER_PATH,'utf8') } catch { return {status:'NO_DATA',tracked:0} }
+  const rows=raw.split(/\r?\n/).filter(Boolean).slice(-Math.max(1,Math.min(Number(limit)||500,5000))).flatMap(line=>{
+    try { return [JSON.parse(line)] } catch { return [] }
+  })
+  const tracked=rows.length
+  if(!tracked) return {status:'NO_DATA',tracked:0}
+  const countStatus=status=>rows.filter(row=>String(row.status||'').toUpperCase()===status).length
+  const reporting=rows.filter(row=>['REPORTING','REPORTING_CONFLICT','REPORTING_STALE','GAME_NEWS','NEWS'].includes(String(row.intent||'').toUpperCase()))
+  const cited=reporting.filter(row=>Number(row.citation_url_count||0)>0).length
+  const latencies=rows.map(row=>Number(row.latency_ms)).filter(Number.isFinite)
+  const pct=value=>Math.round((value/tracked)*1000)/10
+  return {
+    status:'READY',
+    tracked,
+    window:'RECENT_APPEND_ONLY',
+    grounded_current:rows.filter(row=>!['INSUFFICIENT_EVIDENCE','UNKNOWN','ERROR','STALE_SOURCE','SOURCE_CONFLICT'].includes(String(row.status||'').toUpperCase())).length,
+    insufficient_evidence:countStatus('INSUFFICIENT_EVIDENCE'),
+    stale_source:countStatus('STALE_SOURCE'),
+    source_conflict:countStatus('SOURCE_CONFLICT'),
+    unknown:countStatus('UNKNOWN'),
+    errors:countStatus('ERROR'),
+    grounded_current_pct:pct(rows.filter(row=>!['INSUFFICIENT_EVIDENCE','UNKNOWN','ERROR','STALE_SOURCE','SOURCE_CONFLICT'].includes(String(row.status||'').toUpperCase())).length),
+    withheld_or_flagged_pct:pct(rows.filter(row=>['INSUFFICIENT_EVIDENCE','UNKNOWN','ERROR','STALE_SOURCE','SOURCE_CONFLICT'].includes(String(row.status||'').toUpperCase())).length),
+    reporting_answers:reporting.length,
+    reporting_with_clickable_citation:cited,
+    citation_coverage_pct:reporting.length?Math.round((cited/reporting.length)*1000)/10:null,
+    avg_latency_ms:latencies.length?Math.round(latencies.reduce((a,b)=>a+b,0)/latencies.length):null,
+    generated_at:new Date().toISOString(),
+  }
 }
 
 async function queueFailedAskReview(question, context, answer, error = null) {
@@ -3838,9 +3895,14 @@ const server=http.createServer(async(req,res)=>{
       source:'PRIVATE_MEMBER_STATE'
     })
   }
+  if(req.method==='GET'&&url.pathname==='/api/ask/evaluation-summary'){
+    const limit=Math.max(1,Math.min(Number(url.searchParams.get('limit')||500),5000))
+    return json(res,200,await askEvaluationSummary(limit))
+  }
   if(req.method==='POST'&&url.pathname==='/api/ask'){
     let question=''
     let context={}
+    const askStartedAt=Date.now()
     try{
       const body=await readBody(req)
       question=String(body.question||body.message||'').trim()
@@ -3848,11 +3910,19 @@ const server=http.createServer(async(req,res)=>{
       const data=await loadAll()
       const personalAnswer=await personalizedFantasyAsk(req,question,context)
       const answer=personalAnswer||routeAsk(question,data,context)
-      await queueFailedAskReview(question,context,answer)
+      await Promise.all([
+        queueFailedAskReview(question,context,answer),
+        recordAskEvaluation(question,context,answer,Date.now()-askStartedAt),
+      ])
       return json(res,200,{question,context,...answer,generated_at:new Date().toISOString()})
     }
     catch(err){
-      try { await queueFailedAskReview(question,context,null,err) } catch {}
+      try {
+        await Promise.all([
+          queueFailedAskReview(question,context,null,err),
+          recordAskEvaluation(question,context,null,Date.now()-askStartedAt,err),
+        ])
+      } catch {}
       return json(res,400,{status:'ERROR',take:'The sports analyst could not process that request.',error:err instanceof Error?err.message:String(err)})
     }
   }
