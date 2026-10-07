@@ -9,7 +9,6 @@ import { AccountButton, useAuth } from './AuthShell'
 import { bettingNavItems, navItems, nflSections, scoreLeagues, statusCards } from './dashboardConfig'
 import { PUBLIC_BRAND, PUBLIC_BRAND_WORD_1, PUBLIC_BRAND_WORD_2, PUBLIC_TAGLINE } from './brandConfig'
 import BetMeaning, { betDisplayLabel } from './BetMeaning'
-import ScoreGameCenter from './ScoreGameCenter'
 import { survivorHomeSummary } from '../survivor_home_summary.js'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
@@ -18,6 +17,7 @@ const AssistantLauncher = lazy(() => import('./AskSportsHulk').then(module => ({
 const DfsLineupLab = lazy(() => import('./DfsLineupLab'))
 const PerformancePanel = lazy(() => import('./PerformancePanel'))
 const PracticeBetting = lazy(() => import('./PracticeBetting'))
+const ScoreGameCenter = lazy(() => import('./ScoreGameCenter'))
 const PersonalIdpPanel = lazy(() => import('./PersonalIdpPanel'))
 const PersonalDefenseStreamingPanel = lazy(() => import('./PersonalDefenseStreamingPanel'))
 const PersonalIrStashPanel = lazy(() => import('./PersonalIrStashPanel'))
@@ -269,12 +269,14 @@ function Scoreboard() {
 
       {selectedGame && (
         <div className="mt-5">
-          <ScoreGameCenter
-            game={{ ...selectedGame, boxscore_available: Boolean(selectedGame.boxscore) }}
-            league="NFL"
-            onClose={() => setSelectedGameId(null)}
-            boxScoreOverride={selectedGame.boxscore ? <NflBoxScore game={selectedGame} /> : null}
-          />
+          <Suspense fallback={<LoadingSurface label="Loading Game Center" />}>
+            <ScoreGameCenter
+              game={{ ...selectedGame, boxscore_available: Boolean(selectedGame.boxscore) }}
+              league="NFL"
+              onClose={() => setSelectedGameId(null)}
+              boxScoreOverride={selectedGame.boxscore ? <NflBoxScore game={selectedGame} /> : null}
+            />
+          </Suspense>
         </div>
       )}
     </section>
@@ -565,12 +567,14 @@ function MlbPanel() {
       </section>
 
       {selectedGameForCenter && (
-        <ScoreGameCenter
-          game={selectedGameForCenter}
-          league="MLB"
-          onClose={() => setSelectedGamePk(null)}
-          boxScoreOverride={selectedGame?.boxscore ? <MlbBoxScore game={selectedGame} /> : null}
-        />
+        <Suspense fallback={<LoadingSurface label="Loading Game Center" />}>
+          <ScoreGameCenter
+            game={selectedGameForCenter}
+            league="MLB"
+            onClose={() => setSelectedGamePk(null)}
+            boxScoreOverride={selectedGame?.boxscore ? <MlbBoxScore game={selectedGame} /> : null}
+          />
+        </Suspense>
       )}
 
       <section>
@@ -2076,11 +2080,13 @@ function CrossSportScorePanel({ league }) {
 
       {selectedGame && (
         <div className="mt-5">
-          <ScoreGameCenter
-            game={selectedGame}
-            league={league}
-            onClose={() => setSelectedGameId(null)}
-          />
+          <Suspense fallback={<LoadingSurface label="Loading Game Center" />}>
+            <ScoreGameCenter
+              game={selectedGame}
+              league={league}
+              onClose={() => setSelectedGameId(null)}
+            />
+          </Suspense>
         </div>
       )}
 
@@ -3422,7 +3428,7 @@ function MobileBottomNav({ active, onNavigate }) {
 function MoreMenu({ onNavigate, onClose }) {
   return (
     <div className="grid gap-2">
-      {['Scores', 'News & Insights', 'Brain Record', 'Practice', 'Research'].map((item) => (
+      {['Scores', 'News & Insights', 'Brain Record', 'Research'].map((item) => (
         <button key={item} onClick={() => { onNavigate(item); onClose?.() }} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-black text-slate-800 hover:border-blue-200">
           <span>{item}</span><ChevronRight size={17} className="text-slate-300" />
         </button>
@@ -3438,6 +3444,7 @@ const ROUTE_HASH = {
   Props: 'props',
   PrizePicks: 'prizepicks',
   Parlays: 'parlays',
+  'Bet Lab': 'bet-lab',
   Fantasy: 'fantasy',
   Survivor: 'survivor',
   'News & Insights': 'news',
@@ -3451,6 +3458,7 @@ const HASH_ROUTE = Object.fromEntries(Object.entries(ROUTE_HASH).map(([route, ha
 
 function routeFromLocation() {
   const hash = window.location.hash.replace(/^#/, '').trim().toLowerCase()
+  if (hash === 'practice') return 'Bet Lab'
   return HASH_ROUTE[hash] || 'Home'
 }
 
@@ -3561,7 +3569,7 @@ export default function App() {
             </button>
           ))}
           <div className="relative ml-auto">
-            <button aria-haspopup="menu" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className={`rounded-xl px-3.5 py-2.5 text-sm font-extrabold ${['Practice', 'Research'].includes(active) ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}>More</button>
+            <button aria-haspopup="menu" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className={`rounded-xl px-3.5 py-2.5 text-sm font-extrabold ${active === 'Research' ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}>More</button>
             {moreOpen && (
               <div className="absolute right-0 top-12 z-40 w-64 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-2xl">
                 <MoreMenu onNavigate={navigate} onClose={() => setMoreOpen(false)} />
@@ -3597,6 +3605,7 @@ export default function App() {
                 {active === 'Props' && <PropsV2Panel lane="PROP" />}
                 {active === 'PrizePicks' && <PropsV2Panel lane="PRIZEPICKS" />}
                 {active === 'Parlays' && <ParlaysV2Panel />}
+                {active === 'Bet Lab' && <Suspense fallback={<LoadingSurface label="Loading Bet Lab" />}><PracticeBetting /></Suspense>}
               </>
             )}
 
@@ -3604,7 +3613,6 @@ export default function App() {
             {active === 'Survivor' && <SurvivorCommercialPanel />}
             {active === 'News & Insights' && <NewsInsightsPanel />}
             {active === 'Brain Record' && <Suspense fallback={<LoadingSurface label="Loading Brain Record" />}><PerformancePanel /></Suspense>}
-            {active === 'Practice' && <Suspense fallback={<LoadingSurface label="Loading Practice" />}><PracticeBetting /></Suspense>}
 
             {active === 'Research' && (
               <EmptyPanel

@@ -8,7 +8,7 @@ export const navItems = [
   'Brain Record',
 ]
 
-export const bettingNavItems = ['Best Bets', 'Props', 'PrizePicks', 'Parlays']
+export const bettingNavItems = ['Best Bets', 'Props', 'PrizePicks', 'Parlays', 'Bet Lab']
 
 export const scoreLeagues = ['NFL', 'MLB', 'NBA', 'NHL', 'CFB', 'CBB']
 
