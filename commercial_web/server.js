@@ -16,6 +16,7 @@ import { addSurvivorLink, survivorEntryOwnedByOther, survivorLinkNames } from '.
 import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
+import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -1139,6 +1140,66 @@ function survivorBuybackAnswer(data, entryName = null, entry = null, poolState =
     ],
     sources:updatedSources(data,['survivorV2']),
     updated_at:data.survivorV2?.generated_at,
+  })
+}
+
+
+function survivorPoolDynamicsAnswer(data, poolState = null) {
+  if (!poolState) {
+    return response({
+      intent:'survivor_pool_dynamics',
+      take:'Current Survivor field-size and elimination counts require linked private pool state.',
+      confidence:'PERSONAL CONTEXT REQUIRED',
+      status:'PERSONAL_CONTEXT_REQUIRED',
+      why:['Generic Survivor research does not expose private pool participation counts.'],
+      risk:['Sports Zenith will not estimate how many entries remain without a verified pool sheet.'],
+      sources:updatedSources(data,['survivorV2']),
+      updated_at:data.survivorV2?.generated_at,
+    })
+  }
+
+  const dynamics=survivorPoolDynamics(poolState)
+  if(dynamics.status==='NO_VERIFIED_POOL_COUNTS'){
+    return response({
+      intent:'personal_survivor_pool_dynamics',
+      take:'No verified Survivor field-size snapshot is available from an official pool sheet yet.',
+      confidence:'WAITING FOR VERIFIED POOL COUNTS',
+      status:'NO_VERIFIED_POOL_COUNTS',
+      risk:['No remaining-field percentage is being estimated.'],
+      sources:updatedSources(data,['survivorV2']),
+      updated_at:poolState?.official_pool_state_updated_at||data.survivorV2?.generated_at,
+    })
+  }
+
+  if(dynamics.status==='POOL_COUNT_CONFLICT'){
+    return response({
+      intent:'personal_survivor_pool_dynamics',
+      take:`The latest verified Week ${dynamics.source_week} pool-count records disagree, so Sports Zenith is withholding the field-size estimate.`,
+      confidence:'SOURCE CONFLICT / VERIFY',
+      status:'POOL_COUNT_CONFLICT',
+      risk:['Conflicting pool counts are never averaged or silently resolved.'],
+      sources:updatedSources(data,['survivorV2']),
+      updated_at:poolState?.official_pool_state_updated_at||data.survivorV2?.generated_at,
+    })
+  }
+
+  const historical=!dynamics.current
+  return response({
+    intent:'personal_survivor_pool_dynamics',
+    take:historical
+      ? `Latest verified pool snapshot is Week ${dynamics.source_week}: ${dynamics.alive_entries} of ${dynamics.start_entries} entries were alive (${dynamics.survival_pct}%). The active pool week is Week ${dynamics.current_week}, so this is historical context only.`
+      : `Current verified Week ${dynamics.source_week} pool snapshot: ${dynamics.alive_entries} of ${dynamics.start_entries} entries are alive (${dynamics.survival_pct}%).`,
+    confidence:historical?'HISTORICAL VERIFIED':'CURRENT VERIFIED',
+    status:dynamics.status,
+    why:[
+      `${dynamics.lost_entries} entries eliminated · ${dynamics.eliminated_pct}% of the recorded starting field.`,
+      historical?`Verified count is ${Math.max(0,Number(dynamics.current_week||0)-Number(dynamics.source_week||0))} week${Math.abs(Number(dynamics.current_week||0)-Number(dynamics.source_week||0))===1?'':'s'} behind the active pool week.`:'Field-size snapshot matches the active pool week.',
+      historical?'Historical pool pressure does not alter the current-week Survivor ranking.':null,
+    ].filter(Boolean),
+    risk:[historical?'Current Week field size remains unverified until a newer official pool sheet is imported.':'Pool counts can change after the snapshot as additional entries are graded.'],
+    pool_dynamics:dynamics,
+    sources:updatedSources(data,['survivorV2']),
+    updated_at:poolState?.official_pool_state_updated_at||data.survivorV2?.generated_at,
   })
 }
 
@@ -2298,6 +2359,7 @@ function routeAsk(question, data, context = {}) {
   if(/\b(team style|team stats|offensive style|play mix|pass heavy|run heavy|rush heavy|tempo|pace|three[- ]point rate|shot environment|how .* play)\b/.test(q)) return teamStatsAnswer(question,data)
   if(/\b(player history|historical evidence|historical context|historically supported|career stats|career numbers|career statistics|season stats|stat line|past performance)\b/.test(q)) return playerHistoryAnswer(question,data)
   if(/\b(parlay|two leg|2 leg)\b/.test(q)) return parlayAnswer(data)
+  if(/\b(how many .*left|entries? (?:are )?left|remaining entries|field size|pool survival|survival dynamics|pool dynamics)\b/.test(q)) return survivorPoolDynamicsAnswer(data)
   if(/\b(buyback|buy back|re-entry|reentry|rebuy|re-buy)\b/.test(q)) return survivorBuybackAnswer(data)
   if(/\b(save for later|save .* for later|future value|future-value|preserve for later|team should i save)\b/.test(q)) return survivorFutureValueAnswer(data)
   if(/\b(survivor|survivor pick|pool pick|survivor research|research leader)\b/.test(q)) return survivorAnswer(data)
@@ -2317,6 +2379,7 @@ function routeAsk(question, data, context = {}) {
   if(page==='Props') return propsAnswer(question+' props',data)
   if(page==='PrizePicks') return propsAnswer(question+' prizepicks',data)
   if(page==='Parlays') return parlayAnswer(data)
+  if(page==='Survivor' && /\b(how many .*left|entries? (?:are )?left|remaining entries|field size|pool survival|survival dynamics|pool dynamics)\b/.test(q)) return survivorPoolDynamicsAnswer(data)
   if(page==='Survivor' && /\b(buyback|buy back|re-entry|reentry|rebuy|re-buy)\b/.test(q)) return survivorBuybackAnswer(data)
   if(page==='Survivor' && /\b(save|future value|preserve)\b/.test(q)) return survivorFutureValueAnswer(data)
   if(page==='Survivor') return survivorAnswer(data)
@@ -3199,7 +3262,8 @@ async function personalizedSurvivorAsk(req, question, data) {
   const q=qtext(question)
   const wantsFutureValue=/\b(save for later|save .* for later|future value|future-value|preserve for later|team should i save)\b/.test(q)
   const wantsBuyback=/\b(buyback|buy back|re-entry|reentry|rebuy|re-buy)\b/.test(q)
-  if(!/\b(survivor|survivor pick|pool pick|knockout|used teams?|teams? used|save for later|future value|future-value|preserve for later|team should i save|buyback|buy back|re-entry|reentry|rebuy|re-buy)\b/.test(q)) return null
+  const wantsPoolDynamics=/\b(how many .*left|entries? (?:are )?left|remaining entries|field size|pool survival|survival dynamics|pool dynamics)\b/.test(q)
+  if(!/\b(survivor|survivor pick|pool pick|knockout|used teams?|teams? used|save for later|future value|future-value|preserve for later|team should i save|buyback|buy back|re-entry|reentry|rebuy|re-buy|how many .*left|entries? (?:are )?left|remaining entries|field size|pool survival|survival dynamics|pool dynamics)\b/.test(q)) return null
   if(!bearerToken(req)) return null
 
   const user=await authenticatedUser(req)
@@ -3210,6 +3274,10 @@ async function personalizedSurvivorAsk(req, question, data) {
   if(!entryName) return null
 
   const survivorState=await loadExternalJson(SURVIVOR_ENTRIES_PATH)
+
+  if(wantsPoolDynamics){
+    return survivorPoolDynamicsAnswer(data,survivorState)
+  }
 
   if(entryNames.length>1){
     const poolWeek=Number(survivorState?.pool_current_week||data.survivorV2?.pool_current_week||0)||null
@@ -4773,6 +4841,7 @@ const server=http.createServer(async(req,res)=>{
     const linkedName=selectLinkedSurvivorEntry(linkedNames,requestedEntry)
     const entry=linkedName ? (state.entries||{})[linkedName]||null : null
     const linkedEntries=buildLinkedSurvivorSummaries(linkedNames,state)
+    const poolDynamics=survivorPoolDynamics(state)
     const poolWeek=Number(state.pool_current_week||entry?.current_week||0)||null
     const linkedEntryStates=linkedNames
       .map(name=>({entry_name:name,entry:(state.entries||{})[name]||null}))
@@ -4789,6 +4858,7 @@ const server=http.createServer(async(req,res)=>{
       linked_entries:linkedEntries,
       diversified_allocations:diversifiedAllocations,
       diversification_concentration:diversificationConcentration,
+      pool_dynamics:poolDynamics,
       pool_current_week:poolWeek,
       used_teams:[],
       current_picks:[],
@@ -4811,6 +4881,7 @@ const server=http.createServer(async(req,res)=>{
       linked_entries:linkedEntries,
       diversified_allocations:diversifiedAllocations,
       diversification_concentration:diversificationConcentration,
+      pool_dynamics:poolDynamics,
       active_entry:linkedName,
       entry_status:entry?.status||null,
       pool_current_week:poolWeek,

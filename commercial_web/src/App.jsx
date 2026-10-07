@@ -938,6 +938,7 @@ function SurvivorCommercialPanel() {
   const linkedEntries = Array.isArray(saved.linked_entries) ? saved.linked_entries : []
   const diversifiedAllocations = Array.isArray(saved.diversified_allocations) ? saved.diversified_allocations : []
   const concentration = saved.diversification_concentration || {}
+  const poolDynamics = saved.pool_dynamics || {}
   const usedTeams = hasEntry ? (saved.used_teams || []) : []
   const currentPicks = hasEntry ? (saved.current_picks || []) : []
   const candidates = [...(survivor.candidates || [])]
@@ -1262,6 +1263,12 @@ function SurvivorCommercialPanel() {
           <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Pool state</div>
           <div className="mt-3 text-lg font-black text-slate-950">{hasEntry ? humanize(saved.rule_status || 'UNKNOWN') : 'Authentication required for personal rules'}</div>
           <div className="mt-2 text-sm leading-6 text-slate-500">{hasEntry ? `Current pool week: ${saved.pool_current_week ?? '—'} · latest official sheet week: ${saved.ownership?.official_pool_week ?? '—'}.` : 'Generic Survivor research does not expose member pool rules or ownership.'}</div>
+          {hasEntry && poolDynamics.alive_entries != null && (
+            <div className="mt-3 rounded-2xl bg-slate-50 px-3 py-3 text-xs font-semibold leading-5 text-slate-600">
+              <span className="font-black text-slate-900">{poolDynamics.alive_entries}/{poolDynamics.start_entries} alive · {poolDynamics.survival_pct}%</span>
+              {' '}from verified Week {poolDynamics.source_week}. {poolDynamics.current ? 'This matches the active pool week.' : 'Historical only — current-week field size is still unverified.'}
+            </div>
+          )}
         </div>
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
           <div className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">Forward accountability</div>
