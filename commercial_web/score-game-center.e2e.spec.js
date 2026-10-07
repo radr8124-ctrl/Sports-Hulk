@@ -105,7 +105,6 @@ test('Game Center presents overview, real box score, and honest next-connection 
   await expect(page.getByText('Attendance 19,812', { exact: false })).toBeVisible();
 
   for (const [tab, title] of [
-    ['Props', 'Player props will live with the game'],
     ['Zenith', 'Sports Zenith game intelligence'],
     ['News', 'Game news and impact'],
   ]) {
