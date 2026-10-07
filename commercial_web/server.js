@@ -20,6 +20,7 @@ import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
 import { askClaimCoverage } from './ask_claim_coverage.js'
 import { reportingConsensus } from './reporting_consensus.js'
+import { validateAskOutput, outputValidationFallback } from './ask_output_validation.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -399,7 +400,7 @@ function response({ intent, take, confidence = 'HIGH', why = [], risk = [], sour
 function shouldQueueAskReview(answer) {
   const status=String(answer?.status||'').toUpperCase()
   const confidence=String(answer?.confidence||'').toUpperCase()
-  return ['INSUFFICIENT_EVIDENCE','UNKNOWN','ERROR'].includes(status)
+  return ['INSUFFICIENT_EVIDENCE','UNKNOWN','ERROR','OUTPUT_VALIDATION_FAILED'].includes(status)
     || confidence==='INSUFFICIENT EVIDENCE'
     || confidence==='UNKNOWN'
 }
@@ -4967,7 +4968,9 @@ const server=http.createServer(async(req,res)=>{
       const routedQuestion=sessionResolution.question
       const survivorPersonalAnswer=await personalizedSurvivorAsk(req,routedQuestion,data)
       const fantasyPersonalAnswer=survivorPersonalAnswer?null:await personalizedFantasyAsk(req,routedQuestion,context)
-      const answer=survivorPersonalAnswer||fantasyPersonalAnswer||routeAsk(routedQuestion,data,context)
+      const routedAnswer=survivorPersonalAnswer||fantasyPersonalAnswer||routeAsk(routedQuestion,data,context)
+      const outputValidation=validateAskOutput(routedAnswer)
+      const answer=outputValidation.valid?routedAnswer:outputValidationFallback(outputValidation.errors)
       let preferenceState=null
       if(bearerToken(req)){
         const preferenceUser=await authenticatedUser(req)

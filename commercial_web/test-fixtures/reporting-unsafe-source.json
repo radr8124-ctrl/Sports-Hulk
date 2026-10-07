@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-10-07T12:00:00Z",
+  "source": "Unsafe-source output validation fixture",
+  "news_events": [
+    {
+      "event_node_id": "NEWS:unsafe-source",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "LOW",
+      "title": "Unsafe Source Runner injury update",
+      "detail": "Unsafe Source Runner returned to practice.",
+      "source": "Unsafe Fixture Feed",
+      "source_tier": "EXTERNAL_NEWS",
+      "source_url": "javascript:alert(1)",
+      "published_or_effective_at": "2026-10-07T10:00:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    }
+  ],
+  "facts": [],
+  "entity_links": [],
+  "entity_index": {
+    "unsafe source runner": ["NEWS:unsafe-source"]
+  },
+  "counts": {
+    "facts": 0,
+    "news_events": 1
+  },
+  "truth_rules": {}
+}
