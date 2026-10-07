@@ -36,3 +36,9 @@ Recovery branch: backup/pre-regime-20261007T201003Z
 
 ## Follow-up
 Audit NBA upstream competition-regime coverage once there are current NBA candidate rows and continue forward validation. See BETTING_V2_REGIME_ISOLATION_ACCEPTANCE_2026-10-07.md for the full test and isolation specification.
+
+## GitHub sync safety hold
+- Local production main is ahead of origin/main; the production release is deployed on the VPS but **has not been pushed to GitHub**.
+- The GitHub main CI workflow triggers an automatic deploy workflow, which currently uses `rsync -a --delete` into the live Sports HULK repository.
+- That deploy path could delete untracked runtime state and replace ongoing uncommitted UI work such as `commercial_web/src/App.jsx`.
+- **Do not push main until the deploy workflow is hardened and the existing live state/working changes are preserved.**
