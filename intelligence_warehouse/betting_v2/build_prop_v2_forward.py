@@ -5,6 +5,7 @@ import json
 import math
 import re
 import sys
+import requests
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -17,6 +18,7 @@ LEDGER = OUT_DIR / "PROP_V2_FORWARD_LEDGER.jsonl"
 SUMMARY = OUT_DIR / "PROP_V2_FORWARD_SUMMARY.json"
 PUBLIC = ROOT / "commercial_web" / "public" / "prop_v2_forward.json"
 NHL_BOX_RECEIPT = OUT_DIR / "NHL_OFFICIAL_BOX_FORWARD_RECEIPT.json"
+MLB_BOX_RECEIPT = OUT_DIR / "MLB_OFFICIAL_BOX_FORWARD_RECEIPT.json"
 DIST = ROOT / "commercial_web" / "dist" / "prop_v2_forward.json"
 
 if str(OUT_DIR) not in sys.path:
@@ -910,17 +912,69 @@ def settle_nhl_official_box():
     return receipt
 
 
+def settle_mlb_official_box(session=None):
+    try:
+        from .mlb_official_box_forward import (
+            plan_mlb_settlement, archive_fingerprint,
+        )
+    except ImportError:
+        from mlb_official_box_forward import (
+            plan_mlb_settlement, archive_fingerprint,
+        )
+
+    import os
+    source_ledger = LEDGER
+    before = (
+        (source_ledger.stat().st_size, source_ledger.stat().st_mtime_ns)
+        if source_ledger.exists() else None
+    )
+    receipt, planned = plan_mlb_settlement(
+        ROOT, canonical(), session or requests.Session(),
+    )
+    receipt["settled_now"] = 0
+    if receipt.get("status") == "READY":
+        current = (
+            (source_ledger.stat().st_size, source_ledger.stat().st_mtime_ns)
+            if source_ledger.exists() else None
+        )
+        if archive_fingerprint(ROOT) != receipt.get("archive_source"):
+            receipt["status"] = "ARCHIVE_CHANGED_BEFORE_APPEND"
+        elif current != before:
+            receipt["status"] = "LEDGER_CHANGED_BEFORE_APPEND"
+        else:
+            for event in planned:
+                append_jsonl(LEDGER, event)
+            receipt["settled_now"] = len(planned)
+    write_json(MLB_BOX_RECEIPT, receipt)
+    if receipt["status"] == "INTEGRITY_HOLD_PREVIOUS_GRADE_CONFLICT":
+        raise RuntimeError("MLB official box contradicts an existing grade; no new official MLB events appended")
+    return receipt
+
+
 def main():
     capture_result = capture()
     generic_settled_now = settle()
     nhl_receipt = settle_nhl_official_box()
-    settled_now = generic_settled_now + int(nhl_receipt.get("settled_now") or 0)
+    mlb_receipt = settle_mlb_official_box()
+    settled_now = (
+        generic_settled_now
+        + int(nhl_receipt.get("settled_now") or 0)
+        + int(mlb_receipt.get("settled_now") or 0)
+    )
     payload = build_summary(capture_result, settled_now)
     payload["nhl_official_box"] = {
         "status": nhl_receipt.get("status"),
         "settled_now": nhl_receipt.get("settled_now", 0),
         "existing_verified": nhl_receipt.get("existing_verified", 0),
         "conflicting_previous_grades_count": nhl_receipt.get("conflicting_previous_grades_count", 0),
+        "official_result_not_platform_payout": True,
+        "automatic_model_promotion": False,
+    }
+    payload["mlb_official_box"] = {
+        "status": mlb_receipt.get("status"),
+        "settled_now": mlb_receipt.get("settled_now", 0),
+        "existing_verified": mlb_receipt.get("existing_verified", 0),
+        "conflicting_previous_grades_count": mlb_receipt.get("conflicting_previous_grades_count", 0),
         "official_result_not_platform_payout": True,
         "automatic_model_promotion": False,
     }
@@ -934,6 +988,7 @@ def main():
         "capture": capture_result,
         "settled_now": settled_now,
         "nhl_official_box": payload["nhl_official_box"],
+        "mlb_official_box": payload["mlb_official_box"],
         "all_predictions": payload["all_predictions"],
         "monitor_selection": payload["monitor_selection"],
         "by_lane": {
