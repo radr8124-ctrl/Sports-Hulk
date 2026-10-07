@@ -449,11 +449,10 @@ def history_lookup():
                     or row.get("competition_phase"),
                     sport,
                 )
-                if regime != "UNKNOWN":
-                    lookup[f"{key}|{regime}"] = {
-                        **result,
-                        "competition_regime": regime,
-                    }
+                lookup[f"{key}|{regime}"] = {
+                    **result,
+                    "competition_regime": regime,
+                }
     return lookup
 
 

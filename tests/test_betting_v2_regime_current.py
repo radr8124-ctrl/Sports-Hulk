@@ -1,4 +1,5 @@
 import csv
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -196,6 +197,94 @@ class BettingV2RegimeCurrentTests(unittest.TestCase):
         self.assertEqual(
             row["probability_source"],
             "MARKET_REFERENCE_INSUFFICIENT_HISTORY",
+        )
+
+    def test_main_summary_includes_current_only_regular_proof_lane(self):
+        root = Path(self.temp_dir.name)
+        original_history_files = dict(all_markets.HISTORY_FILES)
+        original_outputs = {
+            "MODEL_OUT": all_markets.MODEL_OUT,
+            "VALIDATION_OUT": all_markets.VALIDATION_OUT,
+            "CURRENT_OUT": all_markets.CURRENT_OUT,
+            "PUBLIC": all_markets.PUBLIC,
+            "DIST": all_markets.DIST,
+        }
+
+        def restore():
+            all_markets.HISTORY_FILES.clear()
+            all_markets.HISTORY_FILES.update(original_history_files)
+            for name, value in original_outputs.items():
+                setattr(all_markets, name, value)
+
+        self.addCleanup(restore)
+
+        for sport in all_markets.SPORTS:
+            all_markets.HISTORY_FILES[sport] = root / f"missing-history-{sport}.csv"
+            all_markets.CURRENT_FILES[sport] = root / f"missing-current-{sport}.csv"
+
+        history_path = root / "NBA_GRADED_RECOMMENDATIONS.csv"
+        with history_path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=[
+                    "snapshot_at",
+                    "lane",
+                    "grade",
+                    "market",
+                    "game_key",
+                    "selection",
+                    "line",
+                    "score",
+                    "start",
+                    "season_type",
+                    "payload_json",
+                ],
+            )
+            writer.writeheader()
+            writer.writerow({
+                "snapshot_at": "2026-10-01T12:00:00Z",
+                "lane": "GAME",
+                "grade": "WIN",
+                "market": "MONEYLINE",
+                "game_key": "NBA_PRE_HISTORY",
+                "selection": "HME",
+                "line": "",
+                "score": 80,
+                "start": "2026-10-01T20:00:00Z",
+                "season_type": 1,
+                "payload_json": json.dumps({"american_odds": -110}),
+            })
+        all_markets.HISTORY_FILES["NBA"] = history_path
+
+        self._write_current(
+            "NBA",
+            [self._row("NBA_REG_CURRENT", 2)],
+        )
+
+        all_markets.MODEL_OUT = root / "models.json"
+        all_markets.VALIDATION_OUT = root / "validation.json"
+        all_markets.CURRENT_OUT = root / "current.json"
+        all_markets.PUBLIC = root / "public"
+        all_markets.DIST = root / "dist-does-not-exist"
+
+        all_markets.main()
+        current = json.loads(all_markets.CURRENT_OUT.read_text())
+
+        regular = current["by_proof_lane"]["NBA_MONEYLINE|REGULAR"]
+        self.assertEqual(regular["competition_regime"], "REGULAR")
+        self.assertEqual(regular["candidates"], 1)
+        self.assertEqual(regular["history_n"], 0)
+        self.assertEqual(
+            regular["proof_version"],
+            proof_version(
+                all_markets.MODEL_VERSION,
+                "NBA",
+                "REGULAR",
+            ),
+        )
+        self.assertIn(
+            "NBA_MONEYLINE|PRESEASON",
+            current["by_proof_lane"],
         )
 
     def test_cfb_regular_candidate_keeps_legacy_proof_key(self):

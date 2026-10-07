@@ -222,6 +222,77 @@ class BettingV2RegimeForwardTests(unittest.TestCase):
         self.assertEqual(events[-1]["grade"], "WIN")
         self.assertEqual(events[-1]["competition_regime"], "PRESEASON")
 
+    def test_unknown_regime_nba_entry_settles_only_from_unknown_history(self):
+        row = self._row("NBA", "UNKNOWN")
+        entry = {
+            "event_type": "ENTRY",
+            "forward_key": forward.forward_identity(row, row["model_version"]),
+            "model_version": row["model_version"],
+            "proof_version": row["proof_version"],
+            "competition_regime": "UNKNOWN",
+            "proof_lane_key": "NBA_TOTAL|UNKNOWN",
+            "sport": "NBA",
+            "game_key": row["game_key"],
+            "market": "TOTAL",
+            "selection": "OVER",
+            "selection_key": "OVER",
+            "line": 220.5,
+            "status": "PENDING",
+            "grade": "PENDING",
+        }
+        forward.LEDGER.write_text(json.dumps(entry) + "\n")
+
+        history_path = self.root / "nba_unknown_history.csv"
+        with history_path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=[
+                    "lane",
+                    "grade",
+                    "market",
+                    "snapshot_at",
+                    "game_key",
+                    "selection",
+                    "line",
+                    "season_type",
+                    "away_score",
+                    "home_score",
+                ],
+            )
+            writer.writeheader()
+            writer.writerow({
+                "lane": "GAME",
+                "grade": "WIN",
+                "market": "TOTAL",
+                "snapshot_at": "2026-10-01T12:00:00Z",
+                "game_key": row["game_key"],
+                "selection": "OVER",
+                "line": 220.5,
+                "season_type": "",
+                "away_score": 110,
+                "home_score": 120,
+            })
+            writer.writerow({
+                "lane": "GAME",
+                "grade": "LOSS",
+                "market": "TOTAL",
+                "snapshot_at": "2026-10-01T13:00:00Z",
+                "game_key": row["game_key"],
+                "selection": "OVER",
+                "line": 220.5,
+                "season_type": 1,
+                "away_score": 100,
+                "home_score": 101,
+            })
+        forward.HISTORY_FILES["NBA"] = history_path
+
+        settled = forward.settle()
+        events = self._read_jsonl(forward.LEDGER)
+
+        self.assertEqual(settled, 1)
+        self.assertEqual(events[-1]["grade"], "WIN")
+        self.assertEqual(events[-1]["competition_regime"], "UNKNOWN")
+
     def test_legacy_entry_without_regime_keeps_legacy_settlement_behavior(self):
         row = self._row("NBA", "PRESEASON")
         entry = {
