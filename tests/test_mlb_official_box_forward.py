@@ -234,7 +234,7 @@ class MlbOfficialBoxTests(unittest.TestCase):
         csvfile(self.archive, [dict(SOURCE_ROW), dict(SOURCE_ROW, player_id="999999")])
         receipt, events = self.plan()
         self.assertEqual(events, [])
-        self.assertEqual(receipt["review_reasons"]["NO_UNIQUE_ARCHIVED_OFFICIAL_PLAYER_ID"], 1)
+        self.assertEqual(receipt["review_reasons"]["CONFLICTING_ARCHIVED_OFFICIAL_PLAYER_IDS"], 1)
 
     def test_source_player_team_and_name_must_agree_with_official_box(self):
         for change in (

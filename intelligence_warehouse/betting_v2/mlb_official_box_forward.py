@@ -18,6 +18,11 @@ import re
 import unicodedata
 import requests
 
+try:
+    from .mlb_verified_player_crosswalk import indexed_verified_ids, source_fingerprint
+except ImportError:
+    from mlb_verified_player_crosswalk import indexed_verified_ids, source_fingerprint
+
 SCHEDULE_URL = "https://statsapi.mlb.com/api/v1/schedule"
 FEED_URL = "https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live"
 ARCHIVE_GLOB = "mlb_live/decision/history/snapshots/*/MLB_*_CANDIDATES.csv"
@@ -263,7 +268,7 @@ def stat_actual(record, market):
     return result, "VERIFIED"
 
 
-def verify_prediction(row, mapped, archived_players, boxes):
+def verify_prediction(row, mapped, archived_players, boxes, verified_crosswalk=None):
     event = str(row.get("event_id") or "").strip()
     game = mapped.get(event)
     if game is None:
@@ -278,10 +283,28 @@ def verify_prediction(row, mapped, archived_players, boxes):
         frozen_at >= min(frozen_start, game["start"])
     ):
         return None, "NOT_VERIFIED_PREGAME_OR_START"
-    players = archived_players.get((event, person_key(row.get("player_key"))), set())
-    if len(players) != 1:
-        return None, "NO_UNIQUE_ARCHIVED_OFFICIAL_PLAYER_ID"
-    player_id, source_team, archived_name = next(iter(players))
+    frozen_name = person_key(row.get("player_key"))
+    players = archived_players.get((event, frozen_name), set())
+    if len(players) > 1:
+        return None, "CONFLICTING_ARCHIVED_OFFICIAL_PLAYER_IDS"
+    if len(players) == 1:
+        player_id, source_team, archived_name = next(iter(players))
+        id_proof = "EXPLICIT_ORIGINAL_ARCHIVED_MLB_PLAYER_ID"
+    else:
+        # No player-ID guessing: require the SAME unique official numeric ID
+        # in two existing MLB StatsAPI-derived sources, bound to this exact
+        # player name + team from the unique provider-event/gamePk match.
+        candidates = []
+        for team in (game["away"], game["home"]):
+            evidence = (verified_crosswalk or {}).get((frozen_name, team))
+            if evidence and evidence["earliest_official_box_date"] < frozen_at.date().isoformat():
+                candidates.append((evidence["player_id"], team))
+        if len(candidates) != 1:
+            return None, "NO_INDEPENDENT_VERIFIED_OFFICIAL_ID_CROSSWALK"
+        player_id, source_team = candidates[0]
+        archived_name = frozen_name
+        id_proof = "TWO_STATSAPI_ID_SOURCES_EXACT_NAME_AND_TEAM"
+
     official_rows = boxes[game["game_pk"]]["players"].get(player_id, [])
     if len(official_rows) != 1:
         return None, "PLAYER_MISSING_OR_DUPLICATED_IN_FINAL_BOX"
@@ -309,6 +332,7 @@ def verify_prediction(row, mapped, archived_players, boxes):
         "grade": grade, "actual_value": actual,
         "stat_column": market, "official_game_pk": game["game_pk"],
         "official_player_id": player_id,
+        "player_id_provenance": id_proof,
         "official_game_type": game["game_type"],
         "official_start": game["start"].isoformat(),
         "away_score": boxes[game["game_pk"]]["scores"]["away"],
@@ -343,6 +367,25 @@ def plan_mlb_settlement(root, frozen, session, now=None):
             return receipt, []
         needed = {str(row.get("event_id") or "").strip() for row in mlb.values()}
         events, players = load_archived_identity(root, needed)
+        # For unmatched IDs, index only official-derived identity records
+        # from the relevant seasons. No fuzzy name search or date-only game
+        # pairing is permitted, including for same-day doubleheaders.
+        missing_names = {
+            person_key(row.get("player_key"))
+            for row in mlb.values()
+            if not players.get((str(row.get("event_id") or ""),
+                                person_key(row.get("player_key"))), set())
+        }
+        seasons = {
+            str(t.year) for row in mlb.values()
+            if (t := time_utc(row.get("event_start"))) is not None
+        }
+        id_sources_before = source_fingerprint(root)
+        verified_crosswalk, crosswalk_summary = indexed_verified_ids(
+            root, missing_names, seasons,
+        )
+        receipt["id_source_fingerprints"] = id_sources_before
+        receipt["id_crosswalk"] = crosswalk_summary
         receipt["archive_source"] = beginning
         receipt["mapped_archived_events"] = len(events)
         starts = [start for records in events.values() for _, _, start in records]
@@ -386,6 +429,9 @@ def plan_mlb_settlement(root, frozen, session, now=None):
         if archive_fingerprint(root) != beginning:
             receipt["status"] = "ARCHIVE_CHANGED_DURING_RESEARCH"
             return receipt, []
+        if source_fingerprint(root) != id_sources_before:
+            receipt["status"] = "PLAYER_ID_SOURCES_CHANGED_DURING_RESEARCH"
+            return receipt, []
     except (requests.exceptions.RequestException, TimeoutError, ConnectionError) as exc:
         receipt["status"] = "OFFICIAL_API_UNAVAILABLE"
         receipt["error_type"] = type(exc).__name__
@@ -402,8 +448,9 @@ def plan_mlb_settlement(root, frozen, session, now=None):
     problems = Counter()
     output = []
     contradictions = []
+    identity_counts = Counter()
     for key, row in mlb.items():
-        proof, reason = verify_prediction(row, mapped, players, boxes)
+        proof, reason = verify_prediction(row, mapped, players, boxes, verified_crosswalk)
         prior = str(row.get("grade") or "").upper()
         if proof is None:
             problems[reason] += 1
@@ -423,13 +470,19 @@ def plan_mlb_settlement(root, frozen, session, now=None):
         if prior not in {"", "PENDING"}:
             problems["UNSUPPORTED_PREVIOUS_FORWARD_STATE"] += 1
             continue
+        identity_counts[proof["player_id_provenance"]] += 1
         output.append({
             "event_type": "SETTLED", "forward_key": key,
             "sport": "MLB", "status": "SETTLED",
             "grade": proof["grade"], "actual_value": proof["actual_value"],
             "settled_at": receipt["generated_at"],
             "grade_snapshot_at": receipt["generated_at"],
-            "settlement_match_type": "MLB_OFFICIAL_GAME_AND_PLAYER_ID",
+            "settlement_match_type": (
+                "MLB_VERIFIED_HISTORICAL_ID_CROSSWALK"
+                if proof["player_id_provenance"] == "TWO_STATSAPI_ID_SOURCES_EXACT_NAME_AND_TEAM"
+                else "MLB_OFFICIAL_GAME_AND_PLAYER_ID"
+            ),
+            "player_id_provenance": proof["player_id_provenance"],
             "settlement_source": SOURCE,
             "original_provider_event_id": row.get("event_id"),
             "official_game_pk": proof["official_game_pk"],
@@ -446,6 +499,7 @@ def plan_mlb_settlement(root, frozen, session, now=None):
     receipt["conflicting_previous_grades_count"] = len(contradictions)
     receipt["conflicting_previous_grades"] = contradictions[:20]
     receipt["verified_new"] = len(output)
+    receipt["verified_new_by_player_id_provenance"] = dict(sorted(identity_counts.items()))
     if contradictions:
         receipt["status"] = "INTEGRITY_HOLD_PREVIOUS_GRADE_CONFLICT"
         return receipt, []

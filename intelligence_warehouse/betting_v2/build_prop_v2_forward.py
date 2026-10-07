@@ -912,7 +912,11 @@ def settle_nhl_official_box():
     return receipt
 
 
-def settle_mlb_official_box(session=None):
+def settle_mlb_official_box(session=None, max_events=50):
+    # Bound each verified settlement pass. Subsequent runs continue from the
+    # unchanged frozen ledger; default hourly refresh also uses this cap.
+    if not isinstance(max_events, int) or not 1 <= max_events <= 500:
+        raise ValueError("MLB verified settlement batch must contain 1 to 500 events")
     try:
         from .mlb_official_box_forward import (
             plan_mlb_settlement, archive_fingerprint,
@@ -922,7 +926,11 @@ def settle_mlb_official_box(session=None):
             plan_mlb_settlement, archive_fingerprint,
         )
 
-    import os
+    try:
+        from .mlb_verified_player_crosswalk import source_fingerprint
+    except ImportError:
+        from mlb_verified_player_crosswalk import source_fingerprint
+
     source_ledger = LEDGER
     before = (
         (source_ledger.stat().st_size, source_ledger.stat().st_mtime_ns)
@@ -931,6 +939,16 @@ def settle_mlb_official_box(session=None):
     receipt, planned = plan_mlb_settlement(
         ROOT, canonical(), session or requests.Session(),
     )
+    # Two independently corroborated official-ID crosswalks are prioritized
+    # over ordinary original archive IDs to resolve old missing-ID cases.
+    planned = sorted(planned, key=lambda x: (
+        x.get("player_id_provenance") != "TWO_STATSAPI_ID_SOURCES_EXACT_NAME_AND_TEAM",
+        str(x.get("official_game_pk")), str(x.get("forward_key")),
+    ))
+    batch = planned[:max_events]
+    receipt["batch_limit"] = max_events
+    receipt["pending_verified_next_batch"] = len(planned) - len(batch)
+    receipt["planned_verified_this_run"] = len(planned)
     receipt["settled_now"] = 0
     if receipt.get("status") == "READY":
         current = (
@@ -939,12 +957,14 @@ def settle_mlb_official_box(session=None):
         )
         if archive_fingerprint(ROOT) != receipt.get("archive_source"):
             receipt["status"] = "ARCHIVE_CHANGED_BEFORE_APPEND"
+        elif source_fingerprint(ROOT) != receipt.get("id_source_fingerprints"):
+            receipt["status"] = "OFFICIAL_ID_EVIDENCE_CHANGED_BEFORE_APPEND"
         elif current != before:
             receipt["status"] = "LEDGER_CHANGED_BEFORE_APPEND"
         else:
-            for event in planned:
+            for event in batch:
                 append_jsonl(LEDGER, event)
-            receipt["settled_now"] = len(planned)
+            receipt["settled_now"] = len(batch)
     write_json(MLB_BOX_RECEIPT, receipt)
     if receipt["status"] == "INTEGRITY_HOLD_PREVIOUS_GRADE_CONFLICT":
         raise RuntimeError("MLB official box contradicts an existing grade; no new official MLB events appended")
