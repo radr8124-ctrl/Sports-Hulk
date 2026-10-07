@@ -132,6 +132,9 @@ function AskQualityPanel({ data }) {
   const tracked = Number(data?.tracked || 0)
   const citation = data?.citation_coverage_pct
   const claimEvidence = data?.claim_evidence_coverage_pct
+  const retrievalRecall = data?.retrieval_recall_pct
+  const retrievalPrecision = data?.retrieval_precision_pct
+  const answerRelevance = data?.answer_relevance_pct
   const latency = data?.avg_latency_ms
 
   return (
@@ -182,6 +185,32 @@ function AskQualityPanel({ data }) {
               </div>
             ))}
           </div>
+
+          {(retrievalRecall != null || retrievalPrecision != null || answerRelevance != null) && (
+            <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-xs font-black uppercase tracking-[0.12em] text-blue-700">Deterministic retrieval benchmark</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.12em] text-blue-600">
+                  {data.retrieval_golden_passed || 0}/{data.retrieval_golden_cases || 0} cases · {data.retrieval_golden_status || 'WAITING'}
+                </div>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                {[
+                  ['Retrieval recall', retrievalRecall == null ? '—' : pct(retrievalRecall)],
+                  ['Retrieval precision', retrievalPrecision == null ? '—' : pct(retrievalPrecision)],
+                  ['Answer relevance', answerRelevance == null ? '—' : pct(answerRelevance)],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-xl border border-blue-100 bg-white p-3">
+                    <div className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{label}</div>
+                    <div className="mt-1 text-xl font-black text-slate-950">{value}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 text-[10px] font-semibold leading-4 text-blue-700">
+                Synthetic known-answer cases verify that expected evidence is recovered, unrelated evidence stays out, and the returned answer remains relevant. This is a code-quality benchmark, not live sports performance.
+              </div>
+            </div>
+          )}
 
           <div className="mt-4 text-[11px] font-semibold leading-5 text-slate-400">
             Recent append-only evaluation window · clickable citations measure source-link presence, while claim evidence measures exact take/why claims mapped to a specific reporting evidence record · these metrics measure restraint and traceability, not whether every sports opinion is correct.

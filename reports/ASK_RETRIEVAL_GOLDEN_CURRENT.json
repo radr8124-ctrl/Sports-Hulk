@@ -1,0 +1,93 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-10-07T09:41:29.236Z",
+  "benchmark": "DETERMINISTIC_SYNTHETIC_GOLDEN_SET",
+  "cases": 5,
+  "passed": 5,
+  "retrieval_recall_pct": 100,
+  "retrieval_precision_pct": 100,
+  "answer_relevance_pct": 100,
+  "expected_evidence_count": 5,
+  "recovered_expected_evidence_count": 5,
+  "returned_positive_evidence_count": 5,
+  "results": [
+    {
+      "id": "atlas-martin-exact",
+      "passed": true,
+      "intent": "reporting",
+      "status": "CURRENT",
+      "confidence": "ENTITY-LINKED REPORTING",
+      "expected_evidence_ids": [
+        "NEWS:atlas-martin"
+      ],
+      "returned_evidence_ids": [
+        "NEWS:atlas-martin"
+      ],
+      "forbidden_hits": [],
+      "unexpected_evidence_ids": [],
+      "relevance_pass": true
+    },
+    {
+      "id": "martin-solo-exact",
+      "passed": true,
+      "intent": "reporting",
+      "status": "CURRENT",
+      "confidence": "ENTITY-LINKED REPORTING",
+      "expected_evidence_ids": [
+        "NEWS:martin-solo"
+      ],
+      "returned_evidence_ids": [
+        "NEWS:martin-solo"
+      ],
+      "forbidden_hits": [],
+      "unexpected_evidence_ids": [],
+      "relevance_pass": true
+    },
+    {
+      "id": "consensus-runner-recall",
+      "passed": true,
+      "intent": "reporting",
+      "status": "CURRENT",
+      "confidence": "MULTI-SOURCE AGREEMENT",
+      "expected_evidence_ids": [
+        "NEWS:consensus-official",
+        "NEWS:consensus-beat"
+      ],
+      "returned_evidence_ids": [
+        "NEWS:consensus-official",
+        "NEWS:consensus-beat"
+      ],
+      "forbidden_hits": [],
+      "unexpected_evidence_ids": [],
+      "relevance_pass": true
+    },
+    {
+      "id": "orion-vale-fact",
+      "passed": true,
+      "intent": "reporting",
+      "status": "CURRENT",
+      "confidence": "ATTRIBUTED REPORTING",
+      "expected_evidence_ids": [
+        "FACT:orion-vale-role"
+      ],
+      "returned_evidence_ids": [
+        "FACT:orion-vale-role"
+      ],
+      "forbidden_hits": [],
+      "unexpected_evidence_ids": [],
+      "relevance_pass": true
+    },
+    {
+      "id": "unknown-subject-restraint",
+      "passed": true,
+      "intent": "news",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "confidence": "INSUFFICIENT EVIDENCE",
+      "expected_evidence_ids": [],
+      "returned_evidence_ids": [],
+      "forbidden_hits": [],
+      "unexpected_evidence_ids": [],
+      "relevance_pass": true
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "generated_at": "2026-10-07T12:00:00Z",
+  "source": "Sports Zenith deterministic retrieval golden set",
+  "news_events": [
+    {
+      "event_node_id": "NEWS:atlas-martin",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "MEDIUM",
+      "title": "Atlas Martin injury update",
+      "detail": "Atlas Martin returned to limited practice.",
+      "source": "Atlas Official",
+      "source_tier": "OFFICIAL_NEWS",
+      "source_url": "https://atlas.example/martin",
+      "published_or_effective_at": "2026-10-07T10:00:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    },
+    {
+      "event_node_id": "NEWS:martin-solo",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "MEDIUM",
+      "title": "Martin Solo injury update",
+      "detail": "Martin Solo did not practice.",
+      "source": "Solo Beat",
+      "source_tier": "EXTERNAL_NEWS",
+      "source_url": "https://solo.example/martin",
+      "published_or_effective_at": "2026-10-07T09:45:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    },
+    {
+      "event_node_id": "NEWS:consensus-official",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "LOW",
+      "title": "Consensus Runner official update",
+      "detail": "Consensus Runner returned to full practice.",
+      "source": "Consensus Team",
+      "source_tier": "OFFICIAL_NEWS",
+      "source_url": "https://consensus-team.example/runner",
+      "published_or_effective_at": "2026-10-07T10:15:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    },
+    {
+      "event_node_id": "NEWS:consensus-beat",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "LOW",
+      "title": "Consensus Runner beat update",
+      "detail": "Consensus Runner returned to full practice.",
+      "source": "Consensus Beat",
+      "source_tier": "EXTERNAL_NEWS",
+      "source_url": "https://consensus-beat.example/runner",
+      "published_or_effective_at": "2026-10-07T10:10:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    }
+  ],
+  "facts": [
+    {
+      "fact_id": "FACT:orion-vale-role",
+      "sport": "NFL",
+      "fact_type": "LINEUP_ROLE",
+      "severity": "CONTEXT",
+      "subject": "Orion Vale",
+      "team": "Test City Owls",
+      "fact_text": "Orion Vale is listed as the starting slot receiver for Test City.",
+      "source": "Test City Official",
+      "source_tier": "OFFICIAL_FACT",
+      "source_url": "https://testcity.example/orion",
+      "effective_at": "2026-10-07T09:30:00Z",
+      "verified_status": "OFFICIAL_LISTING"
+    }
+  ],
+  "entity_links": [],
+  "entity_index": {
+    "atlas martin": ["NEWS:atlas-martin"],
+    "martin solo": ["NEWS:martin-solo"],
+    "consensus runner": ["NEWS:consensus-official", "NEWS:consensus-beat"]
+  },
+  "counts": {
+    "facts": 1,
+    "news_events": 4
+  },
+  "truth_rules": {}
+}

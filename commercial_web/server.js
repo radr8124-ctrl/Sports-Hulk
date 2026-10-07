@@ -41,6 +41,7 @@ const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPO
 const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_EVALUATION_LEDGER.jsonl')
 const ASK_FEEDBACK_LEDGER_PATH = process.env.ASK_FEEDBACK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FEEDBACK_LEDGER.jsonl')
 const ASK_SOURCE_CLICK_LEDGER_PATH = process.env.ASK_SOURCE_CLICK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_SOURCE_CLICK_LEDGER.jsonl')
+const ASK_RETRIEVAL_GOLDEN_PATH = process.env.ASK_RETRIEVAL_GOLDEN_PATH || path.join(SPORTS_ROOT, 'reports', 'ASK_RETRIEVAL_GOLDEN_CURRENT.json')
 const ASK_RETRIEVAL_PATH_OVERRIDE = process.env.ASK_RETRIEVAL_PATH || ''
 const ASK_CONTEXT_PATH_OVERRIDE = process.env.ASK_CONTEXT_PATH || ''
 const ASK_NOW_MS_OVERRIDE = Date.parse(process.env.ASK_NOW_ISO || '')
@@ -498,6 +499,8 @@ async function askEvaluationSummary(limit = 500) {
     : []
   const sourceClicks=scopedClickRows.length
   const uniqueClickedAnswers=new Set(scopedClickRows.map(row=>String(row.answer_generated_at||'')).filter(Boolean)).size
+  let goldenRetrieval=null
+  try { goldenRetrieval=JSON.parse(await readFile(ASK_RETRIEVAL_GOLDEN_PATH,'utf8')) } catch {}
   const latencies=rows.map(row=>Number(row.latency_ms)).filter(Number.isFinite)
   const pct=value=>Math.round((value/tracked)*1000)/10
   return {
@@ -520,6 +523,13 @@ async function askEvaluationSummary(limit = 500) {
     supported_reporting_claim_count:supportedReportingClaimCount,
     unsupported_reporting_claim_count:unsupportedReportingClaimCount,
     claim_evidence_coverage_pct:reportingClaimCount?Math.round((supportedReportingClaimCount/reportingClaimCount)*1000)/10:null,
+    retrieval_golden_status:goldenRetrieval?.status||null,
+    retrieval_golden_cases:Number(goldenRetrieval?.cases||0)||0,
+    retrieval_golden_passed:Number(goldenRetrieval?.passed||0)||0,
+    retrieval_recall_pct:Number.isFinite(Number(goldenRetrieval?.retrieval_recall_pct))?Number(goldenRetrieval.retrieval_recall_pct):null,
+    retrieval_precision_pct:Number.isFinite(Number(goldenRetrieval?.retrieval_precision_pct))?Number(goldenRetrieval.retrieval_precision_pct):null,
+    answer_relevance_pct:Number.isFinite(Number(goldenRetrieval?.answer_relevance_pct))?Number(goldenRetrieval.answer_relevance_pct):null,
+    retrieval_golden_generated_at:goldenRetrieval?.generated_at||null,
     source_clicks:sourceClicks,
     unique_answers_with_source_click:uniqueClickedAnswers,
     source_click_rate_pct:cited?Math.round((Math.min(uniqueClickedAnswers,cited)/cited)*1000)/10:null,
