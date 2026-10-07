@@ -110,6 +110,30 @@ function AskCard({ answer, compact = false }) {
         </div>
       )}
 
+      {!!answer.personalization?.watchlist_hits?.length && (
+        <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">Also on your watchlist</div>
+          <div className="mt-2 space-y-2">
+            {answer.personalization.watchlist_hits.slice(0, 3).map((item, index) => {
+              const href = safeSourceUrl(item.url)
+              return (
+                <div key={`${item.title}-${index}`} className="text-xs leading-5 text-slate-300">
+                  <span className="font-black text-sky-300">{item.matched_preference}</span>{' · '}
+                  {href ? (
+                    <a href={href} target="_blank" rel="noreferrer noopener" className="font-bold text-slate-200 underline decoration-slate-500/40 underline-offset-2 hover:text-white">
+                      {item.title}
+                    </a>
+                  ) : (
+                    <span className="font-bold text-slate-200">{item.title}</span>
+                  )}
+                  {item.source ? <span className="text-slate-500"> · {item.source}</span> : null}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {!!answer.why?.length && (
         <div className="mt-5">
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-300">

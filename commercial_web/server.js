@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { createAdminClient, createClient } from '@insforge/sdk'
 import { buildPersonalizedSurvivorSource } from './survivor_personalization.js'
 import { sanitizeAccountPreferences } from './account_preferences.js'
-import { preferencePresentation } from './preference_presentation.js'
+import { preferencePresentation, watchlistNewsHits } from './preference_presentation.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -4545,7 +4545,11 @@ const server=http.createServer(async(req,res)=>{
         queueFailedAskReview(question,context,answer),
         recordAskEvaluation(question,context,answer,Date.now()-askStartedAt,null,answerGeneratedAt),
       ])
-      const personalization=preferenceState?.saved?preferencePresentation(answer,preferenceState.preferences):null
+      const newsLikeIntents=new Set(['news','reporting','reporting_stale','reporting_conflict','reporting_guardrail','game_news'])
+      const watchlistHits=preferenceState?.saved && newsLikeIntents.has(String(answer?.intent||''))
+        ? watchlistNewsHits(data.fantasyNews?.articles||[],preferenceState.preferences)
+        : []
+      const personalization=preferenceState?.saved?preferencePresentation(answer,preferenceState.preferences,watchlistHits):null
       return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt,...(personalization?{personalization}:{}),...(sessionResolution.resolved?{session_reference_resolved:true,resolved_question:routedQuestion}:{})})
     }
     catch(err){

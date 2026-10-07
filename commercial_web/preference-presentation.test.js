@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { preferencePresentation } from './preference_presentation.js'
+import { preferencePresentation, watchlistNewsHits } from './preference_presentation.js'
 
 test('presentation detects watched players and favorite teams without model adjustment', () => {
   const result = preferencePresentation(
@@ -43,4 +43,41 @@ test('presentation leaves unmatched preferences as metadata only', () => {
   assert.deepEqual(result.matched_favorite_teams, [])
   assert.deepEqual(result.matched_watched_players, [])
   assert.equal(result.model_adjustment, false)
+})
+
+
+test('watchlist surfaces recent preference matches and withholds stale ones', () => {
+  const now = Date.parse('2026-10-07T12:00:00Z')
+  const hits = watchlistNewsHits(
+    [
+      {
+        title: 'Eagles RT Lane Johnson To Retire',
+        source: 'Pro Football Rumors',
+        url: 'https://example.com/eagles',
+        published_at: '2026-10-07T04:00:00Z',
+      },
+      {
+        title: 'Josh Allen injury update',
+        source: 'Test Wire',
+        url: 'https://example.com/allen',
+        published_at: '2026-10-06T18:00:00Z',
+      },
+      {
+        title: 'Old Buffalo Bills feature',
+        source: 'Old Wire',
+        url: 'https://example.com/old-bills',
+        published_at: '2026-10-04T00:00:00Z',
+      },
+    ],
+    {
+      favorite_teams: ['Philadelphia Eagles', 'Buffalo Bills'],
+      watched_players: ['Josh Allen'],
+    },
+    now,
+  )
+
+  assert.equal(hits.length, 2)
+  assert.equal(hits[0].matched_preference, 'Philadelphia Eagles')
+  assert.equal(hits[1].matched_preference, 'Josh Allen')
+  assert.equal(hits.some(hit => hit.title.includes('Old Buffalo Bills')), false)
 })
