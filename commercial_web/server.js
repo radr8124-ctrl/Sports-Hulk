@@ -1151,6 +1151,65 @@ function reportingAnswer(question, data) {
   const topEvent=events[0]
   const topFact=facts[0]
   const subject=(topEvent?.title || topFact?.subject || 'Current reporting')
+
+  const q=qtext(question)
+  const statusSensitive=/\b(injury|injured|status|practice|inactive|active|questionable|doubtful|out|return|returning)\b/.test(q)
+  const recencySensitive=statusSensitive || /\b(latest|today|right now|current|currently|most recent|update)\b/.test(q)
+  const freshnessHours=statusSensitive?12:recencySensitive?24:null
+  const evidenceTimes=[
+    ...events.map(row=>Date.parse(row?.published_or_effective_at||'')).filter(Number.isFinite),
+    ...facts.map(row=>Date.parse(row?.effective_at||'')).filter(Number.isFinite),
+  ]
+  const newestEvidenceMs=evidenceTimes.length?Math.max(...evidenceTimes):null
+  const evidenceAgeHours=newestEvidenceMs==null?null:Math.max(0,(Date.now()-newestEvidenceMs)/3600000)
+
+  if(freshnessHours!=null && (evidenceAgeHours==null || evidenceAgeHours>freshnessHours)){
+    const staleEvent=topEvent||null
+    const staleFact=topFact||null
+    const staleSource=staleEvent
+      ? {
+          label:String(staleEvent.source||'Sports reporting'),
+          source:String(staleEvent.source||'Sports reporting'),
+          url:staleEvent.source_url||null,
+          updated_at:staleEvent.published_or_effective_at||null,
+          tier:staleEvent.source_tier||null,
+        }
+      : staleFact
+        ? {
+            label:String(staleFact.source||'Sports reporting'),
+            source:String(staleFact.source||'Sports reporting'),
+            url:staleFact.source_url||null,
+            updated_at:staleFact.effective_at||null,
+            tier:staleFact.source_tier||null,
+          }
+        : null
+    const ageText=evidenceAgeHours==null?'unknown':`${Math.round(evidenceAgeHours)}h old`
+    return response({
+      intent:'reporting_stale',
+      take:'I do not have fresh enough verified reporting to answer that as current.',
+      confidence:'STALE / VERIFY',
+      status:'STALE_SOURCE',
+      why:[
+        `Newest matching evidence is ${ageText}; this question requires evidence within ${freshnessHours} hours.`,
+        staleEvent?.title || staleFact?.fact_text || 'No timestamped current evidence is available.',
+      ],
+      risk:[
+        'An older injury or status report may no longer reflect the player\'s current availability.',
+        'Sports Zenith will not relabel stale evidence as current.',
+      ],
+      cards:staleEvent?[{
+        type:'stale_news',
+        title:staleEvent.title,
+        source:staleEvent.source,
+        url:staleEvent.source_url,
+        published_at:staleEvent.published_or_effective_at,
+      }]:[],
+      sources:staleSource?[staleSource]:updatedSources(data,['askRetrieval']),
+      updated_at:staleEvent?.published_or_effective_at||staleFact?.effective_at||null,
+      followups:['Show me the latest verified status','What changed most recently?'],
+    })
+  }
+
   const why=[]
 
   for(const fact of facts.slice(0,2)){
