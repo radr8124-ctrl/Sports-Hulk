@@ -46,6 +46,11 @@ CURRENT_FILES = {
 if str(OUT_DIR) not in sys.path:
     sys.path.insert(0, str(OUT_DIR))
 import build_betting_v2 as base
+from competition_regime import (
+    normalize_competition_regime,
+    proof_lane_key,
+    proof_version,
+)
 
 _DEVIG = None
 
@@ -362,10 +367,33 @@ def build_history(sport, market):
         if not game_key or not selection:
             continue
 
+        explicit_regime = ""
+        for regime_field in (
+            "season_type",
+            "competition_regime",
+            "season_phase",
+            "competition_phase",
+        ):
+            candidate_regime = row.get(regime_field)
+            if clean(candidate_regime):
+                explicit_regime = candidate_regime
+                break
+        competition_regime = normalize_competition_regime(
+            explicit_regime,
+            sport,
+        )
+        lane_key = f"{sport}_{market}"
+
         rows.append({
             "sport": sport,
             "market": market,
-            "lane_key": f"{sport}_{market}",
+            "lane_key": lane_key,
+            "competition_regime": competition_regime,
+            "proof_lane_key": proof_lane_key(
+                sport,
+                market,
+                competition_regime,
+            ),
             "game_key": game_key,
             "selection": selection,
             "line": line,
@@ -435,6 +463,19 @@ def build_history(sport, market):
         .reset_index(drop=True)
     )
     return frame
+
+
+def partition_proof_frames(frame):
+    if frame.empty or "proof_lane_key" not in frame.columns:
+        return {}
+    return {
+        str(key): group.copy().reset_index(drop=True)
+        for key, group in frame.groupby(
+            "proof_lane_key",
+            dropna=False,
+            sort=True,
+        )
+    }
 
 
 def matrices(frame):
@@ -1238,87 +1279,193 @@ def build_current(models, validations):
 def main():
     validations = {}
     models = {}
-    history_counts = {}
 
     for sport in SPORTS:
         for market in MARKETS:
             lane_key = f"{sport}_{market}"
             frame = build_history(sport, market)
-            history_counts[lane_key] = int(len(frame))
-            validation = walk_forward(frame)
-            validations[lane_key] = {
-                "sport": sport,
-                "market": market,
-                **validation,
-            }
-            if validation.get("status") == "READY":
-                model = fit_final(frame, validation)
-            else:
-                model = {
-                    "trained_at": now_iso(),
-                    "model_version": MODEL_VERSION,
-                    "history_n": int(len(frame)),
-                    "independent_blocks": (
-                        int(frame["block_key"].nunique())
-                        if not frame.empty else 0
+            proof_frames = partition_proof_frames(frame)
+            if not proof_frames:
+                unknown_key = proof_lane_key(
+                    sport,
+                    market,
+                    "UNKNOWN",
+                )
+                proof_frames = {unknown_key: frame}
+
+            for proof_key, proof_frame in proof_frames.items():
+                regimes = sorted({
+                    clean(value).upper()
+                    for value in (
+                        proof_frame.get(
+                            "competition_regime",
+                            pd.Series(dtype=str),
+                        )
+                    )
+                    if clean(value)
+                })
+                competition_regime = (
+                    regimes[0] if len(regimes) == 1
+                    else "UNKNOWN"
+                )
+                validation = walk_forward(proof_frame)
+                validations[proof_key] = {
+                    "sport": sport,
+                    "market": market,
+                    "lane_key": lane_key,
+                    "proof_lane_key": proof_key,
+                    "competition_regime": competition_regime,
+                    "proof_version": proof_version(
+                        MODEL_VERSION,
+                        sport,
+                        competition_regime,
                     ),
-                    "coefficients": {},
-                    "deployment_probability_source": (
-                        "MARKET_REFERENCE_INSUFFICIENT_HISTORY"
-                    ),
-                    "historical_edge_confidence": (
-                        "INSUFFICIENT_HISTORY"
-                    ),
-                    "selection_rule_status": (
-                        "INSUFFICIENT_HISTORY_FORWARD_TRACKING_ONLY"
-                    ),
-                    "hulk_score_adds_out_of_sample_value": False,
-                    "hulk_score_confidence_supported": False,
-                    "old_score_status": "UNTRAINED",
-                    "old_score_coefficient": None,
-                    "automatic_live_change": False,
+                    **validation,
                 }
-            models[lane_key] = {
-                "sport": sport,
-                "market": market,
-                **model,
-            }
+                if validation.get("status") == "READY":
+                    model = fit_final(proof_frame, validation)
+                else:
+                    model = {
+                        "trained_at": now_iso(),
+                        "model_version": MODEL_VERSION,
+                        "history_n": int(len(proof_frame)),
+                        "independent_blocks": (
+                            int(proof_frame["block_key"].nunique())
+                            if not proof_frame.empty else 0
+                        ),
+                        "coefficients": {},
+                        "deployment_probability_source": (
+                            "MARKET_REFERENCE_INSUFFICIENT_HISTORY"
+                        ),
+                        "historical_edge_confidence": (
+                            "INSUFFICIENT_HISTORY"
+                        ),
+                        "selection_rule_status": (
+                            "INSUFFICIENT_HISTORY_FORWARD_TRACKING_ONLY"
+                        ),
+                        "hulk_score_adds_out_of_sample_value": False,
+                        "hulk_score_confidence_supported": False,
+                        "old_score_status": "UNTRAINED",
+                        "old_score_coefficient": None,
+                        "automatic_live_change": False,
+                    }
+                models[proof_key] = {
+                    "sport": sport,
+                    "market": market,
+                    "lane_key": lane_key,
+                    "proof_lane_key": proof_key,
+                    "competition_regime": competition_regime,
+                    "proof_version": proof_version(
+                        MODEL_VERSION,
+                        sport,
+                        competition_regime,
+                    ),
+                    **model,
+                }
 
     current_rows = build_current(models, validations)
-    by_lane = {}
-    for lane_key in sorted(validations):
-        lane_rows = [
+    by_proof_lane = {}
+    for proof_key in sorted(validations):
+        proof_rows = [
             r for r in current_rows
-            if r["lane_key"] == lane_key
+            if r.get("proof_lane_key") == proof_key
         ]
-        by_lane[lane_key] = {
-            "candidates": len(lane_rows),
+        model = models[proof_key]
+        by_proof_lane[proof_key] = {
+            "lane_key": model.get("lane_key"),
+            "competition_regime": model.get("competition_regime"),
+            "proof_version": model.get("proof_version"),
+            "candidates": len(proof_rows),
             "shadow_plays": sum(
                 r["shadow_decision"] == "SHADOW_PLAY"
-                for r in lane_rows
+                for r in proof_rows
             ),
             "passes": sum(
                 r["shadow_decision"] != "SHADOW_PLAY"
-                for r in lane_rows
+                for r in proof_rows
             ),
-            "history_n": int(
-                models[lane_key].get("history_n") or 0
-            ),
+            "history_n": int(model.get("history_n") or 0),
             "independent_blocks": int(
-                models[lane_key].get(
-                    "independent_blocks"
-                ) or 0
+                model.get("independent_blocks") or 0
             ),
-            "probability_source": models[lane_key].get(
+            "probability_source": model.get(
                 "deployment_probability_source"
             ),
-            "historical_edge_confidence": models[
-                lane_key
-            ].get("historical_edge_confidence"),
-            "selection_rule_status": models[
-                lane_key
-            ].get("selection_rule_status"),
+            "historical_edge_confidence": model.get(
+                "historical_edge_confidence"
+            ),
+            "selection_rule_status": model.get(
+                "selection_rule_status"
+            ),
         }
+
+    by_lane = {}
+    for sport in SPORTS:
+        for market in MARKETS:
+            lane_key = f"{sport}_{market}"
+            lane_rows = [
+                r for r in current_rows
+                if r["lane_key"] == lane_key
+            ]
+            proof_models = [
+                model for model in models.values()
+                if model.get("lane_key") == lane_key
+            ]
+            probability_sources = {
+                model.get("deployment_probability_source")
+                for model in proof_models
+                if model.get("deployment_probability_source")
+            }
+            confidence_states = {
+                model.get("historical_edge_confidence")
+                for model in proof_models
+                if model.get("historical_edge_confidence")
+            }
+            rule_states = {
+                model.get("selection_rule_status")
+                for model in proof_models
+                if model.get("selection_rule_status")
+            }
+            by_lane[lane_key] = {
+                "candidates": len(lane_rows),
+                "shadow_plays": sum(
+                    r["shadow_decision"] == "SHADOW_PLAY"
+                    for r in lane_rows
+                ),
+                "passes": sum(
+                    r["shadow_decision"] != "SHADOW_PLAY"
+                    for r in lane_rows
+                ),
+                "history_n": sum(
+                    int(model.get("history_n") or 0)
+                    for model in proof_models
+                ),
+                "independent_blocks": sum(
+                    int(model.get("independent_blocks") or 0)
+                    for model in proof_models
+                ),
+                "probability_source": (
+                    next(iter(probability_sources))
+                    if len(probability_sources) == 1
+                    else "MULTIPLE_REGIME_PROOF"
+                    if probability_sources
+                    else None
+                ),
+                "historical_edge_confidence": (
+                    next(iter(confidence_states))
+                    if len(confidence_states) == 1
+                    else "MULTIPLE_REGIME_PROOF"
+                    if confidence_states
+                    else None
+                ),
+                "selection_rule_status": (
+                    next(iter(rule_states))
+                    if len(rule_states) == 1
+                    else "MULTIPLE_REGIME_PROOF"
+                    if rule_states
+                    else None
+                ),
+            }
 
     validation_payload = {
         "generated_at": now_iso(),
@@ -1373,6 +1520,7 @@ def main():
             ),
         },
         "by_lane": by_lane,
+        "by_proof_lane": by_proof_lane,
         "picks": current_rows,
         "rules": [
             "No point spread or total number can enter odds math; American price must be valid and at least plus/minus 100.",
