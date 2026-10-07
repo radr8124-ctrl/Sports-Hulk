@@ -8,6 +8,7 @@ import { insforgeConfigured } from './insforge'
 import { AccountButton, useAuth } from './AuthShell'
 import { bettingNavItems, navItems, nflSections, scoreLeagues, statusCards } from './dashboardConfig'
 import { PUBLIC_BRAND, PUBLIC_BRAND_WORD_1, PUBLIC_BRAND_WORD_2, PUBLIC_TAGLINE } from './brandConfig'
+import BetMeaning, { betDisplayLabel } from './BetMeaning'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
 const AssistantDrawer = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AssistantDrawer })))
@@ -1614,21 +1615,46 @@ function BestBetsV2Panel() {
       </div>
       <SportFilter sports={sports} active={sport} onChange={setSport} />
       <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        {visible.map((row, i) => (
-          <div key={`${row.game_key}-${row.market}-${row.selection_key}-${i}`} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-            <div className="flex items-start justify-between gap-3">
-              <div><div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">{row.sport} · {humanize(row.market)}</div><div className="mt-2 text-xl font-black text-slate-950">{row.selection}</div></div>
-              <span className={`rounded-full px-3 py-1 text-[10px] font-black ${row.shadow_decision === 'SHADOW_PLAY' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{row.shadow_decision === 'SHADOW_PLAY' ? 'PLAY' : 'PASS'}</span>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.calibrated_win_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Probability</div></div>
-              <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.market_reference_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Market fair</div></div>
-              <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.conservative_expected_value_pct == null ? '—' : `${row.conservative_expected_value_pct}%`}</div><div className="mt-1 text-slate-400">Cons. EV</div></div>
-            </div>
-            <div className="mt-4 text-xs font-semibold leading-5 text-slate-500">{humanize(row.historical_edge_confidence)} · {row.book_count ?? '—'} books · quality {row.data_quality_grade || '—'}</div>
-            <div className="mt-2 text-[11px] leading-5 text-slate-400">{humanize(row.selection_rule_status)}</div>
-          </div>
-        ))}
+        {visible.map((row, i) => {
+          const isPlay = row.shadow_decision === 'SHADOW_PLAY'
+          const zenithStatus = isPlay ? 'PLAY' : 'PASS'
+          return (
+            <article key={`${row.game_key}-${row.market}-${row.selection_key}-${i}`} className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">{row.sport} · {humanize(row.market)}</div>
+                  <div className="mt-2 truncate text-2xl font-black tracking-tight text-slate-950">{betDisplayLabel(row)}</div>
+                </div>
+                <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black ${isPlay ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{zenithStatus}</span>
+              </div>
+
+              <div className="mt-4">
+                <BetMeaning row={row} />
+              </div>
+
+              <div className={`mt-4 rounded-2xl border px-4 py-3 ${isPlay ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'}`}>
+                <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Sports Zenith status</div>
+                <div className={`mt-1 text-sm font-black ${isPlay ? 'text-emerald-800' : 'text-slate-800'}`}>{zenithStatus} · {humanize(row.selection_rule_status || row.shadow_decision)}</div>
+              </div>
+
+              <details className="group mt-4 rounded-2xl border border-slate-200 bg-white">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-black text-slate-700">
+                  <span>View evidence</span>
+                  <ChevronRight size={16} className="shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
+                </summary>
+                <div className="border-t border-slate-100 px-4 pb-4 pt-4">
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.calibrated_win_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Zenith probability</div></div>
+                    <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.market_reference_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Market fair</div></div>
+                    <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.conservative_expected_value_pct == null ? '—' : `${row.conservative_expected_value_pct}%`}</div><div className="mt-1 text-slate-400">Conservative EV</div></div>
+                  </div>
+                  <div className="mt-4 text-xs font-semibold leading-5 text-slate-500">{humanize(row.historical_edge_confidence)} · {row.book_count ?? '—'} books · quality {row.data_quality_grade || '—'}</div>
+                  <div className="mt-2 text-[11px] leading-5 text-slate-400">{humanize(row.selection_rule_status)}</div>
+                </div>
+              </details>
+            </article>
+          )
+        })}
       </div>
     </section>
   )
