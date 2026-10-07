@@ -6,6 +6,7 @@ import {
 
 const GameOddsPanel = React.lazy(() => import('./GameOddsPanel'))
 const GamePropsPanel = React.lazy(() => import('./GamePropsPanel'))
+const GameZenithPanel = React.lazy(() => import('./GameZenithPanel'))
 
 const TABS = [
   ['Overview', Trophy],
@@ -331,7 +332,21 @@ export default function ScoreGameCenter({ game, league, onClose, boxScoreOverrid
             <GamePropsPanel game={game} league={league} />
           </React.Suspense>
         )}
-        {['Zenith', 'News'].includes(tab) && <ConnectedNext tab={tab} game={game} />}
+        {tab === 'Zenith' && (
+          <React.Suspense fallback={
+            <div role="status" className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-white p-6 text-sm font-black text-slate-600">
+              <Activity size={17} className="animate-pulse text-blue-600" /> Loading Zenith game intelligence…
+            </div>
+          }>
+            <GameZenithPanel
+              game={game}
+              league={league}
+              onOpenOdds={() => setTab('Odds')}
+              onOpenProps={() => setTab('Props')}
+            />
+          </React.Suspense>
+        )}
+        {tab === 'News' && <ConnectedNext tab={tab} game={game} />}
       </div>
     </section>
   )
