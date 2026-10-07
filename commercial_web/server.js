@@ -1912,6 +1912,94 @@ function teamStatsAnswer(question, data) {
   })
 }
 
+function playerHistoryAnswer(question, data) {
+  const q=qtext(question)
+  const rows=data.askContext?.datasets?.player_evidence||[]
+  if(!rows.length) return response({
+    intent:'player_history',
+    take:'Governed player-history evidence is not available right now.',
+    confidence:'WAITING',
+    status:'WAITING',
+    sources:updatedSources(data,['askContext']),
+  })
+
+  const sportMatch=['NFL','MLB','NBA','NHL','CFB','CBB'].find(sport=>new RegExp(`\\b${sport.toLowerCase()}\\b`).test(q))||null
+  const candidates=rows.filter(row=>!sportMatch || String(row.sport||'').toUpperCase()===sportMatch)
+  const exact=candidates.filter(row=>{
+    const name=String(row.player||'').toLowerCase().trim()
+    return name.length>=3 && q.includes(name)
+  })
+
+  let matched=exact
+  if(!matched.length){
+    const queryTokens=new Set(q.match(/[a-z0-9'-]+/g)||[])
+    const lastNameMatches=candidates.filter(row=>{
+      const parts=String(row.player||'').toLowerCase().trim().split(/\s+/).filter(Boolean)
+      const last=parts[parts.length-1]||''
+      return last.length>=4 && queryTokens.has(last)
+    })
+    const uniqueNames=[...new Set(lastNameMatches.map(row=>String(row.player||'')))]
+    if(uniqueNames.length===1) matched=lastNameMatches
+  }
+
+  const top=matched[0]
+  if(!top) return response({
+    intent:'player_history',
+    take:"I don't have enough verified player identity context to answer that historical question confidently.",
+    confidence:'NEEDS PLAYER',
+    status:'INSUFFICIENT_EVIDENCE',
+    why:['Use the player’s full name so Sports Zenith can match the governed historical-evidence row without borrowing another player.'],
+    sources:updatedSources(data,['askContext']),
+  })
+
+  const numeric=value=>value==null||value===''?null:Number(value)
+  const n=numeric(top.role_evidence_n)
+  const above=numeric(top.role_above_baseline_rate)
+  const supported=top.role_direction_historically_supported===true || String(top.role_direction_historically_supported).toLowerCase()==='true'
+  const combinationN=numeric(top.combination_evidence_n)
+  const defenseN=numeric(top.defense_contrast_minimum_side_n)
+  const wantsCareerStats=/\b(career stats|career numbers|career statistics|season stats|stat line)\b/.test(q)
+  const why=[
+    `Evidence readiness: ${nice(top.evidence_readiness||'UNKNOWN')}.`,
+    `Current role signal: ${nice(top.current_role_signal||'UNKNOWN')}.`,
+    `Role evidence gate: ${nice(top.role_evidence_gate||'UNKNOWN')}.`,
+    Number.isFinite(n)?`Historical role sample: ${n} observation${n===1?'':'s'}.`:null,
+    Number.isFinite(above)?`Above-baseline rate in that historical role sample: ${(above*100).toFixed(1)}%.`:null,
+    `Role direction historically supported: ${supported?'yes':'no'}.`,
+    Number.isFinite(combinationN)?`Role + matchup combination sample: ${combinationN}.`:null,
+    Number.isFinite(defenseN)?`Defense-contrast minimum side sample: ${defenseN}.`:null,
+  ].filter(Boolean)
+
+  return response({
+    intent:'player_history',
+    take:wantsCareerStats
+      ? `I have governed historical evidence for ${top.player}, but not a verified career stat line in this Ask lane.`
+      : `${top.player}'s governed historical evidence is ${nice(top.role_evidence_gate||top.evidence_readiness||'limited')}.`,
+    confidence:supported?'HISTORICALLY SUPPORTED':'HISTORICAL CONTEXT ONLY',
+    status:wantsCareerStats?'PARTIAL_CONTEXT':'HISTORICAL_CONTEXT',
+    why:why.slice(0,7),
+    risk:[
+      wantsCareerStats
+        ? 'A verified career stat line is not connected in this Ask lane yet; these are historical evidence features only.'
+        : 'This is historical evidence context, not a career stat line or a prediction.',
+      'Historical directional evidence does not automatically change the current Sports Zenith recommendation.',
+    ],
+    cards:[{
+      type:'player_history',
+      title:top.player,
+      team:top.team,
+      position:top.position,
+      sport:top.sport,
+      evidence_gate:nice(top.role_evidence_gate||'UNKNOWN'),
+      evidence_n:Number.isFinite(n)?n:null,
+      historically_supported:supported,
+      readiness:nice(top.evidence_readiness||'UNKNOWN'),
+    }],
+    sources:updatedSources(data,['askContext']),
+    updated_at:data.askContext?.generated_at,
+  })
+}
+
 function routeAsk(question, data, context = {}) {
   const q=qtext(question)
   const page=String(context?.page||'').trim()
@@ -1921,6 +2009,7 @@ function routeAsk(question, data, context = {}) {
   if(/\b(score|scores|live score|who is winning|box score|game score)\b/.test(q)) return scoreAnswer(question,data)
   if(/\b(schedule|next game|play next|plays next|back[- ]to[- ]back|rest days?|fatigue|road trip|future schedule|hardest|toughest|easiest|softest)\b/.test(q)) return scheduleAnswer(question,data)
   if(/\b(team style|team stats|offensive style|play mix|pass heavy|run heavy|rush heavy|tempo|pace|three[- ]point rate|shot environment|how .* play)\b/.test(q)) return teamStatsAnswer(question,data)
+  if(/\b(player history|historical evidence|historical context|historically supported|career stats|career numbers|career statistics|season stats|stat line|past performance)\b/.test(q)) return playerHistoryAnswer(question,data)
   if(/\b(parlay|two leg|2 leg)\b/.test(q)) return parlayAnswer(data)
   if(/\b(survivor|survivor pick|pool pick|survivor research|research leader)\b/.test(q)) return survivorAnswer(data)
   if(/\b(waiver|waivers|faab|free agent)\b/.test(q)) return waiversAnswer(data)

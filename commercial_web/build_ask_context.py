@@ -20,6 +20,7 @@ SOURCES = {
     "schedule_load": ROOT / "intelligence_warehouse/schedule/TEAM_SCHEDULE_LOAD_CURRENT.csv",
     "future_schedule": ROOT / "intelligence_warehouse/schedule/FUTURE_SCHEDULE_DIFFICULTY.csv",
     "team_style": ROOT / "intelligence_warehouse/team_style/TEAM_STYLE_CURRENT.csv",
+    "player_evidence": ROOT / "intelligence_warehouse/evidence_gates/PLAYER_EVIDENCE_CONTEXT_CURRENT.csv",
 }
 
 LIMITS = {
@@ -32,6 +33,7 @@ LIMITS = {
     "schedule_load": 1600,
     "future_schedule": 1600,
     "team_style": 1600,
+    "player_evidence": 2200,
 }
 
 
