@@ -38,6 +38,23 @@ const number = (value, digits = 1) => {
   return Number.isFinite(n) ? n.toFixed(digits) : '—'
 }
 
+const hasVerifiedOwnershipRow = row => {
+  const verified = row?.verified_ownership_pct
+  if (verified !== null && verified !== '' && Number.isFinite(Number(verified))) return true
+
+  const projected = row?.projected_ownership_pct
+  const source = String(row?.projected_ownership_source || '').trim().toUpperCase()
+  if (
+    projected !== null &&
+    projected !== '' &&
+    Number.isFinite(Number(projected)) &&
+    source &&
+    !/(HEURISTIC|MODELLED|MODELED|SHARKSNIP)/.test(source)
+  ) return true
+
+  return false
+}
+
 function freshness(value) {
   if (!value) return 'Updated time unavailable'
   const d = new Date(value)
@@ -129,6 +146,19 @@ export default function DfsLineupLab() {
       .sort((a, b) => Number(b.projected_fantasy_points || 0) - Number(a.projected_fantasy_points || 0))
   }, [context, platform])
 
+  const verifiedOwnershipAvailable = useMemo(
+    () => pool.some(hasVerifiedOwnershipRow),
+    [pool],
+  )
+
+  const modelledOwnershipAvailable = useMemo(
+    () => pool.some(row => {
+      const value = row?.modelled_ownership_pct
+      return value !== null && value !== '' && Number.isFinite(Number(value))
+    }),
+    [pool],
+  )
+
   const visiblePlayers = useMemo(() => {
     const q = query.trim().toLowerCase()
     const rows = q
@@ -174,6 +204,21 @@ export default function DfsLineupLab() {
 
   const build = async () => {
     if (loading || !pool.length) return
+
+    if (mode === 'CONTRARIAN' && !verifiedOwnershipAvailable) {
+      setResult({
+        status: 'MODE_UNAVAILABLE',
+        reason: 'Contrarian mode requires verified current slate ownership. Modelled or heuristic ownership does not unlock this mode.',
+        ownership_available: false,
+        verified_ownership_available: false,
+        modelled_ownership_available: modelledOwnershipAvailable,
+        lineups: [],
+      })
+      setError('')
+      setSelectedLineup(0)
+      return
+    }
+
     setLoading(true)
     setError('')
     try {
@@ -190,6 +235,13 @@ export default function DfsLineupLab() {
       })
       const payload = await response.json()
       if (!response.ok || payload.status === 'ERROR') throw new Error(payload.error || 'Could not build a legal lineup')
+
+      if (payload.status === 'MODE_UNAVAILABLE') {
+        setResult(payload)
+        setSelectedLineup(0)
+        return
+      }
+
       if (!payload.lineups?.length) {
         throw new Error(
           `Current ${platform === 'DRAFTKINGS' ? 'DraftKings' : 'FanDuel'} projection coverage cannot form a legal Classic lineup yet. Try the other platform or wait for the next projection refresh.`
@@ -258,18 +310,27 @@ export default function DfsLineupLab() {
           {MODES.map(item => {
             const Icon = item.icon
             const active = item.key === mode
+            const unavailable = item.key === 'CONTRARIAN' && !verifiedOwnershipAvailable
             return (
               <button
                 key={item.key}
                 type="button"
+                disabled={unavailable}
+                aria-disabled={unavailable || undefined}
                 onClick={() => changeMode(item.key)}
-                className={`rounded-3xl border p-5 text-left transition ${active ? 'border-emerald-300 bg-emerald-50 shadow-soft' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`rounded-3xl border p-5 text-left transition ${active ? 'border-emerald-300 bg-emerald-50 shadow-soft' : unavailable ? 'cursor-not-allowed border-amber-200 bg-amber-50/60 opacity-80' : 'border-slate-200 bg-white hover:border-slate-300'}`}
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${active ? 'bg-emerald-100 text-emerald-700' : unavailable ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
                   <Icon size={19} />
                 </div>
                 <div className="mt-4 font-black text-slate-950">{item.label}</div>
                 <div className="mt-2 text-sm leading-5 text-slate-500">{item.text}</div>
+                {unavailable && (
+                  <div className="mt-3 text-xs font-black leading-5 text-amber-800">
+                    Unavailable · verified slate ownership required.
+                    {modelledOwnershipAvailable ? ' Modelled ownership exists but does not unlock this mode.' : ''}
+                  </div>
+                )}
               </button>
             )
           })}
@@ -329,10 +390,14 @@ export default function DfsLineupLab() {
           <button
             type="button"
             onClick={build}
-            disabled={loading || !pool.length}
+            disabled={loading || !pool.length || (mode === 'CONTRARIAN' && !verifiedOwnershipAvailable)}
             className="rounded-2xl bg-slate-950 px-6 py-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? 'BUILDING…' : 'BUILD BEST LINEUP'}
+            {loading
+              ? 'BUILDING…'
+              : mode === 'CONTRARIAN' && !verifiedOwnershipAvailable
+                ? 'VERIFIED OWNERSHIP REQUIRED'
+                : 'BUILD BEST LINEUP'}
           </button>
         </div>
       </section>
@@ -344,10 +409,14 @@ export default function DfsLineupLab() {
         </div>
       )}
 
-      {result && mode === 'CONTRARIAN' && !result.ownership_available && (
+      {mode === 'CONTRARIAN' && !verifiedOwnershipAvailable && (
         <div className="flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
           <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-          <span>Ownership is not present in the current slate. This build uses ceiling, value and correlation only; The system does not invent low-ownership percentages.</span>
+          <span>
+            Contrarian mode is unavailable without verified current slate ownership.
+            {modelledOwnershipAvailable ? ' Modelled heuristic ownership is present as research context, but it does not unlock leverage mode.' : ''}
+            Sports Zenith does not invent or promote unverified ownership percentages.
+          </span>
         </div>
       )}
 

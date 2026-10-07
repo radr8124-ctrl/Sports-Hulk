@@ -14,7 +14,6 @@ from premium_ui.dfs_optimizer import (
     optimize_nfl,
     lineup_frame,
     prepare_pool,
-    has_ownership_data,
 )
 
 MODE_TO_STRATEGY = {
@@ -51,6 +50,75 @@ def clean_value(value):
         except Exception:
             pass
     return value
+
+
+
+def _numeric_present(frame, column):
+    if column not in frame.columns:
+        return pd.Series(False, index=frame.index)
+    return pd.to_numeric(frame[column], errors="coerce").notna()
+
+
+def verified_ownership_mask(frame):
+    mask = pd.Series(False, index=frame.index)
+
+    if "verified_ownership_pct" in frame.columns:
+        mask = mask | _numeric_present(frame, "verified_ownership_pct")
+
+    if "projected_ownership_pct" in frame.columns:
+        projected = pd.to_numeric(frame["projected_ownership_pct"], errors="coerce")
+        if "projected_ownership_source" in frame.columns:
+            source = frame["projected_ownership_source"].fillna("").astype(str).str.upper()
+            verified_source = (
+                source.str.strip().ne("")
+                & ~source.str.contains("HEURISTIC|MODELLED|MODELED|SHARKSNIP", regex=True)
+            )
+            mask = mask | (projected.notna() & verified_source)
+
+    if "ownership_is_verified" in frame.columns:
+        verified_flag = frame["ownership_is_verified"].astype(str).str.lower().isin({"true", "1", "yes"})
+        projected = pd.to_numeric(
+            frame.get("projected_ownership_pct", pd.Series(index=frame.index, dtype=float)),
+            errors="coerce",
+        )
+        mask = mask | (verified_flag & projected.notna())
+
+    return mask
+
+
+def prepare_commercial_ownership(source):
+    out = source.copy()
+    verified = verified_ownership_mask(out)
+
+    verified_values = pd.Series(float("nan"), index=out.index)
+    if "verified_ownership_pct" in out.columns:
+        verified_values = pd.to_numeric(out["verified_ownership_pct"], errors="coerce")
+
+    projected = pd.to_numeric(
+        out.get("projected_ownership_pct", pd.Series(index=out.index, dtype=float)),
+        errors="coerce",
+    )
+    projected_source = (
+        out.get("projected_ownership_source", pd.Series("", index=out.index))
+        .fillna("")
+        .astype(str)
+        .str.upper()
+    )
+    verified_projected = (
+        projected.notna()
+        & projected_source.str.strip().ne("")
+        & ~projected_source.str.contains("HEURISTIC|MODELLED|MODELED|SHARKSNIP", regex=True)
+    )
+
+    commercial_projected = verified_values.where(verified_values.notna(), projected.where(verified_projected))
+    out["projected_ownership_pct"] = commercial_projected
+    out["modelled_ownership_pct"] = None
+
+    modelled_available = False
+    if "modelled_ownership_pct" in source.columns:
+        modelled_available = bool(pd.to_numeric(source["modelled_ownership_pct"], errors="coerce").notna().any())
+
+    return out, bool(verified.any()), modelled_available
 
 
 def player_payload(slot, row, reason, locked):
@@ -94,18 +162,33 @@ def main():
         if not counts.empty:
             slate_id = counts.index[0]
 
-    prepared = prepare_pool(source, platform, slate_id=slate_id)
-    ownership_available = has_ownership_data(prepared)
+    raw_prepared = prepare_pool(source, platform, slate_id=slate_id)
+    verified_ownership_available = bool(verified_ownership_mask(raw_prepared).any())
+    modelled_ownership_available = bool(
+        "modelled_ownership_pct" in raw_prepared.columns
+        and pd.to_numeric(raw_prepared["modelled_ownership_pct"], errors="coerce").notna().any()
+    )
+
+    source_for_optimizer, _, _ = prepare_commercial_ownership(source)
+    prepared = prepare_pool(source_for_optimizer, platform, slate_id=slate_id)
+    ownership_available = bool(
+        verified_ownership_available
+        and "projected_ownership_pct" in prepared.columns
+        and pd.to_numeric(prepared["projected_ownership_pct"], errors="coerce").notna().any()
+    )
 
     if strategy == "Contrarian" and not ownership_available:
         response = {
             "status": "MODE_UNAVAILABLE",
-            "reason": "Contrarian mode requires current ownership data; HULK will not fake contrarian leverage without it.",
+            "reason": "Contrarian mode requires verified current slate ownership. Sports Zenith will not unlock leverage mode from modelled or heuristic ownership alone.",
             "platform": platform,
             "slate_id": str(slate_id) if slate_id is not None else None,
             "mode": mode,
             "strategy": strategy,
             "ownership_available": False,
+            "verified_ownership_available": False,
+            "modelled_ownership_available": modelled_ownership_available,
+            "ownership_policy": "VERIFIED_ONLY_FOR_CONTRARIAN",
             "pool_size": int(len(prepared)),
             "generated_at": generated_at,
             "lineups": [],
@@ -118,7 +201,7 @@ def main():
     if strategy in {"GPP", "Contrarian"}:
         for reference_strategy in ["Balanced", "Cash Safe"]:
             reference = optimize_nfl(
-                source,
+                source_for_optimizer,
                 platform,
                 locked_keys=locked,
                 excluded_keys=excluded,
@@ -135,7 +218,7 @@ def main():
         max_overlap = 7 if strategy == "GPP" else 6
 
     results = optimize_nfl(
-        source,
+        source_for_optimizer,
         platform,
         locked_keys=locked,
         excluded_keys=excluded,
@@ -197,6 +280,9 @@ def main():
         "mode": mode,
         "strategy": strategy,
         "ownership_available": ownership_available,
+        "verified_ownership_available": ownership_available,
+        "modelled_ownership_available": modelled_ownership_available,
+        "ownership_policy": "VERIFIED_ONLY_FOR_CONTRARIAN",
         "pool_size": int(len(prepared)),
         "generated_at": generated_at,
         "lineups": lineups,
