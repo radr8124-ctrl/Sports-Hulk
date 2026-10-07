@@ -236,6 +236,27 @@ export default function ScoreGameCenter({ game, league, onClose, boxScoreOverrid
     setTab('Overview')
   }, [game?.event_id, league])
 
+  useEffect(() => {
+    if (!game?.event_id || !league) return undefined
+    const context = {
+      surface: 'GAME_CENTER',
+      league,
+      event_id: String(game.event_id),
+      away: game.away || game.away_abbr || '',
+      away_abbr: game.away_abbr || '',
+      home: game.home || game.home_abbr || '',
+      home_abbr: game.home_abbr || '',
+      status: game.status || '',
+      start_time: game.start_time || null,
+    }
+    window.dispatchEvent(new CustomEvent('sports-zenith-game-context', { detail: context }))
+    return () => {
+      window.dispatchEvent(new CustomEvent('sports-zenith-game-context', {
+        detail: { surface: 'GAME_CENTER', event_id: String(game.event_id), cleared: true },
+      }))
+    }
+  }, [game?.event_id, game?.away, game?.away_abbr, game?.home, game?.home_abbr, game?.status, game?.start_time, league])
+
   if (!game) return null
 
   return (

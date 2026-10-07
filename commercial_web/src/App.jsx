@@ -3332,6 +3332,7 @@ function routeFromLocation() {
 export default function App() {
   const [active, setActive] = useState(() => routeFromLocation())
   const [assistantOpen, setAssistantOpen] = useState(false)
+  const [gameScoutContext, setGameScoutContext] = useState(null)
   const [moreOpen, setMoreOpen] = useState(false)
   const backendLabel = useMemo(() => insforgeConfigured ? 'DATA PLATFORM CONNECTED' : 'LIVE DATA CONNECTED', [])
   const isAsk = active === 'Ask'
@@ -3352,6 +3353,19 @@ export default function App() {
       ? `${PUBLIC_BRAND} | ${PUBLIC_TAGLINE}`
       : `${active} | ${PUBLIC_BRAND}`
   }, [active])
+
+  useEffect(() => {
+    const syncGameScoutContext = (event) => {
+      const next = event.detail || null
+      if (next?.cleared) {
+        setGameScoutContext(current => String(current?.event_id || '') === String(next.event_id || '') ? null : current)
+        return
+      }
+      setGameScoutContext(next)
+    }
+    window.addEventListener('sports-zenith-game-context', syncGameScoutContext)
+    return () => window.removeEventListener('sports-zenith-game-context', syncGameScoutContext)
+  }, [])
 
   useEffect(() => {
     const closeOverlays = (event) => {
@@ -3491,6 +3505,7 @@ export default function App() {
             onClose={() => setAssistantOpen(false)}
             onOpenFull={() => navigate('Ask')}
             page={active}
+            gameContext={gameScoutContext}
           />
         </Suspense>
       )}

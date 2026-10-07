@@ -325,7 +325,7 @@ export function AskSportsHulkPage() {
   )
 }
 
-export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home' }) {
+export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home', gameContext = null }) {
   const { user, getAccessToken } = useAuth()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -341,7 +341,10 @@ export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home' }) 
     setLoading(true)
     try {
       const token = user ? await getAccessToken() : null
-      const answer = await askQuestion(q, { page }, token)
+      const answer = await askQuestion(q, {
+        page,
+        game_context: gameContext || undefined,
+      }, token)
       setMessages(prev => [...prev, { role: 'assistant', answer }])
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', answer: { take: 'Assistant unavailable.', confidence: 'WAITING', risk: [error.message] } }])
@@ -356,7 +359,14 @@ export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home' }) 
         <div className="flex items-center justify-between">
           <button onClick={onOpenFull} className="flex items-center gap-2 text-left">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300"><Brain size={20} /></div>
-            <div><div className="font-black">Ask</div><div className="text-[11px] font-semibold text-slate-500">Context: {page}</div></div>
+            <div>
+              <div className="font-black">Game Scout</div>
+              <div className="text-[11px] font-semibold text-slate-500">
+                {gameContext?.surface === 'GAME_CENTER'
+                  ? `${gameContext.league} · ${gameContext.away || gameContext.away_abbr} @ ${gameContext.home || gameContext.home_abbr}`
+                  : `Context: ${page}`}
+              </div>
+            </div>
           </button>
           <button onClick={onClose} className="rounded-xl p-2 text-slate-400 hover:bg-white/5 hover:text-white"><X size={18} /></button>
         </div>
