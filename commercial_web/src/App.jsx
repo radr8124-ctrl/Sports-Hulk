@@ -190,7 +190,7 @@ function NflBoxScore({ game }) {
 
 function Scoreboard() {
   const [snapshot, setSnapshot] = useState({ games: [], generated_at: null })
-  const [openBox, setOpenBox] = useState(null)
+  const [selectedGameId, setSelectedGameId] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -210,6 +210,8 @@ function Scoreboard() {
   }, [])
 
   const games = snapshot.games || []
+  const selectedGame = games.find(game => String(game.event_id) === String(selectedGameId)) || null
+
   return (
     <section>
       <div className="section-heading">
@@ -239,15 +241,38 @@ function Scoreboard() {
                   <span>{game.home_abbr || game.home}</span><span>{game.home_score ?? '—'}</span>
                 </div>
               </div>
-              {game.boxscore && (
-                <button onClick={() => setOpenBox(openBox === game.event_id ? null : game.event_id)} className="mt-5 text-sm font-extrabold text-blue-700">
-                  {openBox === game.event_id ? 'Hide box score' : 'View box score'} →
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                <div className="text-xs font-semibold text-slate-400">Source: {game.source || 'ESPN Core'}</div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextId = selectedGameId === game.event_id ? null : game.event_id
+                    setSelectedGameId(nextId)
+                    if (nextId) {
+                      window.requestAnimationFrame(() => {
+                        document.getElementById('score-game-center')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      })
+                    }
+                  }}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-black text-white"
+                >
+                  {selectedGameId === game.event_id ? 'Close Game Center' : 'Open Game Center'}
+                  <ChevronRight size={15} className={selectedGameId === game.event_id ? 'rotate-90' : ''} />
                 </button>
-              )}
-              {openBox === game.event_id && game.boxscore && <NflBoxScore game={game} />}
-              <div className="mt-5 border-t border-slate-100 pt-3 text-xs font-semibold text-slate-400">Source: {game.source || 'ESPN Core'}</div>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {selectedGame && (
+        <div className="mt-5">
+          <ScoreGameCenter
+            game={{ ...selectedGame, boxscore_available: Boolean(selectedGame.boxscore) }}
+            league="NFL"
+            onClose={() => setSelectedGameId(null)}
+            boxScoreOverride={selectedGame.boxscore ? <NflBoxScore game={selectedGame} /> : null}
+          />
         </div>
       )}
     </section>
@@ -462,7 +487,7 @@ function MlbBoxScore({ game }) {
 
 function MlbPanel() {
   const [data, setData] = useState({ today_games: [], recent_games: [], next_games: [] })
-  const [openBox, setOpenBox] = useState(null)
+  const [selectedGamePk, setSelectedGamePk] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -481,7 +506,20 @@ function MlbPanel() {
     return () => { cancelled = true; window.clearInterval(timer) }
   }, [])
 
-  const renderGame = (game, showBox = false) => (
+  const allGames = [
+    ...(data.today_games || []),
+    ...(data.next_games || []),
+    ...(data.recent_games || []),
+  ]
+  const selectedGame = allGames.find(game => String(game.gamePk) === String(selectedGamePk)) || null
+  const selectedGameForCenter = selectedGame ? {
+    ...selectedGame,
+    event_id: String(selectedGame.gamePk),
+    start_time: selectedGame.gameDate,
+    boxscore_available: Boolean(selectedGame.boxscore),
+  } : null
+
+  const renderGame = game => (
     <div key={game.gamePk} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
       <div className="flex items-center justify-between gap-3">
         <span className={`rounded-full px-3 py-1 text-xs font-black ${game.final ? 'bg-slate-100 text-slate-700' : game.live ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
@@ -493,12 +531,25 @@ function MlbPanel() {
         <div className="flex items-center justify-between text-lg font-black"><span>{game.away}</span><span>{game.away_score ?? '—'}</span></div>
         <div className="flex items-center justify-between text-lg font-black"><span>{game.home}</span><span>{game.home_score ?? '—'}</span></div>
       </div>
-      {showBox && game.boxscore && (
-        <button onClick={() => setOpenBox(openBox === game.gamePk ? null : game.gamePk)} className="mt-5 text-sm font-extrabold text-blue-700">
-          {openBox === game.gamePk ? 'Hide box score' : 'View box score'} →
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+        <div className="text-xs font-semibold text-slate-400">Source: {game.source || 'MLB StatsAPI'}</div>
+        <button
+          type="button"
+          onClick={() => {
+            const nextId = selectedGamePk === game.gamePk ? null : game.gamePk
+            setSelectedGamePk(nextId)
+            if (nextId) {
+              window.requestAnimationFrame(() => {
+                document.getElementById('score-game-center')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              })
+            }
+          }}
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-black text-white"
+        >
+          {selectedGamePk === game.gamePk ? 'Close Game Center' : 'Open Game Center'}
+          <ChevronRight size={15} className={selectedGamePk === game.gamePk ? 'rotate-90' : ''} />
         </button>
-      )}
-      {openBox === game.gamePk && game.boxscore && <MlbBoxScore game={game} />}
+      </div>
     </div>
   )
 
@@ -506,18 +557,28 @@ function MlbPanel() {
     <div className="space-y-8">
       <section>
         <div className="section-heading"><div><p className="eyebrow">MLB</p><h2>Today</h2></div><span className="health-pill">MLB STATSAPI</span></div>
-        {data.today_games?.length ? <div className="grid gap-4 lg:grid-cols-2">{data.today_games.map(g => renderGame(g, true))}</div> : (
+        {data.today_games?.length ? <div className="grid gap-4 lg:grid-cols-2">{data.today_games.map(renderGame)}</div> : (
           <EmptyPanel icon={Trophy} title="No MLB games today" text="The feed is connected. MLB has no games scheduled today, so the dashboard shows the next postseason slate below instead of looking broken." />
         )}
       </section>
+
+      {selectedGameForCenter && (
+        <ScoreGameCenter
+          game={selectedGameForCenter}
+          league="MLB"
+          onClose={() => setSelectedGamePk(null)}
+          boxScoreOverride={selectedGame?.boxscore ? <MlbBoxScore game={selectedGame} /> : null}
+        />
+      )}
+
       <section>
         <div className="section-heading"><div><p className="eyebrow">Next slate</p><h2>Upcoming MLB games</h2></div></div>
-        <div className="grid gap-4 lg:grid-cols-2">{(data.next_games || []).slice(0, 8).map(g => renderGame(g, false))}</div>
+        <div className="grid gap-4 lg:grid-cols-2">{(data.next_games || []).slice(0, 8).map(renderGame)}</div>
       </section>
       {!!data.recent_games?.length && (
         <section>
           <div className="section-heading"><div><p className="eyebrow">Recent finals</p><h2>Box scores</h2></div></div>
-          <div className="grid gap-4">{data.recent_games.map(g => renderGame(g, true))}</div>
+          <div className="grid gap-4">{data.recent_games.map(renderGame)}</div>
         </section>
       )}
     </div>
@@ -1924,7 +1985,7 @@ function ScoresHub() {
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1">
           {scoreLeagues.map(item => (
-            <button key={item} onClick={() => setLeague(item)} className={`rounded-full px-4 py-2 text-xs font-black ${league === item ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>{item}</button>
+            <button key={item} onClick={() => setLeague(item)} className={`min-h-11 rounded-full px-4 py-2 text-xs font-black ${league === item ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>{item}</button>
           ))}
         </div>
       </section>

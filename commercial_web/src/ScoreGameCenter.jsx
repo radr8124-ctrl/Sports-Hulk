@@ -259,7 +259,7 @@ function ConnectedNext({ tab, game }) {
   )
 }
 
-export default function ScoreGameCenter({ game, league, onClose }) {
+export default function ScoreGameCenter({ game, league, onClose, boxScoreOverride = null }) {
   const [tab, setTab] = useState('Overview')
 
   useEffect(() => {
@@ -307,7 +307,9 @@ export default function ScoreGameCenter({ game, league, onClose }) {
 
       <div className="mt-5" role="tabpanel">
         {tab === 'Overview' && <GameOverview game={game} league={league} />}
-        {tab === 'Box Score' && <BoxScoreContent league={league} eventId={game.event_id} available={game.boxscore_available} />}
+        {tab === 'Box Score' && (
+          boxScoreOverride || <BoxScoreContent league={league} eventId={game.event_id} available={game.boxscore_available} />
+        )}
         {['Odds', 'Props', 'Zenith', 'News'].includes(tab) && <ConnectedNext tab={tab} game={game} />}
       </div>
     </section>
