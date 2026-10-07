@@ -42,6 +42,7 @@ const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORT
 const ASK_FEEDBACK_LEDGER_PATH = process.env.ASK_FEEDBACK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FEEDBACK_LEDGER.jsonl')
 const ASK_SOURCE_CLICK_LEDGER_PATH = process.env.ASK_SOURCE_CLICK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_SOURCE_CLICK_LEDGER.jsonl')
 const ASK_RETRIEVAL_GOLDEN_PATH = process.env.ASK_RETRIEVAL_GOLDEN_PATH || path.join(SPORTS_ROOT, 'reports', 'ASK_RETRIEVAL_GOLDEN_CURRENT.json')
+const ASK_SEMANTIC_GOLDEN_PATH = process.env.ASK_SEMANTIC_GOLDEN_PATH || path.join(SPORTS_ROOT, 'reports', 'ASK_SEMANTIC_ANSWER_GOLDEN_CURRENT.json')
 const ASK_RETRIEVAL_PATH_OVERRIDE = process.env.ASK_RETRIEVAL_PATH || ''
 const ASK_CONTEXT_PATH_OVERRIDE = process.env.ASK_CONTEXT_PATH || ''
 const ASK_NOW_MS_OVERRIDE = Date.parse(process.env.ASK_NOW_ISO || '')
@@ -500,7 +501,9 @@ async function askEvaluationSummary(limit = 500) {
   const sourceClicks=scopedClickRows.length
   const uniqueClickedAnswers=new Set(scopedClickRows.map(row=>String(row.answer_generated_at||'')).filter(Boolean)).size
   let goldenRetrieval=null
+  let semanticGolden=null
   try { goldenRetrieval=JSON.parse(await readFile(ASK_RETRIEVAL_GOLDEN_PATH,'utf8')) } catch {}
+  try { semanticGolden=JSON.parse(await readFile(ASK_SEMANTIC_GOLDEN_PATH,'utf8')) } catch {}
   const latencies=rows.map(row=>Number(row.latency_ms)).filter(Number.isFinite)
   const pct=value=>Math.round((value/tracked)*1000)/10
   return {
@@ -530,6 +533,11 @@ async function askEvaluationSummary(limit = 500) {
     retrieval_precision_pct:Number.isFinite(Number(goldenRetrieval?.retrieval_precision_pct))?Number(goldenRetrieval.retrieval_precision_pct):null,
     answer_relevance_pct:Number.isFinite(Number(goldenRetrieval?.answer_relevance_pct))?Number(goldenRetrieval.answer_relevance_pct):null,
     retrieval_golden_generated_at:goldenRetrieval?.generated_at||null,
+    semantic_golden_status:semanticGolden?.status||null,
+    semantic_golden_cases:Number(semanticGolden?.cases||0)||0,
+    semantic_golden_passed:Number(semanticGolden?.passed||0)||0,
+    semantic_answer_pass_pct:Number.isFinite(Number(semanticGolden?.semantic_answer_pass_pct))?Number(semanticGolden.semantic_answer_pass_pct):null,
+    semantic_golden_generated_at:semanticGolden?.generated_at||null,
     source_clicks:sourceClicks,
     unique_answers_with_source_click:uniqueClickedAnswers,
     source_click_rate_pct:cited?Math.round((Math.min(uniqueClickedAnswers,cited)/cited)*1000)/10:null,
@@ -1534,7 +1542,7 @@ function reportingRetrieval(question, data) {
   const q=qtext(question)
 
   const stop=new Set([
-    'what','which','about','saying','reporters','reporter','writer','writers',
+    'what','which','about','saying','report','reports','reporting','reporters','reporter','writer','writers',
     'beat','news','latest','today','right','now','update','updates','tell','show',
     'player','team','injury','status','are','is','was','were','the','and','for','with','from','this','that','has','have','had','into','onto','can','could','would','should'
   ])

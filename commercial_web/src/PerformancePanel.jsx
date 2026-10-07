@@ -135,6 +135,7 @@ function AskQualityPanel({ data }) {
   const retrievalRecall = data?.retrieval_recall_pct
   const retrievalPrecision = data?.retrieval_precision_pct
   const answerRelevance = data?.answer_relevance_pct
+  const semanticAnswers = data?.semantic_answer_pass_pct
   const latency = data?.avg_latency_ms
 
   return (
@@ -186,19 +187,20 @@ function AskQualityPanel({ data }) {
             ))}
           </div>
 
-          {(retrievalRecall != null || retrievalPrecision != null || answerRelevance != null) && (
+          {(retrievalRecall != null || retrievalPrecision != null || answerRelevance != null || semanticAnswers != null) && (
             <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="text-xs font-black uppercase tracking-[0.12em] text-blue-700">Deterministic retrieval benchmark</div>
+                <div className="text-xs font-black uppercase tracking-[0.12em] text-blue-700">Deterministic Ask benchmark</div>
                 <div className="text-[10px] font-black uppercase tracking-[0.12em] text-blue-600">
-                  {data.retrieval_golden_passed || 0}/{data.retrieval_golden_cases || 0} cases · {data.retrieval_golden_status || 'WAITING'}
+                  Retrieval {data.retrieval_golden_passed || 0}/{data.retrieval_golden_cases || 0} · Semantic {data.semantic_golden_passed || 0}/{data.semantic_golden_cases || 0}
                 </div>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   ['Retrieval recall', retrievalRecall == null ? '—' : pct(retrievalRecall)],
                   ['Retrieval precision', retrievalPrecision == null ? '—' : pct(retrievalPrecision)],
                   ['Answer relevance', answerRelevance == null ? '—' : pct(answerRelevance)],
+                  ['Semantic answers', semanticAnswers == null ? '—' : pct(semanticAnswers)],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-xl border border-blue-100 bg-white p-3">
                     <div className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{label}</div>
@@ -207,7 +209,7 @@ function AskQualityPanel({ data }) {
                 ))}
               </div>
               <div className="mt-2 text-[10px] font-semibold leading-4 text-blue-700">
-                Synthetic known-answer cases verify that expected evidence is recovered, unrelated evidence stays out, and the returned answer remains relevant. This is a code-quality benchmark, not live sports performance.
+                Synthetic known-answer cases verify that expected evidence is recovered, unrelated evidence stays out, and the final answer uses the correct current / stale / conflict / insufficient-evidence behavior. This is a code-quality benchmark, not live sports performance.
               </div>
             </div>
           )}

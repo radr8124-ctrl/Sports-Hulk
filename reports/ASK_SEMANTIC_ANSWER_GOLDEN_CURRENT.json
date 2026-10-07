@@ -1,0 +1,79 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-10-07T09:49:23.231Z",
+  "benchmark": "DETERMINISTIC_SEMANTIC_ANSWER_GOLDEN_SET",
+  "cases": 5,
+  "passed": 5,
+  "semantic_answer_pass_pct": 100,
+  "results": [
+    {
+      "id": "current-fact-answer",
+      "passed": true,
+      "intent": "reporting",
+      "status": "CURRENT",
+      "confidence": "ATTRIBUTED REPORTING",
+      "checks": {
+        "intent": true,
+        "status": true,
+        "take": true,
+        "evidence": true,
+        "source": true
+      }
+    },
+    {
+      "id": "multi-source-consensus-answer",
+      "passed": true,
+      "intent": "reporting",
+      "status": "CURRENT",
+      "confidence": "MULTI-SOURCE AGREEMENT",
+      "checks": {
+        "intent": true,
+        "status": true,
+        "confidence": true,
+        "agreement": true,
+        "claim": true
+      }
+    },
+    {
+      "id": "stale-answer-withheld",
+      "passed": true,
+      "intent": "reporting_stale",
+      "status": "STALE_SOURCE",
+      "confidence": "STALE / VERIFY",
+      "checks": {
+        "intent": true,
+        "status": true,
+        "confidence": true,
+        "take": true,
+        "restraint": true
+      }
+    },
+    {
+      "id": "conflict-answer-withheld",
+      "passed": true,
+      "intent": "reporting_conflict",
+      "status": "SOURCE_CONFLICT",
+      "confidence": "SOURCE CONFLICT / VERIFY",
+      "checks": {
+        "intent": true,
+        "status": true,
+        "confidence": true,
+        "take": true,
+        "restraint": true
+      }
+    },
+    {
+      "id": "unknown-answer-refuses-invention",
+      "passed": true,
+      "intent": "news",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "confidence": "INSUFFICIENT EVIDENCE",
+      "checks": {
+        "status": true,
+        "confidence": true,
+        "restraint": true,
+        "no_sources": true
+      }
+    }
+  ]
+}

@@ -57,6 +57,20 @@
       "source_url": "https://consensus-beat.example/runner",
       "published_or_effective_at": "2026-10-07T10:10:00Z",
       "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    },
+    {
+      "event_node_id": "NEWS:semantic-stale-runner",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "MEDIUM",
+      "title": "Semantic Stale Runner injury update",
+      "detail": "Semantic Stale Runner remained questionable in the older report.",
+      "source": "Semantic Old Beat",
+      "source_tier": "EXTERNAL_NEWS",
+      "source_url": "https://semantic-old.example/runner",
+      "published_or_effective_at": "2026-10-05T12:00:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
     }
   ],
   "facts": [
@@ -77,13 +91,23 @@
   ],
   "entity_links": [],
   "entity_index": {
-    "atlas martin": ["NEWS:atlas-martin"],
-    "martin solo": ["NEWS:martin-solo"],
-    "consensus runner": ["NEWS:consensus-official", "NEWS:consensus-beat"]
+    "atlas martin": [
+      "NEWS:atlas-martin"
+    ],
+    "martin solo": [
+      "NEWS:martin-solo"
+    ],
+    "consensus runner": [
+      "NEWS:consensus-official",
+      "NEWS:consensus-beat"
+    ],
+    "semantic stale runner": [
+      "NEWS:semantic-stale-runner"
+    ]
   },
   "counts": {
     "facts": 1,
-    "news_events": 4
+    "news_events": 5
   },
   "truth_rules": {}
 }

@@ -16,4 +16,9 @@ test('evaluation summary exposes deterministic retrieval benchmark metrics', asy
   expect(body.retrieval_precision_pct).toBe(100);
   expect(body.answer_relevance_pct).toBe(100);
   expect(body.retrieval_golden_generated_at).toBeTruthy();
+  expect(body.semantic_golden_status).toBe('PASS');
+  expect(body.semantic_golden_cases).toBe(5);
+  expect(body.semantic_golden_passed).toBe(5);
+  expect(body.semantic_answer_pass_pct).toBe(100);
+  expect(body.semantic_golden_generated_at).toBeTruthy();
 });
