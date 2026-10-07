@@ -794,6 +794,19 @@ def fit_final(frame, validation):
 
 
 def current_schema(sport, frame):
+    regime_column = next(
+        (
+            column
+            for column in (
+                "season_type",
+                "competition_regime",
+                "season_phase",
+                "competition_phase",
+            )
+            if column in frame.columns
+        ),
+        None,
+    )
     if sport == "NFL":
         return {
             "market": "market",
@@ -807,6 +820,7 @@ def current_schema(sport, frame):
             "away": None,
             "home": None,
             "side": None,
+            "regime": regime_column,
         }
     return {
         "market": "market_canonical",
@@ -837,6 +851,7 @@ def current_schema(sport, frame):
             if "selection_side" in frame.columns
             else None
         ),
+        "regime": regime_column,
     }
 
 
@@ -993,8 +1008,33 @@ def build_current(models, validations):
             ref_p = fair_p if fair_p is not None else raw_p
 
             lane_key = f"{sport}_{market}"
-            validation = validations.get(lane_key, {})
-            model = models.get(lane_key, {})
+            explicit_regime = (
+                row.get(schema["regime"])
+                if schema.get("regime")
+                else None
+            )
+            competition_regime = normalize_competition_regime(
+                explicit_regime,
+                sport,
+            )
+            current_proof_lane_key = proof_lane_key(
+                sport,
+                market,
+                competition_regime,
+            )
+            current_proof_version = proof_version(
+                MODEL_VERSION,
+                sport,
+                competition_regime,
+            )
+            validation = validations.get(
+                current_proof_lane_key,
+                {},
+            )
+            model = models.get(
+                current_proof_lane_key,
+                {},
+            )
             source = model.get(
                 "deployment_probability_source",
                 "MARKET_REFERENCE_INSUFFICIENT_HISTORY",
@@ -1079,6 +1119,9 @@ def build_current(models, validations):
             rows.append({
                 "model_version": MODEL_VERSION,
                 "lane_key": lane_key,
+                "proof_lane_key": current_proof_lane_key,
+                "competition_regime": competition_regime,
+                "proof_version": current_proof_version,
                 "sport": sport,
                 "market": market,
                 "game_key": clean(row.get("game_key")),
