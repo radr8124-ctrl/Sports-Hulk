@@ -86,9 +86,16 @@ function AskCard({ answer, compact = false }) {
             {answer.take || 'No current take.'}
           </div>
         </div>
-        <span className={`rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-wide ${tone(answer.confidence)}`}>
-          {answer.confidence || answer.status || 'RESEARCH'}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-wide ${tone(answer.confidence)}`}>
+            {answer.confidence || 'RESEARCH'}
+          </span>
+          {!!answer.status && (
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-slate-400">
+              {String(answer.status).replaceAll('_', ' ')}
+            </span>
+          )}
+        </div>
       </div>
 
       {!!answer.why?.length && (
