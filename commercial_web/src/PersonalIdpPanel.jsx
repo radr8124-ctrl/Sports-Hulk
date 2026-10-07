@@ -32,10 +32,10 @@ function scoreTone(tier) {
 
 function UsageCard({ row, slotLabel = null }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
+    <div className="min-w-0 max-w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {slotLabel && (
               <span className="rounded-full bg-slate-950 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-white">
                 {slotLabel}
@@ -45,12 +45,12 @@ function UsageCard({ row, slotLabel = null }) {
               {row.idp_group || row.position || 'IDP'} · {row.team || '—'}
             </span>
           </div>
-          <div className="mt-1 truncate text-base font-black text-slate-950">{row.player}</div>
+          <div className="mt-1 max-w-full truncate text-base font-black text-slate-950">{row.player}</div>
           <div className="mt-1 text-[11px] font-semibold text-slate-400">
             {row.position || '—'} · vs {row.next_opponent || '—'}
           </div>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wide ${scoreTone(row.idp_usage_tier)}`}>
+        <span className={`max-w-[46%] rounded-full px-2.5 py-1 text-center text-[9px] font-black uppercase leading-4 tracking-wide ${scoreTone(row.idp_usage_tier)}`}>
           {humanize(row.idp_usage_tier || 'UNKNOWN')}
         </span>
       </div>
@@ -192,10 +192,10 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
   const unmatched = Array.isArray(payload.unmatched_idp) ? payload.unmatched_idp : []
 
   return (
-    <section className="rounded-[28px] border border-sky-200 bg-sky-50/40 p-5 md:p-6">
+    <section className="min-w-0 max-w-full rounded-[28px] border border-sky-200 bg-sky-50/40 p-5 md:p-6">
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
         <div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <p className="eyebrow text-sky-700">My IDP</p>
             <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-sky-700">Usage + snap research</span>
           </div>
@@ -244,9 +244,9 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
 
       <div className="mt-5">
         <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Saved IDP coverage</div>
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        <div className="mt-2 grid min-w-0 max-w-full gap-2 sm:grid-cols-3">
           {groups.map((group) => (
-            <div key={group.idp_group} className="rounded-2xl border border-sky-100 bg-white p-3">
+            <div key={group.idp_group} className="min-w-0 max-w-full rounded-2xl border border-sky-100 bg-white p-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm font-black text-slate-950">{group.idp_group}</div>
                 <div className="text-sm font-black text-sky-700">{group.active_saved_count}/{group.saved_slot_count}</div>
@@ -267,7 +267,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
       {slotAware && (
         <div className="mt-5">
           <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Starter candidates by saved slots</div>
-          <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-2 grid min-w-0 max-w-full gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {starters.map((row) => (
               <UsageCard
                 key={[row.assigned_slot, row.slot_index, row.player_key || row.player].join('-')}
@@ -287,7 +287,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
       {!slotAware && matched.length > 0 && (
         <div className="mt-5">
           <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Players on your saved roster</div>
-          <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-2 grid min-w-0 max-w-full gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {matched.slice(0, 12).map((row) => <UsageCard key={row.player_key || row.player} row={row} />)}
           </div>
         </div>
@@ -296,7 +296,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
       {bench.length > 0 && (
         <div className="mt-5">
           <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Bench / depth candidates</div>
-          <div className="mt-2 flex gap-3 overflow-x-auto pb-1">
+          <div className="mt-2 flex w-full min-w-0 max-w-full gap-3 overflow-x-auto pb-1">
             {bench.map((row) => (
               <div key={row.player_key || row.player} className="min-w-[210px]">
                 <UsageCard row={row} />
@@ -322,15 +322,15 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
             No outside IDP research target cleared the current usage filter. Sports Zenith will not invent a pickup just to fill this section.
           </div>
         )}
-        <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-2 grid min-w-0 max-w-full gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {targets.slice(0, 8).map((row) => (
-            <div key={row.player_key || row.player} className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
+            <div key={row.player_key || row.player} className="min-w-0 max-w-full rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
                   <div className="text-[10px] font-black uppercase tracking-[0.12em] text-violet-700">
                     {row.idp_group} · {row.team || '—'}
                   </div>
-                  <div className="mt-1 text-base font-black text-slate-950">{row.player}</div>
+                  <div className="mt-1 truncate text-base font-black text-slate-950">{row.player}</div>
                 </div>
                 <span className={`rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-wide ${scoreTone(row.idp_usage_tier)}`}>
                   {humanize(row.idp_usage_tier)}

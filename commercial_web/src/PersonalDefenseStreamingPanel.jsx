@@ -118,7 +118,7 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
   }
 
   return (
-    <section className="rounded-[28px] border border-emerald-200 bg-emerald-50/40 p-5 md:p-6">
+    <section className="min-w-0 max-w-full rounded-[28px] border border-emerald-200 bg-emerald-50/40 p-5 md:p-6">
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -145,10 +145,10 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
       <div className="mt-5">
         <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Your saved defense</div>
         {savedDefenses.length ? (
-          <div className="mt-2 grid gap-3 lg:grid-cols-2">
+          <div className="mt-2 grid min-w-0 max-w-full gap-3 lg:grid-cols-2">
             {savedDefenses.map((row) => (
-              <div key={row.team || row.player} className="rounded-2xl border border-slate-200 bg-white p-4">
-                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+              <div key={row.team || row.player} className="min-w-0 max-w-full rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="flex min-w-0 flex-col justify-between gap-3 sm:flex-row sm:items-start">
                   <div>
                     <div className="text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">{row.team} D/ST</div>
                     <div className="mt-1 text-xl font-black text-slate-950">vs {row.next_opponent || '—'}</div>
@@ -157,7 +157,7 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
                   <span className={`rounded-full px-3 py-1 text-[9px] font-black uppercase tracking-wide ${actionTone(row.research_action)}`}>{humanize(row.research_action)}</span>
                 </div>
 
-                <div className="mt-4 grid grid-cols-4 gap-2 text-center">
+                <div className="mt-4 grid min-w-0 grid-cols-2 gap-2 text-center sm:grid-cols-4">
                   <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">{row.weekly_stream_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Weekly stream</div></div>
                   <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">#{row.weekly_rank ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Weekly rank</div></div>
                   <div className="rounded-lg bg-slate-50 p-2"><div className="text-sm font-black text-slate-950">{row.multiweek_hold_score ?? '—'}</div><div className="text-[9px] font-bold text-slate-400">Multi-week hold</div></div>
@@ -191,11 +191,11 @@ export default function PersonalDefenseStreamingPanel({ onOpenMyTeams, leagueId 
             No outside D/ST alternative is available in the current defense-streaming research snapshot. Sports Zenith will not invent a replacement.
           </div>
         )}
-        <div className="mt-2 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-2 grid min-w-0 max-w-full gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {alternatives.slice(0, 8).map((row) => (
-            <div key={row.team} className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
+            <div key={row.team} className="min-w-0 max-w-full rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
                   <div className="text-[10px] font-black uppercase tracking-[0.12em] text-blue-700">{row.team} D/ST</div>
                   <div className="mt-1 text-base font-black text-slate-950">vs {row.next_opponent || '—'}</div>
                 </div>
