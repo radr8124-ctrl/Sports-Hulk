@@ -21,6 +21,7 @@ import { reportingEvidenceSources, reportingClaimSources } from './reporting_evi
 import { askClaimCoverage } from './ask_claim_coverage.js'
 import { reportingConsensus } from './reporting_consensus.js'
 import { validateAskOutput, outputValidationFallback } from './ask_output_validation.js'
+import { newAskTraceId, buildAskTraceRecord, appendAskTrace, askTraceSummary } from './ask_trace.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -44,6 +45,7 @@ const ASK_FEEDBACK_LEDGER_PATH = process.env.ASK_FEEDBACK_LEDGER_PATH || path.jo
 const ASK_SOURCE_CLICK_LEDGER_PATH = process.env.ASK_SOURCE_CLICK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_SOURCE_CLICK_LEDGER.jsonl')
 const ASK_RETRIEVAL_GOLDEN_PATH = process.env.ASK_RETRIEVAL_GOLDEN_PATH || path.join(SPORTS_ROOT, 'reports', 'ASK_RETRIEVAL_GOLDEN_CURRENT.json')
 const ASK_SEMANTIC_GOLDEN_PATH = process.env.ASK_SEMANTIC_GOLDEN_PATH || path.join(SPORTS_ROOT, 'reports', 'ASK_SEMANTIC_ANSWER_GOLDEN_CURRENT.json')
+const ASK_TRACE_LEDGER_PATH = process.env.ASK_TRACE_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_TRACE_LEDGER.jsonl')
 const ASK_RETRIEVAL_PATH_OVERRIDE = process.env.ASK_RETRIEVAL_PATH || ''
 const ASK_CONTEXT_PATH_OVERRIDE = process.env.ASK_CONTEXT_PATH || ''
 const ASK_NOW_MS_OVERRIDE = Date.parse(process.env.ASK_NOW_ISO || '')
@@ -4939,6 +4941,10 @@ const server=http.createServer(async(req,res)=>{
     const limit=Math.max(1,Math.min(Number(url.searchParams.get('limit')||500),5000))
     return json(res,200,await askEvaluationSummary(limit))
   }
+  if(req.method==='GET'&&url.pathname==='/api/ask/trace-summary'){
+    const limit=Math.max(1,Math.min(Number(url.searchParams.get('limit')||500),5000))
+    return json(res,200,await askTraceSummary(ASK_TRACE_LEDGER_PATH,limit))
+  }
   if(req.method==='POST'&&url.pathname==='/api/ask/feedback'){
     try{
       const body=await readBody(req)
@@ -4958,6 +4964,10 @@ const server=http.createServer(async(req,res)=>{
   if(req.method==='POST'&&url.pathname==='/api/ask'){
     let question=''
     let context={}
+    let routeLane='GENERIC'
+    let outputValidation=null
+    let sessionResolved=false
+    const traceId=newAskTraceId()
     const askStartedAt=Date.now()
     try{
       const body=await readBody(req)
@@ -4965,11 +4975,13 @@ const server=http.createServer(async(req,res)=>{
       context=body.context&&typeof body.context==='object'?body.context:{}
       const data=await loadAll()
       const sessionResolution=resolveSessionQuestion(question,context)
+      sessionResolved=Boolean(sessionResolution.resolved)
       const routedQuestion=sessionResolution.question
       const survivorPersonalAnswer=await personalizedSurvivorAsk(req,routedQuestion,data)
       const fantasyPersonalAnswer=survivorPersonalAnswer?null:await personalizedFantasyAsk(req,routedQuestion,context)
+      routeLane=survivorPersonalAnswer?'PERSONAL_SURVIVOR':fantasyPersonalAnswer?'PERSONAL_FANTASY':'GENERIC'
       const routedAnswer=survivorPersonalAnswer||fantasyPersonalAnswer||routeAsk(routedQuestion,data,context)
-      const outputValidation=validateAskOutput(routedAnswer)
+      outputValidation=validateAskOutput(routedAnswer)
       const answer=outputValidation.valid?routedAnswer:outputValidationFallback(outputValidation.errors)
       let preferenceState=null
       if(bearerToken(req)){
@@ -4977,25 +4989,33 @@ const server=http.createServer(async(req,res)=>{
         if(preferenceUser?.id) preferenceState=await loadAccountPreferences(preferenceUser.id)
       }
       const answerGeneratedAt=new Date().toISOString()
+      const askLatencyMs=Date.now()-askStartedAt
       await Promise.all([
         queueFailedAskReview(question,context,answer),
-        recordAskEvaluation(question,context,answer,Date.now()-askStartedAt,null,answerGeneratedAt),
+        recordAskEvaluation(question,context,answer,askLatencyMs,null,answerGeneratedAt),
+        appendAskTrace(ASK_TRACE_LEDGER_PATH,buildAskTraceRecord({
+          traceId,question,context,routeLane,sessionResolved,answer,outputValidation,latencyMs:askLatencyMs,
+        })).catch(()=>{}),
       ])
       const newsLikeIntents=new Set(['news','reporting','reporting_stale','reporting_conflict','reporting_guardrail','game_news'])
       const watchlistHits=preferenceState?.saved && newsLikeIntents.has(String(answer?.intent||''))
         ? watchlistNewsHits(data.fantasyNews?.articles||[],preferenceState.preferences)
         : []
       const personalization=preferenceState?.saved?preferencePresentation(answer,preferenceState.preferences,watchlistHits):null
-      return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt,...(personalization?{personalization}:{}),...(sessionResolution.resolved?{session_reference_resolved:true,resolved_question:routedQuestion}:{})})
+      return json(res,200,{question,context,...answer,trace_id:traceId,generated_at:answerGeneratedAt,...(personalization?{personalization}:{}),...(sessionResolution.resolved?{session_reference_resolved:true,resolved_question:routedQuestion}:{})})
     }
     catch(err){
       try {
+        const askLatencyMs=Date.now()-askStartedAt
         await Promise.all([
           queueFailedAskReview(question,context,null,err),
-          recordAskEvaluation(question,context,null,Date.now()-askStartedAt,err,new Date().toISOString()),
+          recordAskEvaluation(question,context,null,askLatencyMs,err,new Date().toISOString()),
+          appendAskTrace(ASK_TRACE_LEDGER_PATH,buildAskTraceRecord({
+            traceId,question,context,routeLane,sessionResolved,answer:null,outputValidation,latencyMs:askLatencyMs,error:err,
+          })).catch(()=>{}),
         ])
       } catch {}
-      return json(res,400,{status:'ERROR',take:'The sports analyst could not process that request.',error:err instanceof Error?err.message:String(err)})
+      return json(res,400,{status:'ERROR',take:'The sports analyst could not process that request.',trace_id:traceId,error:err instanceof Error?err.message:String(err)})
     }
   }
   if(req.method==='POST'&&url.pathname==='/api/dfs/optimize'){

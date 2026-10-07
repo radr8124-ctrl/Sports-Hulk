@@ -127,7 +127,7 @@ function OfficialRecord({ data }) {
   )
 }
 
-function AskQualityPanel({ data }) {
+function AskQualityPanel({ data, trace }) {
   const ready = String(data?.status || '').toUpperCase() === 'READY'
   const tracked = Number(data?.tracked || 0)
   const citation = data?.citation_coverage_pct
@@ -137,6 +137,7 @@ function AskQualityPanel({ data }) {
   const answerRelevance = data?.answer_relevance_pct
   const semanticAnswers = data?.semantic_answer_pass_pct
   const latency = data?.avg_latency_ms
+  const traceReady = String(trace?.status || '').toUpperCase() === 'READY'
 
   return (
     <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-soft md:p-8">
@@ -210,6 +211,30 @@ function AskQualityPanel({ data }) {
               </div>
               <div className="mt-2 text-[10px] font-semibold leading-4 text-blue-700">
                 Synthetic known-answer cases verify that expected evidence is recovered, unrelated evidence stays out, and the final answer uses the correct current / stale / conflict / insufficient-evidence behavior. This is a code-quality benchmark, not live sports performance.
+              </div>
+            </div>
+          )}
+
+          {traceReady && (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-600">Trace health</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Privacy-safe · hashed questions only</div>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                {[
+                  ['Requests traced', integer(trace.tracked)],
+                  ['Validation failures', integer(trace.validation_failures)],
+                  ['Errors', integer(trace.error_count)],
+                  ['Session resolves', integer(trace.session_reference_resolved_count)],
+                  ['Avg latency', trace.avg_latency_ms == null ? '—' : `${integer(trace.avg_latency_ms)} ms`],
+                  ['P95 latency', trace.p95_latency_ms == null ? '—' : `${integer(trace.p95_latency_ms)} ms`],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-xl border border-slate-200 bg-white p-3">
+                    <div className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">{label}</div>
+                    <div className="mt-1 text-lg font-black text-slate-950">{value}</div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -1692,6 +1717,7 @@ export default function PerformancePanel() {
   const [data, setData] = useState({ official: {}, policy: {}, research_validation: [] })
   const [brain, setBrain] = useState({ categories: [], dfs: {}, selectivity_watch: [] })
   const [askQuality, setAskQuality] = useState({ status: 'NO_DATA', tracked: 0 })
+  const [askTrace, setAskTrace] = useState({ status: 'NO_DATA', tracked: 0 })
   const [sport, setSport] = useState('ALL')
   const [error, setError] = useState('')
 
@@ -1699,19 +1725,22 @@ export default function PerformancePanel() {
     let cancelled = false
     const load = async () => {
       try {
-        const [performanceResponse, brainResponse, askQualityResponse] = await Promise.all([
+        const [performanceResponse, brainResponse, askQualityResponse, askTraceResponse] = await Promise.all([
           fetch(`/performance_snapshot.json?ts=${Date.now()}`, { cache: 'no-store' }),
           fetch(`/brain_performance.json?ts=${Date.now()}`, { cache: 'no-store' }),
           fetch(`/api/ask/evaluation-summary?limit=500&ts=${Date.now()}`, { cache: 'no-store' }),
+          fetch(`/api/ask/trace-summary?limit=500&ts=${Date.now()}`, { cache: 'no-store' }),
         ])
         if (!performanceResponse.ok) throw new Error('Official performance snapshot is unavailable')
         const performancePayload = await performanceResponse.json()
         const brainPayload = brainResponse.ok ? await brainResponse.json() : { categories: [], dfs: {}, selectivity_watch: [] }
         const askQualityPayload = askQualityResponse.ok ? await askQualityResponse.json() : { status: 'NO_DATA', tracked: 0 }
+        const askTracePayload = askTraceResponse.ok ? await askTraceResponse.json() : { status: 'NO_DATA', tracked: 0 }
         if (!cancelled) {
           setData(performancePayload)
           setBrain(brainPayload)
           setAskQuality(askQualityPayload)
+          setAskTrace(askTracePayload)
           setError('')
         }
       } catch (err) {
@@ -1746,7 +1775,7 @@ export default function PerformancePanel() {
   return (
     <div className="space-y-8">
       <OfficialRecord data={data} />
-      <AskQualityPanel data={askQuality} />
+      <AskQualityPanel data={askQuality} trace={askTrace} />
 
       {error && (
         <div className="flex gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-800">
