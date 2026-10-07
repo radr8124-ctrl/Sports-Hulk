@@ -19,12 +19,16 @@ test('multiple linked entries preserve separate status and used-team counts', ()
     entry_name: 'ENTRY A',
     entry_status: 'ALIVE',
     used_team_count: 3,
+    used_teams: ['A', 'B', 'C'],
+    current_picks: [],
     current_week: 5,
   })
   assert.deepEqual(result[1], {
     entry_name: 'ENTRY B',
     entry_status: 'ELIMINATED',
     used_team_count: 2,
+    used_teams: ['D', 'E'],
+    current_picks: [],
     current_week: 5,
   })
 })
@@ -35,6 +39,8 @@ test('missing linked entry state stays non-invented', () => {
     entry_name: 'UNKNOWN ENTRY',
     entry_status: null,
     used_team_count: 0,
+    used_teams: [],
+    current_picks: [],
     current_week: 5,
   }])
 })

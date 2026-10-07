@@ -5,10 +5,14 @@ export function buildLinkedSurvivorSummaries(linkedNames = [], survivorState = {
 
   return unique.map(name => {
     const entry = (survivorState?.entries || {})[name] || {}
+    const usedTeams = Array.isArray(entry.used_teams) ? entry.used_teams : []
+    const currentPicks = Array.isArray(entry.current_picks) ? entry.current_picks : []
     return {
       entry_name: name,
       entry_status: entry.status || null,
-      used_team_count: Array.isArray(entry.used_teams) ? entry.used_teams.length : 0,
+      used_team_count: usedTeams.length,
+      used_teams: usedTeams,
+      current_picks: currentPicks,
       current_week: Number(survivorState?.pool_current_week || entry.current_week || 0) || null,
     }
   })

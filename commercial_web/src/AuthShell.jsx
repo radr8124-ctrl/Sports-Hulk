@@ -386,12 +386,16 @@ function AccountModal({ onClose }) {
                     {accountLoading
                       ? 'Checking…'
                       : accountSummary?.survivor?.linked
-                        ? accountSummary.survivor.active_entry
+                        ? Number(accountSummary.survivor.linked_entry_count || 1) > 1
+                          ? `${accountSummary.survivor.linked_entry_count} entries linked`
+                          : accountSummary.survivor.active_entry
                         : 'Not linked'}
                   </div>
                   <div className="mt-1 text-[11px] font-semibold leading-4 text-slate-400">
                     {accountSummary?.survivor?.linked
-                      ? `Week ${accountSummary.survivor.current_week ?? '—'} · ${accountSummary.survivor.used_team_count ?? 0} used`
+                      ? Number(accountSummary.survivor.linked_entry_count || 1) > 1
+                        ? `${accountSummary.survivor.active_entry} primary · Week ${accountSummary.survivor.current_week ?? '—'}`
+                        : `Week ${accountSummary.survivor.current_week ?? '—'} · ${accountSummary.survivor.used_team_count ?? 0} used`
                       : 'Connect a pool entry when ready'}
                   </div>
                 </div>

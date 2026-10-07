@@ -932,6 +932,7 @@ function SurvivorCommercialPanel() {
 
   const isSignedIn = Boolean(user)
   const hasEntry = saved.status === 'READY' && saved.entry_linked
+  const linkedEntries = Array.isArray(saved.linked_entries) ? saved.linked_entries : []
   const usedTeams = hasEntry ? (saved.used_teams || []) : []
   const currentPicks = hasEntry ? (saved.current_picks || []) : []
   const candidates = [...(survivor.candidates || [])]
@@ -991,6 +992,51 @@ function SurvivorCommercialPanel() {
         </div>
       </section>
 
+      {isSignedIn && linkedEntries.length > 0 && (
+        <section>
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">My Survivor entries</p>
+              <h2>{linkedEntries.length} linked entr{linkedEntries.length === 1 ? 'y' : 'ies'}</h2>
+            </div>
+            <span className="health-pill">{linkedEntries.filter(entry => String(entry.entry_status || '').toUpperCase() === 'ALIVE').length} ALIVE</span>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {linkedEntries.map((entry) => {
+              const entryUsed = Array.isArray(entry.used_teams) ? entry.used_teams : []
+              const entryPicks = Array.isArray(entry.current_picks) ? entry.current_picks : []
+              const alive = String(entry.entry_status || '').toUpperCase() === 'ALIVE'
+              return (
+                <div key={entry.entry_name} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-lg font-black text-slate-950">{entry.entry_name}</div>
+                      <div className="mt-1 text-xs font-semibold text-slate-400">Week {entry.current_week ?? saved.pool_current_week ?? '—'}</div>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${alive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                      {humanize(entry.entry_status || 'UNKNOWN')}
+                    </span>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs">
+                    <div className="rounded-xl bg-slate-50 p-3">
+                      <div className="font-black text-slate-950">{entryUsed.length}</div>
+                      <div className="mt-1 text-slate-400">Teams used</div>
+                    </div>
+                    <div className="rounded-xl bg-slate-50 p-3">
+                      <div className="truncate font-black text-slate-950">{entryPicks.length ? entryPicks.join(', ') : 'None'}</div>
+                      <div className="mt-1 text-slate-400">Current pick</div>
+                    </div>
+                  </div>
+                  {entry.entry_name === saved.active_entry && (
+                    <div className="mt-3 text-[10px] font-black uppercase tracking-[0.12em] text-blue-700">Primary detail view</div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
       {!isSignedIn && (
         <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5 md:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1006,13 +1052,13 @@ function SurvivorCommercialPanel() {
         </section>
       )}
 
-      {isSignedIn && !hasEntry && saved.status !== 'LOADING' && (
+      {isSignedIn && saved.status !== 'LOADING' && (
         <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5 md:p-6">
           <div className="flex gap-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-700"><CheckCircle2 size={20} /></div>
             <div className="min-w-0 flex-1">
-              <div className="text-lg font-black text-slate-950">Connect your existing Survivor entry</div>
-              <p className="mt-2 text-sm leading-6 text-blue-950">Your passwordless account is authenticated. Use the exact entry name and one-time claim code to attach the private pool record to this account.</p>
+              <div className="text-lg font-black text-slate-950">{hasEntry ? 'Connect another Survivor entry' : 'Connect your existing Survivor entry'}</div>
+              <p className="mt-2 text-sm leading-6 text-blue-950">{hasEntry ? 'Add another private entry to this same account. Each entry keeps its own used-team history and can be diversified separately.' : 'Your passwordless account is authenticated. Use the exact entry name and one-time claim code to attach the private pool record to this account.'}</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
                 <input
                   value={claimEntry}

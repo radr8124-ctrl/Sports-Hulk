@@ -4557,12 +4557,16 @@ const server=http.createServer(async(req,res)=>{
 
     const data=await loadAll()
     const state=data.survivorUser||{}
-    const linkedName=await linkedSurvivorEntry(req,user.id)
+    const linkedNames=await linkedSurvivorEntries(req,user.id)
+    const linkedName=linkedNames[0]||null
     const entry=linkedName ? (state.entries||{})[linkedName]||null : null
+    const linkedEntries=buildLinkedSurvivorSummaries(linkedNames,state)
 
     if(!entry) return json(res,200,{
       status:'AUTHENTICATED_NO_ENTRY',
       entry_linked:false,
+      linked_entry_count:linkedEntries.length,
+      linked_entries:linkedEntries,
       pool_current_week:Number(state.pool_current_week||0)||null,
       used_teams:[],
       current_picks:[],
@@ -4577,6 +4581,8 @@ const server=http.createServer(async(req,res)=>{
     return json(res,200,{
       status:'READY',
       entry_linked:true,
+      linked_entry_count:linkedEntries.length,
+      linked_entries:linkedEntries,
       active_entry:linkedName,
       entry_status:entry?.status||null,
       pool_current_week:Number(state.pool_current_week||entry?.current_week||0)||null,
