@@ -49,9 +49,14 @@ LOG="$LOGDIR/NBA_REFRESH_${STAMP}.log"
     echo
     echo "=== NBA DECISION BRAIN ==="
 
-    "$PY" \
-      "$NBA/decision/build_nba_decision_brain.py" \
-      || echo "WARNING: NBA decision brain failed; prior decisions preserved."
+    if "$PY" "$NBA/decision/build_nba_decision_brain.py"; then
+        echo
+        echo "=== EXPLICIT ESPN GAME REGIME VERIFICATION ==="
+        "$PY" "$NBA/decision/enrich_nba_competition_regime.py" \
+          || echo "WARNING: ESPN regime source unavailable; unlabeled picks remain UNKNOWN."
+    else
+        echo "WARNING: NBA decision brain failed; previous decisions preserved."
+    fi
 
     echo
     echo "=== NBA LEARNING / RESULTS ==="

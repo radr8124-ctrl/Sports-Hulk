@@ -325,57 +325,34 @@ def status_info(
     }
 
 
-def season_info(
-    event,
-):
+def season_info(event):
+    """Use the explicit ESPN event seasonType reference, never the game date."""
+    season = event.get("season") or {}
+    year = season.get("year") if isinstance(season, dict) else None
+    raw_type = season.get("type") if isinstance(season, dict) else None
+    if isinstance(raw_type, dict):
+        raw_type = raw_type.get("type") or raw_type.get("name")
 
-    season = (
-        event.get(
-            "season"
-        )
-        or {}
-    )
+    type_ref = event.get("seasonType") or {}
+    if isinstance(type_ref, dict):
+        raw_reference = str(type_ref.get("$ref") or "")
+        match = re.search(r"/seasons/(\d+)/types/([123])(?:\?|$)", raw_reference)
+        if match:
+            explicit_year = int(match.group(1))
+            explicit_type = int(match.group(2))
+            if year is not None and str(year) != str(explicit_year):
+                return (year, None)
+            if raw_type is not None and str(raw_type) != str(explicit_type):
+                return (year or explicit_year, None)
+            return (year or explicit_year, explicit_type)
 
+        explicit_type = type_ref.get("type")
+        if explicit_type in (1, 2, 3, "1", "2", "3"):
+            if raw_type is not None and str(raw_type) != str(explicit_type):
+                return (year, None)
+            return (year, int(explicit_type))
 
-    if isinstance(
-        season,
-        dict,
-    ):
-
-        year = season.get(
-            "year"
-        )
-
-        stype = season.get(
-            "type"
-        )
-
-
-        if isinstance(
-            stype,
-            dict,
-        ):
-
-            stype = (
-                stype.get(
-                    "type"
-                )
-                or stype.get(
-                    "name"
-                )
-            )
-
-
-        return (
-            year,
-            stype,
-        )
-
-
-    return (
-        None,
-        None,
-    )
+    return (year, raw_type)
 
 
 def parse_event(

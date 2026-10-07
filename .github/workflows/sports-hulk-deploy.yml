@@ -36,7 +36,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install proof test dependencies
-        run: python -m pip install numpy pandas
+        run: python -m pip install numpy pandas requests
 
       - name: Run proof and deployment safety tests
         run: |
