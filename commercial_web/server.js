@@ -1641,6 +1641,172 @@ function gameScopedAnswer(question, data, context = {}) {
   })
 }
 
+function scheduleTeamCode(sport, code) {
+  const upper=String(code||'').toUpperCase().trim()
+  if(String(sport||'').toUpperCase()==='NFL'){
+    if(upper==='JAC') return 'JAX'
+    if(upper==='WSH') return 'WAS'
+  }
+  return upper
+}
+
+function scheduleTeamAliases(data) {
+  const aliases=new Map()
+  const feeds=[
+    ['NFL','nflScores'],['MLB','mlbScores'],['NBA','nbaScores'],
+    ['NHL','nhlScores'],['CFB','cfbScores'],['CBB','cbbScores'],
+  ]
+  for(const [sport,key] of feeds){
+    const source=data[key]||{}
+    const games=[
+      ...(source.games||[]),...(source.next_games||[]),
+      ...(source.today_games||[]),...(source.recent_games||[]),
+    ]
+    for(const game of games){
+      for(const side of ['away','home']){
+        const abbr=scheduleTeamCode(sport,game[`${side}_abbr`])
+        const name=String(game[side]||'').trim()
+        if(!abbr) continue
+        const mapKey=`${sport}|${abbr}`
+        if(!aliases.has(mapKey)) aliases.set(mapKey,new Set())
+        const set=aliases.get(mapKey)
+        if(name){
+          set.add(name.toLowerCase())
+          const last=name.toLowerCase().split(/\s+/).pop()
+          if(last?.length>=3) set.add(last)
+        }
+      }
+    }
+  }
+  return aliases
+}
+
+function scheduleAnswer(question, data) {
+  const q=qtext(question)
+  const loads=data.askContext?.datasets?.schedule_load||[]
+  const futures=data.askContext?.datasets?.future_schedule||[]
+  if(!loads.length) return response({
+    intent:'schedule',
+    take:'Schedule intelligence is not available right now.',
+    confidence:'WAITING',
+    status:'WAITING',
+    sources:updatedSources(data,['askContext']),
+  })
+
+  const sportMatch=['NFL','MLB','NBA','NHL','CFB','CBB'].find(sport=>new RegExp(`\\b${sport.toLowerCase()}\\b`).test(q))||null
+  const aliases=scheduleTeamAliases(data)
+  const qTokens=new Set(q.match(/[a-z0-9'-]+/g)||[])
+  const matchStop=new Set(['the','for','who','what','when','where','why','how','are','is','was','were','has','have','had','next','game','schedule','rest','days','day','fatigue','load','road','trip','play','plays','team'])
+
+  const matchScore=row=>{
+    if(sportMatch && String(row.sport||'').toUpperCase()!==sportMatch) return -1
+    const candidates=[
+      String(row.team||'').toLowerCase(),
+      String(row.team_name||'').toLowerCase(),
+      ...[...(aliases.get(`${String(row.sport||'').toUpperCase()}|${String(row.team||'').toUpperCase()}`)||[])],
+    ].filter(Boolean)
+    let best=0
+    for(const candidate of candidates){
+      const tokens=candidate.match(/[a-z0-9'-]+/g)||[]
+      const exact=tokens.length===1
+        ? tokens[0].length>=3 && !matchStop.has(tokens[0]) && qTokens.has(tokens[0])
+        : q.includes(candidate)
+      if(exact) best=Math.max(best,candidate.length)
+    }
+    return best
+  }
+
+  const wantsHard=/\b(hardest|toughest|most difficult|difficult schedule)\b/.test(q)
+  const wantsEasy=/\b(easiest|softest|best schedule|easier schedule)\b/.test(q)
+  if(wantsHard||wantsEasy){
+    const eligible=futures
+      .filter(row=>(!sportMatch || String(row.sport||'').toUpperCase()===sportMatch))
+      .filter(row=>Number(row.games_evaluated||0)>=3 && row.opponent_strength_avg!=null)
+      .sort((a,b)=>(wantsHard?1:-1)*(Number(b.opponent_strength_avg||0)-Number(a.opponent_strength_avg||0)))
+      .slice(0,5)
+    if(!eligible.length) return response({
+      intent:'schedule_difficulty',
+      take:'There is not enough multi-game schedule data to rank that safely.',
+      confidence:'INSUFFICIENT EVIDENCE',
+      status:'INSUFFICIENT_EVIDENCE',
+      sources:updatedSources(data,['askContext']),
+    })
+    const top=eligible[0]
+    return response({
+      intent:'schedule_difficulty',
+      take:`${top.team} has the ${wantsHard?'hardest':'easiest'} current future-schedule profile${sportMatch?` in ${sportMatch}`:''} among teams with at least three evaluated games.`,
+      confidence:'GOVERNED SCHEDULE RESEARCH',
+      status:'CURRENT',
+      why:[
+        `Average opponent-strength index: ${Number(top.opponent_strength_avg).toFixed(1)}.`,
+        `Next opponents: ${top.next_opponents||'—'}.`,
+        `Signal: ${nice(top.future_schedule_signal||'UNKNOWN')}.`,
+      ],
+      risk:['Schedule strength is a research index, not a win-probability forecast.'],
+      cards:eligible.map(row=>({
+        type:'schedule',
+        title:`${row.sport} · ${row.team}`,
+        opponent:row.next_opponents,
+        score:Number(row.opponent_strength_avg).toFixed(1),
+        tier:nice(row.future_schedule_signal||'UNKNOWN'),
+      })),
+      sources:updatedSources(data,['askContext']),
+      updated_at:data.askContext?.generated_at,
+    })
+  }
+
+  const ranked=loads.map(row=>({row,score:matchScore(row)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)
+  const top=ranked[0]?.row
+  if(!top) return response({
+    intent:'schedule',
+    take:"I don't have enough team context to answer that schedule question confidently.",
+    confidence:'NEEDS TEAM',
+    status:'INSUFFICIENT_EVIDENCE',
+    why:['Name the team or use its abbreviation so Sports Zenith can match the governed schedule row.'],
+    sources:updatedSources(data,['askContext']),
+  })
+
+  const future=futures.find(row=>String(row.sport||'').toUpperCase()===String(top.sport||'').toUpperCase() && String(row.team||'').toUpperCase()===String(top.team||'').toUpperCase())
+  const knownAliases=[...(aliases.get(`${String(top.sport||'').toUpperCase()}|${String(top.team||'').toUpperCase()}`)||[])].sort((a,b)=>b.length-a.length)
+  const aliasDisplay=knownAliases.find(value=>value.includes(' '))
+  const display=top.team_name && String(top.team_name).toUpperCase()!==String(top.team).toUpperCase()
+    ? top.team_name
+    : aliasDisplay ? aliasDisplay.replace(/\b\w/g,c=>c.toUpperCase()) : top.team
+  const opponentAliases=[...(aliases.get(`${String(top.sport||'').toUpperCase()}|${String(top.next_opponent||'').toUpperCase()}`)||[])].sort((a,b)=>b.length-a.length)
+  const opponentDisplay=(opponentAliases.find(value=>value.includes(' '))||top.next_opponent||'an opponent still awaiting confirmation').replace(/\b\w/g,c=>c.toUpperCase())
+  const date=top.next_game_date||'the next scheduled date'
+  const opponent=top.next_opponent||'an opponent still awaiting confirmation'
+  return response({
+    intent:'schedule',
+    take:`${display} next plays ${opponentDisplay} on ${date}${top.next_side?` (${nice(top.next_side)})`:''}.`,
+    confidence:'GOVERNED SCHEDULE',
+    status:'CURRENT',
+    why:[
+      top.rest_days!=null?`Rest before next game: ${top.rest_days} day${Number(top.rest_days)===1?'':'s'}.`:null,
+      top.back_to_back?'This is a back-to-back spot.':null,
+      top.fatigue_signal?`Fatigue signal: ${nice(top.fatigue_signal)} · load score ${top.fatigue_load_score??'—'}.`:null,
+      top.travel_sequence?`Travel: ${nice(top.travel_sequence)}.`:null,
+      future?.next_opponents?`Future opponents: ${future.next_opponents}.`:null,
+      future?.future_schedule_signal?`Future schedule: ${nice(future.future_schedule_signal)}.`:null,
+    ].filter(Boolean),
+    risk:['Schedule/fatigue scores are context signals and are not probabilities or automatic betting adjustments.'],
+    cards:[{
+      type:'schedule',
+      title:`${top.sport} · ${display}`,
+      opponent,
+      next_game_date:date,
+      side:top.next_side,
+      rest_days:top.rest_days,
+      back_to_back:Boolean(top.back_to_back),
+      fatigue:nice(top.fatigue_signal||'UNKNOWN'),
+      future_schedule:nice(future?.future_schedule_signal||'UNKNOWN'),
+    }],
+    sources:updatedSources(data,['askContext']),
+    updated_at:data.askContext?.generated_at,
+    followups:['How hard is their next five?','Are they on a back-to-back?','What is their fatigue load?'],
+  })
+}
+
 function routeAsk(question, data, context = {}) {
   const q=qtext(question)
   const page=String(context?.page||'').trim()
@@ -1648,6 +1814,7 @@ function routeAsk(question, data, context = {}) {
   const scopedGameAnswer=gameScopedAnswer(question,data,context)
   if(scopedGameAnswer) return scopedGameAnswer
   if(/\b(score|scores|live score|who is winning|box score|game score)\b/.test(q)) return scoreAnswer(question,data)
+  if(/\b(schedule|next game|play next|plays next|back[- ]to[- ]back|rest days?|fatigue|road trip|future schedule|hardest|toughest|easiest|softest)\b/.test(q)) return scheduleAnswer(question,data)
   if(/\b(parlay|two leg|2 leg)\b/.test(q)) return parlayAnswer(data)
   if(/\b(survivor|survivor pick|pool pick|survivor research|research leader)\b/.test(q)) return survivorAnswer(data)
   if(/\b(waiver|waivers|faab|free agent)\b/.test(q)) return waiversAnswer(data)

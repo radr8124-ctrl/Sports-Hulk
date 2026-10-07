@@ -17,6 +17,8 @@ SOURCES = {
     "defense_streaming": ROOT / "intelligence_warehouse/fantasy_decisions/FANTASY_DEFENSE_STREAMING_CURRENT.csv",
     "idp": ROOT / "intelligence_warehouse/fantasy_decisions/FANTASY_IDP_OPPORTUNITY_CURRENT.csv",
     "dfs": ROOT / "intelligence_warehouse/dfs/DFS_CONTEST_ARCHETYPES_CURRENT.csv",
+    "schedule_load": ROOT / "intelligence_warehouse/schedule/TEAM_SCHEDULE_LOAD_CURRENT.csv",
+    "future_schedule": ROOT / "intelligence_warehouse/schedule/FUTURE_SCHEDULE_DIFFICULTY.csv",
 }
 
 LIMITS = {
@@ -26,6 +28,8 @@ LIMITS = {
     "defense_streaming": 40,
     "idp": 120,
     "dfs": 240,
+    "schedule_load": 1600,
+    "future_schedule": 1600,
 }
 
 
@@ -56,7 +60,7 @@ def load(name, path):
         return []
     df = pd.read_csv(path, low_memory=False)
 
-    if "sport" in df.columns:
+    if "sport" in df.columns and name in {"weekly_fantasy", "waivers", "stash", "defense_streaming", "idp", "dfs"}:
         nfl = df[df["sport"].astype(str).str.upper().eq("NFL")].copy()
         if not nfl.empty:
             df = nfl
