@@ -26,6 +26,7 @@ const DATASET_FRESHNESS_PATH = path.join(SPORTS_ROOT, 'intelligence_warehouse', 
 const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FAILED_QUESTION_QUEUE.jsonl')
 const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_EVALUATION_LEDGER.jsonl')
 const ASK_FEEDBACK_LEDGER_PATH = process.env.ASK_FEEDBACK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FEEDBACK_LEDGER.jsonl')
+const ASK_SOURCE_CLICK_LEDGER_PATH = process.env.ASK_SOURCE_CLICK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_SOURCE_CLICK_LEDGER.jsonl')
 
 const JSON_FILES = {
   nflScores: 'nfl_scores.json',
@@ -330,11 +331,12 @@ function shouldQueueAskReview(answer) {
     || confidence==='UNKNOWN'
 }
 
-async function recordAskEvaluation(question, context, answer, latencyMs, error = null) {
+async function recordAskEvaluation(question, context, answer, latencyMs, error = null, answerGeneratedAt = null) {
   const cleanQuestion=String(question||'').trim().replace(/\s+/g,' ').slice(0,500)
   const sources=Array.isArray(answer?.sources)?answer.sources:[]
   const record={
     recorded_at:new Date().toISOString(),
+    answer_generated_at:answerGeneratedAt||null,
     question_hash:cleanQuestion?sha256(cleanQuestion.toLowerCase()):null,
     page:String(context?.page||'').slice(0,80)||null,
     has_game_context:Boolean(context?.game_context?.event_id),
@@ -369,6 +371,29 @@ async function recordAskFeedback(body = {}) {
   return {status:'RECORDED',rating}
 }
 
+async function recordAskSourceClick(body = {}) {
+  const rawUrl=String(body.url||'').trim()
+  let host=''
+  try {
+    const parsed=new URL(rawUrl)
+    if(!['http:','https:'].includes(parsed.protocol)) throw new Error('Invalid source URL')
+    host=parsed.hostname
+  } catch {
+    throw new Error('Invalid source URL')
+  }
+  const record={
+    recorded_at:new Date().toISOString(),
+    answer_generated_at:String(body.answer_generated_at||'').slice(0,80)||null,
+    intent:String(body.intent||'').slice(0,80)||null,
+    status:String(body.status||'').slice(0,80)||null,
+    source_label:String(body.source_label||'').slice(0,120)||null,
+    source_host:host.slice(0,160)||null,
+    page:String(body.page||'').slice(0,80)||null,
+  }
+  await appendFile(ASK_SOURCE_CLICK_LEDGER_PATH, JSON.stringify(record)+'\n', { encoding:'utf8', mode:0o600 })
+  return {status:'RECORDED'}
+}
+
 async function askEvaluationSummary(limit = 500) {
   let raw=''
   try { raw=await readFile(ASK_EVAL_LEDGER_PATH,'utf8') } catch { return {status:'NO_DATA',tracked:0} }
@@ -380,6 +405,19 @@ async function askEvaluationSummary(limit = 500) {
   const countStatus=status=>rows.filter(row=>String(row.status||'').toUpperCase()===status).length
   const reporting=rows.filter(row=>['REPORTING','REPORTING_CONFLICT','REPORTING_STALE','GAME_NEWS','NEWS'].includes(String(row.intent||'').toUpperCase()))
   const cited=reporting.filter(row=>Number(row.citation_url_count||0)>0).length
+  let clickRows=[]
+  try {
+    const clickRaw=await readFile(ASK_SOURCE_CLICK_LEDGER_PATH,'utf8')
+    clickRows=clickRaw.split(/\r?\n/).filter(Boolean).slice(-Math.max(1,Math.min(Number(limit)||500,5000))).flatMap(line=>{
+      try { return [JSON.parse(line)] } catch { return [] }
+    })
+  } catch {}
+  const trackedAnswerIds=new Set(rows.map(row=>String(row.answer_generated_at||'')).filter(Boolean))
+  const scopedClickRows=trackedAnswerIds.size
+    ? clickRows.filter(row=>trackedAnswerIds.has(String(row.answer_generated_at||'')))
+    : []
+  const sourceClicks=scopedClickRows.length
+  const uniqueClickedAnswers=new Set(scopedClickRows.map(row=>String(row.answer_generated_at||'')).filter(Boolean)).size
   const latencies=rows.map(row=>Number(row.latency_ms)).filter(Number.isFinite)
   const pct=value=>Math.round((value/tracked)*1000)/10
   return {
@@ -397,6 +435,9 @@ async function askEvaluationSummary(limit = 500) {
     reporting_answers:reporting.length,
     reporting_with_clickable_citation:cited,
     citation_coverage_pct:reporting.length?Math.round((cited/reporting.length)*1000)/10:null,
+    source_clicks:sourceClicks,
+    unique_answers_with_source_click:uniqueClickedAnswers,
+    source_click_rate_pct:cited?Math.round((Math.min(uniqueClickedAnswers,cited)/cited)*1000)/10:null,
     avg_latency_ms:latencies.length?Math.round(latencies.reduce((a,b)=>a+b,0)/latencies.length):null,
     generated_at:new Date().toISOString(),
   }
@@ -3924,6 +3965,14 @@ const server=http.createServer(async(req,res)=>{
       return json(res,400,{status:'ERROR',message:err instanceof Error?err.message:String(err)})
     }
   }
+  if(req.method==='POST'&&url.pathname==='/api/ask/source-click'){
+    try{
+      const body=await readBody(req)
+      return json(res,200,await recordAskSourceClick(body))
+    }catch(err){
+      return json(res,400,{status:'ERROR',message:err instanceof Error?err.message:String(err)})
+    }
+  }
   if(req.method==='POST'&&url.pathname==='/api/ask'){
     let question=''
     let context={}
@@ -3935,17 +3984,18 @@ const server=http.createServer(async(req,res)=>{
       const data=await loadAll()
       const personalAnswer=await personalizedFantasyAsk(req,question,context)
       const answer=personalAnswer||routeAsk(question,data,context)
+      const answerGeneratedAt=new Date().toISOString()
       await Promise.all([
         queueFailedAskReview(question,context,answer),
-        recordAskEvaluation(question,context,answer,Date.now()-askStartedAt),
+        recordAskEvaluation(question,context,answer,Date.now()-askStartedAt,null,answerGeneratedAt),
       ])
-      return json(res,200,{question,context,...answer,generated_at:new Date().toISOString()})
+      return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt})
     }
     catch(err){
       try {
         await Promise.all([
           queueFailedAskReview(question,context,null,err),
-          recordAskEvaluation(question,context,null,Date.now()-askStartedAt,err),
+          recordAskEvaluation(question,context,null,Date.now()-askStartedAt,err,new Date().toISOString()),
         ])
       } catch {}
       return json(res,400,{status:'ERROR',take:'The sports analyst could not process that request.',error:err instanceof Error?err.message:String(err)})

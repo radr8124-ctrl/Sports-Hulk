@@ -150,12 +150,13 @@ function AskQualityPanel({ data }) {
 
       {ready ? (
         <>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
             {[
               ['Questions tracked', integer(tracked)],
               ['Grounded / current', pct(data.grounded_current_pct)],
               ['Flagged / withheld', pct(data.withheld_or_flagged_pct)],
               ['Clickable citations', citation == null ? '—' : pct(citation)],
+              ['Source click rate', data.source_click_rate_pct == null ? '—' : pct(data.source_click_rate_pct)],
               ['Avg response time', latency == null ? '—' : `${integer(latency)} ms`],
             ].map(([label, value]) => (
               <div key={label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">

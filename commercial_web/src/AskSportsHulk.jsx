@@ -161,12 +161,28 @@ function AskCard({ answer, compact = false }) {
               {answer.sources.slice(0, 3).map((source, index) => {
                 const label = source.source || source.label || `Source ${index + 1}`
                 const href = safeSourceUrl(source.url)
+                const trackSourceClick = () => {
+                  fetch('/api/ask/source-click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      url: href,
+                      source_label: label,
+                      answer_generated_at: answer.generated_at,
+                      intent: answer.intent,
+                      status: answer.status,
+                      page: answer.context?.page,
+                    }),
+                    keepalive: true,
+                  }).catch(() => {})
+                }
                 return href ? (
                   <a
                     key={`${label}-${href}`}
                     href={href}
                     target="_blank"
                     rel="noreferrer noopener"
+                    onClick={trackSourceClick}
                     className="font-black text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200"
                   >
                     {label}
