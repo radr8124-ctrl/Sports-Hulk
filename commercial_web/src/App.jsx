@@ -890,6 +890,7 @@ function SurvivorRoutePanel() {
 function SurvivorCommercialPanel() {
   const { user, getAccessToken } = useAuth()
   const [linkRefresh, setLinkRefresh] = useState(0)
+  const [selectedEntry, setSelectedEntry] = useState('')
   const [claimEntry, setClaimEntry] = useState('')
   const [claimCode, setClaimCode] = useState('')
   const [linking, setLinking] = useState(false)
@@ -898,7 +899,7 @@ function SurvivorCommercialPanel() {
     candidates: [],
     mode: 'GENERIC_RESEARCH_ONLY',
   })
-  const saved = usePrivateSurvivorState(linkRefresh)
+  const saved = usePrivateSurvivorState(linkRefresh, selectedEntry)
 
   const linkExistingEntry = async () => {
     if (!claimEntry.trim() || !claimCode.trim() || linking) return
@@ -921,6 +922,7 @@ function SurvivorCommercialPanel() {
       const payload = await response.json()
       if (!response.ok) throw new Error(payload.message || 'Could not link that Survivor entry.')
       setClaimCode('')
+      setSelectedEntry(payload.active_entry || claimEntry.trim())
       setLinkMessage('Entry linked successfully.')
       setLinkRefresh(value => value + 1)
     } catch (error) {
@@ -1007,7 +1009,12 @@ function SurvivorCommercialPanel() {
               const entryPicks = Array.isArray(entry.current_picks) ? entry.current_picks : []
               const alive = String(entry.entry_status || '').toUpperCase() === 'ALIVE'
               return (
-                <div key={entry.entry_name} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+                <button
+                  key={entry.entry_name}
+                  type="button"
+                  onClick={() => setSelectedEntry(entry.entry_name)}
+                  className={`rounded-3xl border bg-white p-5 text-left shadow-soft transition hover:border-blue-300 ${entry.entry_name === saved.active_entry ? 'border-blue-400 ring-2 ring-blue-50' : 'border-slate-200'}`}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="truncate text-lg font-black text-slate-950">{entry.entry_name}</div>
@@ -1030,7 +1037,7 @@ function SurvivorCommercialPanel() {
                   {entry.entry_name === saved.active_entry && (
                     <div className="mt-3 text-[10px] font-black uppercase tracking-[0.12em] text-blue-700">Primary detail view</div>
                   )}
-                </div>
+                </button>
               )
             })}
           </div>
@@ -1298,7 +1305,7 @@ function useJsonEndpoint(path, fallback = {}) {
   return data
 }
 
-function usePrivateSurvivorState(refreshKey = 0) {
+function usePrivateSurvivorState(refreshKey = 0, selectedEntry = '') {
   const { user, getAccessToken } = useAuth()
   const [data, setData] = useState({
     status: user ? 'LOADING' : 'AUTH_REQUIRED',
@@ -1325,7 +1332,8 @@ function usePrivateSurvivorState(refreshKey = 0) {
       try {
         const token = await getAccessToken()
         if (!token) throw new Error('No authenticated session')
-        const response = await fetch(`/api/survivor/state?ts=${Date.now()}`, {
+        const entryQuery = selectedEntry ? `&entry=${encodeURIComponent(selectedEntry)}` : ''
+        const response = await fetch(`/api/survivor/state?ts=${Date.now()}${entryQuery}`, {
           cache: 'no-store',
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -1350,7 +1358,7 @@ function usePrivateSurvivorState(refreshKey = 0) {
       cancelled = true
       if (timer) window.clearInterval(timer)
     }
-  }, [user?.id, getAccessToken, refreshKey])
+  }, [user?.id, getAccessToken, refreshKey, selectedEntry])
 
   return data
 }

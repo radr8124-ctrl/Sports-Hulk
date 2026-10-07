@@ -1,3 +1,11 @@
+export function selectLinkedSurvivorEntry(linkedNames = [], requestedEntry = '') {
+  const unique = [...new Set((Array.isArray(linkedNames) ? linkedNames : [])
+    .map(value => String(value || '').trim())
+    .filter(Boolean))]
+  const requested = String(requestedEntry || '').trim()
+  return requested && unique.includes(requested) ? requested : (unique[0] || null)
+}
+
 export function buildLinkedSurvivorSummaries(linkedNames = [], survivorState = {}) {
   const unique = [...new Set((Array.isArray(linkedNames) ? linkedNames : [])
     .map(value => String(value || '').trim())

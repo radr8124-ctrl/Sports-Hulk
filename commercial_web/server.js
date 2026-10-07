@@ -10,7 +10,7 @@ import { buildPersonalizedSurvivorSource } from './survivor_personalization.js'
 import { sanitizeAccountPreferences } from './account_preferences.js'
 import { preferencePresentation, watchlistNewsHits } from './preference_presentation.js'
 import { faabBudgetLines } from './faab_presentation.js'
-import { buildLinkedSurvivorSummaries } from './survivor_linked_entries.js'
+import { buildLinkedSurvivorSummaries, selectLinkedSurvivorEntry } from './survivor_linked_entries.js'
 import { diversifySurvivorEntries } from './survivor_diversification.js'
 import { addSurvivorLink, survivorEntryOwnedByOther, survivorLinkNames } from './survivor_link_registry.js'
 
@@ -4558,7 +4558,8 @@ const server=http.createServer(async(req,res)=>{
     const data=await loadAll()
     const state=data.survivorUser||{}
     const linkedNames=await linkedSurvivorEntries(req,user.id)
-    const linkedName=linkedNames[0]||null
+    const requestedEntry=String(url.searchParams.get('entry')||'').trim()
+    const linkedName=selectLinkedSurvivorEntry(linkedNames,requestedEntry)
     const entry=linkedName ? (state.entries||{})[linkedName]||null : null
     const linkedEntries=buildLinkedSurvivorSummaries(linkedNames,state)
 
@@ -4577,6 +4578,11 @@ const server=http.createServer(async(req,res)=>{
 
     const governed=await loadExternalJson(SURVIVOR_V2_PRIVATE_PATH)
     const governedEntry=governed?.active_entry===linkedName ? governed : null
+    const poolWeek=Number(state.pool_current_week||entry?.current_week||0)||null
+    const weekState=poolWeek ? entry?.[`week_${poolWeek}`]||{} : {}
+    const entryRuleConfirmed=governedEntry?.rule_confirmed ?? Boolean(weekState?.official_pool_sheet_confirmed)
+    const entryRuleStatus=governedEntry?.rule_status || weekState?.rule_status || (entryRuleConfirmed?'CONFIRMED_FROM_LINKED_ENTRY':'AWAITING_OFFICIAL_POOL_SHEET')
+    const entryRequiredPicks=governedEntry?.required_picks ?? weekState?.required_picks ?? null
 
     return json(res,200,{
       status:'READY',
@@ -4585,16 +4591,16 @@ const server=http.createServer(async(req,res)=>{
       linked_entries:linkedEntries,
       active_entry:linkedName,
       entry_status:entry?.status||null,
-      pool_current_week:Number(state.pool_current_week||entry?.current_week||0)||null,
+      pool_current_week:poolWeek,
       active_entry_week:governedEntry?.active_entry_week||entry?.current_week||null,
       state_week_matches_pool:governedEntry?.state_week_matches_pool??null,
       used_teams:Array.isArray(entry?.used_teams)?entry.used_teams:[],
       current_picks:Array.isArray(entry?.current_picks)?entry.current_picks:[],
-      required_picks:governedEntry?.required_picks??null,
-      rule_status:governedEntry?.rule_status||null,
-      rule_confirmed:Boolean(governedEntry?.rule_confirmed),
-      ownership:governedEntry?.ownership||{status:'PERSONAL_CONTEXT_WAITING'},
-      recommendation_status:governedEntry?.recommendation_status||'PERSONAL_CONTEXT_WAITING',
+      required_picks:entryRequiredPicks,
+      rule_status:entryRuleStatus,
+      rule_confirmed:Boolean(entryRuleConfirmed),
+      ownership:governedEntry?.ownership||{status:entryRuleConfirmed?'LINKED_ENTRY_RULE_CONFIRMED':'PERSONAL_CONTEXT_WAITING'},
+      recommendation_status:governedEntry?.recommendation_status||(entryRuleConfirmed?'PERSONALIZED_READY':'PERSONAL_CONTEXT_WAITING'),
       shadow_recommendation:governedEntry?.shadow_recommendation||[],
       updated_at:state.manual_state_updated_at||state.last_result_refresh_at||null,
       source:'PRIVATE_MEMBER_STATE'

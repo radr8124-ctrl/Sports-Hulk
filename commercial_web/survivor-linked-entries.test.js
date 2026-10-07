@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { buildLinkedSurvivorSummaries } from './survivor_linked_entries.js'
+import { buildLinkedSurvivorSummaries, selectLinkedSurvivorEntry } from './survivor_linked_entries.js'
 
 test('multiple linked entries preserve separate status and used-team counts', () => {
   const result = buildLinkedSurvivorSummaries(
@@ -43,4 +43,13 @@ test('missing linked entry state stays non-invented', () => {
     current_picks: [],
     current_week: 5,
   }])
+})
+
+
+test('entry selector permits linked entry and falls back for unlinked requests', () => {
+  const linked = ['ENTRY A', 'ENTRY B']
+
+  assert.equal(selectLinkedSurvivorEntry(linked, 'ENTRY B'), 'ENTRY B')
+  assert.equal(selectLinkedSurvivorEntry(linked, 'NOT MINE'), 'ENTRY A')
+  assert.equal(selectLinkedSurvivorEntry([], 'ENTRY A'), null)
 })
