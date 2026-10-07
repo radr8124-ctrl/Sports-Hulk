@@ -135,6 +135,18 @@ function AccountModal({ onClose }) {
   const [message, setMessage] = useState('')
   const [accountSummary, setAccountSummary] = useState(null)
   const [accountLoading, setAccountLoading] = useState(false)
+  const [preferences, setPreferences] = useState({
+    favorite_teams: [],
+    sports_followed: [],
+    watched_players: [],
+    risk_preference: 'BALANCED',
+  })
+  const [preferencesSaved, setPreferencesSaved] = useState(false)
+  const [favoriteTeamsInput, setFavoriteTeamsInput] = useState('')
+  const [watchedPlayersInput, setWatchedPlayersInput] = useState('')
+  const [preferencesLoading, setPreferencesLoading] = useState(false)
+  const [preferencesSaving, setPreferencesSaving] = useState(false)
+  const [preferencesMessage, setPreferencesMessage] = useState('')
 
   useEffect(() => {
     const close = (event) => {
@@ -172,6 +184,56 @@ function AccountModal({ onClose }) {
     }
 
     load()
+    return () => { active = false }
+  }, [user, getAccessToken])
+
+  useEffect(() => {
+    let active = true
+    if (!user) {
+      setPreferences({
+        favorite_teams: [],
+        sports_followed: [],
+        watched_players: [],
+        risk_preference: 'BALANCED',
+      })
+      setPreferencesSaved(false)
+      setFavoriteTeamsInput('')
+      setWatchedPlayersInput('')
+      setPreferencesLoading(false)
+      return () => { active = false }
+    }
+
+    const loadPreferences = async () => {
+      setPreferencesLoading(true)
+      setPreferencesMessage('')
+      try {
+        const token = await getAccessToken()
+        if (!token) throw new Error('No authenticated session')
+        const response = await fetch('/api/account/preferences', {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error('Preferences unavailable')
+        const payload = await response.json()
+        if (!active) return
+        const nextPreferences = payload.preferences || {
+          favorite_teams: [],
+          sports_followed: [],
+          watched_players: [],
+          risk_preference: 'BALANCED',
+        }
+        setPreferences(nextPreferences)
+        setFavoriteTeamsInput((nextPreferences.favorite_teams || []).join(', '))
+        setWatchedPlayersInput((nextPreferences.watched_players || []).join(', '))
+        setPreferencesSaved(Boolean(payload.saved))
+      } catch {
+        if (active) setPreferencesMessage('Preferences could not be loaded.')
+      } finally {
+        if (active) setPreferencesLoading(false)
+      }
+    }
+
+    loadPreferences()
     return () => { active = false }
   }, [user, getAccessToken])
 
@@ -220,6 +282,54 @@ function AccountModal({ onClose }) {
     await requestCode()
   }
 
+  const savePreferences = async () => {
+    if (!user || preferencesSaving) return
+    setPreferencesSaving(true)
+    setPreferencesMessage('')
+    try {
+      const token = await getAccessToken()
+      if (!token) throw new Error('No authenticated session')
+      const payloadPreferences = {
+        ...preferences,
+        favorite_teams: favoriteTeamsInput.split(',').map(item => item.trim()).filter(Boolean),
+        watched_players: watchedPlayersInput.split(',').map(item => item.trim()).filter(Boolean),
+      }
+      const response = await fetch('/api/account/preferences', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ preferences: payloadPreferences }),
+      })
+      if (!response.ok) throw new Error('Could not save preferences')
+      const payload = await response.json()
+      const savedPreferences = payload.preferences || preferences
+      setPreferences(savedPreferences)
+      setFavoriteTeamsInput((savedPreferences.favorite_teams || []).join(', '))
+      setWatchedPlayersInput((savedPreferences.watched_players || []).join(', '))
+      setPreferencesSaved(Boolean(payload.saved))
+      setPreferencesMessage('Saved.')
+    } catch {
+      setPreferencesMessage('Preferences could not be saved.')
+    } finally {
+      setPreferencesSaving(false)
+    }
+  }
+
+  const toggleSportPreference = (sport) => {
+    setPreferences(prev => {
+      const current = Array.isArray(prev.sports_followed) ? prev.sports_followed : []
+      const exists = current.includes(sport)
+      return {
+        ...prev,
+        sports_followed: exists ? current.filter(item => item !== sport) : [...current, sport],
+      }
+    })
+    setPreferencesSaved(false)
+    setPreferencesMessage('')
+  }
+
   const doSignOut = async () => {
     setBusy(true)
     await signOut()
@@ -234,7 +344,7 @@ function AccountModal({ onClose }) {
         aria-modal="true"
         aria-labelledby="sports-zenith-auth-title"
         onClick={(event) => event.stopPropagation()}
-        className="w-full overflow-hidden rounded-t-[32px] border-t border-white/80 bg-white shadow-2xl sm:max-w-[470px] sm:rounded-[32px] sm:border"
+        className="max-h-[92vh] w-full overflow-y-auto rounded-t-[32px] border-t border-white/80 bg-white shadow-2xl sm:max-w-[520px] sm:rounded-[32px] sm:border"
       >
         <div className="h-1.5 bg-blue-700" />
         <div className="mx-auto mt-3 h-1 w-11 rounded-full bg-slate-200 sm:hidden" />
@@ -301,6 +411,107 @@ function AccountModal({ onClose }) {
                   </div>
                 </div>
               </div>
+
+              <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Sports preferences</div>
+                    <div className="mt-1 text-sm font-black text-slate-950">Personalize Game Scout</div>
+                    <div className="mt-1 text-[11px] font-semibold leading-5 text-slate-500">Optional preferences help prioritize what you care about. They never override live sports facts.</div>
+                  </div>
+                  <div className={`rounded-full px-2.5 py-1 text-[10px] font-black ${preferencesSaved ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                    {preferencesLoading ? 'Loading…' : preferencesSaved ? 'Saved' : 'Optional'}
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Sports followed</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {['NFL','MLB','NBA','NHL','CFB','CBB'].map(sport => {
+                      const selected = preferences.sports_followed?.includes(sport)
+                      return (
+                        <button
+                          key={sport}
+                          type="button"
+                          onClick={() => toggleSportPreference(sport)}
+                          disabled={preferencesLoading || preferencesSaving}
+                          className={`rounded-full border px-3 py-1.5 text-[11px] font-black transition ${selected ? 'border-blue-700 bg-blue-700 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700'} disabled:opacity-50`}
+                        >
+                          {sport}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <label className="mt-4 block">
+                  <span className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Favorite teams</span>
+                  <input
+                    type="text"
+                    value={favoriteTeamsInput}
+                    onChange={(event) => {
+                      setFavoriteTeamsInput(event.target.value)
+                      setPreferencesSaved(false)
+                      setPreferencesMessage('')
+                    }}
+                    placeholder="Yankees, Bills, Knicks"
+                    disabled={preferencesLoading || preferencesSaving}
+                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-900 outline-none focus:border-blue-400 focus:bg-white"
+                  />
+                </label>
+
+                <label className="mt-4 block">
+                  <span className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Watched players</span>
+                  <input
+                    type="text"
+                    value={watchedPlayersInput}
+                    onChange={(event) => {
+                      setWatchedPlayersInput(event.target.value)
+                      setPreferencesSaved(false)
+                      setPreferencesMessage('')
+                    }}
+                    placeholder="Josh Allen, Amon-Ra St. Brown"
+                    disabled={preferencesLoading || preferencesSaving}
+                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-900 outline-none focus:border-blue-400 focus:bg-white"
+                  />
+                </label>
+
+                <div className="mt-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Risk preference</div>
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {['CONSERVATIVE','BALANCED','AGGRESSIVE'].map(value => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => {
+                          setPreferences(prev => ({ ...prev, risk_preference: value }))
+                          setPreferencesSaved(false)
+                          setPreferencesMessage('')
+                        }}
+                        disabled={preferencesLoading || preferencesSaving}
+                        className={`rounded-xl border px-2 py-2 text-[10px] font-black transition ${preferences.risk_preference === value ? 'border-slate-950 bg-slate-950 text-white' : 'border-slate-200 bg-white text-slate-500 hover:border-slate-400'} disabled:opacity-50`}
+                      >
+                        {value === 'CONSERVATIVE' ? 'Conservative' : value === 'AGGRESSIVE' ? 'Aggressive' : 'Balanced'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <div className={`text-[11px] font-bold ${preferencesMessage === 'Saved.' ? 'text-emerald-700' : 'text-slate-400'}`}>
+                    {preferencesMessage || 'Nothing is saved until you choose Save preferences.'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={savePreferences}
+                    disabled={preferencesLoading || preferencesSaving}
+                    className="shrink-0 rounded-xl bg-blue-700 px-4 py-2 text-xs font-black text-white disabled:opacity-50"
+                  >
+                    {preferencesSaving ? 'Saving…' : 'Save preferences'}
+                  </button>
+                </div>
+              </div>
+
               <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-900">This verified account keeps each member’s private sports data separate and provides the identity foundation for future subscription access.</div>
               <button type="button" disabled={busy} onClick={doSignOut} className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 disabled:opacity-50"><LogOut size={16} /> Sign out</button>
             </>
