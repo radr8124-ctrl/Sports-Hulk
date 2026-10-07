@@ -6,6 +6,7 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createAdminClient, createClient } from '@insforge/sdk'
+import { buildPersonalizedSurvivorSource } from './survivor_personalization.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -2972,6 +2973,42 @@ function attachPersonalFantasyFreshness(answer, snapshot) {
   }
 }
 
+async function personalizedSurvivorAsk(req, question, data) {
+  const q=qtext(question)
+  if(!/\b(survivor|survivor pick|pool pick|knockout|used teams?|teams? used)\b/.test(q)) return null
+  if(!bearerToken(req)) return null
+
+  const user=await authenticatedUser(req)
+  if(!user?.id) return null
+
+  const entryName=await linkedSurvivorEntry(req,user.id)
+  if(!entryName) return null
+
+  const survivorState=await loadExternalJson(SURVIVOR_ENTRIES_PATH)
+  const entry=(survivorState?.entries||{})[entryName]
+  if(!entry) return null
+
+  const personalizedSource=buildPersonalizedSurvivorSource(entryName,entry,survivorState,data.survivorV2||{})
+  const usedTeams=personalizedSource.used_teams||[]
+
+  const answer=survivorAnswer({...data,survivorV2:personalizedSource})
+  return {
+    ...answer,
+    intent:'personal_survivor',
+    confidence:answer.confidence,
+    status:answer.status,
+    why:[
+      `Using your linked Survivor entry: ${entryName}.`,
+      `Saved entry status: ${nice(entry.status||'UNKNOWN')} · ${usedTeams.length} team${usedTeams.length===1?'':'s'} already used.`,
+      ...(Array.isArray(answer.why)?answer.why:[]),
+    ],
+    risk:[
+      ...(Array.isArray(answer.risk)?answer.risk:[]),
+      'Your saved Survivor history personalizes eligibility only; live game and market facts still come from governed Sports Zenith data.',
+    ],
+  }
+}
+
 async function personalizedFantasyAsk(req, question, context={}) {
   const intent=personalFantasyIntent(question)
   const leagueId=String(context?.fantasy_league_id||'').trim()
@@ -4451,8 +4488,9 @@ const server=http.createServer(async(req,res)=>{
       const data=await loadAll()
       const sessionResolution=resolveSessionQuestion(question,context)
       const routedQuestion=sessionResolution.question
-      const personalAnswer=await personalizedFantasyAsk(req,routedQuestion,context)
-      const answer=personalAnswer||routeAsk(routedQuestion,data,context)
+      const survivorPersonalAnswer=await personalizedSurvivorAsk(req,routedQuestion,data)
+      const fantasyPersonalAnswer=survivorPersonalAnswer?null:await personalizedFantasyAsk(req,routedQuestion,context)
+      const answer=survivorPersonalAnswer||fantasyPersonalAnswer||routeAsk(routedQuestion,data,context)
       const answerGeneratedAt=new Date().toISOString()
       await Promise.all([
         queueFailedAskReview(question,context,answer),
