@@ -29,6 +29,16 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
       || echo "WARNING: MLB official core refresh failed; prior data preserved."
 
     echo
+    echo "=== OFFICIAL MLB MASTER STATUS FRESHNESS ==="
+
+    SPORTS_LABEL=mlb-master-status \
+    SPORTS_MAX_SECONDS=55 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" "$ROOT/baseball_vault/refresh_mlb_master_status.py" \
+        --days-back 8 --days-forward 3 \
+      || echo "WARNING: MLB master status freshness held; previous master preserved."
+
+    echo
     echo "=== MLB MARKETS ==="
 
     SPORTS_LABEL=mlb-markets \

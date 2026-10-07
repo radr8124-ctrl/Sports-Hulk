@@ -35,7 +35,7 @@ jobs:
           cache-dependency-path: requirements.txt
 
       - name: Install proof test dependencies
-        run: python -m pip install numpy pandas requests
+        run: python -m pip install numpy pandas requests pyarrow
 
       - name: Validate betting builders and Python proof
         run: |
@@ -50,6 +50,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_nfl_official_player_identity.py'
           python -m unittest discover -s tests -p 'test_nhl_official_box_forward.py'
           python -m unittest discover -s tests -p 'test_mlb_official_box_forward.py'
+          python -m unittest discover -s tests -p 'test_mlb_master_freshness.py'
           python -m unittest discover -s tests -p 'test_sports_workflow_safety.py'
 
       - name: Set up Node

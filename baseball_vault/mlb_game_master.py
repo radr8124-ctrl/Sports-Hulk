@@ -1,5 +1,5 @@
 from pathlib import Path
-from datetime import date,datetime,timedelta
+from datetime import date,datetime,timedelta,timezone
 import argparse, json, urllib.parse, urllib.request
 import pandas as pd
 import numpy as np
@@ -18,10 +18,24 @@ def season_dates(year):
     # broad window; StatsAPI returns only actual MLB games.
     return f"{year}-03-15",f"{year}-11-15"
 
+def use_finalized_cache(year, path, today=None):
+    """Never reuse a season schedule captured before games finished.
+
+    Current-season schedules change throughout playoffs. Past seasons are
+    reusable only after the postseason's year-end finalization date.
+    """
+    today=today or datetime.now(timezone.utc)
+    if not path.exists() or year>=today.year:
+        return False
+    finalized=datetime(year,12,15,tzinfo=timezone.utc).timestamp()
+    return path.stat().st_mtime>=finalized
+
+
 def fetch_year(year,force=False):
     RAW.mkdir(parents=True,exist_ok=True)
     out=RAW/f"mlb_schedule_{year}.json"
-    if out.exists() and not force: return json.loads(out.read_text())
+    if not force and use_finalized_cache(year,out):
+        return json.loads(out.read_text())
     a,b=season_dates(year)
     d=get_json(BASE,{"sportId":1,"startDate":a,"endDate":b,"hydrate":"team,venue,linescore"})
     out.write_text(json.dumps(d))
