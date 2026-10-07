@@ -9,6 +9,11 @@ from pathlib import Path
 
 import pandas as pd
 
+try:
+    from .forward_result_evidence import register_evidence, trusted_result
+except ImportError:
+    from forward_result_evidence import register_evidence, trusted_result
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "intelligence_warehouse" / "betting_v2"
 CURRENT = OUT_DIR / "PARLAY_V2_CURRENT.json"
@@ -326,18 +331,12 @@ def result_lookup():
             grade = clean(row.get("grade")).upper()
             if not signature or grade not in SETTLED:
                 continue
-            out[(sport, signature)] = {
+            register_evidence(out, (sport, signature), {
                 "grade": grade,
-                "grade_snapshot_at": clean(
-                    row.get("snapshot_at")
-                ),
-                "leg1_grade": clean(
-                    row.get("leg1_grade")
-                ).upper(),
-                "leg2_grade": clean(
-                    row.get("leg2_grade")
-                ).upper(),
-            }
+                "grade_snapshot_at": clean(row.get("snapshot_at")),
+                "leg1_grade": clean(row.get("leg1_grade")).upper(),
+                "leg2_grade": clean(row.get("leg2_grade")).upper(),
+            })
     return out
 
 
@@ -352,7 +351,7 @@ def settle():
         sport = clean(row.get("sport")).upper()
         signature = clean(row.get("combo_signature"))
         result = results.get((sport, signature))
-        if not result:
+        if not trusted_result(result):
             continue
         event = {
             "event_type": "SETTLED",

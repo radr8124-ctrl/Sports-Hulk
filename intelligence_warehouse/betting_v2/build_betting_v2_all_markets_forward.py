@@ -24,6 +24,11 @@ except ImportError:
         regime_enforced,
     )
 
+try:
+    from .forward_result_evidence import register_evidence, trusted_result
+except ImportError:
+    from forward_result_evidence import register_evidence, trusted_result
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "intelligence_warehouse" / "betting_v2"
 CURRENT = OUT_DIR / "BETTING_V2_ALL_MARKETS_CURRENT.json"
@@ -439,8 +444,9 @@ def history_lookup():
                 "grade_snapshot_at": clean(row.get("snapshot_at")),
                 "away_score": num(row.get("away_score")),
                 "home_score": num(row.get("home_score")),
+                "source_event_id": clean(row.get("result_event_id") or row.get("official_gamePk") or row.get("espn_event_id")),
             }
-            lookup[key] = result
+            register_evidence(lookup, key, result)
             if regime_enforced(sport):
                 regime = normalize_competition_regime(
                     row.get("season_type")
@@ -449,10 +455,10 @@ def history_lookup():
                     or row.get("competition_phase"),
                     sport,
                 )
-                lookup[f"{key}|{regime}"] = {
+                register_evidence(lookup, f"{key}|{regime}", {
                     **result,
                     "competition_regime": regime,
-                }
+                })
     return lookup
 
 
@@ -489,7 +495,7 @@ def settle():
             result = lookup.get(f"{result_key}|{regime}")
         else:
             result = lookup.get(result_key)
-        if not result:
+        if not trusted_result(result):
             continue
         event = {
             "event_type": "SETTLED",
@@ -508,6 +514,7 @@ def settle():
             "grade_snapshot_at": result.get("grade_snapshot_at"),
             "away_score": result.get("away_score"),
             "home_score": result.get("home_score"),
+            "settlement_source_event_id": result.get("source_event_id"),
         }
         append_jsonl(LEDGER, event)
         settled_now += 1

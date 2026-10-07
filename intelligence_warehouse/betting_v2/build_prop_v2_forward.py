@@ -21,6 +21,10 @@ DIST = ROOT / "commercial_web" / "dist" / "prop_v2_forward.json"
 if str(OUT_DIR) not in sys.path:
     sys.path.insert(0, str(OUT_DIR))
 import build_prop_v2 as prop_v2
+try:
+    from .forward_result_evidence import register_evidence, trusted_result
+except ImportError:
+    from forward_result_evidence import register_evidence, trusted_result
 
 SETTLED = {"WIN", "LOSS", "PUSH"}
 
@@ -107,7 +111,9 @@ def identity_parts(row):
         "game_key": clean(row.get("game_key")),
         "event_start": clean(row.get("event_start")),
         "player_key": clean(row.get("player_key")) or key_text(row.get("player")),
-        "market": clean(row.get("market_subtype")).upper(),
+        # Current picks expose market_subtype; captured ledger ENTRY events
+        # freeze it as "market". Both must round-trip to the same identity.
+        "market": clean(row.get("market_subtype") or row.get("market")).upper(),
         "side": clean(row.get("side")).upper(),
         "line": line_text(row.get("line")),
     }
@@ -332,9 +338,10 @@ def grade_lookup():
                     if "snapshot_at" in row.index
                     else None
                 ),
+                "source_event_id": identity.get("event_id"),
             }
             for key in identity_keys(grade_row):
-                lookup[key] = grade_row
+                register_evidence(lookup, key, grade_row)
     return lookup
 
 
@@ -348,11 +355,32 @@ def settle():
             continue
 
         match = None
+        matched_by = None
+        # Exact frozen event ID is the strongest evidence. A game-key fallback
+        # is allowed only when a source lacks event ID, not when two IDs
+        # disagree. Date-only identity cannot settle a bet (doubleheaders).
         for identity_key in identity_keys(row):
-            if identity_key in lookup:
-                match = lookup[identity_key]
+            kind = identity_key.split("|", 1)[0]
+            if kind not in {"event", "game"}:
+                continue
+            evidence = lookup.get(identity_key)
+            if evidence is None:
+                continue
+            if evidence.get("ambiguous"):
+                match = None
+                matched_by = None
                 break
-        if match is None:
+            if kind == "game" and clean(row.get("event_id")) and clean(evidence.get("source_event_id")):
+                if clean(row.get("event_id")) != clean(evidence.get("source_event_id")):
+                    continue
+            if kind == "event" and clean(row.get("game_key")) and clean(evidence.get("game_key")):
+                if clean(row.get("game_key")) != clean(evidence.get("game_key")):
+                    continue
+            if trusted_result(evidence):
+                match = evidence
+                matched_by = kind
+                break
+        if not trusted_result(match):
             continue
 
         event = {
@@ -363,6 +391,8 @@ def settle():
             "actual_value": match.get("actual_value"),
             "settled_at": now_iso(),
             "grade_snapshot_at": match.get("grade_snapshot_at"),
+            "settlement_match_type": matched_by,
+            "settlement_source_event_id": match.get("source_event_id"),
         }
         append_jsonl(LEDGER, event)
         settled_now += 1

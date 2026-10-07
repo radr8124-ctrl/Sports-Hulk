@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -11,6 +12,9 @@ import pandas as pd
 from build_selectivity_analysis import build_selectivity
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from intelligence_warehouse.betting_v2.forward_results_audit import audit_forward_ledgers
 OUT_DIR = ROOT / "intelligence_warehouse" / "brain_performance"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 OUT = OUT_DIR / "BRAIN_PERFORMANCE.json"
@@ -354,6 +358,7 @@ def main():
     categories = [best_bets, props, parlays, prizepicks]
     sports = sport_metrics(rows)
     dfs = dfs_payload()
+    forward_results_accountability = audit_forward_ledgers(ROOT)
     fantasy_v2 = {
         "current": read_json(FANTASY_V2_CURRENT, {
             "status": "WAITING",
@@ -549,6 +554,7 @@ def main():
         "selectivity_shadow": selectivity_shadow,
         "betting_v2": betting_v2,
         "betting_v2_all_markets": betting_v2_all_markets,
+        "forward_results_accountability": forward_results_accountability,
         "parlay_v2": parlay_v2,
         "prop_v2": prop_v2,
         "experiment_registry": experiment_registry,
@@ -563,11 +569,16 @@ def main():
 
     write_json(OUT, payload)
     write_json(PUBLIC, payload)
+    # The public proof receipt follows mocked OUT/PUBLIC destinations during
+    # isolated tests, never writes to production from a test worktree.
+    write_json(OUT.with_name("FORWARD_RESULTS_ACCOUNTABILITY.json"), forward_results_accountability)
+    write_json(PUBLIC.with_name("forward_results_accountability.json"), forward_results_accountability)
     write_json(SELECTIVITY_OUT, selectivity)
     write_json(PUBLIC_SELECTIVITY, selectivity)
     if DIST.parent.exists():
         write_json(DIST, payload)
         write_json(DIST_SELECTIVITY, selectivity)
+        write_json(DIST.with_name("forward_results_accountability.json"), forward_results_accountability)
 
     print(json.dumps({
         "status": payload["status"],
