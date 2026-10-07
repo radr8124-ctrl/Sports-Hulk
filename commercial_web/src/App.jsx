@@ -937,6 +937,7 @@ function SurvivorCommercialPanel() {
   const hasEntry = saved.status === 'READY' && saved.entry_linked
   const linkedEntries = Array.isArray(saved.linked_entries) ? saved.linked_entries : []
   const diversifiedAllocations = Array.isArray(saved.diversified_allocations) ? saved.diversified_allocations : []
+  const concentration = saved.diversification_concentration || {}
   const usedTeams = hasEntry ? (saved.used_teams || []) : []
   const currentPicks = hasEntry ? (saved.current_picks || []) : []
   const candidates = [...(survivor.candidates || [])]
@@ -1053,10 +1054,29 @@ function SurvivorCommercialPanel() {
               <p className="eyebrow">Multi-entry strategy</p>
               <h2 className="mt-1">Diversified Survivor plan</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-950">
-                Each entry is evaluated against its own burned teams. Duplicate team exposure is avoided when another eligible governed option exists.
+                Each entry is evaluated against its own burned teams. Duplicate-team and same-game exposure are avoided when another eligible governed option exists.
               </p>
             </div>
             <span className="health-pill emerald">MODEL SCORES UNCHANGED</span>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-4">
+            <div className="rounded-xl bg-white/80 p-3">
+              <div className={`font-black ${concentration.status === 'HIGH' ? 'text-rose-700' : 'text-emerald-700'}`}>{concentration.status || 'CLEAR'}</div>
+              <div className="mt-1 text-slate-400">Concentration</div>
+            </div>
+            <div className="rounded-xl bg-white/80 p-3">
+              <div className="font-black text-slate-950">{concentration.unique_teams ?? '—'}/{concentration.actionable_entries ?? '—'}</div>
+              <div className="mt-1 text-slate-400">Unique teams</div>
+            </div>
+            <div className="rounded-xl bg-white/80 p-3">
+              <div className="font-black text-slate-950">{concentration.same_game_collision_count ?? 0}</div>
+              <div className="mt-1 text-slate-400">Same-game collisions</div>
+            </div>
+            <div className="rounded-xl bg-white/80 p-3">
+              <div className="font-black text-slate-950">{concentration.max_team_exposure_pct ?? 0}%</div>
+              <div className="mt-1 text-slate-400">Max team exposure</div>
+            </div>
           </div>
 
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">

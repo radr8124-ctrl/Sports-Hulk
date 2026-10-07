@@ -1,3 +1,5 @@
+import { survivorGameKey } from './survivor_concentration.js'
+
 function num(value, fallback = 0) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : fallback
@@ -9,6 +11,7 @@ export function diversifySurvivorEntries(entries = [], candidates = [], poolWeek
     .sort((a, b) => num(b.strategy_index) - num(a.strategy_index))
 
   const assignedTeams = new Set()
+  const assignedGames = new Set()
   const allocations = []
 
   for (const item of Array.isArray(entries) ? entries : []) {
@@ -44,8 +47,12 @@ export function diversifySurvivorEntries(entries = [], candidates = [], poolWeek
     }
 
     const eligible = ranked.filter(row => !used.has(row.team))
-    const unique = eligible.find(row => !assignedTeams.has(row.team))
-    const selected = unique || eligible[0] || null
+    const independent = eligible.find(row => {
+      const key = survivorGameKey(row.team, row.opponent)
+      return !assignedTeams.has(row.team) && (!key || !assignedGames.has(key))
+    })
+    const uniqueTeam = eligible.find(row => !assignedTeams.has(row.team))
+    const selected = independent || uniqueTeam || eligible[0] || null
 
     if (!selected) {
       allocations.push({
@@ -58,7 +65,11 @@ export function diversifySurvivorEntries(entries = [], candidates = [], poolWeek
       continue
     }
 
+    const selectedGameKey = survivorGameKey(selected.team, selected.opponent)
+    const sameGameAcrossEntries = Boolean(selectedGameKey && assignedGames.has(selectedGameKey))
+    const reusedTeamAcrossEntries = assignedTeams.has(selected.team)
     assignedTeams.add(selected.team)
+    if (selectedGameKey) assignedGames.add(selectedGameKey)
     allocations.push({
       entry_name: entryName,
       entry_status: status || null,
@@ -70,7 +81,8 @@ export function diversifySurvivorEntries(entries = [], candidates = [], poolWeek
       decision_tier: selected.decision_tier || null,
       future_value_label: selected.future_value_label || null,
       risk_signals: selected.risk_signals || null,
-      reused_team_across_entries: !unique && assignedTeams.has(selected.team),
+      reused_team_across_entries: reusedTeamAcrossEntries,
+      same_game_across_entries: sameGameAcrossEntries,
     })
   }
 

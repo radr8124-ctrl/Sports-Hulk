@@ -15,6 +15,7 @@ import { diversifySurvivorEntries } from './survivor_diversification.js'
 import { addSurvivorLink, survivorEntryOwnedByOther, survivorLinkNames } from './survivor_link_registry.js'
 import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
+import { survivorConcentrationAudit } from './survivor_concentration.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -3278,6 +3279,7 @@ async function personalizedSurvivorAsk(req, question, data) {
     if(allocations.length){
       const actionable=allocations.filter(row=>row.team)
       const withheld=allocations.filter(row=>!row.team)
+      const concentration=survivorConcentrationAudit(allocations)
       return response({
         intent:'personal_survivor_multi',
         take:actionable.length
@@ -3287,14 +3289,17 @@ async function personalizedSurvivorAsk(req, question, data) {
         status:actionable.length?'DIVERSIFIED_RESEARCH':'WAITING',
         why:[
           `${entryNames.length} linked entries evaluated independently against their own used-team history.`,
-          actionable.length>1?'Duplicate team exposure is avoided when another eligible governed candidate exists.':null,
+          actionable.length>1?'Duplicate-team and same-game exposure are avoided when another eligible governed candidate exists.':null,
+          actionable.length>1?`Concentration audit: ${concentration.status} · ${concentration.unique_teams}/${concentration.actionable_entries} unique teams · ${concentration.same_game_collision_count} same-game collision${concentration.same_game_collision_count===1?'':'s'}.`:null,
           ...actionable.slice(0,6).map(row=>`${row.entry_name}: ${row.team} vs ${row.opponent||'—'} · market survival ${row.market_prob_pct??'—'}% · strategy index ${row.strategy_index??'—'}.`),
           ...withheld.slice(0,4).map(row=>`${row.entry_name}: ${nice(row.status)} · ${row.reason}`),
         ].filter(Boolean),
         risk:[
           'Diversification changes allocation across entries, not the underlying Survivor candidate scores.',
+          concentration.status==='HIGH'?'Concentration remains high because the eligible board forced duplicate-team or same-game exposure.':null,
           'An entry without a confirmed current-week pool rule is withheld rather than guessed.',
-        ],
+        ].filter(Boolean),
+        concentration,
         cards:allocations.slice(0,10).map(row=>({
           type:'survivor_multi',
           title:row.entry_name,
@@ -4775,6 +4780,7 @@ const server=http.createServer(async(req,res)=>{
     const diversifiedAllocations=linkedEntryStates.length>1
       ? diversifySurvivorEntries(linkedEntryStates,data.survivorV2?.candidates||[],poolWeek)
       : []
+    const diversificationConcentration=survivorConcentrationAudit(diversifiedAllocations)
 
     if(!entry) return json(res,200,{
       status:'AUTHENTICATED_NO_ENTRY',
@@ -4782,6 +4788,7 @@ const server=http.createServer(async(req,res)=>{
       linked_entry_count:linkedEntries.length,
       linked_entries:linkedEntries,
       diversified_allocations:diversifiedAllocations,
+      diversification_concentration:diversificationConcentration,
       pool_current_week:poolWeek,
       used_teams:[],
       current_picks:[],
@@ -4803,6 +4810,7 @@ const server=http.createServer(async(req,res)=>{
       linked_entry_count:linkedEntries.length,
       linked_entries:linkedEntries,
       diversified_allocations:diversifiedAllocations,
+      diversification_concentration:diversificationConcentration,
       active_entry:linkedName,
       entry_status:entry?.status||null,
       pool_current_week:poolWeek,
