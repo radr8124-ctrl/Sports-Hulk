@@ -562,6 +562,12 @@ function resolveSessionQuestion(question, context = {}) {
     }
   }
 
+  const saferFollowup=/safer (option|choice)/i.test(original)
+  if(saferFollowup && String(answer.intent||'')==='start_sit'){
+    const priorUser=[...history.slice(0,lastAssistantIndex)].reverse().find(item=>item?.role==='user' && item?.text)
+    if(priorUser?.text) return {question:`${String(priorUser.text).trim()} safer option`,resolved:true}
+  }
+
   const cards=Array.isArray(answer.cards)?answer.cards.slice(0,4):[]
   const playerCards=cards.filter(card=>['fantasy','prop','prop_research','prizepicks_research','waiver','stash','player_history','dfs'].includes(String(card?.type||'')))
   const scoreCards=cards.filter(card=>String(card?.type||'')==='score')
@@ -1168,17 +1174,37 @@ function startSitAnswerV3(question, data) {
   const weeklyMatches=matchPlayers(question,weekly)
 
   if(weeklyMatches.length){
-    const chosen=[...weeklyMatches].sort((a,b)=>num(b.weekly_research_score,0)-num(a.weekly_research_score,0))
+    const wantsSafer=/\bsafer\b/.test(qtext(question))
+    const availabilityRisk=row=>{
+      const status=String(row.availability_status||'').toUpperCase()
+      if(status==='OUT'||status==='IR'||status==='PUP') return 5
+      if(status==='DOUBTFUL') return 4
+      if(status==='QUESTIONABLE') return 3
+      return 0
+    }
+    const tierRank=row=>{
+      const tier=String(row.weekly_tier||'').toUpperCase()
+      if(tier.includes('CORE')) return 4
+      if(tier.includes('START_LEAN')) return 3
+      if(tier.includes('FLEX')) return 2
+      return 1
+    }
+    const chosen=[...weeklyMatches].sort((a,b)=> wantsSafer
+      ? availabilityRisk(a)-availabilityRisk(b) || tierRank(b)-tierRank(a) || num(b.weekly_research_score,0)-num(a.weekly_research_score,0)
+      : num(b.weekly_research_score,0)-num(a.weekly_research_score,0))
     const top=chosen[0]
     const take=chosen.length>1
-      ? 'Start ' + top.player + ' over ' + chosen[1].player + '.'
-      : 'Start ' + top.player + '.'
+      ? wantsSafer
+        ? 'Safer option: ' + top.player + ' over ' + chosen[1].player + '.'
+        : 'Start ' + top.player + ' over ' + chosen[1].player + '.'
+      : wantsSafer ? 'Safer option: ' + top.player + '.' : 'Start ' + top.player + '.'
     return response({
       intent:'start_sit',
       take,
       confidence:nice(top.weekly_tier||'RESEARCH'),
       status:'RESEARCH_ONLY',
       why:[
+        wantsSafer ? 'Safer ordering prioritizes lower availability risk, then existing weekly tier and research score.' : null,
         top.research_reasons||null,
         'Role: ' + nice(top.role_signal||'UNKNOWN'),
         top.defensive_pressure_context ? 'Matchup pressure: ' + nice(top.defensive_pressure_context) : null,

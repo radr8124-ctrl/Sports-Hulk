@@ -120,3 +120,51 @@ test('session memory resolves Why by re-running the prior governed question', as
   expect(follow.status).toBe('CURRENT');
   expect(follow.why?.length).toBeGreaterThan(0);
 });
+
+
+test('session memory safer option can switch from higher weekly score to lower availability risk', async ({ request }) => {
+  const firstQuestion = 'Start Kyle Monangai or Rhamondre Stevenson?'
+  const firstResponse = await request.post(`${BASE}/api/ask`, {
+    data: {
+      question: firstQuestion,
+      context: { page: 'Ask' },
+    },
+  });
+  expect(firstResponse.ok()).toBeTruthy();
+  const first = await firstResponse.json();
+
+  expect(first.intent).toBe('start_sit');
+  expect(first.take).toContain('Kyle Monangai');
+  expect(first.risk || []).toContain('Player status: QUESTIONABLE');
+
+  const followResponse = await request.post(`${BASE}/api/ask`, {
+    data: {
+      question: 'Give me the safer option',
+      context: {
+        page: 'Ask',
+        session_history: [
+          { role: 'user', text: firstQuestion },
+          {
+            role: 'assistant',
+            answer: {
+              intent: first.intent,
+              status: first.status,
+              confidence: first.confidence,
+              take: first.take,
+              cards: first.cards,
+            },
+          },
+        ],
+      },
+    },
+  });
+  expect(followResponse.ok()).toBeTruthy();
+  const follow = await followResponse.json();
+
+  expect(follow.session_reference_resolved).toBe(true);
+  expect(follow.resolved_question).toContain('safer option');
+  expect(follow.intent).toBe('start_sit');
+  expect(follow.take).toContain('Rhamondre Stevenson');
+  expect(follow.take).toContain('Kyle Monangai');
+  expect(follow.why || []).toContain('Safer ordering prioritizes lower availability risk, then existing weekly tier and research score.');
+});
