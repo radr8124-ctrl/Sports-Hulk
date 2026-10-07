@@ -13,6 +13,7 @@ import { faabBudgetLines } from './faab_presentation.js'
 import { buildLinkedSurvivorSummaries, selectLinkedSurvivorEntry } from './survivor_linked_entries.js'
 import { diversifySurvivorEntries } from './survivor_diversification.js'
 import { addSurvivorLink, survivorEntryOwnedByOther, survivorLinkNames } from './survivor_link_registry.js'
+import { survivorSaveForLater } from './survivor_future_value.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -1001,6 +1002,65 @@ function survivorAnswer(data) {
     sources:updatedSources(data,['survivorV2']),
     updated_at:source.generated_at,
     followups:['Why this Survivor pick?','What team should I save for later?','Show the next five eligible options'],
+  })
+}
+
+
+function survivorFutureValueAnswer(data) {
+  const source=data.survivorV2||{}
+  const result=survivorSaveForLater(source.candidates||[],source.used_teams||[])
+  const entry=source.active_entry||null
+
+  if(!result.top){
+    return response({
+      intent:'survivor_future_value',
+      take:'No unused Survivor team has a clear positive future-value preservation signal right now.',
+      confidence:'RESEARCH ONLY',
+      status:'NO_CLEAR_SAVE_VALUE',
+      why:[
+        `${result.options.length} eligible future-value option${result.options.length===1?'':'s'} checked.`,
+        entry?`Eligibility reflects ${entry}'s saved used-team history.`:null,
+      ].filter(Boolean),
+      risk:['Future value is a schedule-preservation signal, not a guarantee of later-week availability or win probability.'],
+      cards:result.options.map(row=>({
+        type:'survivor_future_value',
+        title:row.team,
+        opponent:row.opponent,
+        future_value_index:row.future_value_index,
+        future_value_label:row.future_value_label,
+        strategy_index:row.strategy_index,
+        market_prob:row.market_prob_pct,
+      })),
+      sources:updatedSources(data,['survivorV2']),
+      updated_at:source.generated_at,
+    })
+  }
+
+  const top=result.top
+  return response({
+    intent:'survivor_future_value',
+    take:`${top.team} is the strongest current team to preserve for later based on future-value research.`,
+    confidence:'FUTURE VALUE RESEARCH',
+    status:'RESEARCH_ONLY',
+    why:[
+      `Future-value index ${top.future_value_index??'—'} · ${nice(top.future_value_label||'UNKNOWN')}.`,
+      `Current-week strategy index ${top.strategy_index??'—'} · market survival ${top.market_prob_pct??'—'}%.`,
+      entry?`This excludes teams already used by ${entry}.`:null,
+      'A high future-value team can be worth saving even when another team is the better current-week recommendation.',
+    ].filter(Boolean),
+    risk:['Future schedule value can change with injuries, market movement and later matchup conditions.'],
+    cards:result.options.map(row=>({
+      type:'survivor_future_value',
+      title:row.team,
+      opponent:row.opponent,
+      future_value_index:row.future_value_index,
+      future_value_label:row.future_value_label,
+      strategy_index:row.strategy_index,
+      market_prob:row.market_prob_pct,
+    })),
+    sources:updatedSources(data,['survivorV2']),
+    updated_at:source.generated_at,
+    followups:['Why save this team?','Show the next five future-value teams','What is my best Survivor pick this week?'],
   })
 }
 
@@ -2160,6 +2220,7 @@ function routeAsk(question, data, context = {}) {
   if(/\b(team style|team stats|offensive style|play mix|pass heavy|run heavy|rush heavy|tempo|pace|three[- ]point rate|shot environment|how .* play)\b/.test(q)) return teamStatsAnswer(question,data)
   if(/\b(player history|historical evidence|historical context|historically supported|career stats|career numbers|career statistics|season stats|stat line|past performance)\b/.test(q)) return playerHistoryAnswer(question,data)
   if(/\b(parlay|two leg|2 leg)\b/.test(q)) return parlayAnswer(data)
+  if(/\b(save for later|save .* for later|future value|future-value|preserve for later|team should i save)\b/.test(q)) return survivorFutureValueAnswer(data)
   if(/\b(survivor|survivor pick|pool pick|survivor research|research leader)\b/.test(q)) return survivorAnswer(data)
   if(/\b(waiver|waivers|faab|free agent)\b/.test(q)) return waiversAnswer(data)
   if(/\b(stash|ir stash|returning from ir|return window)\b/.test(q)) return stashAnswer(data)
@@ -2177,6 +2238,7 @@ function routeAsk(question, data, context = {}) {
   if(page==='Props') return propsAnswer(question+' props',data)
   if(page==='PrizePicks') return propsAnswer(question+' prizepicks',data)
   if(page==='Parlays') return parlayAnswer(data)
+  if(page==='Survivor' && /\b(save|future value|preserve)\b/.test(q)) return survivorFutureValueAnswer(data)
   if(page==='Survivor') return survivorAnswer(data)
   if(page==='Scores'){
     const feeds=[
@@ -3055,7 +3117,8 @@ function attachPersonalFantasyFreshness(answer, snapshot) {
 
 async function personalizedSurvivorAsk(req, question, data) {
   const q=qtext(question)
-  if(!/\b(survivor|survivor pick|pool pick|knockout|used teams?|teams? used)\b/.test(q)) return null
+  const wantsFutureValue=/\b(save for later|save .* for later|future value|future-value|preserve for later|team should i save)\b/.test(q)
+  if(!/\b(survivor|survivor pick|pool pick|knockout|used teams?|teams? used|save for later|future value|future-value|preserve for later|team should i save)\b/.test(q)) return null
   if(!bearerToken(req)) return null
 
   const user=await authenticatedUser(req)
@@ -3072,6 +3135,39 @@ async function personalizedSurvivorAsk(req, question, data) {
     const linkedEntries=entryNames
       .map(name=>({entry_name:name,entry:(survivorState?.entries||{})[name]||null}))
       .filter(item=>item.entry)
+
+    if(wantsFutureValue){
+      const rows=linkedEntries.map(item=>{
+        const result=survivorSaveForLater(data.survivorV2?.candidates||[],item.entry?.used_teams||[])
+        return {entry_name:item.entry_name,result}
+      })
+      const actionable=rows.filter(row=>row.result?.top)
+      return response({
+        intent:'personal_survivor_future_value_multi',
+        take:actionable.length
+          ? `Future-value preservation by entry: ${actionable.map(row=>`${row.entry_name} → save ${row.result.top.team}`).join(' · ')}.`
+          : 'No linked Survivor entry has a clear positive future-value preservation signal right now.',
+        confidence:'FUTURE VALUE RESEARCH',
+        status:actionable.length?'RESEARCH_ONLY':'NO_CLEAR_SAVE_VALUE',
+        why:[
+          'Each entry is evaluated against its own burned-team history.',
+          ...actionable.slice(0,6).map(row=>`${row.entry_name}: ${row.result.top.team} · future-value index ${row.result.top.future_value_index??'—'} · ${nice(row.result.top.future_value_label||'UNKNOWN')}.`),
+          'Future-value preservation does not change the current-week Survivor ranking.',
+        ],
+        risk:['Future schedule value can change with injuries, market movement and later matchup conditions.'],
+        cards:rows.slice(0,10).map(row=>({
+          type:'survivor_future_value_multi',
+          title:row.entry_name,
+          selection:row.result?.top?.team||null,
+          future_value_index:row.result?.top?.future_value_index??null,
+          future_value_label:row.result?.top?.future_value_label||null,
+          status:row.result?.status||'NO_CLEAR_SAVE_VALUE',
+        })),
+        sources:updatedSources(data,['survivorV2']),
+        updated_at:data.survivorV2?.generated_at,
+      })
+    }
+
     const allocations=diversifySurvivorEntries(linkedEntries,data.survivorV2?.candidates||[],poolWeek)
     if(allocations.length){
       const actionable=allocations.filter(row=>row.team)
@@ -3115,10 +3211,12 @@ async function personalizedSurvivorAsk(req, question, data) {
   const personalizedSource=buildPersonalizedSurvivorSource(entryName,entry,survivorState,data.survivorV2||{})
   const usedTeams=personalizedSource.used_teams||[]
 
-  const answer=survivorAnswer({...data,survivorV2:personalizedSource})
+  const answer=wantsFutureValue
+    ? survivorFutureValueAnswer({...data,survivorV2:personalizedSource})
+    : survivorAnswer({...data,survivorV2:personalizedSource})
   return {
     ...answer,
-    intent:'personal_survivor',
+    intent:wantsFutureValue?'personal_survivor_future_value':'personal_survivor',
     confidence:answer.confidence,
     status:answer.status,
     why:[
