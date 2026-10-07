@@ -9,6 +9,7 @@ import { AccountButton, useAuth } from './AuthShell'
 import { bettingNavItems, navItems, nflSections, scoreLeagues, statusCards } from './dashboardConfig'
 import { PUBLIC_BRAND, PUBLIC_BRAND_WORD_1, PUBLIC_BRAND_WORD_2, PUBLIC_TAGLINE } from './brandConfig'
 import BetMeaning, { betDisplayLabel } from './BetMeaning'
+import ScoreGameCenter from './ScoreGameCenter'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
 const AssistantDrawer = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AssistantDrawer })))
@@ -1785,90 +1786,9 @@ function ParlaysV2Panel() {
   )
 }
 
-function CrossSportBoxscore({ league, eventId }) {
-  const [data, setData] = useState(null)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    setError('')
-    fetch(`/api/boxscore?league=${encodeURIComponent(league)}&event=${encodeURIComponent(eventId)}`, { cache: 'no-store' })
-      .then(async response => {
-        const payload = await response.json()
-        if (!response.ok) throw new Error(payload.error || 'Box score unavailable')
-        return payload
-      })
-      .then(payload => { if (!cancelled) setData(payload) })
-      .catch(err => { if (!cancelled) setError(err.message || 'Box score unavailable') })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
-  }, [league, eventId])
-
-  if (loading) return <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm font-bold text-slate-500">Loading box score…</div>
-  if (error) return <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">{error}</div>
-  if (!data) return null
-
-  const teams = data.teams || []
-  const statLabels = Array.from(new Set(teams.flatMap(team => (team.stats || []).map(stat => stat.label)))).slice(0, 8)
-  const byTeam = team => Object.fromEntries((team.stats || []).map(stat => [stat.label, stat.value]))
-
-  return (
-    <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
-      {!!statLabels.length && (
-        <div className="overflow-x-auto rounded-2xl border border-slate-100">
-          <table className="w-full min-w-[480px] text-xs">
-            <thead className="bg-slate-50 text-slate-400">
-              <tr>
-                <th className="px-3 py-2 text-left font-black">Team</th>
-                {statLabels.map(label => <th key={label} className="px-3 py-2 text-right font-black">{label}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {teams.map(team => {
-                const stats = byTeam(team)
-                return (
-                  <tr key={team.abbreviation || team.team} className="border-t border-slate-100">
-                    <td className="px-3 py-2 font-black text-slate-800">{team.abbreviation || team.team}</td>
-                    {statLabels.map(label => <td key={label} className="px-3 py-2 text-right font-semibold text-slate-600">{stats[label] ?? '—'}</td>)}
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {!!data.leaders?.length && (
-        <div>
-          <div className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Game leaders</div>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            {data.leaders.slice(0, 8).map((leader, index) => (
-              <div key={`${leader.team}-${leader.category}-${index}`} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2">
-                <div className="min-w-0">
-                  <div className="truncate text-xs font-black text-slate-800">{leader.player || '—'}</div>
-                  <div className="text-[10px] font-semibold text-slate-400">{leader.team} · {leader.category}</div>
-                </div>
-                <div className="shrink-0 text-xs font-black text-blue-700">{leader.value}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {(data.venue || data.attendance) && (
-        <div className="text-[11px] font-semibold text-slate-400">
-          {data.venue || 'Venue unavailable'}{data.attendance ? ` · Attendance ${Number(data.attendance).toLocaleString()}` : ''}
-        </div>
-      )}
-    </div>
-  )
-}
-
 function CrossSportScorePanel({ league }) {
   const data = useJsonEndpoint(`/${league.toLowerCase()}_scores.json`, { games: [], counts: {}, status: 'LOADING' })
-  const [openId, setOpenId] = useState(null)
+  const [selectedGameId, setSelectedGameId] = useState(null)
   const [showAll, setShowAll] = useState(false)
   const games = [...(data.games || [])]
     .sort((a, b) => {
@@ -1876,6 +1796,11 @@ function CrossSportScorePanel({ league }) {
       return rank(a) - rank(b) || String(a.start_time || '').localeCompare(String(b.start_time || ''))
     })
   const visible = showAll ? games : games.slice(0, 24)
+  const selectedGame = games.find(game => String(game.event_id) === String(selectedGameId)) || null
+
+  useEffect(() => {
+    setSelectedGameId(null)
+  }, [league])
 
   const formatStart = value => {
     if (!value) return 'Time TBD'
@@ -1940,18 +1865,37 @@ function CrossSportScorePanel({ league }) {
                 <div className="text-[11px] font-semibold text-slate-400">
                   {game.broadcasts?.length ? game.broadcasts.join(' · ') : formatStart(game.start_time)}
                 </div>
-                {game.boxscore_available && (
-                  <button onClick={() => setOpenId(openId === game.event_id ? null : game.event_id)} className="text-xs font-black text-blue-700">
-                    {openId === game.event_id ? 'Hide box score' : 'View box score'} →
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextId = selectedGameId === game.event_id ? null : game.event_id
+                    setSelectedGameId(nextId)
+                    if (nextId) {
+                      window.requestAnimationFrame(() => {
+                        document.getElementById('score-game-center')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      })
+                    }
+                  }}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-black text-white"
+                >
+                  {selectedGameId === game.event_id ? 'Close Game Center' : 'Open Game Center'}
+                  <ChevronRight size={15} className={selectedGameId === game.event_id ? 'rotate-90' : ''} />
+                </button>
               </div>
-
-              {openId === game.event_id && <CrossSportBoxscore league={league} eventId={game.event_id} />}
             </div>
           )
         })}
       </div>
+
+      {selectedGame && (
+        <div className="mt-5">
+          <ScoreGameCenter
+            game={selectedGame}
+            league={league}
+            onClose={() => setSelectedGameId(null)}
+          />
+        </div>
+      )}
 
       {games.length > 24 && (
         <div className="mt-5 text-center">
