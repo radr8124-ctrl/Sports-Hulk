@@ -992,16 +992,21 @@ function reportingRetrieval(question, data) {
   const stop=new Set([
     'what','which','about','saying','reporters','reporter','writer','writers',
     'beat','news','latest','today','right','now','update','updates','tell','show',
-    'player','team','injury','status'
+    'player','team','injury','status','are','is','was','were','the','and','for','with','from','this','that','has','have','had','into','onto','can','could','would','should'
   ])
   const words=q.split(/\s+/)
     .map(w=>w.replace(/[^a-z0-9'-]/g,''))
     .filter(w=>w.length>=3&&!stop.has(w))
 
+  const queryTokens=String(q||'').match(/[a-z0-9'-]+/g)||[]
   const exactIds=new Set()
   for(const [entity, ids] of Object.entries(entityIndex)){
-    const key=String(entity||'').toLowerCase().trim()
-    if(key.length>=3 && q.includes(key)){
+    const entityTokens=String(entity||'').toLowerCase().match(/[a-z0-9'-]+/g)||[]
+    if(!entityTokens.length) continue
+    const exactEntityMatch=entityTokens.length===1
+      ? queryTokens.includes(entityTokens[0])
+      : queryTokens.some((_,index)=>entityTokens.every((token,offset)=>queryTokens[index+offset]===token))
+    if(exactEntityMatch){
       for(const id of ids||[]) exactIds.add(String(id))
     }
   }
@@ -1041,7 +1046,7 @@ function reportingRetrieval(question, data) {
     return {event,score,when,matchedWords}
   }
 
-  const scoredEvents=events.map(eventScore).filter(x=>x.score>0)
+  const scoredEvents=events.map(eventScore).filter(x=>x.score>0 && ((x.matchedWords||0)>0 || exactIds.has(String(x.event.event_node_id))))
   const maxEventCoverage=Math.max(0,...scoredEvents.map(x=>x.matchedWords||0))
   const rankedEvents=scoredEvents
     .filter(x=>words.length<2 || maxEventCoverage<2 || x.matchedWords===maxEventCoverage)
@@ -1081,7 +1086,7 @@ function reportingRetrieval(question, data) {
     return {fact,score,when,matchedWords}
   }
 
-  const scoredFacts=facts.map(factScore).filter(x=>x.score>0)
+  const scoredFacts=facts.map(factScore).filter(x=>x.score>0 && (x.matchedWords||0)>0)
   const maxFactCoverage=Math.max(0,...scoredFacts.map(x=>x.matchedWords||0))
   const rankedFacts=scoredFacts
     .filter(x=>words.length<2 || (maxFactCoverage>=2 && x.matchedWords===maxFactCoverage))
@@ -1263,8 +1268,8 @@ function reportingAnswer(question, data) {
 function newsAnswerV2(question, data) {
   const articles=data.fantasyNews?.articles||[]
   const q=qtext(question)
-  const stop=new Set(['what','which','player','players','news','matters','most','right','now','latest','today','about'])
-  const words=q.split(/\s+/).map(w=>w.replace(/[^a-z0-9'-]/g,'')).filter(w=>w.length>=4&&!stop.has(w))
+  const stop=new Set(['what','which','player','players','news','matters','most','right','now','latest','today','about','injury','injured','status','update','updates','report','reports','reporting','are','is','was','were','the','and','for','with','from','this','that','has','have','had'])
+  const words=q.split(/\s+/).map(w=>w.replace(/[^a-z0-9'-]/g,'')).filter(w=>w.length>=3&&!stop.has(w))
   const wantsPromo=/\b(promo|bonus|sportsbook|betting app|offer)\b/.test(q)
   const impactTags=['INJURY','START/SIT WATCH','WAIVER WATCH','DEPTH CHART','TRADE']
 
@@ -1272,11 +1277,14 @@ function newsAnswerV2(question, data) {
     const title=String(article.title||'').toLowerCase()
     const tags=(article.impact_tags||[]).map(t=>String(t).toUpperCase())
     const hay=title+' '+tags.join(' ').toLowerCase()
+    const titleTokens=new Set(title.match(/[a-z0-9'-]+/g)||[])
     let score=0
+    let matchedWords=0
 
     for(const word of words){
-      if(title.includes(word)) score+=5
-      else if(hay.includes(word)) score+=2
+      const matched=titleTokens.has(word)
+      if(matched) matchedWords+=1
+      if(matched) score+=5
     }
 
     if(tags.some(tag=>impactTags.includes(tag))) score+=6
@@ -1292,13 +1300,13 @@ function newsAnswerV2(question, data) {
     if(q.includes('depth')&&tags.includes('DEPTH CHART')) score+=8
 
     const published=Date.parse(article.published_at||'')||0
-    return {article,score,published}
+    return {article,score,published,matchedWords}
   })
 
-  scored.sort((a,b)=>b.score-a.score||b.published-a.published)
-  let rows=scored.filter(x=>x.score>0).slice(0,8).map(x=>x.article)
+  scored.sort((a,b)=>(b.matchedWords||0)-(a.matchedWords||0)||b.score-a.score||b.published-a.published)
+  let rows=scored.filter(x=>x.score>0 && (words.length===0 || (x.matchedWords||0)>0)).slice(0,8).map(x=>x.article)
 
-  if(!rows.length){
+  if(!rows.length && words.length===0){
     rows=scored
       .filter(x=>!(/\b(promo|bonus|claim|sportsbook|betting app|deposit|free bet)\b/.test(String(x.article.title||'').toLowerCase())))
       .slice(0,8)
@@ -1306,6 +1314,15 @@ function newsAnswerV2(question, data) {
   }
 
   const top=rows[0]
+  if(!top && words.length) return response({
+    intent:'news',
+    take:"I don't have enough verified information yet to answer that confidently.",
+    confidence:'INSUFFICIENT EVIDENCE',
+    status:'INSUFFICIENT_EVIDENCE',
+    why:['No retrieved article matched the named subject strongly enough.'],
+    risk:['Sports Zenith will not substitute unrelated reporting just to produce an answer.'],
+    sources:[],
+  })
   if(!top) return response({intent:'news',take:'No current article feed is available.',confidence:'WAITING',status:'WAITING'})
 
   return response({
