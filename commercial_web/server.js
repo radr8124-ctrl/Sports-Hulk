@@ -1006,16 +1006,26 @@ function reportingRetrieval(question, data) {
     }
   }
 
+  const tokenSet=value=>new Set(String(value||'').toLowerCase().match(/[a-z0-9'-]+/g)||[])
+  const hasWord=(tokens,word)=>tokens.has(word)
+
   const eventScore=event=>{
     const title=String(event.title||'').toLowerCase()
     const detail=String(event.detail||'').toLowerCase()
+    const titleTokens=tokenSet(title)
+    const detailTokens=tokenSet(detail)
     const type=String(event.event_type||'').toUpperCase()
     let score=exactIds.has(String(event.event_node_id))?40:0
+    let matchedWords=0
 
     for(const word of words){
-      if(title.includes(word)) score+=7
-      if(detail.includes(word)) score+=3
+      const titleMatch=hasWord(titleTokens,word)
+      const detailMatch=hasWord(detailTokens,word)
+      if(titleMatch||detailMatch) matchedWords+=1
+      if(titleMatch) score+=7
+      if(detailMatch) score+=3
     }
+    score+=matchedWords*10
 
     if(/\b(injur|practice|inactive|active|return|ir\b|questionable|doubtful|out\b)/.test(q) && type==='INJURY') score+=12
     if(/\b(role|starter|depth|snap|usage)/.test(q) && ['LINEUP_ROLE','DEPTH_CHART'].includes(type)) score+=10
@@ -1028,27 +1038,38 @@ function reportingRetrieval(question, data) {
     if(promo && !/\b(promo|bonus|sportsbook offer)/.test(q)) score-=30
 
     const when=Date.parse(event.published_or_effective_at||'')||0
-    return {event,score,when}
+    return {event,score,when,matchedWords}
   }
 
-  const rankedEvents=events.map(eventScore)
-    .filter(x=>x.score>0)
-    .sort((a,b)=>b.score-a.score||b.when-a.when)
+  const scoredEvents=events.map(eventScore).filter(x=>x.score>0)
+  const maxEventCoverage=Math.max(0,...scoredEvents.map(x=>x.matchedWords||0))
+  const rankedEvents=scoredEvents
+    .filter(x=>words.length<2 || maxEventCoverage<2 || x.matchedWords===maxEventCoverage)
+    .sort((a,b)=>(b.matchedWords||0)-(a.matchedWords||0)||b.score-a.score||b.when-a.when)
 
   const factScore=fact=>{
     const subject=String(fact.subject||'').toLowerCase()
     const team=String(fact.team||'').toLowerCase()
     const text=String(fact.fact_text||'').toLowerCase()
+    const subjectTokens=tokenSet(subject)
+    const teamTokens=tokenSet(team)
+    const textTokens=tokenSet(text)
     let score=0
+    let matchedWords=0
 
     if(subject.length>=3 && q.includes(subject)) score+=35
     if(team.length>=3 && q.includes(team)) score+=25
 
     for(const word of words){
-      if(subject.includes(word)) score+=7
-      if(team.includes(word)) score+=5
-      if(text.includes(word)) score+=3
+      const subjectMatch=hasWord(subjectTokens,word)
+      const teamMatch=hasWord(teamTokens,word)
+      const textMatch=hasWord(textTokens,word)
+      if(subjectMatch||teamMatch||textMatch) matchedWords+=1
+      if(subjectMatch) score+=7
+      if(teamMatch) score+=5
+      if(textMatch) score+=3
     }
+    score+=matchedWords*10
 
     const type=String(fact.fact_type||'').toUpperCase()
     if(/\b(injur|practice|inactive|active|return|ir\b|questionable|doubtful|out\b)/.test(q) && type==='INJURY') score+=12
@@ -1057,12 +1078,14 @@ function reportingRetrieval(question, data) {
     if(tier.includes('OFFICIAL')) score+=6
 
     const when=Date.parse(fact.effective_at||'')||0
-    return {fact,score,when}
+    return {fact,score,when,matchedWords}
   }
 
-  const rankedFacts=facts.map(factScore)
-    .filter(x=>x.score>0)
-    .sort((a,b)=>b.score-a.score||b.when-a.when)
+  const scoredFacts=facts.map(factScore).filter(x=>x.score>0)
+  const maxFactCoverage=Math.max(0,...scoredFacts.map(x=>x.matchedWords||0))
+  const rankedFacts=scoredFacts
+    .filter(x=>words.length<2 || (maxFactCoverage>=2 && x.matchedWords===maxFactCoverage))
+    .sort((a,b)=>(b.matchedWords||0)-(a.matchedWords||0)||b.score-a.score||b.when-a.when)
 
   return {
     events: rankedEvents.slice(0,8).map(x=>x.event),
