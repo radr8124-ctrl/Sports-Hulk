@@ -2411,7 +2411,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
   ]
 
   return (
-    <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="mt-4 min-w-0 max-w-full rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -2692,9 +2692,9 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
   const recognized = Array.isArray(result?.recognized_without_decision) ? result.recognized_without_decision : []
 
   return (
-    <section className="grid gap-5 xl:grid-cols-[0.92fr_1.08fr]">
-      <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft md:p-6">
-        <div className="flex items-start justify-between gap-4">
+    <section className="grid min-w-0 max-w-full gap-5 xl:grid-cols-[0.92fr_1.08fr]">
+      <div className="min-w-0 max-w-full overflow-x-hidden rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft md:p-6">
+        <div className="flex min-w-0 items-start justify-between gap-4">
           <div>
             <p className="eyebrow">My Teams · Quick setup</p>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Rate my team</h2>
@@ -2733,7 +2733,7 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
                 <Activity size={14} className="animate-pulse" /> Loading saved teams…
               </div>
             ) : savedTeams.length ? (
-              <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+              <div className="mt-2 flex w-full min-w-0 max-w-full gap-2 overflow-x-auto pb-1">
                 {savedTeams.map((team) => {
                   const selected = selectedLeagueId === team.league_id
                   return (
@@ -2817,7 +2817,7 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
         </div>
       </div>
 
-      <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft md:p-6">
+      <div className="min-w-0 max-w-full overflow-x-hidden rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft md:p-6">
         {!result ? (
           savedSummary ? (
             <div className="flex min-h-[420px] items-center justify-center">
@@ -3057,7 +3057,7 @@ function FantasyCommercialPanel() {
           </div>
           <div className="flex gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
             {['Season-Long','DFS Lineup Lab'].map((item) => (
-              <button key={item} onClick={() => setMode(item)} className={`rounded-xl px-4 py-2.5 text-sm font-black ${mode === item ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{item}</button>
+              <button key={item} onClick={() => setMode(item)} className={`min-h-11 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black ${mode === item ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{item}</button>
             ))}
           </div>
         </div>
@@ -3068,7 +3068,7 @@ function FantasyCommercialPanel() {
           <section className="rounded-2xl border border-slate-200 bg-white p-2 shadow-soft">
             <div className="flex gap-2 overflow-x-auto">
               {laneTabs.map(([key,label]) => (
-                <button key={key} onClick={() => switchLane(key)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black ${lane === key ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{label}</button>
+                <button key={key} onClick={() => switchLane(key)} className={`min-h-11 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black ${lane === key ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{label}</button>
               ))}
             </div>
           </section>
@@ -3141,12 +3141,12 @@ function FantasyCommercialPanel() {
             </div>
           </section>
 
-          <section>
+          <section className="min-w-0">
             <div className="section-heading">
               <div><p className="eyebrow">Forward proof</p><h2>Five fantasy lanes are being tested</h2></div>
               <span className="health-pill">NO AUTO-PROMOTION</span>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 xl:grid xl:grid-cols-5 xl:overflow-visible">
+            <div className="flex w-full min-w-0 max-w-full gap-3 overflow-x-auto pb-2 xl:grid xl:grid-cols-5 xl:overflow-visible">
               {forwardLanes.map(([label, block]) => (
                 <div key={label} className="min-w-[220px] rounded-2xl border border-slate-200 bg-white p-4 shadow-soft xl:min-w-0">
                   <div className="text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</div>
@@ -3166,7 +3166,7 @@ function FantasyCommercialPanel() {
             {!!sports.length && (
               <div className="mt-4 flex gap-2 overflow-x-auto">
                 {sports.map((item) => (
-                  <button key={item} onClick={() => setSport(item)} className={`rounded-full px-3 py-2 text-xs font-black ${effectiveSport === item ? 'bg-blue-700 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>{item}</button>
+                  <button key={item} onClick={() => setSport(item)} className={`min-h-11 rounded-full px-3 py-2 text-xs font-black ${effectiveSport === item ? 'bg-blue-700 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>{item}</button>
                 ))}
               </div>
             )}
@@ -3221,7 +3221,7 @@ function MobileBottomNav({ active, onNavigate }) {
   ]
 
   return (
-    <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden">
+    <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
       <div className="grid grid-cols-5 gap-1">
         {items.map(([label, route, Icon]) => {
           const selected = route === 'Best Bets' ? bettingNavItems.includes(active) : active === route
@@ -3326,13 +3326,13 @@ export default function App() {
   const navSelected = (item) => item === 'Betting' ? isBetting : active === item
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20 text-slate-900 md:pb-0">
+    <div className="min-h-screen bg-slate-50 pb-20 text-slate-900 lg:pb-0">
       <a href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus() }} className="skip-link">Skip to main content</a>
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-5 md:py-4">
           <button type="button" aria-label="Sports Zenith home" onClick={() => navigate('Home')} className="text-left"><Brand /></button>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-3 lg:flex">
             <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-extrabold text-slate-600">
               <Activity size={15} className="text-emerald-500" />
               {backendLabel}
@@ -3343,15 +3343,15 @@ export default function App() {
             </button>
           </div>
 
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-2 lg:hidden">
             <AccountButton compact />
-            <button onClick={() => navigate('Ask')} aria-label="Ask" className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-white"><Sparkles size={17} /></button>
-            <button aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">More</button>
+            <button onClick={() => navigate('Ask')} aria-label="Ask" className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-white"><Sparkles size={17} /></button>
+            <button aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">More</button>
           </div>
         </div>
       </header>
 
-      <nav aria-label="Primary navigation" className="hidden border-b border-slate-200 bg-white md:block">
+      <nav aria-label="Primary navigation" className="hidden border-b border-slate-200 bg-white lg:block">
         <div className="relative mx-auto flex max-w-[1500px] items-center gap-1 px-5 py-2.5">
           {navItems.map((item) => (
             <button
@@ -3432,7 +3432,7 @@ export default function App() {
       )}
 
       {moreOpen && (
-        <div className="fixed inset-0 z-50 flex items-end bg-slate-950/30 md:hidden" onClick={() => setMoreOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-end bg-slate-950/30 lg:hidden" onClick={() => setMoreOpen(false)}>
           <div role="dialog" aria-modal="true" aria-label="More navigation" onClick={(event) => event.stopPropagation()} className="w-full rounded-t-[30px] bg-slate-50 p-5 pb-[calc(5.5rem+env(safe-area-inset-bottom))] shadow-2xl">
             <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-slate-300" />
             <div className="mb-4 text-lg font-black text-slate-950">More</div>

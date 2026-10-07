@@ -129,7 +129,7 @@ export default function FantasyTeamControl({
           <button
             type="button"
             onClick={onManage}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white"
           >
             <Settings2 size={15} /> Roster & league settings
           </button>

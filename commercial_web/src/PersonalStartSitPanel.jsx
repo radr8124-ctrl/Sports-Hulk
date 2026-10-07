@@ -246,17 +246,17 @@ export default function PersonalStartSitPanel({ onOpenMyTeams, leagueId = null }
         </div>
       )}
 
-      <div className="mt-5 grid gap-4 xl:grid-cols-2">
+      <div className="mt-5 grid min-w-0 max-w-full gap-4 xl:grid-cols-2">
         {groups.map((group) => (
-          <div key={group.position} className="rounded-2xl border border-blue-100 bg-white p-4">
-            <div className="flex items-center justify-between gap-3">
+          <div key={group.position} className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-blue-100 bg-white p-4">
+            <div className="flex min-w-0 items-center justify-between gap-3">
               <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{group.position}</div>
               <div className="text-[10px] font-black text-slate-400">{group.count} roster {group.count === 1 ? 'option' : 'options'}</div>
             </div>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 min-w-0 space-y-2">
               {(group.players || []).map((row) => (
-                <div key={row.player_key || row.player} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3">
-                  <div className="flex items-start justify-between gap-3">
+                <div key={row.player_key || row.player} className="min-w-0 max-w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-50 px-3 py-3">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <div className="truncate text-sm font-black text-slate-950">{row.player}</div>
