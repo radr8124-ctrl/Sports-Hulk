@@ -7,6 +7,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createAdminClient, createClient } from '@insforge/sdk'
 import { buildPersonalizedSurvivorSource } from './survivor_personalization.js'
+import { sanitizeAccountPreferences } from './account_preferences.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -195,6 +196,7 @@ async function fantasyResearchFreshness(lane, rosterUpdatedAt = null) {
 }
 
 const MEMBER_LINKS_PATH = path.join(__dirname, 'private_member_links.json')
+const ACCOUNT_PREFERENCES_PATH = path.join(__dirname, 'private_account_preferences.json')
 
 function readLocalEnv() {
   const values = {}
@@ -268,6 +270,30 @@ async function linkedSurvivorEntry(req, userId) {
 
   const links = await loadExternalJson(MEMBER_LINKS_PATH)
   return links?.survivor_entries?.[userId] || null
+}
+
+async function loadAccountPreferences(userId) {
+  if(!userId) return {saved:false,preferences:sanitizeAccountPreferences({})}
+  const key=sha256(userId)
+  const stored=await loadExternalJson(ACCOUNT_PREFERENCES_PATH)
+  const raw=stored?.users?.[key]
+  return {saved:Boolean(raw),preferences:sanitizeAccountPreferences(raw||{})}
+}
+
+async function saveAccountPreferences(userId, preferences) {
+  if(!userId) throw new Error('Missing user identity')
+  const key=sha256(userId)
+  const clean=sanitizeAccountPreferences(preferences)
+  const current=await loadExternalJson(ACCOUNT_PREFERENCES_PATH)||{version:1,users:{}}
+  const next={
+    version:1,
+    updated_at:new Date().toISOString(),
+    users:{...(current.users||{}),[key]:{...clean,updated_at:new Date().toISOString()}},
+  }
+  const tmp=ACCOUNT_PREFERENCES_PATH+'.tmp'
+  await writeFile(tmp,JSON.stringify(next,null,2)+'\n',{mode:0o600})
+  await rename(tmp,ACCOUNT_PREFERENCES_PATH)
+  return {saved:true,preferences:clean}
 }
 
 function sha256(value) {
@@ -3064,6 +3090,23 @@ const server=http.createServer(async(req,res)=>{
       return json(res,400,{status:'ERROR',error:err instanceof Error?err.message:String(err)})
     }
   }
+  if(req.method==='GET'&&url.pathname==='/api/account/preferences'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to load your sports preferences.'})
+    const state=await loadAccountPreferences(user.id)
+    return json(res,200,{status:'READY',...state})
+  }
+  if(req.method==='PUT'&&url.pathname==='/api/account/preferences'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to save your sports preferences.'})
+    try{
+      const body=await readBody(req)
+      const state=await saveAccountPreferences(user.id,body?.preferences||body||{})
+      return json(res,200,{status:'READY',...state})
+    }catch(err){
+      return json(res,400,{status:'ERROR',message:err instanceof Error?err.message:String(err)})
+    }
+  }
   if(req.method==='GET'&&url.pathname==='/api/account/summary'){
     const user=await authenticatedUser(req)
     if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to load your account.'})
@@ -4491,12 +4534,17 @@ const server=http.createServer(async(req,res)=>{
       const survivorPersonalAnswer=await personalizedSurvivorAsk(req,routedQuestion,data)
       const fantasyPersonalAnswer=survivorPersonalAnswer?null:await personalizedFantasyAsk(req,routedQuestion,context)
       const answer=survivorPersonalAnswer||fantasyPersonalAnswer||routeAsk(routedQuestion,data,context)
+      let preferenceState=null
+      if(bearerToken(req)){
+        const preferenceUser=await authenticatedUser(req)
+        if(preferenceUser?.id) preferenceState=await loadAccountPreferences(preferenceUser.id)
+      }
       const answerGeneratedAt=new Date().toISOString()
       await Promise.all([
         queueFailedAskReview(question,context,answer),
         recordAskEvaluation(question,context,answer,Date.now()-askStartedAt,null,answerGeneratedAt),
       ])
-      return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt,...(sessionResolution.resolved?{session_reference_resolved:true,resolved_question:routedQuestion}:{})})
+      return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt,...(preferenceState?.saved?{personalization:{status:'OPT_IN',...preferenceState.preferences}}:{}),...(sessionResolution.resolved?{session_reference_resolved:true,resolved_question:routedQuestion}:{})})
     }
     catch(err){
       try {
