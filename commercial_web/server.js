@@ -1,6 +1,6 @@
 import http from 'node:http'
 import { createReadStream, readFileSync } from 'node:fs'
-import { readFile, rename, stat, writeFile } from 'node:fs/promises'
+import { appendFile, readFile, rename, stat, writeFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import path from 'node:path'
@@ -23,6 +23,7 @@ const SPORTS_PYTHON = path.join(SPORTS_ROOT, '.venv', 'bin', 'python')
 const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVOR_ENTRIES.json'
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
 const DATASET_FRESHNESS_PATH = path.join(SPORTS_ROOT, 'intelligence_warehouse', 'freshness', 'DATASET_FRESHNESS_CURRENT.csv')
+const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FAILED_QUESTION_QUEUE.jsonl')
 
 const JSON_FILES = {
   nflScores: 'nfl_scores.json',
@@ -317,6 +318,36 @@ function updatedSources(data, labels) {
 
 function response({ intent, take, confidence = 'HIGH', why = [], risk = [], sources = [], cards = [], updated_at = null, followups = [], status = 'CURRENT' }) {
   return { intent, take, confidence, why, risk, sources, cards, updated_at, followups, status }
+}
+
+function shouldQueueAskReview(answer) {
+  const status=String(answer?.status||'').toUpperCase()
+  const confidence=String(answer?.confidence||'').toUpperCase()
+  return ['INSUFFICIENT_EVIDENCE','UNKNOWN','ERROR'].includes(status)
+    || confidence==='INSUFFICIENT EVIDENCE'
+    || confidence==='UNKNOWN'
+}
+
+async function queueFailedAskReview(question, context, answer, error = null) {
+  const cleanQuestion=String(question||'').trim().replace(/\s+/g,' ').slice(0,500)
+  if(!cleanQuestion) return
+  if(!error && !shouldQueueAskReview(answer)) return
+  const record={
+    queued_at:new Date().toISOString(),
+    question:cleanQuestion,
+    question_hash:sha256(cleanQuestion.toLowerCase()),
+    page:String(context?.page||'').slice(0,80)||null,
+    has_game_context:Boolean(context?.game_context?.event_id),
+    intent:answer?.intent||null,
+    status:error?'ERROR':answer?.status||null,
+    confidence:error?'ERROR':answer?.confidence||null,
+    error:error?String(error?.message||error).slice(0,300):null,
+  }
+  try {
+    await appendFile(ASK_FAILED_QUEUE_PATH, JSON.stringify(record)+'\n', { encoding:'utf8', mode:0o600 })
+  } catch {
+    // Review logging must never break the user-facing Ask response.
+  }
 }
 
 function gameAliases(game) {
@@ -3808,16 +3839,22 @@ const server=http.createServer(async(req,res)=>{
     })
   }
   if(req.method==='POST'&&url.pathname==='/api/ask'){
+    let question=''
+    let context={}
     try{
       const body=await readBody(req)
-      const question=String(body.question||body.message||'').trim()
-      const context=body.context&&typeof body.context==='object'?body.context:{}
+      question=String(body.question||body.message||'').trim()
+      context=body.context&&typeof body.context==='object'?body.context:{}
       const data=await loadAll()
       const personalAnswer=await personalizedFantasyAsk(req,question,context)
       const answer=personalAnswer||routeAsk(question,data,context)
+      await queueFailedAskReview(question,context,answer)
       return json(res,200,{question,context,...answer,generated_at:new Date().toISOString()})
     }
-    catch(err){return json(res,400,{status:'ERROR',take:'The sports analyst could not process that request.',error:err instanceof Error?err.message:String(err)})}
+    catch(err){
+      try { await queueFailedAskReview(question,context,null,err) } catch {}
+      return json(res,400,{status:'ERROR',take:'The sports analyst could not process that request.',error:err instanceof Error?err.message:String(err)})
+    }
   }
   if(req.method==='POST'&&url.pathname==='/api/dfs/optimize'){
     try{
