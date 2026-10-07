@@ -1094,7 +1094,54 @@ function reportingRetrieval(question, data) {
   }
 }
 
+function reportingSourceConflict(question, data) {
+  const q=qtext(question)
+  const rows=data.askContext?.datasets?.stash||[]
+  const matches=rows.filter(row=>{
+    const player=String(row?.player||'').toLowerCase().trim()
+    return player.length>=3 && q.includes(player) && Boolean(row?.source_disagreement)
+  })
+  if(!matches.length) return null
+  return matches.sort((a,b)=>num(b.source_count,0)-num(a.source_count,0))[0]
+}
+
 function reportingAnswer(question, data) {
+  const conflict=reportingSourceConflict(question,data)
+  if(conflict){
+    const status=nice(conflict.status||'UNKNOWN')
+    const injury=conflict.injury_type && qtext(conflict.injury_type)!==qtext(conflict.status)
+      ? ` · ${nice(conflict.injury_type)}`
+      : ''
+    return response({
+      intent:'reporting_conflict',
+      take:`Sources disagree on ${conflict.player}'s current availability.`,
+      confidence:'SOURCE CONFLICT / VERIFY',
+      status:'SOURCE_CONFLICT',
+      why:[
+        `Current structured status: ${status}${injury}.`,
+        `${conflict.source_count||2} source records are represented in the current availability state.`,
+        conflict.return_window && String(conflict.return_window).toUpperCase()!=='UNKNOWN'
+          ? `Return window: ${nice(conflict.return_window)}.`
+          : 'No verified return window is available.',
+      ],
+      risk:[
+        'Do not treat the current injury/availability label as settled until the source disagreement clears.',
+        'Sports Zenith will not silently choose one conflicting source as truth.',
+      ],
+      cards:[{
+        type:'source_conflict',
+        title:conflict.player,
+        team:conflict.team,
+        status,
+        injury:nice(conflict.injury_type||''),
+        source_count:conflict.source_count,
+      }],
+      sources:updatedSources(data,['askContext']),
+      updated_at:conflict.generated_at||data.askContext?.generated_at,
+      followups:['What changed most recently?','Show me the latest verified status','How does this affect fantasy?'],
+    })
+  }
+
   const hit=reportingRetrieval(question,data)
   const events=hit.events
   const facts=hit.facts
