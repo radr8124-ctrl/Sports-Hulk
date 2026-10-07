@@ -9,6 +9,7 @@ import { createAdminClient, createClient } from '@insforge/sdk'
 import { buildPersonalizedSurvivorSource } from './survivor_personalization.js'
 import { sanitizeAccountPreferences } from './account_preferences.js'
 import { preferencePresentation, watchlistNewsHits } from './preference_presentation.js'
+import { faabBudgetLines } from './faab_presentation.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -2843,7 +2844,7 @@ async function personalizedWaiverAnswer(req, question, snapshot, leagueId) {
     why:[
       `${top.position||'—'} roster need score ${top.roster_need_score??'—'} · waiver research ${top.waiver_research_score??'—'}.`,
       `Generic FAAB research range ${top.research_faab_low_pct??'—'}–${top.research_faab_high_pct??'—'}%.`,
-      budget.connected?`Saved-budget translation ${budget.research_low_units??'—'}–${budget.research_high_units??'—'} units · ${nice(budget.budget_pressure)}.`:null,
+      ...faabBudgetLines(budget),
     ].filter(Boolean),
     risk:[
       'Sports Zenith has not verified that this player is available in your league.',
