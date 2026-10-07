@@ -4562,13 +4562,21 @@ const server=http.createServer(async(req,res)=>{
     const linkedName=selectLinkedSurvivorEntry(linkedNames,requestedEntry)
     const entry=linkedName ? (state.entries||{})[linkedName]||null : null
     const linkedEntries=buildLinkedSurvivorSummaries(linkedNames,state)
+    const poolWeek=Number(state.pool_current_week||entry?.current_week||0)||null
+    const linkedEntryStates=linkedNames
+      .map(name=>({entry_name:name,entry:(state.entries||{})[name]||null}))
+      .filter(item=>item.entry)
+    const diversifiedAllocations=linkedEntryStates.length>1
+      ? diversifySurvivorEntries(linkedEntryStates,data.survivorV2?.candidates||[],poolWeek)
+      : []
 
     if(!entry) return json(res,200,{
       status:'AUTHENTICATED_NO_ENTRY',
       entry_linked:false,
       linked_entry_count:linkedEntries.length,
       linked_entries:linkedEntries,
-      pool_current_week:Number(state.pool_current_week||0)||null,
+      diversified_allocations:diversifiedAllocations,
+      pool_current_week:poolWeek,
       used_teams:[],
       current_picks:[],
       entry_status:null,
@@ -4578,7 +4586,6 @@ const server=http.createServer(async(req,res)=>{
 
     const governed=await loadExternalJson(SURVIVOR_V2_PRIVATE_PATH)
     const governedEntry=governed?.active_entry===linkedName ? governed : null
-    const poolWeek=Number(state.pool_current_week||entry?.current_week||0)||null
     const weekState=poolWeek ? entry?.[`week_${poolWeek}`]||{} : {}
     const entryRuleConfirmed=governedEntry?.rule_confirmed ?? Boolean(weekState?.official_pool_sheet_confirmed)
     const entryRuleStatus=governedEntry?.rule_status || weekState?.rule_status || (entryRuleConfirmed?'CONFIRMED_FROM_LINKED_ENTRY':'AWAITING_OFFICIAL_POOL_SHEET')
@@ -4589,6 +4596,7 @@ const server=http.createServer(async(req,res)=>{
       entry_linked:true,
       linked_entry_count:linkedEntries.length,
       linked_entries:linkedEntries,
+      diversified_allocations:diversifiedAllocations,
       active_entry:linkedName,
       entry_status:entry?.status||null,
       pool_current_week:poolWeek,

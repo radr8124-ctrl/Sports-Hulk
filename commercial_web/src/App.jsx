@@ -935,6 +935,7 @@ function SurvivorCommercialPanel() {
   const isSignedIn = Boolean(user)
   const hasEntry = saved.status === 'READY' && saved.entry_linked
   const linkedEntries = Array.isArray(saved.linked_entries) ? saved.linked_entries : []
+  const diversifiedAllocations = Array.isArray(saved.diversified_allocations) ? saved.diversified_allocations : []
   const usedTeams = hasEntry ? (saved.used_teams || []) : []
   const currentPicks = hasEntry ? (saved.current_picks || []) : []
   const candidates = [...(survivor.candidates || [])]
@@ -1038,6 +1039,61 @@ function SurvivorCommercialPanel() {
                     <div className="mt-3 text-[10px] font-black uppercase tracking-[0.12em] text-blue-700">Primary detail view</div>
                   )}
                 </button>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {isSignedIn && diversifiedAllocations.length > 1 && (
+        <section className="rounded-[30px] border border-emerald-200 bg-emerald-50/60 p-5 md:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="eyebrow">Multi-entry strategy</p>
+              <h2 className="mt-1">Diversified Survivor plan</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-950">
+                Each entry is evaluated against its own burned teams. Duplicate team exposure is avoided when another eligible governed option exists.
+              </p>
+            </div>
+            <span className="health-pill emerald">MODEL SCORES UNCHANGED</span>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {diversifiedAllocations.map((allocation) => {
+              const actionable = Boolean(allocation.team)
+              return (
+                <div key={allocation.entry_name} className="rounded-3xl border border-emerald-100 bg-white p-4 shadow-soft">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-black text-slate-950">{allocation.entry_name}</div>
+                      <div className="mt-1 text-[11px] font-semibold text-slate-400">{humanize(allocation.entry_status || allocation.status || 'UNKNOWN')}</div>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${actionable ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                      {actionable ? 'DIVERSIFIED' : humanize(allocation.status || 'WAITING')}
+                    </span>
+                  </div>
+
+                  {actionable ? (
+                    <>
+                      <div className="mt-4 text-xl font-black text-slate-950">{allocation.team}</div>
+                      <div className="mt-1 text-xs font-semibold text-slate-400">vs {allocation.opponent || '—'}</div>
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs">
+                        <div className="rounded-xl bg-slate-50 p-3">
+                          <div className="font-black text-slate-950">{allocation.market_prob_pct ?? '—'}%</div>
+                          <div className="mt-1 text-slate-400">Market survival</div>
+                        </div>
+                        <div className="rounded-xl bg-slate-50 p-3">
+                          <div className="font-black text-slate-950">{allocation.strategy_index ?? '—'}</div>
+                          <div className="mt-1 text-slate-400">Strategy index</div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-4 rounded-2xl bg-amber-50 px-3 py-3 text-xs font-semibold leading-5 text-amber-900">
+                      {allocation.reason || 'No current diversified recommendation is available for this entry.'}
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>
