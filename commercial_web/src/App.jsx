@@ -2302,7 +2302,7 @@ function FantasyLaneCard({ lane, row }) {
 
 
 
-function LeagueSettingsPanel({ team, onSaved }) {
+function LeagueSettingsPanel({ team, onSaved, autoOpen = false, onAutoOpened }) {
   const { user, getAccessToken } = useAuth()
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -2352,6 +2352,17 @@ function LeagueSettingsPanel({ team, onSaved }) {
     setError('')
     setSaved(false)
   }, [team?.league_id])
+
+  useEffect(() => {
+    if (!autoOpen || !team?.league_id) return
+    setOpen(true)
+    onAutoOpened?.()
+    window.requestAnimationFrame(() => {
+      const panel = document.getElementById('fantasy-league-settings')
+      panel?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      panel?.focus({ preventScroll: true })
+    })
+  }, [autoOpen, team?.league_id, onAutoOpened])
 
   if (!user || !team?.league_id) return null
 
@@ -2411,11 +2422,13 @@ function LeagueSettingsPanel({ team, onSaved }) {
   ]
 
   return (
-    <div className="mt-4 min-w-0 max-w-full rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div id="fantasy-league-settings" tabIndex="-1" className="mt-4 min-w-0 max-w-full scroll-mt-28 rounded-2xl border border-slate-200 bg-slate-50 p-4 outline-none">
       <button
         type="button"
+        aria-expanded={open}
+        aria-controls="fantasy-league-settings-content"
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center justify-between gap-3 text-left"
+        className="flex min-h-11 w-full items-center justify-between gap-3 text-left"
       >
         <div>
           <div className="text-sm font-black text-slate-950">League settings</div>
@@ -2425,7 +2438,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
       </button>
 
       {open && (
-        <div className="mt-4 border-t border-slate-200 pt-4">
+        <div id="fantasy-league-settings-content" className="mt-4 border-t border-slate-200 pt-4">
           <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">Scoring format</div>
           <div className="mt-2 grid grid-cols-3 gap-2">
             {[
@@ -2437,7 +2450,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
                 key={value}
                 type="button"
                 onClick={() => setScoringPreset(value)}
-                className={`rounded-xl border px-3 py-2.5 text-xs font-black ${scoringPreset === value ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600'}`}
+                className={`min-h-11 rounded-xl border px-3 py-2.5 text-xs font-black ${scoringPreset === value ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-slate-200 bg-white text-slate-600'}`}
               >
                 {label}
               </button>
@@ -2456,7 +2469,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
                   max="30"
                   value={starterSlots[key]}
                   onChange={(event) => setSlot(key, event.target.value)}
-                  className="mt-1 w-full bg-transparent text-center text-sm font-black text-slate-950 outline-none"
+                  className="mt-1 h-11 w-full bg-transparent text-center text-sm font-black text-slate-950 outline-none"
                 />
               </label>
             ))}
@@ -2465,19 +2478,19 @@ function LeagueSettingsPanel({ team, onSaved }) {
           <div className="mt-4 grid gap-3 sm:grid-cols-4">
             <label>
               <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">Bench</span>
-              <input aria-label="Bench slots" type="number" min="0" max="30" value={benchSlots} onChange={(event) => setBenchSlots(Math.max(0, Math.min(30, Number(event.target.value) || 0)))} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
+              <input aria-label="Bench slots" type="number" min="0" max="30" value={benchSlots} onChange={(event) => setBenchSlots(Math.max(0, Math.min(30, Number(event.target.value) || 0)))} className="mt-1 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
             </label>
             <label>
               <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">IR</span>
-              <input aria-label="IR slots" type="number" min="0" max="20" value={irSlots} onChange={(event) => setIrSlots(Math.max(0, Math.min(20, Number(event.target.value) || 0)))} className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
+              <input aria-label="IR slots" type="number" min="0" max="20" value={irSlots} onChange={(event) => setIrSlots(Math.max(0, Math.min(20, Number(event.target.value) || 0)))} className="mt-1 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
             </label>
             <label>
               <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">FAAB total</span>
-              <input aria-label="FAAB total budget" type="number" min="0" max="100000" value={faabBudget} onChange={(event) => setFaabBudget(event.target.value)} placeholder="100" className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
+              <input aria-label="FAAB total budget" type="number" min="0" max="100000" value={faabBudget} onChange={(event) => setFaabBudget(event.target.value)} placeholder="100" className="mt-1 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
             </label>
             <label>
               <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">FAAB left</span>
-              <input aria-label="FAAB remaining" type="number" min="0" max="100000" value={faabRemaining} onChange={(event) => setFaabRemaining(event.target.value)} placeholder="100" className="mt-1 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
+              <input aria-label="FAAB remaining" type="number" min="0" max="100000" value={faabRemaining} onChange={(event) => setFaabRemaining(event.target.value)} placeholder="100" className="mt-1 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-black outline-none" />
             </label>
           </div>
 
@@ -2494,7 +2507,7 @@ function LeagueSettingsPanel({ team, onSaved }) {
   )
 }
 
-function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onTeamUpsert }) {
+function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onTeamUpsert, openLeagueSettings = false, onLeagueSettingsOpened }) {
   const { user, getAccessToken } = useAuth()
   const [leagueName, setLeagueName] = useState('My Team')
   const [teamName, setTeamName] = useState('')
@@ -2762,7 +2775,12 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
           </div>
         )}
 
-        <LeagueSettingsPanel team={selectedTeam} onSaved={updateSavedTeamSettings} />
+        <LeagueSettingsPanel
+          team={selectedTeam}
+          onSaved={updateSavedTeamSettings}
+          autoOpen={openLeagueSettings}
+          onAutoOpened={onLeagueSettingsOpened}
+        />
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <label className="block">
@@ -2940,6 +2958,7 @@ function FantasyCommercialPanel() {
   const [sport, setSport] = useState('NFL')
   const [teamOptions, setTeamOptions] = useState([])
   const [teamOptionsLoading, setTeamOptionsLoading] = useState(false)
+  const [openLeagueSettingsRequest, setOpenLeagueSettingsRequest] = useState(false)
   const [selectedLeagueId, setSelectedLeagueId] = useState(() => {
     try { return window.localStorage.getItem('sports-zenith-active-fantasy-league') || null }
     catch { return null }
@@ -3044,6 +3063,11 @@ function FantasyCommercialPanel() {
     setSport(laneSports.includes('NFL') ? 'NFL' : (laneSports[0] || 'ALL'))
   }
 
+  const openLeagueSettings = () => {
+    if (teamOptions.length > 0) setOpenLeagueSettingsRequest(true)
+    switchLane('my_teams')
+  }
+
   const dkTournament = (dfs.replay_modes || []).find((row) => row.platform === 'DRAFTKINGS' && row.mode === 'TOURNAMENT_UPSIDE')
 
   return (
@@ -3080,7 +3104,7 @@ function FantasyCommercialPanel() {
                 selectedLeagueId={selectedLeagueId}
                 loading={teamOptionsLoading}
                 onSelect={setSelectedLeagueId}
-                onManage={() => switchLane('my_teams')}
+                onManage={openLeagueSettings}
               />
             </Suspense>
           )}
@@ -3090,12 +3114,14 @@ function FantasyCommercialPanel() {
               preferredLeagueId={selectedLeagueId}
               onSelectedLeagueChange={setSelectedLeagueId}
               onTeamUpsert={upsertTeamOption}
+              openLeagueSettings={openLeagueSettingsRequest}
+              onLeagueSettingsOpened={() => setOpenLeagueSettingsRequest(false)}
             />
           ) : (
             <>
           {lane === 'weekly' && (
             <Suspense fallback={<LoadingSurface label="Loading your Start / Sit research" />}>
-              <PersonalStartSitPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} />
+              <PersonalStartSitPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} onOpenLeagueSettings={openLeagueSettings} />
             </Suspense>
           )}
           {lane === 'faab' && (
@@ -3105,7 +3131,7 @@ function FantasyCommercialPanel() {
           )}
           {lane === 'ir_stash' && (
             <Suspense fallback={<LoadingSurface label="Loading your IR stash research" />}>
-              <PersonalIrStashPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} />
+              <PersonalIrStashPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} onOpenLeagueSettings={openLeagueSettings} />
             </Suspense>
           )}
           {lane === 'defense_streaming' && (
@@ -3115,7 +3141,7 @@ function FantasyCommercialPanel() {
           )}
           {lane === 'idp' && (
             <Suspense fallback={<LoadingSurface label="Loading your IDP research" />}>
-              <PersonalIdpPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} />
+              <PersonalIdpPanel leagueId={selectedLeagueId} onOpenMyTeams={() => switchLane('my_teams')} onOpenLeagueSettings={openLeagueSettings} />
             </Suspense>
           )}
           <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5">

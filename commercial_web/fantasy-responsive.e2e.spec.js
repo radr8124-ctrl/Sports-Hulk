@@ -480,6 +480,7 @@ test('Fantasy keyboard navigation and direct league-settings action work on phon
   const settings = page.locator('#fantasy-league-settings');
   await expect(settings).toBeVisible();
   await expect(settings.getByText('Close', { exact: true })).toBeVisible();
+  await expect(settings).toBeFocused();
 
   await expect.poll(async () => {
     const box = await settings.boundingBox();
@@ -487,6 +488,12 @@ test('Fantasy keyboard navigation and direct league-settings action work on phon
   }, { timeout: 3000 }).toBeLessThan(844);
 
   await expectMinButtonHeight(page, ['PPR', 'Half-PPR', 'Standard']);
+  for (const label of ['QB starter slots', 'Bench slots', 'IR slots', 'FAAB total budget', 'FAAB remaining']) {
+    const control = page.getByLabel(label);
+    await expect(control).toBeVisible();
+    const box = await control.boundingBox();
+    expect(box?.height || 0).toBeGreaterThanOrEqual(44);
+  }
   await expectNoPageOverflow(page, 'phone:open league settings');
 
   await page.getByRole('button', { name: 'Start / Sit', exact: true }).click();
@@ -494,5 +501,21 @@ test('Fantasy keyboard navigation and direct league-settings action work on phon
   await page.getByRole('button', { name: 'Open league settings', exact: true }).click();
   await expect(settings).toBeVisible();
   await expect(settings.getByText('Close', { exact: true })).toBeVisible();
+  await expect(settings).toBeFocused();
   await expectNoPageOverflow(page, 'phone:direct settings from Start/Sit');
+
+  await page.getByRole('button', { name: 'IR Stash', exact: true }).click();
+  await expect(page.getByText('My IR / Stash', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Edit league settings', exact: true }).click();
+  await expect(settings).toBeVisible();
+  await expect(settings.getByText('Close', { exact: true })).toBeVisible();
+  await expect(settings).toBeFocused();
+
+  await page.getByRole('button', { name: 'IDP', exact: true }).click();
+  await expect(page.getByText('My IDP', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Open league settings', exact: true }).click();
+  await expect(settings).toBeVisible();
+  await expect(settings.getByText('Close', { exact: true })).toBeVisible();
+  await expect(settings).toBeFocused();
+  await expectNoPageOverflow(page, 'phone:direct settings from IDP');
 });

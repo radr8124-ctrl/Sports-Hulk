@@ -17,7 +17,7 @@ function LoadingPanel({ label = 'Loading' }) {
   )
 }
 
-export default function PersonalIrStashPanel({ onOpenMyTeams, leagueId = null }) {
+export default function PersonalIrStashPanel({ onOpenMyTeams, onOpenLeagueSettings = onOpenMyTeams, leagueId = null }) {
   const { user, getAccessToken } = useAuth()
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
@@ -146,7 +146,7 @@ export default function PersonalIrStashPanel({ onOpenMyTeams, leagueId = null })
           <div className="text-xs font-semibold leading-5 text-amber-950">
             <span className="font-black">No IR slots are saved for this league.</span> IR stash names can still be researched, but Sports Zenith cannot plan IR capacity until the league setting is added.
           </div>
-          <button type="button" onClick={onOpenMyTeams} className="shrink-0 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white">Edit league settings</button>
+          <button type="button" onClick={onOpenLeagueSettings} className="min-h-11 shrink-0 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white">Edit league settings</button>
         </div>
       ) : Number(capacity.likely_overflow_count || 0) > 0 ? (
         <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold leading-5 text-rose-800">

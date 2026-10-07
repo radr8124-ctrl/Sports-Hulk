@@ -85,7 +85,7 @@ function UsageCard({ row, slotLabel = null }) {
   )
 }
 
-export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
+export default function PersonalIdpPanel({ onOpenMyTeams, onOpenLeagueSettings = onOpenMyTeams, leagueId = null }) {
   const { user, getAccessToken } = useAuth()
   const [loading, setLoading] = useState(false)
   const [payload, setPayload] = useState(null)
@@ -232,7 +232,7 @@ export default function PersonalIdpPanel({ onOpenMyTeams, leagueId = null }) {
               <span className="font-black">IDP starter slots are not saved yet.</span> Add DL/LB/DB/IDP FLEX counts to unlock slot-aware IDP starter candidates.
             </div>
           </div>
-          <button type="button" onClick={onOpenMyTeams} className="shrink-0 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white">Open league settings</button>
+          <button type="button" onClick={onOpenLeagueSettings} className="min-h-11 shrink-0 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white">Open league settings</button>
         </div>
       )}
 
