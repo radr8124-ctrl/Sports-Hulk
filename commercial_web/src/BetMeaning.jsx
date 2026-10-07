@@ -1,6 +1,7 @@
 import { BookOpenCheck } from 'lucide-react'
 
 const finiteNumber = value => {
+  if (value === null || value === undefined || String(value).trim() === '') return null
   const number = Number(value)
   return Number.isFinite(number) ? number : null
 }
@@ -144,7 +145,7 @@ function totalMeaning(row) {
 }
 
 function propMeaning(row) {
-  const player = selectionText(row) || String(row.player || '').trim() || 'The player'
+  const player = String(row.player || '').trim() || selectionText(row) || 'The player'
   const line = finiteNumber(row.line)
   const side = sideText(row)
   const metric = displayMetric(row).toLowerCase()

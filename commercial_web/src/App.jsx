@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Activity, AlertTriangle, BarChart3, Brain, CheckCircle2, ChevronRight, CloudSun,
   Gauge, LayoutDashboard, Radio, ShieldCheck, Sparkles, Target,
@@ -17,6 +17,7 @@ const AssistantLauncher = lazy(() => import('./AskSportsHulk').then(module => ({
 const DfsLineupLab = lazy(() => import('./DfsLineupLab'))
 const PerformancePanel = lazy(() => import('./PerformancePanel'))
 const PracticeBetting = lazy(() => import('./PracticeBetting'))
+const ParlaysV2Panel = lazy(() => import('./ParlaysV2Panel'))
 const ScoreGameCenter = lazy(() => import('./ScoreGameCenter'))
 const PersonalIdpPanel = lazy(() => import('./PersonalIdpPanel'))
 const PersonalDefenseStreamingPanel = lazy(() => import('./PersonalDefenseStreamingPanel'))
@@ -1760,10 +1761,21 @@ function HomeSnapshots({ onNavigate }) {
 }
 
 function BettingSubnav({ active, onNavigate }) {
+  const activeButtonRef = useRef(null)
+
+  useEffect(() => {
+    activeButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }, [active])
+
   return (
     <div className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-soft">
       {bettingNavItems.map((item) => (
-        <button key={item} onClick={() => onNavigate(item)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black transition ${active === item ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+        <button
+          key={item}
+          ref={active === item ? activeButtonRef : null}
+          onClick={() => onNavigate(item)}
+          className={`min-h-11 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black transition ${active === item ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
+        >
           {item}
         </button>
       ))}
@@ -1925,53 +1937,6 @@ function PropsV2Panel({ lane = 'PROP' }) {
             </div>
           )
         })}
-      </div>
-    </section>
-  )
-}
-
-function ParlaysV2Panel() {
-  const data = useJsonEndpoint('/parlay_v2_current.json', { summary: {}, picks: [] })
-  const summary = data.summary || {}
-  const rows = (data.picks || [])
-    .filter((row) => row.resolved_legs === row.leg_count)
-    .sort((a, b) => (b.shadow_decision === 'SHADOW_MONITOR') - (a.shadow_decision === 'SHADOW_MONITOR') || (b.joint_v2_probability_pct ?? 0) - (a.joint_v2_probability_pct ?? 0))
-    .slice(0, 10)
-
-  return (
-    <section className="space-y-5">
-      <div className="section-heading">
-        <div><p className="eyebrow">Betting</p><h2>Parlays</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Parlays do not inherit confidence just because their individual legs look interesting. Source-leg proof, correlation and the actual combined payout all have to be known.</p></div>
-        <span className="health-pill">{summary.candidates ?? 0} CURRENT</span>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {[
-          ['Candidates', summary.candidates ?? 0],
-          ['Exact V2 legs', summary.resolved_all_legs ?? 0],
-          ['Source proof', summary.all_source_legs_forward_proven ?? 0],
-          ['Captured price', summary.captured_parlay_price ?? 0],
-          ['Monitors', summary.shadow_monitors ?? 0],
-        ].map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft"><div className="text-2xl font-black text-slate-950">{value}</div><div className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-slate-400">{label}</div></div>
-        ))}
-      </div>
-      <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4 text-sm font-semibold text-violet-900">No parlay can become a PLAY while its source legs are unproven or the combined price is missing. Research joint probability is not being presented as a payout claim.</div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        {rows.map((row, i) => (
-          <div key={`${row.combo_signature}-${i}`} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-            <div className="flex items-center justify-between gap-3"><span className="text-xs font-black uppercase tracking-[0.14em] text-violet-700">{row.sport} · {humanize(row.correlation_status)}</span><span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black text-slate-600">PASS</span></div>
-            <div className="mt-4 space-y-2">
-              {(row.legs || []).map((leg, j) => (
-                <div key={j} className="rounded-2xl bg-slate-50 p-4"><div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Leg {j + 1} · {humanize(leg.source_lane)}</div><div className="mt-1 font-black text-slate-900">{leg.player || leg.selection} {leg.selection} {leg.line ?? ''} {humanize(leg.market)}</div></div>
-              ))}
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs">
-              <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.joint_v2_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Research joint</div></div>
-              <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.captured_parlay_american_odds ?? '—'}</div><div className="mt-1 text-slate-400">Captured price</div></div>
-            </div>
-            <div className="mt-4 text-xs font-semibold leading-5 text-slate-500">{humanize(row.shadow_decision)} · {humanize(row.payout_status)}</div>
-          </div>
-        ))}
       </div>
     </section>
   )
@@ -3604,7 +3569,7 @@ export default function App() {
                 {active === 'Best Bets' && <BestBetsV2Panel />}
                 {active === 'Props' && <PropsV2Panel lane="PROP" />}
                 {active === 'PrizePicks' && <PropsV2Panel lane="PRIZEPICKS" />}
-                {active === 'Parlays' && <ParlaysV2Panel />}
+                {active === 'Parlays' && <Suspense fallback={<LoadingSurface label="Loading Parlays" />}><ParlaysV2Panel /></Suspense>}
                 {active === 'Bet Lab' && <Suspense fallback={<LoadingSurface label="Loading Bet Lab" />}><PracticeBetting /></Suspense>}
               </>
             )}
