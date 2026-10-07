@@ -4,6 +4,7 @@ import {
   MessageCircle, Send, ShieldCheck, Sparkles, Target, ThumbsDown, ThumbsUp, Trophy, Users, X, Zap,
 } from 'lucide-react'
 import { useAuth } from './AuthShell'
+import { claimEvidenceRows } from './claimEvidence'
 
 const quickPrompts = [
   ['Start / Sit', 'Who should I start this week?'],
@@ -49,6 +50,24 @@ function AskCard({ answer, compact = false }) {
   const [feedback, setFeedback] = useState('')
   const [feedbackBusy, setFeedbackBusy] = useState(false)
   if (!answer) return null
+  const evidenceRows = claimEvidenceRows(answer.claim_sources, compact ? 2 : 4)
+
+  const recordSourceClick = (label, href) => {
+    if (!href) return
+    fetch('/api/ask/source-click', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: href,
+        source_label: label,
+        answer_generated_at: answer.generated_at,
+        intent: answer.intent,
+        status: answer.status,
+        page: answer.context?.page,
+      }),
+      keepalive: true,
+    }).catch(() => {})
+  }
 
   const sendFeedback = async (rating) => {
     if (feedbackBusy || feedback) return
@@ -145,6 +164,41 @@ function AskCard({ answer, compact = false }) {
         </div>
       )}
 
+      {!!evidenceRows.length && (
+        <details className="mt-4 rounded-2xl border border-sky-400/15 bg-sky-400/5 p-3">
+          <summary className="cursor-pointer list-none text-xs font-black uppercase tracking-[0.14em] text-sky-300">
+            <span className="inline-flex items-center gap-2"><ShieldCheck size={14} /> Evidence · {evidenceRows.length} claim{evidenceRows.length === 1 ? '' : 's'}</span>
+          </summary>
+          <div className="mt-3 space-y-2">
+            {evidenceRows.map((item, index) => {
+              const href = safeSourceUrl(item.url)
+              return (
+                <div key={`${item.evidence_id || item.source}-${index}`} className="rounded-xl border border-white/10 bg-slate-950/30 px-3 py-2.5">
+                  <div className="text-xs leading-5 text-slate-200">{item.claim}</div>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-bold text-slate-500">
+                    {href ? (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        onClick={() => recordSourceClick(item.source, href)}
+                        className="font-black text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200"
+                      >
+                        {item.source}
+                      </a>
+                    ) : (
+                      <span className="font-black text-sky-300">{item.source}</span>
+                    )}
+                    {item.evidence_type ? <span>{item.evidence_type}</span> : null}
+                    {item.updated_at ? <span>{relativeTime(item.updated_at)}</span> : null}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </details>
+      )}
+
       {!!answer.risk?.length && (
         <div className="mt-4 rounded-2xl border border-amber-400/15 bg-amber-400/5 p-3">
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-amber-300">
@@ -204,28 +258,13 @@ function AskCard({ answer, compact = false }) {
               {answer.sources.slice(0, 3).map((source, index) => {
                 const label = source.source || source.label || `Source ${index + 1}`
                 const href = safeSourceUrl(source.url)
-                const trackSourceClick = () => {
-                  fetch('/api/ask/source-click', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      url: href,
-                      source_label: label,
-                      answer_generated_at: answer.generated_at,
-                      intent: answer.intent,
-                      status: answer.status,
-                      page: answer.context?.page,
-                    }),
-                    keepalive: true,
-                  }).catch(() => {})
-                }
                 return href ? (
                   <a
                     key={`${label}-${href}`}
                     href={href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    onClick={trackSourceClick}
+                    onClick={() => recordSourceClick(label, href)}
                     className="font-black text-sky-300 underline decoration-sky-400/40 underline-offset-2 hover:text-sky-200"
                   >
                     {label}
