@@ -9,6 +9,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+try:
+    from .mlb_forward_capture_identity import frozen_mlb_identity
+except ImportError:
+    from mlb_forward_capture_identity import frozen_mlb_identity
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "intelligence_warehouse" / "betting_v2"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1268,7 +1273,12 @@ def build_current_lane(lane_key, cfg, validation):
         side_col = mapping.get("side")
         line_col = mapping.get("line")
 
+        source_mlb_identity = (
+            frozen_mlb_identity(row)
+            if cfg["sport"] == "MLB" else {}
+        )
         rows.append({
+            **source_mlb_identity,
             "model_version": MODEL_VERSION,
             "lane_key": lane_key,
             "sport": cfg["sport"],

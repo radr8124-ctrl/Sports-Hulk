@@ -20,8 +20,10 @@ import requests
 
 try:
     from .mlb_verified_player_crosswalk import indexed_verified_ids, source_fingerprint
+    from .mlb_forward_capture_identity import frozen_mlb_identity
 except ImportError:
     from mlb_verified_player_crosswalk import indexed_verified_ids, source_fingerprint
+    from mlb_forward_capture_identity import frozen_mlb_identity
 
 SCHEDULE_URL = "https://statsapi.mlb.com/api/v1/schedule"
 FEED_URL = "https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live"
@@ -285,11 +287,36 @@ def verify_prediction(row, mapped, archived_players, boxes, verified_crosswalk=N
         return None, "NOT_VERIFIED_PREGAME_OR_START"
     frozen_name = person_key(row.get("player_key"))
     players = archived_players.get((event, frozen_name), set())
+    # Source identity is attached only when the original forward ENTRY was
+    # frozen, never added retroactively to a previously captured prediction.
+    has_snapshot = bool(row.get("mlb_source_player_id"))
+    source = frozen_mlb_identity(row) if has_snapshot else {}
+    if has_snapshot and not source:
+        return None, "INVALID_FROZEN_OFFICIAL_PLAYER_ID_EVIDENCE"
+    if source and (
+        person_key(source["mlb_source_away_team"]) != game["away"]
+        or person_key(source["mlb_source_home_team"]) != game["home"]
+    ):
+        return None, "FROZEN_TEAM_PAIR_DIFFERS_FROM_OFFICIAL_GAME"
     if len(players) > 1:
         return None, "CONFLICTING_ARCHIVED_OFFICIAL_PLAYER_IDS"
     if len(players) == 1:
         player_id, source_team, archived_name = next(iter(players))
+        if source and (
+            source["mlb_source_player_id"] != player_id
+            or person_key(source["mlb_source_player_team"]) != source_team
+            or person_key(source["mlb_source_player_name"]) != archived_name
+        ):
+            return None, "FROZEN_ID_CONFLICTS_WITH_ARCHIVED_PLAYER_ID"
         id_proof = "EXPLICIT_ORIGINAL_ARCHIVED_MLB_PLAYER_ID"
+    elif source:
+        player_id = source["mlb_source_player_id"]
+        source_team = person_key(source["mlb_source_player_team"])
+        archived_name = person_key(source["mlb_source_player_name"])
+        reference = (verified_crosswalk or {}).get((frozen_name, source_team))
+        if reference and reference["player_id"] != player_id:
+            return None, "FROZEN_ID_CONFLICTS_WITH_OFFICIAL_HISTORY"
+        id_proof = "FROZEN_MLB_DECISION_EXPLICIT_ID_AND_OFFICIAL_FINAL_BOX"
     else:
         # No player-ID guessing: require the SAME unique official numeric ID
         # in two existing MLB StatsAPI-derived sources, bound to this exact
@@ -480,6 +507,8 @@ def plan_mlb_settlement(root, frozen, session, now=None):
             "settlement_match_type": (
                 "MLB_VERIFIED_HISTORICAL_ID_CROSSWALK"
                 if proof["player_id_provenance"] == "TWO_STATSAPI_ID_SOURCES_EXACT_NAME_AND_TEAM"
+                else "MLB_FROZEN_SOURCE_PLAYER_ID_AND_OFFICIAL_FINAL_BOX"
+                if proof["player_id_provenance"] == "FROZEN_MLB_DECISION_EXPLICIT_ID_AND_OFFICIAL_FINAL_BOX"
                 else "MLB_OFFICIAL_GAME_AND_PLAYER_ID"
             ),
             "player_id_provenance": proof["player_id_provenance"],

@@ -26,8 +26,10 @@ if str(OUT_DIR) not in sys.path:
 import build_prop_v2 as prop_v2
 try:
     from .forward_result_evidence import register_evidence, trusted_result
+    from .mlb_forward_capture_identity import frozen_mlb_identity
 except ImportError:
     from forward_result_evidence import register_evidence, trusted_result
+    from mlb_forward_capture_identity import frozen_mlb_identity
 
 SETTLED = {"WIN", "LOSS", "PUSH"}
 
@@ -189,6 +191,7 @@ def capture():
                 "forward_key": key,
                 "captured_at": captured_at,
                 **identity_parts(row),
+                **(frozen_mlb_identity(row) if str(row.get("sport")).upper() == "MLB" else {}),
                 "lane_key": row.get("lane_key"),
                 "old_hulk_score": num(row.get("old_hulk_score")),
                 "old_score_status": row.get("old_score_status"),
