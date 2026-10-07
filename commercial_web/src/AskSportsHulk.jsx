@@ -98,6 +98,18 @@ function AskCard({ answer, compact = false }) {
         </div>
       </div>
 
+      {answer.personalization?.status === 'OPT_IN' && (
+        <div className="mt-4 rounded-2xl border border-sky-400/15 bg-sky-400/5 px-3 py-2.5 text-xs leading-5 text-slate-300">
+          <span className="font-black text-sky-300">Personalized:</span>{' '}
+          {[
+            ...(answer.personalization.matched_watched_players || []).map(name => `watching ${name}`),
+            ...(answer.personalization.matched_favorite_teams || []).map(name => `favorite team ${name}`),
+            `risk style ${String(answer.personalization.risk_preference || 'BALANCED').toLowerCase()}`,
+          ].join(' · ')}
+          <span className="text-slate-500"> · model unchanged</span>
+        </div>
+      )}
+
       {!!answer.why?.length && (
         <div className="mt-5">
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-300">

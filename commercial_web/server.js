@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { createAdminClient, createClient } from '@insforge/sdk'
 import { buildPersonalizedSurvivorSource } from './survivor_personalization.js'
 import { sanitizeAccountPreferences } from './account_preferences.js'
+import { preferencePresentation } from './preference_presentation.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -4544,7 +4545,8 @@ const server=http.createServer(async(req,res)=>{
         queueFailedAskReview(question,context,answer),
         recordAskEvaluation(question,context,answer,Date.now()-askStartedAt,null,answerGeneratedAt),
       ])
-      return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt,...(preferenceState?.saved?{personalization:{status:'OPT_IN',...preferenceState.preferences}}:{}),...(sessionResolution.resolved?{session_reference_resolved:true,resolved_question:routedQuestion}:{})})
+      const personalization=preferenceState?.saved?preferencePresentation(answer,preferenceState.preferences):null
+      return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt,...(personalization?{personalization}:{}),...(sessionResolution.resolved?{session_reference_resolved:true,resolved_question:routedQuestion}:{})})
     }
     catch(err){
       try {
