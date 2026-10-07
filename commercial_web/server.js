@@ -1198,10 +1198,126 @@ function newsAnswerV2(question, data) {
   })
 }
 
+const gameToken=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'')
+const gameIsoDate=value=>{ const ms=Date.parse(value||''); return Number.isFinite(ms)?new Date(ms).toISOString().slice(0,10):'' }
+const gameCloseTime=(left,right,minutes=10)=>{ const a=Date.parse(left||''), b=Date.parse(right||''); return Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=minutes*60000 }
+
+function gameContextTeamMatches(value, game, side) {
+  const prefix=side==='AWAY'?'away':'home'
+  const token=gameToken(value)
+  return Boolean(token && [gameToken(game?.[prefix]),gameToken(game?.[prefix+'_abbr'])].filter(Boolean).includes(token))
+}
+
+function contextGameKeyMatches(gameKey, game) {
+  const parts=String(gameKey||'').split('|')
+  if(parts.length<3 || !/^\d{4}-\d{2}-\d{2}$/.test(parts[0])) return false
+  return gameIsoDate(game?.start_time)===parts[0]
+    && gameContextTeamMatches(parts[1],game,'AWAY')
+    && gameContextTeamMatches(parts[2],game,'HOME')
+}
+
+function contextGameMarketMatches(row, game) {
+  if(String(row?.sport||'').toUpperCase()!==String(game?.league||'').toUpperCase()) return false
+  if(contextGameKeyMatches(row?.game_key,game)) return true
+  const side=String(row?.selection_key||'').toUpperCase()
+  if(!['HOME','AWAY'].includes(side) || !gameCloseTime(row?.event_start,game?.start_time,10)) return false
+  return gameContextTeamMatches(row?.selection,game,side)
+}
+
+function contextNflBridgeMatches(row, bridge, game) {
+  if(!gameContextTeamMatches(bridge?.away_team,game,'AWAY')) return false
+  if(!gameContextTeamMatches(bridge?.home_team,game,'HOME')) return false
+  if(!gameCloseTime(row?.event_start,bridge?.start_dfs,10)) return false
+  if(gameToken(row?.player)!==gameToken(bridge?.player_dfs)) return false
+  if(gameToken(row?.market_subtype)!==gameToken(bridge?.market)) return false
+  if(String(row?.side||'').toUpperCase()!==String(bridge?.side||'').toUpperCase()) return false
+  const left=num(row?.line), right=num(bridge?.sportsbook_line??bridge?.dfs_line)
+  return left!=null && right!=null && Math.abs(left-right)<0.0001
+}
+
+function contextPropRows(data, game) {
+  const sport=String(game?.league||'').toUpperCase()
+  const rows=(data.propV2?.picks||[]).filter(row=>
+    String(row?.sport||'').toUpperCase()===sport && String(row?.lane||'').toUpperCase()==='PROP'
+  )
+  if(['NBA','NHL'].includes(sport)) return rows.filter(row=>contextGameKeyMatches(row?.game_key,game))
+  if(sport==='NFL'){
+    const bridges=data.nflDecisions?.props||[]
+    const ids=new Set()
+    for(const row of rows){
+      if(bridges.some(bridge=>contextNflBridgeMatches(row,bridge,game))) ids.add(String(row.event_id||''))
+    }
+    return rows.filter(row=>ids.has(String(row.event_id||'')))
+  }
+  return []
+}
+
+function contextNewsRows(data, game) {
+  const id=String(game?.event_id||'')
+  const sport=String(game?.league||'').toUpperCase()
+  return (data.askRetrieval?.news_events||[])
+    .filter(row=>String(row?.sport||'').toUpperCase()===sport && String(row?.game_event_id??'')===id)
+    .sort((a,b)=>(Date.parse(b?.published_or_effective_at||'')||0)-(Date.parse(a?.published_or_effective_at||'')||0))
+    .slice(0,8)
+}
+
+function gameScopedAnswer(question, data, context = {}) {
+  const raw=context?.game_context
+  if(String(raw?.surface||'').toUpperCase()!=='GAME_CENTER' || !raw?.event_id || !raw?.league) return null
+  const game={...raw,league:String(raw.league).toUpperCase(),event_id:String(raw.event_id)}
+  const q=qtext(question)
+  if(/\b(survivor|waiver|waivers|faab|free agent|stash|ir stash|defense stream|d\/st|dst|dfs|fanduel|draftkings|daily fantasy|start\/sit|start or sit|parlay|two leg|2 leg)\b/.test(q)) return null
+  const gameRows=(data.bettingV2?.picks||[]).filter(row=>contextGameMarketMatches(row,game))
+  const propRows=contextPropRows(data,game)
+  const newsRows=contextNewsRows(data,game)
+  const decisionRank=row=>String(row?.shadow_decision||'').toUpperCase()==='SHADOW_PLAY'?3:String(row?.shadow_decision||'').toUpperCase()==='SHADOW_MONITOR'?2:1
+  gameRows.sort((a,b)=>decisionRank(b)-decisionRank(a)||num(b.conservative_expected_value_pct,-999)-num(a.conservative_expected_value_pct,-999))
+  propRows.sort((a,b)=>decisionRank(b)-decisionRank(a)||num(b.conservative_edge_pct_points,-999)-num(a.conservative_edge_pct_points,-999))
+
+  if(/\b(score|scores|who is winning|box score|game score)\b/.test(q)){
+    const key={NFL:'nflScores',MLB:'mlbScores',NBA:'nbaScores',NHL:'nhlScores',CFB:'cfbScores',CBB:'cbbScores'}[game.league]
+    const source=data[key]||{}
+    const games=game.league==='MLB'
+      ? [...(source.today_games||[]),...(source.recent_games||[]),...(source.next_games||[]),...(source.games||[])]
+      : (source.games||[])
+    const found=games.find(row=>String(row?.event_id??row?.gamePk??'')===game.event_id)
+    if(found) return response({intent:'game_score',take:`${found.away||found.away_abbr} @ ${found.home||found.home_abbr} · ${found.status||'Current game status'}`,confidence:'VERIFIED',cards:[scoreCard(found,game.league)],sources:updatedSources(data,[key]),status:found.final?'FINAL':found.live?'LIVE':'UPCOMING'})
+  }
+
+  if(/\b(prop|props|passing yards|rushing yards|receiving yards|receptions|touchdown|interceptions)\b/.test(q)){
+    if(!propRows.length) return response({intent:'game_props',take:'No exact-game sportsbook prop is attached to this matchup right now.',confidence:'WAITING',status:'NO_EXACT_PROPS',risk:['Game Scout will not substitute props from another matchup.'],sources:updatedSources(data,['propV2'])})
+    const top=propRows[0]
+    const plays=propRows.filter(row=>String(row.shadow_decision).toUpperCase()==='SHADOW_PLAY')
+    return response({intent:'game_props',take:plays.length?`${top.player} ${top.side} ${top.line} ${nice(top.market_subtype)}`:'No exact-game prop has cleared the V2 PLAY gate.',confidence:plays.length?'V2 PLAY':'WAITING / NO PLAY',status:plays.length?'PLAY':'RESEARCH_ONLY',why:[`${propRows.length} exact-game prop candidate${propRows.length===1?'':'s'} matched this matchup.`,`${top.player} ${top.side} ${top.line} · ${nice(top.selection_rule_status||top.shadow_decision)}.`],risk:['Only props tied to this matchup are shown. PASS and MONITOR are not PLAYs.'],cards:propRows.slice(0,6).map(row=>({type:'prop',title:row.player,side:row.side,line:row.line,market:nice(row.market_subtype),decision:String(row.shadow_decision||'').replace('SHADOW_','')})),sources:updatedSources(data,['propV2'])})
+  }
+
+  if(/\b(news|injury|practice|report|reporter|what changed)\b/.test(q)){
+    if(!newsRows.length) return response({intent:'game_news',take:'No exact-game news item is attached to this matchup right now.',confidence:'WAITING',status:'NO_EXACT_NEWS',risk:['Game Scout will not pull unrelated team news into this game.'],sources:updatedSources(data,['askRetrieval'])})
+    return response({intent:'game_news',take:newsRows[0].title,confidence:'MATCHUP-LINKED REPORTING',why:newsRows.slice(0,4).map(row=>row.detail).filter(Boolean),risk:['Reporting can be superseded by newer official status updates.'],cards:newsRows.slice(0,6).map(row=>({type:'news',title:row.title,source:row.source,url:row.source_url,published_at:row.published_or_effective_at})),sources:updatedSources(data,['askRetrieval'])})
+  }
+
+  const plays=[...gameRows,...propRows].filter(row=>String(row.shadow_decision).toUpperCase()==='SHADOW_PLAY')
+  const monitors=[...gameRows,...propRows].filter(row=>String(row.shadow_decision).toUpperCase()==='SHADOW_MONITOR')
+  const tracked=gameRows.length+propRows.length
+  const label=`${game.away||game.away_abbr} @ ${game.home||game.home_abbr}`
+  return response({
+    intent:'game_zenith',
+    take:plays.length?`Sports Zenith has ${plays.length} PLAY${plays.length===1?'':'s'} for ${label}.`:monitors.length?`No PLAY for ${label}; ${monitors.length} exact-game monitor${monitors.length===1?' is':'s are'} still being tracked.`:`No exact-game market has cleared the PLAY gate for ${label}.`,
+    confidence:plays.length?'V2 PLAY':monitors.length?'MONITOR / NOT PLAY':'WAITING / NO PLAY',
+    status:plays.length?'PLAY':'RESEARCH_ONLY',
+    why:[`${gameRows.length} game-market row${gameRows.length===1?'':'s'} and ${propRows.length} sportsbook prop row${propRows.length===1?'':'s'} tied exactly to this matchup.`,tracked?'Sports Zenith uses the same matchup matching rules as the Game Center panels.':'No governed V2 row is attached to this matchup right now.'],
+    risk:['Game Scout will not borrow a bet, prop, or player line from another matchup.','PASS and MONITOR remain research states, not recommendations.'],
+    cards:[...gameRows.slice(0,3).map(row=>({type:'game_market',title:`${row.selection} · ${nice(row.market)}`,selection:row.selection,market:nice(row.market),line:row.line??row.american_odds,decision:String(row.shadow_decision||'').replace('SHADOW_','')})),...propRows.slice(0,3).map(row=>({type:'prop',title:row.player,side:row.side,line:row.line,market:nice(row.market_subtype),decision:String(row.shadow_decision||'').replace('SHADOW_','')}))],
+    sources:updatedSources(data,['bettingV2','propV2','askRetrieval']),
+  })
+}
+
 function routeAsk(question, data, context = {}) {
   const q=qtext(question)
   const page=String(context?.page||'').trim()
   if(!q) return response({intent:'help',take:'Ask about live scores, betting research, props, Survivor, fantasy, waivers, DFS or player news.',confidence:'READY',followups:['What are the best NFL bets?','Best props today','Who should I start?','Top waiver adds','Survivor pick','Live scores'],sources:updatedSources(data,['nflScores','bettingV2','propV2','survivorV2','askContext','fantasyNews'])})
+  const scopedGameAnswer=gameScopedAnswer(question,data,context)
+  if(scopedGameAnswer) return scopedGameAnswer
   if(/\b(score|scores|live score|who is winning|box score|game score)\b/.test(q)) return scoreAnswer(question,data)
   if(/\b(parlay|two leg|2 leg)\b/.test(q)) return parlayAnswer(data)
   if(/\b(survivor|survivor pick|pool pick|survivor research|research leader)\b/.test(q)) return survivorAnswer(data)
