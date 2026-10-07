@@ -516,6 +516,69 @@ function matchPlayers(question, rows = []) {
   return matches
 }
 
+function resolveSessionQuestion(question, context = {}) {
+  const original=String(question||'').trim()
+  const q=qtext(original)
+  const history=Array.isArray(context?.session_history)?context.session_history.slice(-8):[]
+  if(!history.length) return {question:original,resolved:false}
+
+  const lastAssistant=[...history].reverse().find(item=>item?.role==='assistant' && item?.answer)
+  const answer=lastAssistant?.answer||null
+  if(!answer) return {question:original,resolved:false}
+
+  const cards=Array.isArray(answer.cards)?answer.cards.slice(0,4):[]
+  const playerCards=cards.filter(card=>['fantasy','prop','prop_research','prizepicks_research','waiver','stash','player_history','dfs'].includes(String(card?.type||'')))
+  const scoreCards=cards.filter(card=>String(card?.type||'')==='score')
+
+  let resolved=original
+  let changed=false
+
+  const otherRb=/\b(the )?other rb\b/i.test(original)
+  if(otherRb){
+    const rbCards=playerCards.filter(card=>String(card?.position||'').toUpperCase()==='RB' && card?.title)
+    if(rbCards.length>=2){
+      resolved=resolved.replace(/\b(the )?other rb\b/i,String(rbCards[1].title))
+      changed=true
+    }
+  }
+
+  const pronoun=/\b(him|his|he)\b/i.test(resolved)
+  if(pronoun){
+    const player=playerCards.find(card=>card?.title)?.title
+    if(player){
+      resolved=resolved
+        .replace(/\bhis\b/ig,`${player}'s`)
+        .replace(/\bhim\b/ig,String(player))
+        .replace(/\bhe\b/ig,String(player))
+      changed=true
+    }
+  }
+
+  const gameRef=/\b(that|this) game\b/i.test(resolved)
+  if(gameRef){
+    const game=scoreCards[0]
+    if(game?.title){
+      resolved=`score ${game.title}`
+      changed=true
+    }
+  }
+
+  if(changed){
+    const intent=String(answer.intent||'')
+    const vague=/^(what about|how about|and |what is |what's |tell me about)/i.test(original)
+    if(vague){
+      if(intent==='player_history' && !/\b(history|historical|career|stat)/i.test(resolved)) resolved += ' historical evidence'
+      else if(intent==='schedule' && !/\b(schedule|next game|fatigue|rest)/i.test(resolved)) resolved += ' schedule'
+      else if(intent==='team_stats' && !/\b(team style|team stats|offense|pace|tempo)/i.test(resolved)) resolved += ' team style'
+      else if(intent==='start_sit' && !/\b(start|sit|flex)/i.test(resolved)) resolved += ' start sit'
+      else if(['props','prizepicks','game_props'].includes(intent) && !/\b(prop|props|prizepicks|pick em)/i.test(resolved)) resolved += ' props'
+      else if(['reporting','reporting_stale','reporting_conflict'].includes(intent) && !/\b(report|news|injury|status)/i.test(resolved)) resolved += ' reporting'
+    }
+  }
+
+  return {question:resolved,resolved:changed}
+}
+
 function scoreCard(game, league) {
   const away = game.away || game.away_team || '', home = game.home || game.home_team || ''
   const state = game.final ? 'FINAL' : game.live ? 'LIVE' : 'UPCOMING'
@@ -4386,14 +4449,16 @@ const server=http.createServer(async(req,res)=>{
       question=String(body.question||body.message||'').trim()
       context=body.context&&typeof body.context==='object'?body.context:{}
       const data=await loadAll()
-      const personalAnswer=await personalizedFantasyAsk(req,question,context)
-      const answer=personalAnswer||routeAsk(question,data,context)
+      const sessionResolution=resolveSessionQuestion(question,context)
+      const routedQuestion=sessionResolution.question
+      const personalAnswer=await personalizedFantasyAsk(req,routedQuestion,context)
+      const answer=personalAnswer||routeAsk(routedQuestion,data,context)
       const answerGeneratedAt=new Date().toISOString()
       await Promise.all([
         queueFailedAskReview(question,context,answer),
         recordAskEvaluation(question,context,answer,Date.now()-askStartedAt,null,answerGeneratedAt),
       ])
-      return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt})
+      return json(res,200,{question,context,...answer,generated_at:answerGeneratedAt,...(sessionResolution.resolved?{session_reference_resolved:true,resolved_question:routedQuestion}:{})})
     }
     catch(err){
       try {

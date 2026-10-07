@@ -307,6 +307,36 @@ function activeFantasyLeagueId() {
   catch { return null }
 }
 
+function compactSessionHistory(messages = []) {
+  return messages.slice(-8).map(message => {
+    if (message.role === 'user') {
+      return { role: 'user', text: String(message.text || '').slice(0, 300) }
+    }
+    const answer = message.answer || {}
+    return {
+      role: 'assistant',
+      answer: {
+        intent: answer.intent || null,
+        status: answer.status || null,
+        confidence: answer.confidence || null,
+        take: String(answer.take || '').slice(0, 300),
+        cards: Array.isArray(answer.cards)
+          ? answer.cards.slice(0, 4).map(card => ({
+              type: card.type || null,
+              title: card.title || null,
+              position: card.position || null,
+              team: card.team || null,
+              league: card.league || null,
+              away: card.away || null,
+              home: card.home || null,
+              opponent: card.opponent || null,
+            }))
+          : [],
+      },
+    }
+  })
+}
+
 async function askQuestion(question, context = {}, accessToken = null) {
   const headers = { 'Content-Type': 'application/json' }
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`
@@ -345,7 +375,7 @@ export function AskSportsHulkPage() {
     setLoading(true)
     try {
       const token = user ? await getAccessToken() : null
-      const answer = await askQuestion(q, { page: 'Ask' }, token)
+      const answer = await askQuestion(q, { page: 'Ask', session_history: compactSessionHistory(messages) }, token)
       setMessages(prev => [...prev, { role: 'assistant', answer }])
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', answer: {
@@ -441,6 +471,7 @@ export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home', ga
       const answer = await askQuestion(q, {
         page,
         game_context: gameContext || undefined,
+        session_history: compactSessionHistory(messages),
       }, token)
       setMessages(prev => [...prev, { role: 'assistant', answer }])
     } catch (error) {
