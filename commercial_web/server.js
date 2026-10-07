@@ -11,6 +11,7 @@ import { sanitizeAccountPreferences } from './account_preferences.js'
 import { preferencePresentation, watchlistNewsHits } from './preference_presentation.js'
 import { faabBudgetLines } from './faab_presentation.js'
 import { buildLinkedSurvivorSummaries } from './survivor_linked_entries.js'
+import { diversifySurvivorEntries } from './survivor_diversification.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -3060,10 +3061,54 @@ async function personalizedSurvivorAsk(req, question, data) {
   const user=await authenticatedUser(req)
   if(!user?.id) return null
 
-  const entryName=await linkedSurvivorEntry(req,user.id)
+  const entryNames=await linkedSurvivorEntries(req,user.id)
+  const entryName=entryNames[0]||null
   if(!entryName) return null
 
   const survivorState=await loadExternalJson(SURVIVOR_ENTRIES_PATH)
+
+  if(entryNames.length>1){
+    const poolWeek=Number(survivorState?.pool_current_week||data.survivorV2?.pool_current_week||0)||null
+    const linkedEntries=entryNames
+      .map(name=>({entry_name:name,entry:(survivorState?.entries||{})[name]||null}))
+      .filter(item=>item.entry)
+    const allocations=diversifySurvivorEntries(linkedEntries,data.survivorV2?.candidates||[],poolWeek)
+    if(allocations.length){
+      const actionable=allocations.filter(row=>row.team)
+      const withheld=allocations.filter(row=>!row.team)
+      return response({
+        intent:'personal_survivor_multi',
+        take:actionable.length
+          ? `Diversified Week ${poolWeek||'current'} Survivor research: ${actionable.map(row=>`${row.entry_name} → ${row.team}`).join(' · ')}.`
+          : `No linked Survivor entry is ready for a diversified Week ${poolWeek||'current'} recommendation yet.`,
+        confidence:actionable.length?'MULTI-ENTRY DIVERSIFIED RESEARCH':'WAITING',
+        status:actionable.length?'DIVERSIFIED_RESEARCH':'WAITING',
+        why:[
+          `${entryNames.length} linked entries evaluated independently against their own used-team history.`,
+          actionable.length>1?'Duplicate team exposure is avoided when another eligible governed candidate exists.':null,
+          ...actionable.slice(0,6).map(row=>`${row.entry_name}: ${row.team} vs ${row.opponent||'—'} · market survival ${row.market_prob_pct??'—'}% · strategy index ${row.strategy_index??'—'}.`),
+          ...withheld.slice(0,4).map(row=>`${row.entry_name}: ${nice(row.status)} · ${row.reason}`),
+        ].filter(Boolean),
+        risk:[
+          'Diversification changes allocation across entries, not the underlying Survivor candidate scores.',
+          'An entry without a confirmed current-week pool rule is withheld rather than guessed.',
+        ],
+        cards:allocations.slice(0,10).map(row=>({
+          type:'survivor_multi',
+          title:row.entry_name,
+          selection:row.team,
+          opponent:row.opponent,
+          market_prob:row.market_prob_pct,
+          strategy_index:row.strategy_index,
+          tier:row.decision_tier,
+          status:row.status,
+        })),
+        sources:updatedSources(data,['survivorV2']),
+        updated_at:data.survivorV2?.generated_at,
+      })
+    }
+  }
+
   const entry=(survivorState?.entries||{})[entryName]
   if(!entry) return null
 
