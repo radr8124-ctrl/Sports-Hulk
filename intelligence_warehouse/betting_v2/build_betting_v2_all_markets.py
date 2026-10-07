@@ -14,6 +14,9 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "intelligence_warehouse" / "betting_v2"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from nba_live.decision.nba_proof_source_digest import digest_csv as nba_grade_digest
 PUBLIC = ROOT / "commercial_web" / "public"
 DIST = ROOT / "commercial_web" / "dist"
 
@@ -1334,6 +1337,10 @@ def build_current(models, validations):
 
 
 def main():
+    # One immutable view of the NBA result evidence for this validation run.
+    # Rewrites of identical data do not invalidate model proof; material
+    # changes are detected using a canonical source fingerprint.
+    nba_input_digest = nba_grade_digest(HISTORY_FILES["NBA"])
     validations = {}
     models = {}
 
@@ -1543,8 +1550,14 @@ def main():
                 ),
             }
 
+    if nba_grade_digest(HISTORY_FILES["NBA"]) != nba_input_digest:
+        raise RuntimeError("NBA graded history changed during proof build; retry")
+
     validation_payload = {
         "generated_at": now_iso(),
+        "source_fingerprints": {
+            "nba_game_grades_sha256": nba_input_digest,
+        },
         "model_version": MODEL_VERSION,
         "status": "READY",
         "method": (

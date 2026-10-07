@@ -36,7 +36,20 @@ LOG="$LOGDIR/NBA_LEARNING_${STAMP}.log"
     "$PY" \
       "$DEC/grade_nba_recommendations.py"
 
-    echo "GRADE RC: $?"
+    GRADE_RC=$?
+    echo "GRADE RC: $GRADE_RC"
+
+    # Audits label missing/source-conflicting results and warns if the hourly
+    # Betting V2 validation was generated before today's newly graded games.
+    # No model is promoted by this audit and grade failures are never masked.
+    if [ "$GRADE_RC" -eq 0 ]; then
+        echo
+        echo "=== NBA HISTORICAL PROOF INTEGRITY ==="
+        "$PY" "$DEC/audit_nba_historical_proof.py"
+        echo "PROOF AUDIT RC: $?"
+    else
+        echo "PROOF AUDIT SKIPPED: grader failed; preserve previous receipt."
+    fi
 
     echo
     echo "NBA LEARNING COMPLETE"

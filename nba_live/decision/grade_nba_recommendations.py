@@ -7,15 +7,20 @@ from datetime import datetime, timezone
 
 import json
 import math
+import os
 import re
+from tempfile import NamedTemporaryFile
 
 import numpy as np
 import pandas as pd
 
+try:
+    from .nba_result_reconciliation import reconcile_games
+except ImportError:
+    from nba_result_reconciliation import reconcile_games
 
-ROOT = Path(
-    "/home/ubuntu/sports-hulk"
-)
+
+ROOT = Path(__file__).resolve().parents[2]
 
 NBA = ROOT / "nba_live"
 DEC = NBA / "decision"
@@ -294,20 +299,15 @@ def load_games():
     parts = []
 
 
-    for path in [
+    for source_order, path in enumerate([
         CURRENT_GAMES,
         GAME_HISTORY,
         RESULT_HISTORY,
-    ]:
-
-        df = read_csv(
-            path
-        )
-
+    ]):
+        df = read_csv(path)
         if not df.empty:
-            parts.append(
-                df
-            )
+            df["_source_order"] = source_order
+            parts.append(df)
 
 
     if not parts:
@@ -358,37 +358,25 @@ def load_games():
     )
 
 
-    games[
-        "_final_rank"
-    ] = games[
-        "completed"
-    ].map(
-        truth
-    ).astype(
-        int
-    )
-
-
-    games = (
-        games
-        .sort_values(
-            [
-                "event_id",
-                "_final_rank",
-            ]
+    # Normalize IDs read from mixed CSV integer/float columns. Never
+    # merge unrelated events with missing event IDs.
+    def official_event_id(value):
+        if pd.isna(value):
+            return ""
+        raw = str(value).strip()
+        return raw[:-2] if re.fullmatch(r"[0-9]+\.0", raw) else (
+            raw if re.fullmatch(r"[0-9]+", raw) else ""
         )
-        .drop_duplicates(
-            "event_id",
-            keep="last",
-        )
-        .drop(
-            columns=[
-                "_final_rank"
-            ]
-        )
-    )
 
-
+    games["_official_event_id"] = games["event_id"].map(official_event_id)
+    games["_missing_event_id"] = games["_official_event_id"].eq("")
+    games["event_id"] = games["_official_event_id"]
+    missing = games["_missing_event_id"]
+    games.loc[missing, "event_id"] = [
+        f"MISSING_SOURCE_EVENT_{i}" for i in games.index[missing]
+    ]
+    games = reconcile_games(games)
+    games.loc[games["_missing_event_id"], "_result_conflict"] = "MISSING_EVENT_ID"
     return games
 
 
@@ -553,6 +541,8 @@ def game_from_key(
     if match.empty:
         return None
 
+    if len(match) > 1:
+        return {"_result_conflict": "AMBIGUOUS_GAME_MATCH"}
 
     final = match[
         match[
@@ -598,6 +588,15 @@ def grade_game(
                 "NO_GAME_MATCH",
         }
 
+
+    conflict = str(game.get("_result_conflict") or "").strip()
+    if conflict:
+        return {
+            "result_event_id": game.get("event_id", ""),
+            "season_type": "",
+            "grade": "REVIEW_SOURCE_CONFLICT",
+            "context_status": conflict,
+        }
 
     base = {
         "result_event_id":
@@ -911,6 +910,14 @@ def grade_player(
                 "NO_GAME_MATCH",
         }
 
+
+    conflict = str(game.get("_result_conflict") or "").strip()
+    if conflict:
+        return {
+            "season_type": "",
+            "grade": "REVIEW_SOURCE_CONFLICT",
+            "context_status": conflict,
+        }
 
     base = {
         "result_event_id":
@@ -1696,10 +1703,18 @@ def main():
     )
 
 
-    graded.to_csv(
-        GRADED_OUT,
-        index=False,
-    )
+    # Betting V2 reads this file while the NBA refresh runs. Publish the
+    # complete graded snapshot atomically so it never sees a partial CSV.
+    with NamedTemporaryFile(
+        "w", dir=GRADED_OUT.parent, newline="", encoding="utf-8",
+        prefix=".nba-graded-", suffix=".tmp", delete=False,
+    ) as output:
+        temporary = Path(output.name)
+        graded.to_csv(output, index=False)
+    try:
+        os.replace(temporary, GRADED_OUT)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
     signals = signal_performance(

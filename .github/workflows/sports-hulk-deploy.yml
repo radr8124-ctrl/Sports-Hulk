@@ -41,6 +41,7 @@ jobs:
       - name: Run proof and deployment safety tests
         run: |
           python -m unittest discover -s tests -p 'test_*regime*.py'
+          python -m unittest discover -s tests -p 'test_nba_*proof*.py'
           python -m unittest discover -s tests -p 'test_sports_workflow_safety.py'
 
       - name: Set up Node

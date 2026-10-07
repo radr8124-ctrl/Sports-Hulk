@@ -45,6 +45,7 @@ jobs:
             intelligence_warehouse/betting_v2/build_clv_tracker.py \
             intelligence_warehouse/brain_performance/build_brain_performance.py
           python -m unittest discover -s tests -p 'test_*regime*.py'
+          python -m unittest discover -s tests -p 'test_nba_*proof*.py'
           python -m unittest discover -s tests -p 'test_sports_workflow_safety.py'
 
       - name: Set up Node
