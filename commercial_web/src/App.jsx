@@ -10,6 +10,7 @@ import { bettingNavItems, navItems, nflSections, scoreLeagues, statusCards } fro
 import { PUBLIC_BRAND, PUBLIC_BRAND_WORD_1, PUBLIC_BRAND_WORD_2, PUBLIC_TAGLINE } from './brandConfig'
 import BetMeaning, { betDisplayLabel } from './BetMeaning'
 import ScoreGameCenter from './ScoreGameCenter'
+import { survivorHomeSummary } from '../survivor_home_summary.js'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
 const AssistantDrawer = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AssistantDrawer })))
@@ -1472,10 +1473,11 @@ function HomeDecisionPanel({ onNavigate }) {
   const prizeRows = (props.picks || []).filter((row) => row.lane === 'PRIZEPICKS')
   const prizeMonitor = prizeRows.find((row) => row.shadow_decision === 'SHADOW_MONITOR')
   const bestPlay = (bets.picks || []).find((row) => row.shadow_decision === 'SHADOW_PLAY')
-  const hasPersonalSurvivor = Boolean(user && privateSurvivor.entry_linked)
-  const survivorPick = hasPersonalSurvivor && Array.isArray(privateSurvivor.shadow_recommendation)
-    ? privateSurvivor.shadow_recommendation[0]
-    : null
+  const survivorSummary = survivorHomeSummary({
+    signedIn: Boolean(user),
+    privateState: privateSurvivor,
+    genericState: survivor,
+  })
 
   const cards = [
     {
@@ -1515,24 +1517,10 @@ function HomeDecisionPanel({ onNavigate }) {
     {
       label: 'Survivor',
       route: 'Survivor',
-      status: hasPersonalSurvivor
-        ? (privateSurvivor.rule_confirmed ? 'READY' : 'WAITING')
-        : (user ? 'NO POOL' : 'SIGN IN'),
-      title: hasPersonalSurvivor
-        ? (survivorPick?.team || `Week ${privateSurvivor.pool_current_week ?? survivor.pool_current_week ?? '—'} personal decision locked`)
-        : user
-          ? 'No Survivor pool linked'
-          : `Week ${survivor.pool_current_week ?? '—'} generic research`,
-      detail: hasPersonalSurvivor
-        ? (privateSurvivor.rule_confirmed
-            ? `${privateSurvivor.active_entry || 'Active entry'} · ${survivorPick?.market_prob_pct ?? '—'}% market survival`
-            : humanize(privateSurvivor.rule_status || 'Personal pool rule is still waiting'))
-        : user
-          ? 'Your account is ready; personal pool state appears only after a secure link.'
-          : 'Sign in for private used teams, saved picks and pool-specific guidance.',
-      tone: hasPersonalSurvivor
-        ? (privateSurvivor.rule_confirmed ? 'emerald' : 'amber')
-        : 'blue',
+      status: survivorSummary.status,
+      title: survivorSummary.title,
+      detail: survivorSummary.detail,
+      tone: survivorSummary.tone,
     },
   ]
 
