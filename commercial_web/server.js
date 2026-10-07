@@ -22,6 +22,7 @@ import { askClaimCoverage } from './ask_claim_coverage.js'
 import { reportingConsensus } from './reporting_consensus.js'
 import { validateAskOutput, outputValidationFallback } from './ask_output_validation.js'
 import { newAskTraceId, buildAskTraceRecord, appendAskTrace, askTraceSummary } from './ask_trace.js'
+import { resilientFetch } from './resilient_fetch.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -2503,8 +2504,15 @@ const ESPN_SUMMARY_ENDPOINTS = {
 async function fetchEspnBoxscore(league, eventId) {
   const base = ESPN_SUMMARY_ENDPOINTS[String(league || '').toUpperCase()]
   if (!base || !/^\d+$/.test(String(eventId || ''))) throw new Error('Unsupported box score request')
-  const resp = await fetch(base + encodeURIComponent(String(eventId)), {
+  const resp = await resilientFetch(base + encodeURIComponent(String(eventId)), {
     headers: { 'user-agent': 'Mozilla/5.0 SportsZenith/1.0' },
+  }, {
+    timeoutMs: 5000,
+    retries: 1,
+    retryDelayMs: 100,
+    breakerKey: 'espn-summary',
+    failureThreshold: 3,
+    cooldownMs: 30000,
   })
   if (!resp.ok) throw new Error(`ESPN summary returned ${resp.status}`)
   const payload = await resp.json()
@@ -2610,8 +2618,17 @@ function runDfsOptimizer(payload) {
       reject(new Error('DFS optimizer timed out'))
     }, 15000)
 
-    child.stdout.on('data', chunk => { stdout += chunk.toString() })
-    child.stderr.on('data', chunk => { stderr += chunk.toString() })
+    child.stdout.on('data', chunk => {
+      stdout += chunk.toString()
+      if (stdout.length > 2_000_000) {
+        child.kill('SIGKILL')
+        reject(new Error('DFS optimizer response exceeded limit'))
+      }
+    })
+    child.stderr.on('data', chunk => {
+      stderr += chunk.toString()
+      if (stderr.length > 200_000) stderr = stderr.slice(-200_000)
+    })
 
     child.on('error', err => {
       clearTimeout(timer)
@@ -2928,9 +2945,16 @@ async function privateFantasySnapshot(req, endpoint, leagueId) {
   const id=String(leagueId||'').trim()
   if(!authorization||!id) return null
   try{
-    const response=await fetch(
+    const response=await resilientFetch(
       `http://127.0.0.1:${PORT}${endpoint}?league_id=${encodeURIComponent(id)}`,
-      {headers:{authorization}}
+      {headers:{authorization}},
+      {
+        timeoutMs:15000,
+        retries:0,
+        breakerKey:'private-fantasy-snapshot',
+        failureThreshold:3,
+        cooldownMs:15000,
+      }
     )
     if(!response.ok) return null
     const payload=await response.json()
