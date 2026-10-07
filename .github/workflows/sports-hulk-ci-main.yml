@@ -52,6 +52,8 @@ jobs:
           python -m unittest discover -s tests -p 'test_mlb_official_box_forward.py'
           python -m unittest discover -s tests -p 'test_mlb_verified_player_crosswalk.py'
           python -m unittest discover -s tests -p 'test_mlb_forward_id_capture.py'
+          python -m unittest discover -s tests -p 'test_mlb_rolling_schedule_windows.py'
+          python -m unittest discover -s tests -p 'test_mlb_frozen_event_fallback.py'
           python -m unittest discover -s tests -p 'test_mlb_master_freshness.py'
           python -m unittest discover -s tests -p 'test_sports_workflow_safety.py'
 

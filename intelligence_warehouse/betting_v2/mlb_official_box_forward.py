@@ -32,6 +32,7 @@ SOURCE = "MLB_STATSAPI_FINAL_GAME_BOX_EXACT_ARCHIVED_EVENT_PLAYER"
 SETTLED = {"WIN", "LOSS", "PUSH"}
 MAX_TIME_DRIFT = timedelta(minutes=20)
 MAX_SCHEDULE_SPAN_DAYS = 31
+MAX_SCHEDULE_WINDOWS = 48
 MARKETS = {
     "PLAYER_TOTAL_HITS": ("batting", "hits"),
     "PLAYER_TOTAL_RUNS": ("batting", "runs"),
@@ -130,6 +131,47 @@ def load_archived_identity(root, needed):
     return evidence, players
 
 
+def merge_frozen_original_events(events, frozen):
+    """Use original captured MLB opponent/start proof when snapshots are absent.
+
+    The provider UUID alone is never an official game ID. Every source tuple
+    still must resolve to the SAME unique MLB StatsAPI gamePk by the original
+    opponent pair and first-pitch clock. Conflicting archive/capture forms
+    poison the event's match; they are never silently overwritten.
+    """
+    merged = defaultdict(set)
+    for uuid, forms in events.items():
+        merged[uuid].update(forms)
+    corroborated = set()
+    introduced = set()
+    for row in frozen.values():
+        if str(row.get("sport") or "").upper() != "MLB":
+            continue
+        if not row.get("mlb_source_player_id"):
+            continue
+        proof = frozen_mlb_identity(row)
+        if not proof:
+            continue
+        uuid = str(row.get("event_id") or "").strip()
+        start = time_utc(proof["mlb_source_original_start"])
+        if not uuid or not start:
+            continue
+        form = (
+            person_key(proof["mlb_source_away_team"]),
+            person_key(proof["mlb_source_home_team"]),
+            start,
+        )
+        if uuid in events:
+            corroborated.add(uuid)
+        else:
+            introduced.add(uuid)
+        merged[uuid].add(form)
+    return merged, {
+        "provider_events_from_original_capture": len(introduced),
+        "provider_events_with_frozen_corroboration": len(corroborated),
+    }
+
+
 def read_schedule(payload):
     if not isinstance(payload, dict) or not isinstance(payload.get("dates"), list):
         raise ValueError("Missing MLB schedule dates")
@@ -154,6 +196,47 @@ def read_schedule(payload):
                     "game_type": str(row.get("gameType") or ""),
                 })
     return games
+
+
+def schedule_windows(starts):
+    """Build bounded UTC-date windows only around actual archived events.
+
+    A full current season can span far more than 31 days. One giant query
+    causes the entire proof job to halt, whereas these deterministic windows
+    preserve exact provider-event/gamePk verification across the season.
+    Each request contains at most 31 inclusive days, plus one-day time-zone
+    margin for midnight first pitches. Windows may overlap at their edges;
+    identical official gamePk observations are deduplicated below.
+    """
+    days = sorted({v.date() for v in starts if v is not None})
+    if not days:
+        return []
+    output = []
+    first = last = days[0]
+    for day in days[1:]:
+        if (day - first).days + 3 <= MAX_SCHEDULE_SPAN_DAYS:
+            last = day
+        else:
+            output.append((first - timedelta(days=1), last + timedelta(days=1)))
+            first = last = day
+    output.append((first - timedelta(days=1), last + timedelta(days=1)))
+    if len(output) > MAX_SCHEDULE_WINDOWS:
+        raise ValueError("TOO_MANY_OFFICIAL_SCHEDULE_WINDOWS")
+    if any((end - start).days + 1 > MAX_SCHEDULE_SPAN_DAYS for start, end in output):
+        raise ValueError("OFFICIAL_SCHEDULE_WINDOW_SPAN_EXCEEDED")
+    return output
+
+
+def merge_official_schedules(schedules):
+    """Never accept conflicting duplicate MLB gamePks across date windows."""
+    unique = {}
+    for game in schedules:
+        key = game["game_pk"]
+        old = unique.get(key)
+        if old is not None and old != game:
+            raise ValueError("CONTRADICTORY_OFFICIAL_GAMEPK_BETWEEN_SCHEDULE_WINDOWS")
+        unique[key] = game
+    return list(unique.values())
 
 
 def map_official_games(events, games):
@@ -390,10 +473,13 @@ def plan_mlb_settlement(root, frozen, session, now=None):
 
     try:
         beginning = archive_fingerprint(root)
-        if beginning is None:
-            return receipt, []
         needed = {str(row.get("event_id") or "").strip() for row in mlb.values()}
-        events, players = load_archived_identity(root, needed)
+        archived_events, players = load_archived_identity(root, needed)
+        events, frozen_event_summary = merge_frozen_original_events(archived_events, mlb)
+        if beginning is None and not frozen_event_summary["provider_events_from_original_capture"]:
+            return receipt, []
+        receipt["archived_provider_events"] = len(archived_events)
+        receipt["frozen_event_reconciliation"] = frozen_event_summary
         # For unmatched IDs, index only official-derived identity records
         # from the relevant seasons. No fuzzy name search or date-only game
         # pairing is permitted, including for same-day doubleheaders.
@@ -414,24 +500,30 @@ def plan_mlb_settlement(root, frozen, session, now=None):
         receipt["id_source_fingerprints"] = id_sources_before
         receipt["id_crosswalk"] = crosswalk_summary
         receipt["archive_source"] = beginning
-        receipt["mapped_archived_events"] = len(events)
+        receipt["mapped_archived_events"] = len(archived_events)
+        receipt["mapped_provider_events_with_original_capture"] = len(events)
         starts = [start for records in events.values() for _, _, start in records]
         if not starts:
             receipt["status"] = "NO_ARCHIVED_EVENT_IDENTITIES"
             return receipt, []
-        start_day = min(starts).date() - timedelta(days=1)
-        end_day = max(starts).date() + timedelta(days=1)
-        if (end_day - start_day).days > MAX_SCHEDULE_SPAN_DAYS:
-            receipt["status"] = "SCHEDULE_SPAN_EXCEEDS_SAFETY_LIMIT"
-            return receipt, []
-        response = session.get(
-            SCHEDULE_URL,
-            params={"sportId": 1, "startDate": start_day.isoformat(),
-                    "endDate": end_day.isoformat(), "hydrate": "team"},
-            timeout=20,
-        )
-        response.raise_for_status()
-        official_games = read_schedule(response.json())
+        windows = schedule_windows(starts)
+        receipt["schedule_windows"] = [
+            {"startDate": start.isoformat(), "endDate": end.isoformat()}
+            for start, end in windows
+        ]
+        receipt["schedule_window_count"] = len(windows)
+        all_official_games = []
+        for start, end in windows:
+            response = session.get(
+                SCHEDULE_URL,
+                params={"sportId": 1, "startDate": start.isoformat(),
+                        "endDate": end.isoformat(), "hydrate": "team"},
+                timeout=20,
+            )
+            response.raise_for_status()
+            all_official_games.extend(read_schedule(response.json()))
+        official_games = merge_official_schedules(all_official_games)
+        receipt["official_schedule_games"] = len(official_games)
         mapped, rejects = map_official_games(events, official_games)
         receipt["mapped_official_events"] = len(mapped)
         receipt["unmatched_events"] = rejects

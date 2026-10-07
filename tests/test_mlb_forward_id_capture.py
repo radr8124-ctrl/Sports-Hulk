@@ -219,7 +219,9 @@ class FrozenMlbSettlementTests(unittest.TestCase):
     def test_frozen_team_opponent_pair_must_match_official_game(self):
         receipt, events = self.plan(dict(self.entry, mlb_source_home_team="Boston Red Sox"))
         self.assertEqual(events, [])
-        self.assertEqual(receipt["review_reasons"]["FROZEN_TEAM_PAIR_DIFFERS_FROM_OFFICIAL_GAME"], 1)
+        # Conflicting archived and captured opponent pairs now poison the
+        # provider event BEFORE any official game or player result is graded.
+        self.assertEqual(receipt["review_reasons"]["NO_UNIQUE_OFFICIAL_GAME_MAPPING"], 1)
 
     def test_modified_frozen_id_without_valid_source_is_rejected(self):
         receipt, events = self.plan(dict(self.entry, mlb_source_player_id="wrong-player-id"))
