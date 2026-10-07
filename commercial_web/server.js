@@ -17,6 +17,7 @@ import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
+import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -1763,34 +1764,24 @@ function reportingAnswer(question, data) {
     event_type:event.event_type,
   }))
 
-  const sources=[]
-  const seen=new Set()
-  for(const event of events.slice(0,6)){
-    const label=String(event.source||'Sports reporting')
-    const key=label+'|'+String(event.source_url||'')
-    if(seen.has(key)) continue
-    seen.add(key)
-    sources.push({
-      label,
-      source:label,
-      url:event.source_url||null,
-      updated_at:event.published_or_effective_at||null,
-      tier:event.source_tier||null,
-    })
-  }
+  const sources=reportingEvidenceSources(events.slice(0,6),facts.slice(0,6),8)
   if(!sources.length) sources.push(...updatedSources(data,['askRetrieval']))
+  const claimSources=reportingClaimSources(events,facts)
 
-  return response({
-    intent:'reporting',
-    take:topEvent ? topEvent.title : topFact.fact_text,
-    confidence:hit.exact_entity_match?'ENTITY-LINKED REPORTING':'ATTRIBUTED REPORTING',
-    why:why.slice(0,4),
-    risk:['Reporting can be superseded by newer official status updates. Structured verified facts take precedence when they conflict.'],
-    cards,
-    sources,
-    updated_at:data.askRetrieval?.generated_at,
-    followups:['What does this mean for fantasy?','Any injury update?','What changed most recently?'],
-  })
+  return {
+    ...response({
+      intent:'reporting',
+      take:topEvent ? topEvent.title : topFact.fact_text,
+      confidence:hit.exact_entity_match?'ENTITY-LINKED REPORTING':'ATTRIBUTED REPORTING',
+      why:why.slice(0,4),
+      risk:['Reporting can be superseded by newer official status updates. Structured verified facts take precedence when they conflict.'],
+      cards,
+      sources,
+      updated_at:data.askRetrieval?.generated_at,
+      followups:['What does this mean for fantasy?','Any injury update?','What changed most recently?'],
+    }),
+    claim_sources:claimSources,
+  }
 }
 
 function newsAnswerV2(question, data) {
