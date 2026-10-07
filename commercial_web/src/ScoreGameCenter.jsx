@@ -4,6 +4,8 @@ import {
   Radio, Sparkles, Target, Trophy,
 } from 'lucide-react'
 
+const GameOddsPanel = React.lazy(() => import('./GameOddsPanel'))
+
 const TABS = [
   ['Overview', Trophy],
   ['Box Score', BarChart3],
@@ -310,7 +312,16 @@ export default function ScoreGameCenter({ game, league, onClose, boxScoreOverrid
         {tab === 'Box Score' && (
           boxScoreOverride || <BoxScoreContent league={league} eventId={game.event_id} available={game.boxscore_available} />
         )}
-        {['Odds', 'Props', 'Zenith', 'News'].includes(tab) && <ConnectedNext tab={tab} game={game} />}
+        {tab === 'Odds' && (
+          <React.Suspense fallback={
+            <div role="status" className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-white p-6 text-sm font-black text-slate-600">
+              <Activity size={17} className="animate-pulse text-blue-600" /> Loading game odds…
+            </div>
+          }>
+            <GameOddsPanel game={game} league={league} />
+          </React.Suspense>
+        )}
+        {['Props', 'Zenith', 'News'].includes(tab) && <ConnectedNext tab={tab} game={game} />}
       </div>
     </section>
   )
