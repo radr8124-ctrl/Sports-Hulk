@@ -18,6 +18,7 @@ import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
+import { askClaimCoverage } from './ask_claim_coverage.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -403,6 +404,7 @@ function shouldQueueAskReview(answer) {
 async function recordAskEvaluation(question, context, answer, latencyMs, error = null, answerGeneratedAt = null) {
   const cleanQuestion=String(question||'').trim().replace(/\s+/g,' ').slice(0,500)
   const sources=Array.isArray(answer?.sources)?answer.sources:[]
+  const claimCoverage=askClaimCoverage(answer||{})
   const record={
     recorded_at:new Date().toISOString(),
     answer_generated_at:answerGeneratedAt||null,
@@ -414,6 +416,10 @@ async function recordAskEvaluation(question, context, answer, latencyMs, error =
     confidence:error?'ERROR':answer?.confidence||null,
     source_count:sources.length,
     citation_url_count:sources.filter(source=>Boolean(source?.url)).length,
+    claim_count:claimCoverage.claim_count,
+    supported_claim_count:claimCoverage.supported_claim_count,
+    unsupported_claim_count:claimCoverage.unsupported_claim_count,
+    claim_evidence_coverage_pct:claimCoverage.claim_evidence_coverage_pct,
     latency_ms:Number.isFinite(Number(latencyMs))?Math.max(0,Math.round(Number(latencyMs))):null,
     error:Boolean(error),
   }
@@ -474,6 +480,10 @@ async function askEvaluationSummary(limit = 500) {
   const countStatus=status=>rows.filter(row=>String(row.status||'').toUpperCase()===status).length
   const reporting=rows.filter(row=>['REPORTING','REPORTING_CONFLICT','REPORTING_STALE','GAME_NEWS','NEWS'].includes(String(row.intent||'').toUpperCase()))
   const cited=reporting.filter(row=>Number(row.citation_url_count||0)>0).length
+  const claimMeasured=reporting.filter(row=>Number(row.claim_count||0)>0)
+  const reportingClaimCount=claimMeasured.reduce((sum,row)=>sum+Number(row.claim_count||0),0)
+  const supportedReportingClaimCount=claimMeasured.reduce((sum,row)=>sum+Number(row.supported_claim_count||0),0)
+  const unsupportedReportingClaimCount=claimMeasured.reduce((sum,row)=>sum+Number(row.unsupported_claim_count||0),0)
   let clickRows=[]
   try {
     const clickRaw=await readFile(ASK_SOURCE_CLICK_LEDGER_PATH,'utf8')
@@ -504,6 +514,11 @@ async function askEvaluationSummary(limit = 500) {
     reporting_answers:reporting.length,
     reporting_with_clickable_citation:cited,
     citation_coverage_pct:reporting.length?Math.round((cited/reporting.length)*1000)/10:null,
+    claim_measured_reporting_answers:claimMeasured.length,
+    reporting_claim_count:reportingClaimCount,
+    supported_reporting_claim_count:supportedReportingClaimCount,
+    unsupported_reporting_claim_count:unsupportedReportingClaimCount,
+    claim_evidence_coverage_pct:reportingClaimCount?Math.round((supportedReportingClaimCount/reportingClaimCount)*1000)/10:null,
     source_clicks:sourceClicks,
     unique_answers_with_source_click:uniqueClickedAnswers,
     source_click_rate_pct:cited?Math.round((Math.min(uniqueClickedAnswers,cited)/cited)*1000)/10:null,

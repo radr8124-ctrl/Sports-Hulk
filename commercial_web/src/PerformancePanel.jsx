@@ -131,6 +131,7 @@ function AskQualityPanel({ data }) {
   const ready = String(data?.status || '').toUpperCase() === 'READY'
   const tracked = Number(data?.tracked || 0)
   const citation = data?.citation_coverage_pct
+  const claimEvidence = data?.claim_evidence_coverage_pct
   const latency = data?.avg_latency_ms
 
   return (
@@ -150,12 +151,13 @@ function AskQualityPanel({ data }) {
 
       {ready ? (
         <>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
             {[
               ['Questions tracked', integer(tracked)],
               ['Grounded / current', pct(data.grounded_current_pct)],
               ['Flagged / withheld', pct(data.withheld_or_flagged_pct)],
               ['Clickable citations', citation == null ? '—' : pct(citation)],
+              ['Claim evidence', claimEvidence == null ? '—' : pct(claimEvidence)],
               ['Source click rate', data.source_click_rate_pct == null ? '—' : pct(data.source_click_rate_pct)],
               ['Avg response time', latency == null ? '—' : `${integer(latency)} ms`],
             ].map(([label, value]) => (
@@ -166,11 +168,12 @@ function AskQualityPanel({ data }) {
             ))}
           </div>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-4">
+          <div className="mt-4 grid gap-3 md:grid-cols-5">
             {[
               ['Insufficient evidence', data.insufficient_evidence],
               ['Stale source', data.stale_source],
               ['Source conflict', data.source_conflict],
+              ['Unsupported claims', data.unsupported_reporting_claim_count],
               ['Unknown / errors', Number(data.unknown || 0) + Number(data.errors || 0)],
             ].map(([label, value]) => (
               <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -181,7 +184,7 @@ function AskQualityPanel({ data }) {
           </div>
 
           <div className="mt-4 text-[11px] font-semibold leading-5 text-slate-400">
-            Recent append-only evaluation window · reporting citation coverage is measured only on reporting-style answers · these metrics measure restraint and traceability, not whether every sports opinion is correct.
+            Recent append-only evaluation window · clickable citations measure source-link presence, while claim evidence measures exact take/why claims mapped to a specific reporting evidence record · these metrics measure restraint and traceability, not whether every sports opinion is correct.
           </div>
         </>
       ) : (
