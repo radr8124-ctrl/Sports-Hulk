@@ -14,6 +14,7 @@ import { buildLinkedSurvivorSummaries, selectLinkedSurvivorEntry } from './survi
 import { diversifySurvivorEntries } from './survivor_diversification.js'
 import { addSurvivorLink, survivorEntryOwnedByOther, survivorLinkNames } from './survivor_link_registry.js'
 import { survivorSaveForLater } from './survivor_future_value.js'
+import { survivorBuybackState } from './survivor_buyback.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -1061,6 +1062,82 @@ function survivorFutureValueAnswer(data) {
     sources:updatedSources(data,['survivorV2']),
     updated_at:source.generated_at,
     followups:['Why save this team?','Show the next five future-value teams','What is my best Survivor pick this week?'],
+  })
+}
+
+
+function survivorBuybackAnswer(data, entryName = null, entry = null, poolState = {}) {
+  if (!entryName || !entry) {
+    return response({
+      intent:'survivor_buyback',
+      take:'Buyback or re-entry strategy requires a linked Survivor entry and an explicitly recorded pool state.',
+      confidence:'PERSONAL CONTEXT REQUIRED',
+      status:'PERSONAL_CONTEXT_REQUIRED',
+      why:['Buyback rules are pool-specific and are not inferred from the generic Survivor board.'],
+      risk:['Sports Zenith will not assume that a pool allows buybacks or that an eliminated entry can re-enter.'],
+      sources:updatedSources(data,['survivorV2']),
+      updated_at:data.survivorV2?.generated_at,
+    })
+  }
+
+  const state=survivorBuybackState(entry,poolState)
+  const details=[]
+  if(state.deadline) details.push(`Deadline: ${state.deadline}.`)
+  if(state.cost!=null) details.push(`Recorded cost: ${state.cost}.`)
+  if(state.reentry_week!=null) details.push(`Recorded re-entry week: ${state.reentry_week}.`)
+  if(state.reset_used_teams===true) details.push('Recorded state says prior used teams reset on re-entry.')
+
+  if(state.status==='NOT_APPLICABLE_ACTIVE_ENTRY'){
+    return response({
+      intent:'personal_survivor_buyback',
+      take:`${entryName} is still active, so buyback/re-entry strategy is not currently applicable.`,
+      confidence:'VERIFIED ENTRY STATE',
+      status:'NOT_APPLICABLE_ACTIVE_ENTRY',
+      why:[state.reason],
+      risk:['No re-entry action is needed while the entry remains active.'],
+      sources:updatedSources(data,['survivorV2']),
+      updated_at:data.survivorV2?.generated_at,
+    })
+  }
+
+  if(state.status==='NO_VERIFIED_BUYBACK_STATE'){
+    return response({
+      intent:'personal_survivor_buyback',
+      take:`${entryName} is eliminated, and no verified buyback or re-entry state is recorded for this entry.`,
+      confidence:'NO VERIFIED BUYBACK STATE',
+      status:'BUYBACK_STATE_REQUIRED',
+      why:[state.reason],
+      risk:['The entry remains blocked; Sports Zenith will not assume a buyback exists.'],
+      sources:updatedSources(data,['survivorV2']),
+      updated_at:data.survivorV2?.generated_at,
+    })
+  }
+
+  if(state.status==='BUYBACK_NOT_ELIGIBLE'){
+    return response({
+      intent:'personal_survivor_buyback',
+      take:`${entryName} has a recorded buyback/re-entry state, but it does not mark the entry eligible.`,
+      confidence:'RECORDED POOL STATE',
+      status:'BUYBACK_NOT_ELIGIBLE',
+      why:[state.reason,...details],
+      risk:['No new Survivor pick will be generated for this eliminated entry.'],
+      sources:updatedSources(data,['survivorV2']),
+      updated_at:data.survivorV2?.generated_at,
+    })
+  }
+
+  return response({
+    intent:'personal_survivor_buyback',
+    take:`${entryName} has explicit recorded buyback/re-entry eligibility.`,
+    confidence:'RECORDED BUYBACK ELIGIBILITY',
+    status:'BUYBACK_ELIGIBLE_RECORDED',
+    why:[state.reason,...details],
+    risk:[
+      'Eligibility alone does not reactivate the entry.',
+      'A new Survivor recommendation remains locked until the saved entry state records the actual re-entry/activation and applicable used-team rules.',
+    ],
+    sources:updatedSources(data,['survivorV2']),
+    updated_at:data.survivorV2?.generated_at,
   })
 }
 
@@ -2220,6 +2297,7 @@ function routeAsk(question, data, context = {}) {
   if(/\b(team style|team stats|offensive style|play mix|pass heavy|run heavy|rush heavy|tempo|pace|three[- ]point rate|shot environment|how .* play)\b/.test(q)) return teamStatsAnswer(question,data)
   if(/\b(player history|historical evidence|historical context|historically supported|career stats|career numbers|career statistics|season stats|stat line|past performance)\b/.test(q)) return playerHistoryAnswer(question,data)
   if(/\b(parlay|two leg|2 leg)\b/.test(q)) return parlayAnswer(data)
+  if(/\b(buyback|buy back|re-entry|reentry|rebuy|re-buy)\b/.test(q)) return survivorBuybackAnswer(data)
   if(/\b(save for later|save .* for later|future value|future-value|preserve for later|team should i save)\b/.test(q)) return survivorFutureValueAnswer(data)
   if(/\b(survivor|survivor pick|pool pick|survivor research|research leader)\b/.test(q)) return survivorAnswer(data)
   if(/\b(waiver|waivers|faab|free agent)\b/.test(q)) return waiversAnswer(data)
@@ -2238,6 +2316,7 @@ function routeAsk(question, data, context = {}) {
   if(page==='Props') return propsAnswer(question+' props',data)
   if(page==='PrizePicks') return propsAnswer(question+' prizepicks',data)
   if(page==='Parlays') return parlayAnswer(data)
+  if(page==='Survivor' && /\b(buyback|buy back|re-entry|reentry|rebuy|re-buy)\b/.test(q)) return survivorBuybackAnswer(data)
   if(page==='Survivor' && /\b(save|future value|preserve)\b/.test(q)) return survivorFutureValueAnswer(data)
   if(page==='Survivor') return survivorAnswer(data)
   if(page==='Scores'){
@@ -3118,7 +3197,8 @@ function attachPersonalFantasyFreshness(answer, snapshot) {
 async function personalizedSurvivorAsk(req, question, data) {
   const q=qtext(question)
   const wantsFutureValue=/\b(save for later|save .* for later|future value|future-value|preserve for later|team should i save)\b/.test(q)
-  if(!/\b(survivor|survivor pick|pool pick|knockout|used teams?|teams? used|save for later|future value|future-value|preserve for later|team should i save)\b/.test(q)) return null
+  const wantsBuyback=/\b(buyback|buy back|re-entry|reentry|rebuy|re-buy)\b/.test(q)
+  if(!/\b(survivor|survivor pick|pool pick|knockout|used teams?|teams? used|save for later|future value|future-value|preserve for later|team should i save|buyback|buy back|re-entry|reentry|rebuy|re-buy)\b/.test(q)) return null
   if(!bearerToken(req)) return null
 
   const user=await authenticatedUser(req)
@@ -3135,6 +3215,32 @@ async function personalizedSurvivorAsk(req, question, data) {
     const linkedEntries=entryNames
       .map(name=>({entry_name:name,entry:(survivorState?.entries||{})[name]||null}))
       .filter(item=>item.entry)
+
+    if(wantsBuyback){
+      const rows=linkedEntries.map(item=>({
+        entry_name:item.entry_name,
+        buyback:survivorBuybackState(item.entry,survivorState),
+      }))
+      return response({
+        intent:'personal_survivor_buyback_multi',
+        take:`Buyback/re-entry state by linked entry: ${rows.map(row=>`${row.entry_name} → ${nice(row.buyback.status)}`).join(' · ')}.`,
+        confidence:'RECORDED POOL STATE ONLY',
+        status:rows.some(row=>row.buyback.status==='BUYBACK_ELIGIBLE_RECORDED')?'BUYBACK_ELIGIBILITY_PRESENT':'BUYBACK_STATE_REVIEW',
+        why:rows.map(row=>`${row.entry_name}: ${row.buyback.reason}${row.buyback.deadline?` · deadline ${row.buyback.deadline}`:''}${row.buyback.cost!=null?` · cost ${row.buyback.cost}`:''}.`),
+        risk:['Sports Zenith will not reactivate or create a new pick for an eliminated entry unless an explicit re-entry state is recorded.'],
+        cards:rows.map(row=>({
+          type:'survivor_buyback_multi',
+          title:row.entry_name,
+          status:row.buyback.status,
+          eligible:row.buyback.eligible,
+          deadline:row.buyback.deadline||null,
+          cost:row.buyback.cost??null,
+          reentry_week:row.buyback.reentry_week??null,
+        })),
+        sources:updatedSources(data,['survivorV2']),
+        updated_at:data.survivorV2?.generated_at,
+      })
+    }
 
     if(wantsFutureValue){
       const rows=linkedEntries.map(item=>{
@@ -3211,12 +3317,14 @@ async function personalizedSurvivorAsk(req, question, data) {
   const personalizedSource=buildPersonalizedSurvivorSource(entryName,entry,survivorState,data.survivorV2||{})
   const usedTeams=personalizedSource.used_teams||[]
 
-  const answer=wantsFutureValue
-    ? survivorFutureValueAnswer({...data,survivorV2:personalizedSource})
-    : survivorAnswer({...data,survivorV2:personalizedSource})
+  const answer=wantsBuyback
+    ? survivorBuybackAnswer(data,entryName,entry,survivorState)
+    : wantsFutureValue
+      ? survivorFutureValueAnswer({...data,survivorV2:personalizedSource})
+      : survivorAnswer({...data,survivorV2:personalizedSource})
   return {
     ...answer,
-    intent:wantsFutureValue?'personal_survivor_future_value':'personal_survivor',
+    intent:wantsBuyback?'personal_survivor_buyback':wantsFutureValue?'personal_survivor_future_value':'personal_survivor',
     confidence:answer.confidence,
     status:answer.status,
     why:[
