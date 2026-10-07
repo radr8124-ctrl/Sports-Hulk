@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-10-07T12:00:00Z",
+  "datasets": {
+    "stash": [
+      {
+        "player": "Conflict Back",
+        "team": "TST",
+        "status": "QUESTIONABLE",
+        "injury_type": "QUESTIONABLE",
+        "source_disagreement": true,
+        "source_count": 2,
+        "return_window": "UNKNOWN",
+        "generated_at": "2026-10-07T11:45:00Z"
+      }
+    ]
+  }
+}

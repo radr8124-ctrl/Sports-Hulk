@@ -40,6 +40,8 @@ const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORT
 const ASK_FEEDBACK_LEDGER_PATH = process.env.ASK_FEEDBACK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FEEDBACK_LEDGER.jsonl')
 const ASK_SOURCE_CLICK_LEDGER_PATH = process.env.ASK_SOURCE_CLICK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_SOURCE_CLICK_LEDGER.jsonl')
 const ASK_RETRIEVAL_PATH_OVERRIDE = process.env.ASK_RETRIEVAL_PATH || ''
+const ASK_CONTEXT_PATH_OVERRIDE = process.env.ASK_CONTEXT_PATH || ''
+const ASK_NOW_MS_OVERRIDE = Date.parse(process.env.ASK_NOW_ISO || '')
 
 const JSON_FILES = {
   nflScores: 'nfl_scores.json',
@@ -90,7 +92,9 @@ async function loadJson(name) {
   if (!filename) return null
   const sourcePath = name==='askRetrieval' && ASK_RETRIEVAL_PATH_OVERRIDE
     ? ASK_RETRIEVAL_PATH_OVERRIDE
-    : path.join(DIST, filename)
+    : name==='askContext' && ASK_CONTEXT_PATH_OVERRIDE
+      ? ASK_CONTEXT_PATH_OVERRIDE
+      : path.join(DIST, filename)
   try { return JSON.parse(await readFile(sourcePath, 'utf8')) }
   catch { return null }
 }
@@ -1695,7 +1699,8 @@ function reportingAnswer(question, data) {
     ...facts.map(row=>Date.parse(row?.effective_at||'')).filter(Number.isFinite),
   ]
   const newestEvidenceMs=evidenceTimes.length?Math.max(...evidenceTimes):null
-  const evidenceAgeHours=newestEvidenceMs==null?null:Math.max(0,(Date.now()-newestEvidenceMs)/3600000)
+  const reportingNowMs=Number.isFinite(ASK_NOW_MS_OVERRIDE)?ASK_NOW_MS_OVERRIDE:Date.now()
+  const evidenceAgeHours=newestEvidenceMs==null?null:Math.max(0,(reportingNowMs-newestEvidenceMs)/3600000)
 
   if(freshnessHours!=null && (evidenceAgeHours==null || evidenceAgeHours>freshnessHours)){
     const staleEvent=topEvent||null

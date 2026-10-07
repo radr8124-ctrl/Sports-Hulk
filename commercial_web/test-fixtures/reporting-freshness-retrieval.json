@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-10-07T12:00:00Z",
+  "source": "Deterministic reporting freshness fixture",
+  "news_events": [
+    {
+      "event_node_id": "NEWS:stale-runner",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "MEDIUM",
+      "title": "Stale Runner injury update",
+      "detail": "Stale Runner remained questionable in the older report.",
+      "source": "Fixture Beat Report",
+      "source_tier": "EXTERNAL_NEWS",
+      "source_url": "https://example.com/stale-runner",
+      "published_or_effective_at": "2026-10-05T12:00:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    },
+    {
+      "event_node_id": "NEWS:fresh-runner",
+      "sport": "NFL",
+      "event_source_type": "NEWS",
+      "event_type": "INJURY",
+      "severity": "MEDIUM",
+      "title": "Fresh Runner injury update",
+      "detail": "Fresh Runner returned to full practice in the latest report.",
+      "source": "Fixture Official Team",
+      "source_tier": "OFFICIAL_NEWS",
+      "source_url": "https://example.com/fresh-runner",
+      "published_or_effective_at": "2026-10-07T08:00:00Z",
+      "verified_status": "ATTRIBUTED_NEWS_REPORT"
+    }
+  ],
+  "entity_links": [],
+  "facts": [],
+  "entity_index": {
+    "stale runner": ["NEWS:stale-runner"],
+    "fresh runner": ["NEWS:fresh-runner"]
+  },
+  "counts": {
+    "facts": 0,
+    "news_events": 2
+  },
+  "truth_rules": {}
+}
