@@ -6,12 +6,28 @@ import math
 from datetime import datetime, timezone
 from pathlib import Path
 
+try:
+    from .competition_regime import (
+        normalize_competition_regime,
+        proof_lane_key as regime_proof_lane_key,
+        proof_version as regime_proof_version,
+        regime_enforced,
+    )
+except ImportError:
+    from competition_regime import (
+        normalize_competition_regime,
+        proof_lane_key as regime_proof_lane_key,
+        proof_version as regime_proof_version,
+        regime_enforced,
+    )
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "intelligence_warehouse" / "betting_v2"
 PUBLIC = ROOT / "commercial_web" / "public"
 DIST = ROOT / "commercial_web" / "dist"
 
 CURRENT = OUT_DIR / "BETTING_V2_CURRENT.json"
+REGIME_SOURCE = OUT_DIR / "BETTING_V2_ALL_MARKETS_CURRENT.json"
 PRICE_LEDGER = OUT_DIR / "BETTING_V2_PRICE_TIMELINE.jsonl"
 PICK_LEDGER = OUT_DIR / "BETTING_V2_PICK_LEDGER.jsonl"
 OUT = OUT_DIR / "BETTING_V2_CLV.json"
@@ -110,12 +126,110 @@ def row_key(row):
     ])
 
 
+def regime_metadata(row, model_version=None):
+    sport = clean(row.get("sport")).upper()
+    regime = normalize_competition_regime(
+        row.get("competition_regime"),
+        sport,
+    )
+    proof_key = clean(
+        row.get("proof_lane_key")
+        or regime_proof_lane_key(sport, "MONEYLINE", regime)
+    )
+    version = clean(
+        row.get("proof_version")
+        or regime_proof_version(
+            model_version or row.get("model_version"),
+            sport,
+            regime,
+        )
+    )
+    return {
+        "competition_regime": regime,
+        "proof_lane_key": proof_key,
+        "proof_version": version,
+    }
+
+
+def regime_source_lookup():
+    payload = read_json(REGIME_SOURCE, {})
+    model_version = payload.get("model_version")
+    lookup = {}
+    conflicts = set()
+
+    for row in payload.get("picks") or []:
+        sport = clean(row.get("sport")).upper()
+        game_key = clean(row.get("game_key"))
+        market = clean(row.get("market")).upper()
+        if not sport or not game_key:
+            continue
+        if market and market != "MONEYLINE":
+            continue
+        key = (sport, game_key)
+        metadata = regime_metadata(row, model_version)
+        prior = lookup.get(key)
+        if prior is not None and prior != metadata:
+            conflicts.add(key)
+        else:
+            lookup[key] = metadata
+
+    for sport, game_key in conflicts:
+        lookup[(sport, game_key)] = regime_metadata(
+            {
+                "sport": sport,
+                "competition_regime": "UNKNOWN",
+            },
+            model_version,
+        )
+    return lookup
+
+
+def resolved_regime_metadata(row, model_version=None, lookup=None):
+    explicit = (
+        "competition_regime" in row
+        or bool(clean(row.get("proof_lane_key")))
+        or bool(clean(row.get("proof_version")))
+    )
+    if explicit:
+        return regime_metadata(row, model_version)
+
+    source = regime_source_lookup() if lookup is None else lookup
+    key = (
+        clean(row.get("sport")).upper(),
+        clean(row.get("game_key")),
+    )
+    if key in source:
+        return dict(source[key])
+    return regime_metadata(row, model_version)
+
+
+def regime_clv_key(row):
+    sport = clean(row.get("sport")).upper()
+    regime_aware = (
+        regime_enforced(sport)
+        and (
+            "competition_regime" in row
+            or bool(clean(row.get("proof_version")))
+            or bool(clean(row.get("proof_lane_key")))
+        )
+    )
+    if not regime_aware:
+        return row_key(row)
+    metadata = regime_metadata(row)
+    return "|".join([
+        metadata["proof_version"],
+        metadata["competition_regime"],
+        row_key(row),
+    ])
+
+
 def pick_key(row):
-    return row_key(row)
+    return regime_clv_key(row)
 
 
 def snapshot_market_board(payload):
     captured_at = now_iso()
+    regime_lookup = regime_source_lookup()
     existing = read_jsonl(PRICE_LEDGER)
     latest_signature = {}
     for row in existing:
@@ -129,12 +243,18 @@ def snapshot_market_board(payload):
 
     added = 0
     for row in payload.get("market_board") or []:
+        metadata = resolved_regime_metadata(
+            row,
+            payload.get("model_version"),
+            regime_lookup,
+        )
+        resolved_row = {**row, **metadata}
         start = parse_dt(row.get("event_start"))
         if start is not None and now() >= start:
             # Never record an in-play price as pregame market history.
             continue
 
-        market_key = row_key(row)
+        market_key = regime_clv_key(resolved_row)
         if not market_key:
             continue
 
@@ -152,6 +272,7 @@ def snapshot_market_board(payload):
             "captured_at": captured_at,
             "market_key": market_key,
             "sport": clean(row.get("sport")).upper(),
+            **metadata,
             "game_key": clean(row.get("game_key")),
             "selection": clean(row.get("selection")),
             "side": clean(row.get("side")).upper() or None,
@@ -172,6 +293,7 @@ def snapshot_market_board(payload):
 
 
 def capture_v2_picks(payload):
+    regime_lookup = regime_source_lookup()
     existing = {}
     for row in read_jsonl(PICK_LEDGER):
         key = row.get("pick_key")
@@ -180,7 +302,13 @@ def capture_v2_picks(payload):
 
     added = 0
     for row in payload.get("picks") or []:
-        key = pick_key(row)
+        metadata = resolved_regime_metadata(
+            row,
+            payload.get("model_version"),
+            regime_lookup,
+        )
+        resolved_row = {**row, **metadata}
+        key = pick_key(resolved_row)
         if not key or key in existing:
             continue
 
@@ -194,6 +322,7 @@ def capture_v2_picks(payload):
             "pick_key": key,
             "entry_at": now_iso(),
             "sport": clean(row.get("sport")).upper(),
+            **metadata,
             "game_key": clean(row.get("game_key")),
             "selection": clean(row.get("selection")),
             "side": clean(row.get("side")).upper() or None,
@@ -332,9 +461,25 @@ def finalize_closes():
         else:
             direction = "FLAT"
 
+        regime_aware = any(
+            field in entry
+            for field in (
+                "competition_regime",
+                "proof_lane_key",
+                "proof_version",
+            )
+        )
         event = {
             "event_type": "CLOSE",
             "pick_key": key,
+            **(
+                {
+                    "competition_regime": entry.get("competition_regime"),
+                    "proof_lane_key": entry.get("proof_lane_key"),
+                    "proof_version": entry.get("proof_version"),
+                }
+                if regime_aware else {}
+            ),
             "status": "CLOSED",
             "closed_at": now_iso(),
             "closing_quote_at": close.get("captured_at"),
@@ -401,6 +546,8 @@ def build_output():
     entries = list(canonical_entries().values())
     by_sport = {}
     by_v2_decision = {}
+    by_regime = {}
+    by_proof_lane = {}
 
     for sport in sorted({r.get("sport") for r in entries if r.get("sport")}):
         by_sport[sport] = summarize_group(
@@ -415,6 +562,30 @@ def build_output():
             [r for r in entries if r.get("entry_v2_shadow_decision") == decision]
         )
 
+    regime_groups = {}
+    proof_groups = {}
+    for row in entries:
+        sport = clean(row.get("sport")).upper()
+        regime = normalize_competition_regime(
+            row.get("competition_regime"),
+            sport,
+        )
+        proof_key = clean(row.get("proof_lane_key"))
+        if not proof_key:
+            proof_key = regime_proof_lane_key(
+                sport,
+                "MONEYLINE",
+                regime,
+            )
+        regime_groups.setdefault(regime, []).append(row)
+        proof_groups.setdefault(proof_key, []).append(row)
+
+    for regime in sorted(regime_groups):
+        by_regime[regime] = summarize_group(regime_groups[regime])
+
+    for proof_key in sorted(proof_groups):
+        by_proof_lane[proof_key] = summarize_group(proof_groups[proof_key])
+
     payload = {
         "generated_at": now_iso(),
         "status": "READY",
@@ -422,6 +593,8 @@ def build_output():
         "summary": summarize_group(entries),
         "by_sport": by_sport,
         "by_v2_decision": by_v2_decision,
+        "by_regime": by_regime,
+        "by_proof_lane": by_proof_lane,
         "open_picks": [
             r for r in entries if r.get("status") != "CLOSED"
         ][:50],
