@@ -568,6 +568,12 @@ function resolveSessionQuestion(question, context = {}) {
     if(priorUser?.text) return {question:`${String(priorUser.text).trim()} safer option`,resolved:true}
   }
 
+  const rosterFollowup=/factor in my roster|use my roster|with my roster|based on my roster/i.test(original)
+  if(rosterFollowup && ['start_sit','waivers','stash','defense_stream','personal_start_sit','personal_waivers','personal_ir_stash','personal_defense_streaming','personal_idp'].includes(String(answer.intent||''))){
+    const priorUser=[...history.slice(0,lastAssistantIndex)].reverse().find(item=>item?.role==='user' && item?.text)
+    if(priorUser?.text) return {question:`${String(priorUser.text).trim()} factor in my roster`,resolved:true}
+  }
+
   const cards=Array.isArray(answer.cards)?answer.cards.slice(0,4):[]
   const playerCards=cards.filter(card=>['fantasy','prop','prop_research','prizepicks_research','waiver','stash','player_history','dfs'].includes(String(card?.type||'')))
   const scoreCards=cards.filter(card=>String(card?.type||'')==='score')

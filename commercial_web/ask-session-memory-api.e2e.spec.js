@@ -168,3 +168,43 @@ test('session memory safer option can switch from higher weekly score to lower a
   expect(follow.take).toContain('Kyle Monangai');
   expect(follow.why || []).toContain('Safer ordering prioritizes lower availability risk, then existing weekly tier and research score.');
 });
+
+
+test('roster follow-up resolves prior fantasy question but does not fake private context when unsigned', async ({ request }) => {
+  const firstQuestion = 'Start Kyle Monangai or Rhamondre Stevenson?'
+
+  const followResponse = await request.post(`${BASE}/api/ask`, {
+    data: {
+      question: 'Now factor in my roster',
+      context: {
+        page: 'Ask',
+        fantasy_league_id: 'league-placeholder',
+        session_history: [
+          { role: 'user', text: firstQuestion },
+          {
+            role: 'assistant',
+            answer: {
+              intent: 'start_sit',
+              status: 'RESEARCH_ONLY',
+              confidence: 'START LEAN',
+              take: 'Start Kyle Monangai over Rhamondre Stevenson.',
+              cards: [
+                { type: 'fantasy', title: 'Kyle Monangai', position: 'RB' },
+                { type: 'fantasy', title: 'Rhamondre Stevenson', position: 'RB' },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  expect(followResponse.ok()).toBeTruthy();
+  const follow = await followResponse.json();
+
+  expect(follow.session_reference_resolved).toBe(true);
+  expect(follow.resolved_question).toContain('factor in my roster');
+  expect(follow.intent).toBe('start_sit');
+  expect(follow.intent).not.toBe('personal_start_sit');
+  expect((follow.sources || []).some(source => source.source === 'PRIVATE_SAVED_FANTASY_TEAM')).toBe(false);
+});
