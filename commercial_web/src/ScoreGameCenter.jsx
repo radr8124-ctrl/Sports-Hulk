@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Activity, AlertTriangle, BarChart3, Brain, ChevronRight, Newspaper,
   Radio, Sparkles, Target, Trophy,
@@ -7,6 +7,7 @@ import {
 const GameOddsPanel = React.lazy(() => import('./GameOddsPanel'))
 const GamePropsPanel = React.lazy(() => import('./GamePropsPanel'))
 const GameZenithPanel = React.lazy(() => import('./GameZenithPanel'))
+const GameNewsPanel = React.lazy(() => import('./GameNewsPanel'))
 
 const TABS = [
   ['Overview', Trophy],
@@ -228,41 +229,6 @@ function BoxScoreContent({ league, eventId, available }) {
   )
 }
 
-function ConnectedNext({ tab, game }) {
-  const content = useMemo(() => {
-    if (tab === 'Odds') return {
-      title: 'Game odds are the next connection',
-      text: 'Moneyline, spread and total will live here with the same plain-English “what this bet means” layer used in Best Bets.',
-    }
-    if (tab === 'Props') return {
-      title: 'Player props will live with the game',
-      text: 'Player lines will be grouped by this matchup so users do not have to bounce between Scores and Props to understand one game.',
-    }
-    if (tab === 'Zenith') return {
-      title: 'Sports Zenith game intelligence',
-      text: 'This tab will bring together the governed game decision, market context, risks and evidence without turning research into a forced PLAY.',
-    }
-    return {
-      title: 'Game news and impact',
-      text: 'Only reporting connected to this matchup will appear here: injuries, lineup changes, role changes and important game context.',
-    }
-  }, [tab])
-
-  return (
-    <div className="rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 p-6">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-blue-700 shadow-sm">
-        <Sparkles size={20} />
-      </div>
-      <div className="mt-4 text-xs font-black uppercase tracking-[0.14em] text-blue-700">{tab}</div>
-      <h3 className="mt-2 text-xl font-black text-slate-950">{content.title}</h3>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{content.text}</p>
-      <div className="mt-4 text-xs font-semibold text-slate-400">
-        {game?.away_abbr || game?.away} @ {game?.home_abbr || game?.home} · no placeholder odds, props or recommendations are being invented.
-      </div>
-    </div>
-  )
-}
-
 export default function ScoreGameCenter({ game, league, onClose, boxScoreOverride = null }) {
   const [tab, setTab] = useState('Overview')
 
@@ -346,7 +312,15 @@ export default function ScoreGameCenter({ game, league, onClose, boxScoreOverrid
             />
           </React.Suspense>
         )}
-        {tab === 'News' && <ConnectedNext tab={tab} game={game} />}
+        {tab === 'News' && (
+          <React.Suspense fallback={
+            <div role="status" className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-white p-6 text-sm font-black text-slate-600">
+              <Activity size={17} className="animate-pulse text-blue-600" /> Loading game news…
+            </div>
+          }>
+            <GameNewsPanel game={game} league={league} />
+          </React.Suspense>
+        )}
       </div>
     </section>
   )

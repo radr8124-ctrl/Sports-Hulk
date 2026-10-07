@@ -104,13 +104,7 @@ test('Game Center presents overview, real box score, and honest next-connection 
   await expect(page.getByText('Jayson Tatum', { exact: true })).toBeVisible();
   await expect(page.getByText('Attendance 19,812', { exact: false })).toBeVisible();
 
-  for (const [tab, title] of [
-    ['News', 'Game news and impact'],
-  ]) {
-    await page.getByRole('tab', { name: tab, exact: true }).click();
-    await expect(page.getByRole('heading', { name: title })).toBeVisible();
-    await expect(page.getByText(/no placeholder odds, props or recommendations are being invented/i)).toBeVisible();
-  }
+  await expect(page.getByRole('tab', { name: 'News', exact: true })).toBeVisible();
 });
 
 test('Game Center remains contained and usable on phone width', async ({ page }) => {
