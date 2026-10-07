@@ -27,6 +27,7 @@ const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPO
 const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_EVALUATION_LEDGER.jsonl')
 const ASK_FEEDBACK_LEDGER_PATH = process.env.ASK_FEEDBACK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FEEDBACK_LEDGER.jsonl')
 const ASK_SOURCE_CLICK_LEDGER_PATH = process.env.ASK_SOURCE_CLICK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_SOURCE_CLICK_LEDGER.jsonl')
+const ASK_RETRIEVAL_PATH_OVERRIDE = process.env.ASK_RETRIEVAL_PATH || ''
 
 const JSON_FILES = {
   nflScores: 'nfl_scores.json',
@@ -75,7 +76,10 @@ function json(res, status, payload, extraHeaders = {}) {
 async function loadJson(name) {
   const filename = JSON_FILES[name]
   if (!filename) return null
-  try { return JSON.parse(await readFile(path.join(DIST, filename), 'utf8')) }
+  const sourcePath = name==='askRetrieval' && ASK_RETRIEVAL_PATH_OVERRIDE
+    ? ASK_RETRIEVAL_PATH_OVERRIDE
+    : path.join(DIST, filename)
+  try { return JSON.parse(await readFile(sourcePath, 'utf8')) }
   catch { return null }
 }
 
@@ -295,6 +299,21 @@ async function loadAll() {
 
 const qtext = value => String(value || '').trim().toLowerCase()
 const nice = value => String(value || '').replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
+
+function containsUntrustedInstructions(...values) {
+  const text=values.map(value=>String(value||'')).join(' ').toLowerCase()
+  if(!text.trim()) return false
+  return [
+    /ignore (all |any |the )?(previous|prior|system|developer) instructions?/,
+    /disregard (all |any |the )?(previous|prior|system|developer) instructions?/,
+    /(system|developer) prompt/,
+    /reveal (the )?(prompt|system message|hidden instructions?)/,
+    /(call|invoke|run|execute) (a |the )?(tool|function|command|shell)/,
+    /(change|modify|override) (the )?(user permissions?|access controls?|scoring logic|system rules?)/,
+    /you are now (an?|the )/,
+    /follow these instructions? instead/,
+  ].some(pattern=>pattern.test(text))
+}
 function num(value, fallback = null) { const n = Number(value); return Number.isFinite(n) ? n : fallback }
 
 function updatedSources(data, labels) {
@@ -1163,6 +1182,7 @@ function reportingRetrieval(question, data) {
   const eventScore=event=>{
     const title=String(event.title||'').toLowerCase()
     const detail=String(event.detail||'').toLowerCase()
+    if(containsUntrustedInstructions(title,detail)) return {event,score:-999,when:0,matchedWords:0,quarantined:true}
     const titleTokens=tokenSet(title)
     const detailTokens=tokenSet(detail)
     const type=String(event.event_type||'').toUpperCase()
@@ -1193,6 +1213,8 @@ function reportingRetrieval(question, data) {
   }
 
   const scoredEvents=events.map(eventScore).filter(x=>x.score>0 && ((x.matchedWords||0)>0 || exactIds.has(String(x.event.event_node_id))))
+  const safeExactIds=new Set(scoredEvents.filter(x=>exactIds.has(String(x.event.event_node_id))).map(x=>String(x.event.event_node_id)))
+  const quarantinedExactMatch=exactIds.size>0 && safeExactIds.size===0
   const maxEventCoverage=Math.max(0,...scoredEvents.map(x=>x.matchedWords||0))
   const rankedEvents=scoredEvents
     .filter(x=>words.length<2 || maxEventCoverage<2 || x.matchedWords===maxEventCoverage)
@@ -1202,6 +1224,7 @@ function reportingRetrieval(question, data) {
     const subject=String(fact.subject||'').toLowerCase()
     const team=String(fact.team||'').toLowerCase()
     const text=String(fact.fact_text||'').toLowerCase()
+    if(containsUntrustedInstructions(subject,text)) return {fact,score:-999,when:0,matchedWords:0,quarantined:true}
     const subjectTokens=tokenSet(subject)
     const teamTokens=tokenSet(team)
     const textTokens=tokenSet(text)
@@ -1239,9 +1262,10 @@ function reportingRetrieval(question, data) {
     .sort((a,b)=>(b.matchedWords||0)-(a.matchedWords||0)||b.score-a.score||b.when-a.when)
 
   return {
-    events: rankedEvents.slice(0,8).map(x=>x.event),
-    facts: rankedFacts.slice(0,6).map(x=>x.fact),
-    exact_entity_match: exactIds.size>0,
+    events: quarantinedExactMatch?[]:rankedEvents.slice(0,8).map(x=>x.event),
+    facts: quarantinedExactMatch?[]:rankedFacts.slice(0,6).map(x=>x.fact),
+    exact_entity_match: safeExactIds.size>0,
+    quarantined_exact_match:quarantinedExactMatch,
   }
 }
 
@@ -1296,6 +1320,16 @@ function reportingAnswer(question, data) {
   const hit=reportingRetrieval(question,data)
   const events=hit.events
   const facts=hit.facts
+
+  if(hit.quarantined_exact_match) return response({
+    intent:'reporting_guardrail',
+    take:"I don't have enough trusted information to answer that safely.",
+    confidence:'UNTRUSTED SOURCE BLOCKED',
+    status:'INSUFFICIENT_EVIDENCE',
+    why:['Matching external content contained instruction-like text and was quarantined from sports evidence.'],
+    risk:['Sports Zenith treats scraped articles as data only and will not follow instructions embedded inside them.'],
+    sources:[],
+  })
 
   if(!events.length && !facts.length) return null
 
@@ -1421,6 +1455,8 @@ function newsAnswerV2(question, data) {
 
   const scored=articles.map(article=>{
     const title=String(article.title||'').toLowerCase()
+    const detail=String(article.summary||article.description||article.detail||'').toLowerCase()
+    if(containsUntrustedInstructions(title,detail)) return {article,score:-999,published:0,matchedWords:0,quarantined:true}
     const tags=(article.impact_tags||[]).map(t=>String(t).toUpperCase())
     const hay=title+' '+tags.join(' ').toLowerCase()
     const titleTokens=new Set(title.match(/[a-z0-9'-]+/g)||[])
@@ -1548,6 +1584,7 @@ function contextNewsRows(data, game) {
   const id=String(game?.event_id||'')
   const sport=String(game?.league||'').toUpperCase()
   return (data.askRetrieval?.news_events||[])
+    .filter(row=>!containsUntrustedInstructions(row?.title,row?.detail))
     .filter(row=>String(row?.sport||'').toUpperCase()===sport && String(row?.game_event_id??'')===id)
     .sort((a,b)=>(Date.parse(b?.published_or_effective_at||'')||0)-(Date.parse(a?.published_or_effective_at||'')||0))
     .slice(0,8)
