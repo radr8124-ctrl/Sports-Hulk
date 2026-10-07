@@ -25,6 +25,7 @@
 .trae/
 .windsurf/
 .superdesign/tmp/
+.worktrees/
 
 # Sports Zenith private account state
 commercial_web/private_member_links.json
