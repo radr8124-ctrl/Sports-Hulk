@@ -19,6 +19,7 @@ SOURCES = {
     "dfs": ROOT / "intelligence_warehouse/dfs/DFS_CONTEST_ARCHETYPES_CURRENT.csv",
     "schedule_load": ROOT / "intelligence_warehouse/schedule/TEAM_SCHEDULE_LOAD_CURRENT.csv",
     "future_schedule": ROOT / "intelligence_warehouse/schedule/FUTURE_SCHEDULE_DIFFICULTY.csv",
+    "team_style": ROOT / "intelligence_warehouse/team_style/TEAM_STYLE_CURRENT.csv",
 }
 
 LIMITS = {
@@ -30,6 +31,7 @@ LIMITS = {
     "dfs": 240,
     "schedule_load": 1600,
     "future_schedule": 1600,
+    "team_style": 1600,
 }
 
 

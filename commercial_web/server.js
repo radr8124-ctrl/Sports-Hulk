@@ -1807,6 +1807,111 @@ function scheduleAnswer(question, data) {
   })
 }
 
+function teamStatsAnswer(question, data) {
+  const q=qtext(question)
+  const rows=data.askContext?.datasets?.team_style||[]
+  if(!rows.length) return response({
+    intent:'team_stats',
+    take:'Team style intelligence is not available right now.',
+    confidence:'WAITING',
+    status:'WAITING',
+    sources:updatedSources(data,['askContext']),
+  })
+
+  const sportMatch=['NFL','MLB','NBA','NHL','CFB','CBB'].find(sport=>new RegExp(`\\b${sport.toLowerCase()}\\b`).test(q))||null
+  const aliases=scheduleTeamAliases(data)
+  const qTokens=new Set(q.match(/[a-z0-9'-]+/g)||[])
+  const stop=new Set(['the','for','who','what','when','where','why','how','are','is','was','were','has','have','had','team','stats','style','offense','offensive','play','plays','playing','pace','tempo'])
+
+  const scoreRow=row=>{
+    if(sportMatch && String(row.sport||'').toUpperCase()!==sportMatch) return -1
+    const sport=String(row.sport||'').toUpperCase()
+    const teamCode=String(row.team||'').toUpperCase()
+    const candidates=[
+      String(row.team_name||'').toLowerCase(),
+      String(row.team||'').toLowerCase(),
+      ...[...(aliases.get(`${sport}|${teamCode}`)||[])],
+    ].filter(Boolean)
+    let best=0
+    for(const candidate of candidates){
+      const tokens=candidate.match(/[a-z0-9'-]+/g)||[]
+      const exact=tokens.length===1
+        ? tokens[0].length>=3 && !stop.has(tokens[0]) && qTokens.has(tokens[0])
+        : q.includes(candidate)
+      if(exact) best=Math.max(best,candidate.length)
+    }
+    return best
+  }
+
+  const matched=rows.map(row=>({row,score:scoreRow(row)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)
+  const top=matched[0]?.row
+  if(!top) return response({
+    intent:'team_stats',
+    take:"I don't have enough team context to answer that team-style question confidently.",
+    confidence:'NEEDS TEAM',
+    status:'INSUFFICIENT_EVIDENCE',
+    why:['Name the team and, if useful, the sport so Sports Zenith can match the governed team-stat row.'],
+    sources:updatedSources(data,['askContext']),
+  })
+
+  const sport=String(top.sport||'').toUpperCase()
+  const stage=String(top.sample_stage||'UNKNOWN').toUpperCase()
+  const current=stage.includes('CURRENT')
+  const why=[]
+  if(top.primary_style) why.push(`Primary style: ${nice(top.primary_style)}.`)
+  if(sport==='NFL'||sport==='CFB'){
+    if(top.pass_rate!=null) why.push(`Pass rate: ${(Number(top.pass_rate)*100).toFixed(1)}%.`)
+    if(top.rush_rate!=null) why.push(`Rush rate: ${(Number(top.rush_rate)*100).toFixed(1)}%.`)
+    if(top.plays_per_game!=null) why.push(`Plays per game: ${Number(top.plays_per_game).toFixed(1)}.`)
+    if(top.offensive_epa_per_play!=null) why.push(`Offensive EPA/play: ${Number(top.offensive_epa_per_play).toFixed(3)}.`)
+    if(top.explosive_play_rate!=null) why.push(`Explosive-play rate: ${(Number(top.explosive_play_rate)*100).toFixed(1)}%.`)
+  } else if(sport==='NBA'||sport==='CBB'){
+    if(top.points_per_game!=null) why.push(`Points per game: ${Number(top.points_per_game).toFixed(1)}.`)
+    if(top.estimated_possessions_per_game!=null) why.push(`Estimated possessions/game: ${Number(top.estimated_possessions_per_game).toFixed(1)}.`)
+    if(top.three_point_attempt_rate!=null) why.push(`Three-point attempt rate: ${(Number(top.three_point_attempt_rate)*100).toFixed(1)}%.`)
+    if(top.turnover_rate!=null) why.push(`Turnover rate: ${(Number(top.turnover_rate)*100).toFixed(1)}%.`)
+  } else if(sport==='NHL'){
+    if(top.shots_for_per_game!=null) why.push(`Shots for/game: ${Number(top.shots_for_per_game).toFixed(1)}.`)
+    if(top.shots_against_per_game!=null) why.push(`Shots against/game: ${Number(top.shots_against_per_game).toFixed(1)}.`)
+    if(top.shot_environment_per_game!=null) why.push(`Combined shot environment/game: ${Number(top.shot_environment_per_game).toFixed(1)}.`)
+    if(top.shooting_pct!=null) why.push(`Shooting percentage: ${Number(top.shooting_pct).toFixed(1)}%.`)
+  } else if(sport==='MLB'){
+    if(top.runs_per_game!=null) why.push(`Runs per game: ${Number(top.runs_per_game).toFixed(2)}.`)
+    if(top.home_runs_per_game!=null) why.push(`Home runs per game: ${Number(top.home_runs_per_game).toFixed(2)}.`)
+    if(top.obp!=null) why.push(`OBP: ${Number(top.obp).toFixed(3)}.`)
+    if(top.slg!=null) why.push(`SLG: ${Number(top.slg).toFixed(3)}.`)
+    if(top.ops!=null) why.push(`OPS: ${Number(top.ops).toFixed(3)}.`)
+  }
+
+  const display=top.team_name||top.team
+  return response({
+    intent:'team_stats',
+    take:`${display}: ${nice(top.primary_style||top.play_mix_signal||top.tempo_signal||'structured team profile')}.`,
+    confidence:current?'CURRENT STRUCTURED TEAM STATS':'PRIOR BASELINE',
+    status:current?'CURRENT':'BACKGROUND_BASELINE',
+    why:[
+      `Data stage: ${nice(top.sample_stage||'UNKNOWN')} · ${nice(top.season_basis||'UNKNOWN')}.`,
+      ...why.slice(0,5),
+    ],
+    risk:[
+      current
+        ? 'Current-season team style can still move as the sample grows.'
+        : 'This is a prior-season baseline, not a claim about current-season performance.',
+      'Team-style features are research context and do not automatically change betting or fantasy models.',
+    ],
+    cards:[{
+      type:'team_stats',
+      title:`${sport} · ${display}`,
+      style:nice(top.primary_style||'UNKNOWN'),
+      stage:nice(top.sample_stage||'UNKNOWN'),
+      games:top.games,
+      coach:top.coach||null,
+    }],
+    sources:updatedSources(data,['askContext']),
+    updated_at:data.askContext?.generated_at,
+  })
+}
+
 function routeAsk(question, data, context = {}) {
   const q=qtext(question)
   const page=String(context?.page||'').trim()
@@ -1815,6 +1920,7 @@ function routeAsk(question, data, context = {}) {
   if(scopedGameAnswer) return scopedGameAnswer
   if(/\b(score|scores|live score|who is winning|box score|game score)\b/.test(q)) return scoreAnswer(question,data)
   if(/\b(schedule|next game|play next|plays next|back[- ]to[- ]back|rest days?|fatigue|road trip|future schedule|hardest|toughest|easiest|softest)\b/.test(q)) return scheduleAnswer(question,data)
+  if(/\b(team style|team stats|offensive style|play mix|pass heavy|run heavy|rush heavy|tempo|pace|three[- ]point rate|shot environment|how .* play)\b/.test(q)) return teamStatsAnswer(question,data)
   if(/\b(parlay|two leg|2 leg)\b/.test(q)) return parlayAnswer(data)
   if(/\b(survivor|survivor pick|pool pick|survivor research|research leader)\b/.test(q)) return survivorAnswer(data)
   if(/\b(waiver|waivers|faab|free agent)\b/.test(q)) return waiversAnswer(data)
