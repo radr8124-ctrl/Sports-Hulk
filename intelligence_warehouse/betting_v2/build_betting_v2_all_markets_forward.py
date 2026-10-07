@@ -9,6 +9,21 @@ from pathlib import Path
 
 import pandas as pd
 
+try:
+    from .competition_regime import (
+        normalize_competition_regime,
+        proof_lane_key as regime_proof_lane_key,
+        proof_version as regime_proof_version,
+        regime_enforced,
+    )
+except ImportError:
+    from competition_regime import (
+        normalize_competition_regime,
+        proof_lane_key as regime_proof_lane_key,
+        proof_version as regime_proof_version,
+        regime_enforced,
+    )
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "intelligence_warehouse" / "betting_v2"
 CURRENT = OUT_DIR / "BETTING_V2_ALL_MARKETS_CURRENT.json"
@@ -114,8 +129,71 @@ def identity(row):
     ])
 
 
+def forward_identity(row, model_version):
+    sport = clean(row.get("sport")).upper()
+    regime_aware = (
+        regime_enforced(sport)
+        and (
+            "competition_regime" in row
+            or bool(clean(row.get("proof_version")))
+            or bool(clean(row.get("proof_lane_key")))
+        )
+    )
+    if not regime_aware:
+        return f"{clean(model_version)}|{identity(row)}"
+    regime = normalize_competition_regime(
+        row.get("competition_regime"),
+        sport,
+    )
+    version = clean(
+        row.get("proof_version")
+        or regime_proof_version(model_version, sport, regime)
+    )
+    return "|".join([version, regime, identity(row)])
+
+
+def price_identity(row):
+    sport = clean(row.get("sport")).upper()
+    if not regime_enforced(sport):
+        return identity(row)
+    regime = normalize_competition_regime(
+        row.get("competition_regime"),
+        sport,
+    )
+    proof_key = clean(
+        row.get("proof_lane_key")
+        or regime_proof_lane_key(sport, row.get("market"), regime)
+    )
+    return "|".join([proof_key, regime, identity(row)])
+
+
 def forward_key(version, row):
-    return f"{clean(version)}|{identity(row)}"
+    return forward_identity(row, version)
+
+
+def regime_metadata(row, model_version=None):
+    sport = clean(row.get("sport")).upper()
+    regime = normalize_competition_regime(
+        row.get("competition_regime"),
+        sport,
+    )
+    proof_key = clean(
+        row.get("proof_lane_key")
+        or regime_proof_lane_key(sport, row.get("market"), regime)
+    )
+    version = clean(
+        row.get("proof_version")
+        or regime_proof_version(
+            model_version or row.get("model_version"),
+            sport,
+            regime,
+        )
+    )
+    return {
+        "competition_regime": regime,
+        "proof_lane_key": proof_key,
+        "proof_version": version,
+    }
 
 
 def canonical():
@@ -159,7 +237,7 @@ def snapshot_prices(payload):
         start = parse_dt(row.get("event_start"))
         if start is not None and start <= now():
             continue
-        key = identity(row)
+        key = price_identity(row)
         if not key:
             continue
         sig = (
@@ -173,6 +251,7 @@ def snapshot_prices(payload):
             "event_type": "MARKET_PRICE",
             "captured_at": captured_at,
             "market_key": key,
+            **regime_metadata(row, payload.get("model_version")),
             "sport": clean(row.get("sport")).upper(),
             "game_key": clean(row.get("game_key")),
             "market": clean(row.get("market")).upper(),
@@ -226,6 +305,7 @@ def capture():
                 "event_type": "ENTRY",
                 "forward_key": key,
                 "model_version": version,
+                **regime_metadata(row, version),
                 "captured_at": captured_at,
                 "lane_key": clean(row.get("lane_key")),
                 "sport": clean(row.get("sport")).upper(),
@@ -289,6 +369,7 @@ def capture():
             event = {
                 "event_type": "SHADOW_TRIGGER",
                 "forward_key": key,
+                **regime_metadata(row, version),
                 "shadow_selected": True,
                 "shadow_triggered_at": now_iso(),
                 "shadow_probability_pct": num(
@@ -353,12 +434,26 @@ def history_lookup():
                 norm(selection),
                 line_text(line),
             ])
-            lookup[key] = {
+            result = {
                 "grade": clean(row.get("grade")).upper(),
                 "grade_snapshot_at": clean(row.get("snapshot_at")),
                 "away_score": num(row.get("away_score")),
                 "home_score": num(row.get("home_score")),
             }
+            lookup[key] = result
+            if regime_enforced(sport):
+                regime = normalize_competition_regime(
+                    row.get("season_type")
+                    or row.get("competition_regime")
+                    or row.get("season_phase")
+                    or row.get("competition_phase"),
+                    sport,
+                )
+                if regime != "UNKNOWN":
+                    lookup[f"{key}|{regime}"] = {
+                        **result,
+                        "competition_regime": regime,
+                    }
     return lookup
 
 
@@ -370,19 +465,44 @@ def settle():
     for key, row in existing.items():
         if clean(row.get("grade")).upper() in SETTLED:
             continue
+        sport = clean(row.get("sport")).upper()
         result_key = "|".join([
-            clean(row.get("sport")).upper(),
+            sport,
             clean(row.get("game_key")),
             clean(row.get("market")).upper(),
             norm(row.get("selection")),
             line_text(row.get("line")),
         ])
-        result = lookup.get(result_key)
+        regime_aware = (
+            regime_enforced(sport)
+            and (
+                "competition_regime" in row
+                or bool(clean(row.get("proof_version")))
+                or bool(clean(row.get("proof_lane_key")))
+            )
+        )
+        regime = None
+        if regime_aware:
+            regime = normalize_competition_regime(
+                row.get("competition_regime"),
+                sport,
+            )
+            result = lookup.get(f"{result_key}|{regime}")
+        else:
+            result = lookup.get(result_key)
         if not result:
             continue
         event = {
             "event_type": "SETTLED",
             "forward_key": key,
+            **(
+                {
+                    "competition_regime": regime,
+                    "proof_lane_key": row.get("proof_lane_key"),
+                    "proof_version": row.get("proof_version"),
+                }
+                if regime_aware else {}
+            ),
             "status": "SETTLED",
             "grade": result["grade"],
             "settled_at": now_iso(),
@@ -446,7 +566,16 @@ def grouped_lcb90(pairs):
 
 
 def closing_reference(row, prices):
-    key = identity(row)
+    sport = clean(row.get("sport")).upper()
+    regime_aware = (
+        regime_enforced(sport)
+        and (
+            "competition_regime" in row
+            or bool(clean(row.get("proof_version")))
+            or bool(clean(row.get("proof_lane_key")))
+        )
+    )
+    key = price_identity(row) if regime_aware else identity(row)
     start = parse_dt(row.get("event_start"))
     captured_at = parse_dt(row.get("captured_at"))
     if not key or start is None or captured_at is None:
@@ -739,6 +868,29 @@ def main():
             "promotion": promotion(all_stats, shadow_stats),
         }
 
+    proof_lane_keys = sorted({
+        clean(r.get("proof_lane_key"))
+        for r in rows
+        if clean(r.get("proof_lane_key"))
+    })
+    by_proof_lane = {}
+    for proof_lane in proof_lane_keys:
+        cohort = [
+            r for r in rows
+            if clean(r.get("proof_lane_key")) == proof_lane
+        ]
+        all_stats = summarize(
+            cohort, shadow_only=False, prices=prices
+        )
+        shadow_stats = summarize(
+            cohort, shadow_only=True, prices=prices
+        )
+        by_proof_lane[proof_lane] = {
+            "all_predictions": all_stats,
+            "shadow_selection": shadow_stats,
+            "promotion": promotion(all_stats, shadow_stats),
+        }
+
     payload = {
         "generated_at": now_iso(),
         "status": "READY",
@@ -753,7 +905,9 @@ def main():
             rows, shadow_only=True, prices=prices
         ),
         "by_lane": by_lane,
+        "by_proof_lane": by_proof_lane,
         "rules": [
+            "by_lane is compatibility-only; regime-aware promotion proof is authoritative under by_proof_lane.",
             "Each sport/market lane has its own immutable forward cohort.",
             "Same-game results share one confidence block.",
             "First pregame probability and price are frozen and never rewritten.",
