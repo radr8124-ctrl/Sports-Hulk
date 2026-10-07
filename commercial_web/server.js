@@ -10,6 +10,7 @@ import { buildPersonalizedSurvivorSource } from './survivor_personalization.js'
 import { sanitizeAccountPreferences } from './account_preferences.js'
 import { preferencePresentation, watchlistNewsHits } from './preference_presentation.js'
 import { faabBudgetLines } from './faab_presentation.js'
+import { buildLinkedSurvivorSummaries } from './survivor_linked_entries.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -254,8 +255,8 @@ async function authenticatedUser(req) {
   }
 }
 
-async function linkedSurvivorEntry(req, userId) {
-  if (!userId) return null
+async function linkedSurvivorEntries(req, userId) {
+  if (!userId) return []
 
   const client = scopedInsForgeClient(req)
   if (client) {
@@ -265,13 +266,23 @@ async function linkedSurvivorEntry(req, userId) {
         .select('entry_name')
         .eq('owner_id', userId)
         .eq('is_active', true)
-        .limit(1)
-      if (!error && Array.isArray(data) && data[0]?.entry_name) return data[0].entry_name
+        .limit(20)
+      if (!error && Array.isArray(data)) {
+        const names=[...new Set(data.map(row=>String(row?.entry_name||'').trim()).filter(Boolean))]
+        if(names.length) return names
+      }
     } catch {}
   }
 
   const links = await loadExternalJson(MEMBER_LINKS_PATH)
-  return links?.survivor_entries?.[userId] || null
+  const stored=links?.survivor_entries?.[userId]
+  if(Array.isArray(stored)) return [...new Set(stored.map(value=>String(value||'').trim()).filter(Boolean))]
+  return stored ? [String(stored).trim()].filter(Boolean) : []
+}
+
+async function linkedSurvivorEntry(req, userId) {
+  const entries=await linkedSurvivorEntries(req,userId)
+  return entries[0]||null
 }
 
 async function loadAccountPreferences(userId) {
@@ -3156,9 +3167,11 @@ const server=http.createServer(async(req,res)=>{
     const client=scopedInsForgeClient(req)
     if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage is temporarily unavailable.'})
 
-    const linkedName=await linkedSurvivorEntry(req,user.id)
+    const linkedNames=await linkedSurvivorEntries(req,user.id)
+    const linkedName=linkedNames[0]||null
     const survivorState=await loadExternalJson(SURVIVOR_ENTRIES_PATH)
     const linkedEntry=linkedName ? (survivorState?.entries||{})[linkedName]||null : null
+    const linkedEntries=buildLinkedSurvivorSummaries(linkedNames,survivorState)
 
     let leagues=[]
     let fantasyStatus='READY'
@@ -3181,6 +3194,8 @@ const server=http.createServer(async(req,res)=>{
       },
       survivor:{
         linked:Boolean(linkedName),
+        linked_entry_count:linkedEntries.length,
+        linked_entries:linkedEntries,
         active_entry:linkedName||null,
         entry_status:linkedEntry?.status||null,
         used_team_count:Array.isArray(linkedEntry?.used_teams)?linkedEntry.used_teams.length:0,
