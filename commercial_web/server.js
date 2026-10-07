@@ -25,6 +25,7 @@ const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehous
 const DATASET_FRESHNESS_PATH = path.join(SPORTS_ROOT, 'intelligence_warehouse', 'freshness', 'DATASET_FRESHNESS_CURRENT.csv')
 const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FAILED_QUESTION_QUEUE.jsonl')
 const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_EVALUATION_LEDGER.jsonl')
+const ASK_FEEDBACK_LEDGER_PATH = process.env.ASK_FEEDBACK_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FEEDBACK_LEDGER.jsonl')
 
 const JSON_FILES = {
   nflScores: 'nfl_scores.json',
@@ -350,6 +351,22 @@ async function recordAskEvaluation(question, context, answer, latencyMs, error =
   } catch {
     // Evaluation telemetry must never break the user-facing Ask response.
   }
+}
+
+async function recordAskFeedback(body = {}) {
+  const rating=String(body.rating||'').toUpperCase()
+  if(!['HELPFUL','NEEDS_WORK'].includes(rating)) throw new Error('Invalid feedback rating')
+  const record={
+    recorded_at:new Date().toISOString(),
+    answer_generated_at:String(body.answer_generated_at||'').slice(0,80)||null,
+    intent:String(body.intent||'').slice(0,80)||null,
+    status:String(body.status||'').slice(0,80)||null,
+    confidence:String(body.confidence||'').slice(0,120)||null,
+    rating,
+    page:String(body.page||'').slice(0,80)||null,
+  }
+  await appendFile(ASK_FEEDBACK_LEDGER_PATH, JSON.stringify(record)+'\n', { encoding:'utf8', mode:0o600 })
+  return {status:'RECORDED',rating}
 }
 
 async function askEvaluationSummary(limit = 500) {
@@ -3898,6 +3915,14 @@ const server=http.createServer(async(req,res)=>{
   if(req.method==='GET'&&url.pathname==='/api/ask/evaluation-summary'){
     const limit=Math.max(1,Math.min(Number(url.searchParams.get('limit')||500),5000))
     return json(res,200,await askEvaluationSummary(limit))
+  }
+  if(req.method==='POST'&&url.pathname==='/api/ask/feedback'){
+    try{
+      const body=await readBody(req)
+      return json(res,200,await recordAskFeedback(body))
+    }catch(err){
+      return json(res,400,{status:'ERROR',message:err instanceof Error?err.message:String(err)})
+    }
   }
   if(req.method==='POST'&&url.pathname==='/api/ask'){
     let question=''

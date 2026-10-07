@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Activity, AlertTriangle, BarChart3, Bot, Brain, ChevronRight,
-  MessageCircle, Send, ShieldCheck, Sparkles, Target, Trophy, Users, X, Zap,
+  MessageCircle, Send, ShieldCheck, Sparkles, Target, ThumbsDown, ThumbsUp, Trophy, Users, X, Zap,
 } from 'lucide-react'
 import { useAuth } from './AuthShell'
 
@@ -46,7 +46,35 @@ function safeSourceUrl(value) {
 }
 
 function AskCard({ answer, compact = false }) {
+  const [feedback, setFeedback] = useState('')
+  const [feedbackBusy, setFeedbackBusy] = useState(false)
   if (!answer) return null
+
+  const sendFeedback = async (rating) => {
+    if (feedbackBusy || feedback) return
+    setFeedbackBusy(true)
+    try {
+      const response = await fetch('/api/ask/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating,
+          answer_generated_at: answer.generated_at,
+          intent: answer.intent,
+          status: answer.status,
+          confidence: answer.confidence,
+          page: answer.context?.page,
+        }),
+      })
+      if (!response.ok) throw new Error('Feedback unavailable')
+      setFeedback(rating)
+    } catch {
+      setFeedback('ERROR')
+    } finally {
+      setFeedbackBusy(false)
+    }
+  }
+
   return (
     <div className={`rounded-3xl border border-emerald-400/20 bg-slate-950/80 shadow-2xl shadow-emerald-950/20 ${compact ? 'p-4' : 'p-5 md:p-6'}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -106,6 +134,26 @@ function AskCard({ answer, compact = false }) {
       )}
 
       <div className="mt-5 border-t border-white/10 pt-3">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-[11px] font-bold text-slate-500">Was this helpful?</span>
+          <button
+            type="button"
+            onClick={() => sendFeedback('HELPFUL')}
+            disabled={feedbackBusy || Boolean(feedback)}
+            className={`inline-flex min-h-9 items-center gap-1.5 rounded-xl border px-3 text-[11px] font-black transition ${feedback === 'HELPFUL' ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-300' : 'border-white/10 text-slate-400 hover:border-emerald-400/30 hover:text-emerald-300'} disabled:cursor-default`}
+          >
+            <ThumbsUp size={13} /> Helpful
+          </button>
+          <button
+            type="button"
+            onClick={() => sendFeedback('NEEDS_WORK')}
+            disabled={feedbackBusy || Boolean(feedback)}
+            className={`inline-flex min-h-9 items-center gap-1.5 rounded-xl border px-3 text-[11px] font-black transition ${feedback === 'NEEDS_WORK' ? 'border-amber-400/40 bg-amber-400/10 text-amber-200' : 'border-white/10 text-slate-400 hover:border-amber-400/30 hover:text-amber-200'} disabled:cursor-default`}
+          >
+            <ThumbsDown size={13} /> Needs work
+          </button>
+          {feedback === 'ERROR' && <span className="text-[11px] font-semibold text-amber-300">Feedback could not be saved.</span>}
+        </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-slate-500">
           {!!answer.sources?.length && (
             <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
