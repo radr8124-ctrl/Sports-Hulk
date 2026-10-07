@@ -8,15 +8,15 @@ from datetime import datetime, timezone, timedelta
 import csv
 import json
 import math
+import os
 import re
+from tempfile import NamedTemporaryFile
 
 import pandas as pd
 import requests
 
 
-ROOT = Path(
-    "/home/ubuntu/sports-hulk"
-)
+ROOT = Path(__file__).resolve().parents[2]
 
 DEC = (
     ROOT
@@ -1344,164 +1344,81 @@ def load_player_stats():
     return stats
 
 
-def find_player_result(
-    ledger_row,
-    game,
-    stats,
-):
+def official_player_id(value):
+    """Only an explicit nflverse player ID, not a player-name approximation."""
+    raw = str(value or "").strip().upper()
+    match = re.fullmatch(r"(00-[0-9]{6,8})(?:\|([A-Z]{2,3}))?", raw)
+    return (match.group(1), match.group(2) or "") if match else ("", "")
 
-    if stats.empty:
+
+def find_player_result(ledger_row, game, stats):
+    """One official player/game row; never reuse an earlier week's box score.
+
+    Sportsbook PROP rows often freeze a nflverse player ID plus team (for
+    example 00-0038997|IND), whereas PrizePicks rows freeze a name. We
+    require exact identity plus the *verified* NFL week and both teams.
+    """
+    if stats.empty or not game:
         return None
-
-
-    payload = row_payload(
-        ledger_row
-    )
-
-
+    payload = row_payload(ledger_row)
     player = (
-        ledger_row.get(
-            "player"
-        )
-        or payload.get(
-            "canonical_player_identity"
-        )
-        or payload.get(
-            "player"
-        )
-        or payload.get(
-            "player_dfs"
-        )
-        or payload.get(
-            "player_sportsbook"
-        )
+        ledger_row.get("player")
+        or payload.get("canonical_player_identity")
+        or payload.get("player")
+        or payload.get("player_dfs")
+        or payload.get("player_sportsbook")
     )
-
-
-    player_key = player_norm(
-        player
-    )
-
-
-    if not player_key:
-        return None
-
-
+    player_id, embedded_team = official_player_id(player)
     team = team_abbr(
-        ledger_row.get(
-            "team"
-        )
-        or payload.get(
-            "identity_team"
-        )
-        or payload.get(
-            "player_team"
-        )
-        or payload.get(
-            "prop_team"
-        )
+        ledger_row.get("team")
+        or payload.get("identity_team")
+        or payload.get("player_team")
+        or payload.get("prop_team")
     )
+    if embedded_team:
+        encoded_team = team_abbr(embedded_team)
+        if not encoded_team or (team and team != encoded_team):
+            return None
+        team = encoded_team
 
-
-    x = stats[
-        stats[
-            "_player_key"
-        ].eq(
-            player_key
-        )
-    ].copy()
-
-
-    if team:
-
-        x = x[
-            x[
-                "_team"
-            ].eq(
-                team
-            )
-        ]
-
-
+    if player_id:
+        if "player_id" not in stats.columns:
+            return None
+        x = stats[stats["player_id"].astype(str).str.upper().eq(player_id)].copy()
+    else:
+        key = player_norm(player)
+        if not key or "_player_key" not in stats.columns:
+            return None
+        x = stats[stats["_player_key"].eq(key)].copy()
     if x.empty:
         return None
 
-
-    if game:
-
-        week = num(
-            game.get(
-                "week"
-            )
-        )
-
-        if (
-            week is not None
-            and "week"
-            in x.columns
-        ):
-
-            by_week = x[
-                pd.to_numeric(
-                    x[
-                        "week"
-                    ],
-                    errors="coerce",
-                ).eq(
-                    week
-                )
-            ]
-
-            if not by_week.empty:
-                x = by_week
-
-
-        away = team_abbr(
-            game.get(
-                "away_team"
-            )
-        )
-
-        home = team_abbr(
-            game.get(
-                "home_team"
-            )
-        )
-
-
-        opponent = ""
-
-        if team == away:
-            opponent = home
-
-        elif team == home:
-            opponent = away
-
-
-        if opponent:
-
-            by_opp = x[
-                x[
-                    "_opp"
-                ].eq(
-                    opponent
-                )
-            ]
-
-            if not by_opp.empty:
-                x = by_opp
-
-
-    if len(
-        x
-    ) != 1:
-
+    away = team_abbr(game.get("away_team"))
+    home = team_abbr(game.get("home_team"))
+    # Without an official opponent pair, a single player-season row is not
+    # evidence of performance in this particular game.
+    if not away or not home or away == home:
         return None
+    if team and team not in {away, home}:
+        return None
+    if "_team" not in x.columns or "_opp" not in x.columns:
+        return None
+    x = x[
+        (x["_team"].eq(away) & x["_opp"].eq(home))
+        | (x["_team"].eq(home) & x["_opp"].eq(away))
+    ]
+    if team:
+        x = x[x["_team"].eq(team)]
 
-
-    return x.iloc[
-        0
-    ].to_dict()
+    week = num(game.get("week"))
+    if week is None or "week" not in x.columns:
+        return None
+    x = x[pd.to_numeric(x["week"], errors="coerce").eq(week)]
+    # Never treat prior weeks, absent player box scores, or duplicate game
+    # identities as verified results.
+    if len(x) != 1:
+        return None
+    return x.iloc[0].to_dict()
 
 
 # =========================================================
@@ -2483,6 +2400,21 @@ def grade_parlay(
 # MAIN
 # =========================================================
 
+def atomic_csv(frame, path):
+    """Publish a complete snapshot; readers never see a partial grade CSV."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with NamedTemporaryFile(
+        "w", dir=path.parent, newline="", encoding="utf-8",
+        prefix=".nfl-graded-", suffix=".tmp", delete=False,
+    ) as output:
+        temporary = Path(output.name)
+        frame.to_csv(output, index=False)
+    try:
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def main():
 
     if not LEDGER.exists():
@@ -2658,10 +2590,7 @@ def main():
     )
 
 
-    graded.to_csv(
-        GRADED_HISTORY,
-        index=False,
-    )
+    atomic_csv(graded, GRADED_HISTORY)
 
 
     latest = (
@@ -2677,10 +2606,7 @@ def main():
     )
 
 
-    latest.to_csv(
-        GRADED_LATEST,
-        index=False,
-    )
+    atomic_csv(latest, GRADED_LATEST)
 
 
     settled = latest[

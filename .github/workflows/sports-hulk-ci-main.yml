@@ -47,6 +47,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_*regime*.py'
           python -m unittest discover -s tests -p 'test_nba_*proof*.py'
           python -m unittest discover -s tests -p 'test_forward_results_provenance.py'
+          python -m unittest discover -s tests -p 'test_nfl_official_player_identity.py'
           python -m unittest discover -s tests -p 'test_sports_workflow_safety.py'
 
       - name: Set up Node
