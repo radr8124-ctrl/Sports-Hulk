@@ -127,6 +127,71 @@ function OfficialRecord({ data }) {
   )
 }
 
+function AskQualityPanel({ data }) {
+  const ready = String(data?.status || '').toUpperCase() === 'READY'
+  const tracked = Number(data?.tracked || 0)
+  const citation = data?.citation_coverage_pct
+  const latency = data?.avg_latency_ms
+
+  return (
+    <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-soft md:p-8">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-blue-700">
+            <ShieldCheck size={16} /> Ask Quality
+          </div>
+          <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Is the sports analyst staying grounded?</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+            This is chatbot answer quality, not betting performance. Unsupported, stale and conflicting answers are counted as flagged rather than hidden.
+          </p>
+        </div>
+        <StatusPill value={ready ? 'TRACKING' : 'WAITING'} />
+      </div>
+
+      {ready ? (
+        <>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              ['Questions tracked', integer(tracked)],
+              ['Grounded / current', pct(data.grounded_current_pct)],
+              ['Flagged / withheld', pct(data.withheld_or_flagged_pct)],
+              ['Clickable citations', citation == null ? '—' : pct(citation)],
+              ['Avg response time', latency == null ? '—' : `${integer(latency)} ms`],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{label}</div>
+                <div className="mt-2 text-2xl font-black text-slate-950">{value}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-4">
+            {[
+              ['Insufficient evidence', data.insufficient_evidence],
+              ['Stale source', data.stale_source],
+              ['Source conflict', data.source_conflict],
+              ['Unknown / errors', Number(data.unknown || 0) + Number(data.errors || 0)],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="text-xs font-black text-slate-500">{label}</div>
+                <div className="mt-1 text-xl font-black text-slate-950">{integer(value)}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 text-[11px] font-semibold leading-5 text-slate-400">
+            Recent append-only evaluation window · reporting citation coverage is measured only on reporting-style answers · these metrics measure restraint and traceability, not whether every sports opinion is correct.
+          </div>
+        </>
+      ) : (
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+          Ask quality tracking is connected, but there are not enough recorded questions yet to calculate a useful snapshot.
+        </div>
+      )}
+    </section>
+  )
+}
+
 function BrainMetricCard({ item, icon: Icon }) {
   const decisions = Number(item?.decisions || 0)
   return (
@@ -1591,6 +1656,7 @@ function PromisingSignals({ brain }) {
 export default function PerformancePanel() {
   const [data, setData] = useState({ official: {}, policy: {}, research_validation: [] })
   const [brain, setBrain] = useState({ categories: [], dfs: {}, selectivity_watch: [] })
+  const [askQuality, setAskQuality] = useState({ status: 'NO_DATA', tracked: 0 })
   const [sport, setSport] = useState('ALL')
   const [error, setError] = useState('')
 
@@ -1598,16 +1664,19 @@ export default function PerformancePanel() {
     let cancelled = false
     const load = async () => {
       try {
-        const [performanceResponse, brainResponse] = await Promise.all([
+        const [performanceResponse, brainResponse, askQualityResponse] = await Promise.all([
           fetch(`/performance_snapshot.json?ts=${Date.now()}`, { cache: 'no-store' }),
           fetch(`/brain_performance.json?ts=${Date.now()}`, { cache: 'no-store' }),
+          fetch(`/api/ask/evaluation-summary?limit=500&ts=${Date.now()}`, { cache: 'no-store' }),
         ])
         if (!performanceResponse.ok) throw new Error('Official performance snapshot is unavailable')
         const performancePayload = await performanceResponse.json()
         const brainPayload = brainResponse.ok ? await brainResponse.json() : { categories: [], dfs: {}, selectivity_watch: [] }
+        const askQualityPayload = askQualityResponse.ok ? await askQualityResponse.json() : { status: 'NO_DATA', tracked: 0 }
         if (!cancelled) {
           setData(performancePayload)
           setBrain(brainPayload)
+          setAskQuality(askQualityPayload)
           setError('')
         }
       } catch (err) {
@@ -1642,6 +1711,7 @@ export default function PerformancePanel() {
   return (
     <div className="space-y-8">
       <OfficialRecord data={data} />
+      <AskQualityPanel data={askQuality} />
 
       {error && (
         <div className="flex gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-800">
