@@ -246,8 +246,34 @@ class StrictCrosswalkTests(unittest.TestCase):
             self.assertTrue(ledger.read_bytes().startswith(before))
             self.assertTrue(all(x["grade"] == "WIN" for x in props.canonical().values()))
 
+    def test_default_100_result_batches_then_safe_resume(self):
+        entries = [
+            dict(self.entry,
+                 forward_key=f"frozen-unique-{i:03d}",
+                 line=0.5 + i * 0.01,
+                 captured_at="2026-10-05T18:00:00Z")
+            for i in range(105)
+        ]
+        ledger, output = self.setup_ledger(entries)
+        old = ledger.read_bytes()
+        with patch.object(props, "ROOT", self.root), \
+             patch.object(props, "LEDGER", ledger), \
+             patch.object(props, "MLB_BOX_RECEIPT", output):
+            first = props.settle_mlb_official_box(session=FakeSession())
+            self.assertEqual(first["batch_limit"], 100)
+            self.assertEqual(first["settled_now"], 100)
+            self.assertEqual(first["pending_verified_next_batch"], 5)
+            self.assertTrue(ledger.read_bytes().startswith(old))
+            second = props.settle_mlb_official_box(session=FakeSession())
+            self.assertEqual(second["settled_now"], 5)
+            self.assertEqual(second["pending_verified_next_batch"], 0)
+            third = props.settle_mlb_official_box(session=FakeSession())
+            self.assertEqual(third["settled_now"], 0)
+            self.assertEqual(third["existing_verified"], 105)
+        self.assertEqual(len(ledger.read_text().splitlines()), 210)
+
     def test_reject_zero_negative_or_oversized_batches(self):
-        for amount in (0, -1, 501, 0.5, None):
+        for amount in (0, -1, 101, 501, 0.5, None, True):
             with self.subTest(amount=amount):
                 with self.assertRaises(ValueError):
                     props.settle_mlb_official_box(session=FakeSession(), max_events=amount)

@@ -915,11 +915,11 @@ def settle_nhl_official_box():
     return receipt
 
 
-def settle_mlb_official_box(session=None, max_events=50):
-    # Bound each verified settlement pass. Subsequent runs continue from the
-    # unchanged frozen ledger; default hourly refresh also uses this cap.
-    if not isinstance(max_events, int) or not 1 <= max_events <= 500:
-        raise ValueError("MLB verified settlement batch must contain 1 to 500 events")
+def settle_mlb_official_box(session=None, max_events=100):
+    # Keep official MLB result writes in batches of at most 100. All frozen
+    # outcomes remain unmodified and the next hourly pass resumes the queue.
+    if isinstance(max_events, bool) or not isinstance(max_events, int) or not 1 <= max_events <= 100:
+        raise ValueError("MLB verified settlement batch must contain 1 to 100 events")
     try:
         from .mlb_official_box_forward import (
             plan_mlb_settlement, archive_fingerprint,
