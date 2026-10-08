@@ -12,6 +12,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+try:
+    from .mlb_pending_source_audit import official_pending_breakdown
+except ImportError:
+    from mlb_pending_source_audit import official_pending_breakdown
+
 SPORTS = ("NFL", "CFB", "CBB", "MLB", "NBA", "NHL")
 FILES = {
     "BEST_BETS": "BETTING_V2_ALL_MARKETS_FORWARD_LEDGER.jsonl",
@@ -164,6 +169,15 @@ def audit_forward_ledgers(root: Path, *, at: datetime | None = None) -> dict:
         by_sport[sport] = {
             lane: by_lane[lane]["by_sport"][sport] for lane in FILES
         }
+    # Explain MLB PENDING with exact official source buckets only when the
+    # independent official receipt reconciles against the current frozen
+    # forward ledger; never infer outcomes from the clock alone.
+    mlb_prop = by_sport["MLB"]["PROPS"]
+    mlb_source = official_pending_breakdown(
+        root, pending=mlb_prop["pending"], settled=mlb_prop["settled"],
+    )
+    mlb_prop["official_pending_breakdown"] = mlb_source
+
     # Counts are from distinct proof families, not an assertion these are
     # unique bets or independent, actually placed wagers.
     total_overdue = sum(
@@ -177,6 +191,7 @@ def audit_forward_ledgers(root: Path, *, at: datetime | None = None) -> dict:
         "sports": list(SPORTS),
         "by_lane": by_lane,
         "by_sport": by_sport,
+        "mlb_official_pending_breakdown": mlb_source,
         "integrity_issues": errors,
         "summary": {
             "pending_overdue_12h": total_overdue,

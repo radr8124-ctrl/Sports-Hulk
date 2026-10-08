@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import math
 import re
+from hashlib import sha256
 import sys
 import requests
 from datetime import datetime, timezone
@@ -1014,6 +1015,16 @@ def settle_mlb_official_backlog(session=None, batch_size=100, max_batches=4):
     summary["max_batches_per_refresh"] = max_batches
     summary["batches_executed"] = len(run_results)
     summary["batch_results"] = run_results
+    # Bind this complete source-reason receipt to the *exact* immutable
+    # ledger state examined by this run. A subsequent ENTRY/SETTLED append
+    # makes its reason buckets stale even if totals coincidentally match.
+    if LEDGER.is_file():
+        digest = sha256()
+        with LEDGER.open("rb") as source:
+            for block in iter(lambda: source.read(1024 * 1024), b""):
+                digest.update(block)
+        summary["forward_ledger_sha256"] = digest.hexdigest()
+        summary["forward_ledger_bytes"] = LEDGER.stat().st_size
     if summary.get("status") in {"READY", "NO_FROZEN_MLB_PREDICTIONS"}:
         summary["verified_remaining_for_future_refresh"] = int(
             summary.get("pending_verified_next_batch") or 0

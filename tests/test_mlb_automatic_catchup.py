@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from hashlib import sha256
 from pathlib import Path
 import tempfile
 import unittest
@@ -85,6 +86,9 @@ class MlbAutomaticCatchUpTests(unittest.TestCase):
         self.assertFalse(report["automatic_model_promotion"])
         self.assertFalse(report["platform_payout_claimed"])
         self.assertEqual(json.loads(self.receipt.read_text())["settled_now"], 350)
+        self.assertEqual(report["forward_ledger_sha256"],
+                         sha256(self.ledger.read_bytes()).hexdigest())
+        self.assertEqual(report["forward_ledger_bytes"], self.ledger.stat().st_size)
 
     def test_four_batch_refresh_limit_defers_then_resumes_five_more(self):
         before = self.setup_frozen(405)

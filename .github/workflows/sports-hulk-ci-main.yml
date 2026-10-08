@@ -47,6 +47,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_*regime*.py'
           python -m unittest discover -s tests -p 'test_nba_*proof*.py'
           python -m unittest discover -s tests -p 'test_forward_results_provenance.py'
+          python -m unittest discover -s tests -p 'test_mlb_pending_source_audit.py'
           python -m unittest discover -s tests -p 'test_nfl_official_player_identity.py'
           python -m unittest discover -s tests -p 'test_nhl_official_box_forward.py'
           python -m unittest discover -s tests -p 'test_mlb_official_box_forward.py'
