@@ -1,0 +1,9 @@
+# Sports Zenith local-only roster file preview — live release verified 2026-10-08
+
+Feature commit: `50fb35e`. Rollback directory: `.deploy_backups/zenith_local_roster_upload_20261008T061127Z`, including prior complete frontend and original uncommitted user App.jsx/PropsV2Panel.jsx. Recovery branch: `backup/pre-zenith-local-roster-20261008T061127Z`.
+
+- Fantasy > Season-Long > My Teams now offers a collapsed `Import roster from CSV or TXT` control. Local CSV/TXT parser extracts only player names using standard `Player`, `Player Name`, `Name`, etc. headings or a one-name-per-line text format. The app does not request provider credentials or claim synchronized access to ESPN, Yahoo or CBS.
+- Parsing happens client-side. The roster editor changes only after explicit `Use these N players in editor`. The user then must invoke the existing authenticated `Analyze & save my team` operation before any data is transmitted or saved. No file bytes are uploaded during the preview workflow. Rejects malformed formats, >256KB, >1,000 rows, >60 players, duplicates and unsafe formula-like player fields. Names formatted `Last, First` are normalized to `First Last` with an explicit review warning.
+- 12 new parser tests PASS. All 135 Node tests PASS, production Vite build PASS with exact preserved ongoing user Props refactor.
+- Local QA and **published live** Chromium acceptance PASS at 1365x768, 390x844 and 320x568: a hypothetical CSV with `Allen, Josh` and `Trey McBride` parsed and previewed correctly, form remained unchanged until consent, both players applied correctly, no server writes, zero JavaScript exceptions and zero mobile overflow. Production web and Fantasy/Survivor API healthy; anonymous private-team request remains HTTP 401.
+- ESPN, Yahoo, CBS provider OAuth/authorized imports remain not configured. Yahoo application, domain and HTTPS will be handled last as instructed.
