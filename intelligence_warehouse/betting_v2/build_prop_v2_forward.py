@@ -974,11 +974,65 @@ def settle_mlb_official_box(session=None, max_events=100):
     return receipt
 
 
+def settle_mlb_official_backlog(session=None, batch_size=100, max_batches=4):
+    """Clear a verified backlog in consecutive append-only 100-result batches.
+
+    Each batch independently reruns original-game/player source checks and
+    current-ledger comparisons. If a source changes mid-refresh, earlier
+    fully verified writes remain intact and later batches stop fail-closed.
+    """
+    if (isinstance(max_batches, bool) or not isinstance(max_batches, int)
+            or not 1 <= max_batches <= 4):
+        raise ValueError("MLB automatic catch-up allows 1 to 4 batches")
+    if (isinstance(batch_size, bool) or not isinstance(batch_size, int)
+            or not 1 <= batch_size <= 100):
+        raise ValueError("MLB automatic batch size must be 1 to 100")
+
+    session = session or requests.Session()
+    run_results = []
+    total_settled = 0
+    last = None
+    for index in range(max_batches):
+        receipt = settle_mlb_official_box(session=session, max_events=batch_size)
+        added = int(receipt.get("settled_now") or 0)
+        remaining = int(receipt.get("pending_verified_next_batch") or 0)
+        run_results.append({
+            "batch": index + 1, "settled": added,
+            "verified_waiting": remaining, "status": receipt.get("status"),
+        })
+        total_settled += added
+        last = receipt
+        if receipt.get("status") != "READY" or added == 0 or remaining == 0:
+            break
+
+    summary = dict(last or {})
+    if total_settled and summary.get("status") != "READY":
+        summary["last_batch_status"] = summary.get("status")
+        summary["status"] = "PARTIAL_SOURCE_HOLD"
+    summary["settled_now"] = total_settled
+    summary["batch_limit"] = batch_size
+    summary["max_batches_per_refresh"] = max_batches
+    summary["batches_executed"] = len(run_results)
+    summary["batch_results"] = run_results
+    if summary.get("status") in {"READY", "NO_FROZEN_MLB_PREDICTIONS"}:
+        summary["verified_remaining_for_future_refresh"] = int(
+            summary.get("pending_verified_next_batch") or 0
+        )
+        summary["remaining_count_source_hold"] = False
+    else:
+        # A later source failure invalidates any live claim about the count
+        # still ready to grade. Do not turn "unknown" into "zero".
+        summary["verified_remaining_for_future_refresh"] = None
+        summary["remaining_count_source_hold"] = True
+    write_json(MLB_BOX_RECEIPT, summary)
+    return summary
+
+
 def main():
     capture_result = capture()
     generic_settled_now = settle()
     nhl_receipt = settle_nhl_official_box()
-    mlb_receipt = settle_mlb_official_box()
+    mlb_receipt = settle_mlb_official_backlog()
     settled_now = (
         generic_settled_now
         + int(nhl_receipt.get("settled_now") or 0)
@@ -996,6 +1050,11 @@ def main():
     payload["mlb_official_box"] = {
         "status": mlb_receipt.get("status"),
         "settled_now": mlb_receipt.get("settled_now", 0),
+        "batches_executed": mlb_receipt.get("batches_executed", 0),
+        "batch_results": mlb_receipt.get("batch_results", []),
+        "verified_remaining_for_future_refresh": mlb_receipt.get(
+            "verified_remaining_for_future_refresh", 0
+        ),
         "existing_verified": mlb_receipt.get("existing_verified", 0),
         "conflicting_previous_grades_count": mlb_receipt.get("conflicting_previous_grades_count", 0),
         "official_result_not_platform_payout": True,
