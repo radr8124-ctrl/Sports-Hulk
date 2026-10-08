@@ -1,0 +1,16 @@
+# Sports Zenith: CBS Fantasy and free comparison tools (2026-10-08)
+
+## Research evidence and scope
+
+- Official Footballguys **Rate My Team** site advertises the product as 100% free and its free Insider account provides access. Live public free compatibility listing includes ESPN and Yahoo, not CBS (`https://www.footballguys.com/rate-my-team`). A Footballguys *staff post from August 13, 2025* says the new Rate My Team importer works with CBS and ESPN (`https://forums.footballguys.com/threads/new-rate-my-team-preview-let-us-know-what-you-think.817078/`), and broader Footballguys paid plan listings include CBS; whether CBS is included within the exact free path is not independently verified for a signed-in account. No promise of CBS free compatibility.
+- Official FantasyPros My Playbook lists ESPN, Yahoo, Sleeper and CBS with one free synchronized team; additional team slots and premium advice require upgrades (`https://www.fantasypros.com/nfl/myplaybook/`). This is an independent tool, not a licensed integration into Sports Zenith.
+- Yahoo Fantasy has an official API, but requires developer application review/approval and OAuth authorization (`https://sports.yahoo.com/developer/`, `https://sports.yahoo.com/developer/docs/`). ESPN and CBS private league user accounts do not have an implemented authorized OAuth connection in Sports Zenith; do not collect passwords or browser session cookies.
+- FantasyPros states its free API access is limited to personal non-production work, and commercial API access requires a separate agreement. It prohibits API use for products that directly compete with FantasyPros (`https://support.fantasypros.com/hc/en-us/articles/49749297704475-How-do-I-request-access-to-the-FantasyPros-API`). Do not reuse their league-synced or rated data in Sports Zenith without the appropriate commercial permissions.
+
+## Delivered
+
+- Added CBS Sports Fantasy as a fourth explicitly NOT CONNECTED league host, with an official CBS Fantasy football external link. Live backend `/api/fantasy/providers` includes a matching CBS status; no false CBS roster import or provider sign-in has been added.
+- Added one compact collapsed "Free league-sync tools to compare" section to the Fantasy connections card with the independently verified Footballguys Rate My Team and FantasyPros My Playbook destinations, accurate free-tier constraints and an explicit warning that these websites do not connect to Sports Zenith.
+- Adjusted four-provider grid for desktop/phone, retained the existing authorized read-only Sleeper importer and server authentication rules, and expanded the safe-credentials message to include CBS.
+- Three new coverage tests and all 106 existing/new commercial Node tests passed; isolated Vite production build passed using exact existing user Props work. Chromium checks at 1280x800, 390x844, 320x568 passed for four hosts and six safe external links without JavaScript errors or CBS card overflow. Existing 26-pixel document overflow at 320px comes from pre-existing Fantasy season/DFS tab controls; it is NOT caused by this component and is not changed in this scoped release.
+- No account connections, passwords, Yahoo OAuth credentials, ESPN/CBS browser credentials, fantasy rosters or private survivor data were read or modified. This is transparent provider discovery, not a completed CBS sync.

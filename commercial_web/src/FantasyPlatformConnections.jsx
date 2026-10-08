@@ -13,6 +13,11 @@ const OTHER_PLATFORMS = [
     url: 'https://fantasy.espn.com/',
     description: 'ESPN private leagues do not have an authorized sign-in connection here yet. You can still use manual roster setup.',
   },
+  {
+    name: 'CBS Sports Fantasy',
+    url: 'https://www.cbssports.com/fantasy/football/',
+    description: 'CBS private-league sign-in and roster sync are not active in Sports Zenith yet. Use the official CBS site or manual roster setup.',
+  },
 ]
 
 const currentSeason = new Date().getUTCFullYear()
@@ -93,7 +98,7 @@ export default function FantasyPlatformConnections({ onImported, onManualSetup }
         {!user && <AccountButton />}
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-[1.1fr_1fr_1fr]">
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-black text-slate-950">Sleeper NFL</h3>
@@ -165,10 +170,29 @@ export default function FantasyPlatformConnections({ onImported, onManualSetup }
       )}
       {message && <p role="status" className="mt-3 rounded-xl bg-slate-50 px-4 py-3 text-xs font-bold leading-5 text-slate-700">{message}</p>}
 
+      <details className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <summary className="cursor-pointer text-xs font-black text-slate-800">Free league-sync tools to compare (external websites)</summary>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <div className="font-black text-sm text-slate-900">Footballguys Rate My Team</div>
+            <p className="mt-1 text-xs leading-5 text-slate-600">Advertised as 100% free with a free Insider account. Its free page lists ESPN and Yahoo; CBS availability under that free path is not confirmed.</p>
+            <a href="https://www.footballguys.com/rate-my-team" target="_blank" rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-1 text-xs font-black text-blue-700">Open free Rate My Team <ExternalLink size={13} /></a>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <div className="font-black text-sm text-slate-900">FantasyPros My Playbook</div>
+            <p className="mt-1 text-xs leading-5 text-slate-600">Offers one free synced NFL team and lists Yahoo, ESPN, CBS and Sleeper. More leagues and advanced tools may require Premium.</p>
+            <a href="https://www.fantasypros.com/nfl/myplaybook/" target="_blank" rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-1 text-xs font-black text-blue-700">Open free My Playbook <ExternalLink size={13} /></a>
+          </div>
+        </div>
+        <p className="mt-2 text-[11px] leading-5 text-slate-500">These services manage their own logins and syncing. Using them does not connect their rosters to Sports Zenith.</p>
+      </details>
+
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
         <div className="flex max-w-2xl items-center gap-2 text-xs text-slate-500">
           <ShieldCheck size={17} className="shrink-0 text-blue-600" />
-          Never enter ESPN, Yahoo, or Sleeper passwords or session cookies into Sports Zenith.
+          Never enter ESPN, Yahoo, CBS or Sleeper passwords or session cookies into Sports Zenith.
         </div>
         <button type="button" onClick={onManualSetup} className="text-xs font-black text-blue-700 underline-offset-2 hover:underline">
           Use manual roster setup instead

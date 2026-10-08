@@ -31,6 +31,9 @@ export const fantasyProviderStatus = Object.freeze([
   { id: 'espn', label: 'ESPN Fantasy', status: 'PRIVATE_SIGN_IN_NOT_CONFIGURED',
     note: 'ESPN account sign-in is separate. Private league linking is not active in Sports Zenith.',
     external_url: 'https://fantasy.espn.com/' },
+  { id: 'cbs', label: 'CBS Sports Fantasy', status: 'PRIVATE_SIGN_IN_NOT_CONFIGURED',
+    note: 'CBS private league access is not connected in Sports Zenith. Open CBS directly, or use manual roster setup.',
+    external_url: 'https://www.cbssports.com/fantasy/football/' },
 ])
 
 function inputError(message) {
