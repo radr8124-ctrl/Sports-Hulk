@@ -45,7 +45,7 @@ export default function SurvivorScoreCards({ cards = [], entryName = '' }) {
               <div className="mt-2 text-xs font-medium text-slate-500">{card.game_clock || 'Saved · not yet scored'}</div>
               {card.pool_result === 'PENDING' && (
                 <div className="mt-2 text-[11px] font-semibold text-amber-800">
-                  {card.pool_submitted ? 'Submission recorded in pool state' : 'Saved in Sports HULK · not submitted to pool'}
+                  {card.pool_submitted ? 'Submission recorded in pool state' : 'Saved in Sports Zenith · not submitted to pool'}
                 </div>
               )}
             </div>

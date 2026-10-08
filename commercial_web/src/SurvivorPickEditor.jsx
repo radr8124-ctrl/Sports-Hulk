@@ -47,7 +47,7 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.message || 'Could not save your Survivor picks.')
-      setMessage('Saved in Sports HULK. Your external pool has NOT been submitted.')
+      setMessage('Saved in Sports Zenith. Your external pool has NOT been submitted.')
       onSaved?.()
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Pick saving unavailable.')
@@ -71,7 +71,7 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
         </span>
       </div>
       <p className="mt-3 text-xs leading-5 text-slate-600">
-        Select your current-week teams. Used teams are excluded. Picks are saved privately in Sports HULK—not submitted to your pool.
+        Select your current-week teams. Used teams are excluded. Picks are saved privately in Sports Zenith—not submitted to your pool.
         Picks are locked after kickoff.
       </p>
       {picks.length > 0 && (
