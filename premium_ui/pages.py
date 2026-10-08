@@ -5365,7 +5365,7 @@ def render_survivor():
             if already_imported:
                 st.success(
                     (
-                        "This PDF is already accepted and imported. "
+                        "This pool file is already accepted and imported. "
                         "You do not need to upload or confirm it again."
                     )
                 )
@@ -5554,6 +5554,13 @@ def render_survivor():
                         )
                     )
 
+                duplicates = int(preview.get("duplicate_ticket_instances") or 0)
+                if duplicates:
+                    st.info(
+                        str(duplicates)
+                        + " repeated-name pool ticket(s) kept as separate entries."
+                    )
+
                 sample_rows = []
 
                 for entry in (
@@ -5680,7 +5687,7 @@ def render_survivor():
                             st.session_state[
                                 "survivor_pool_import_flash"
                             ] = (
-                                "PDF accepted and imported: "
+                                "Pool file accepted and imported: "
                                 + str(
                                     result.get(
                                         "entries",

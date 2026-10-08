@@ -140,6 +140,36 @@ def _dedupe_entries(entries):
     return list(dedup.values())
 
 
+def _preserve_duplicate_tickets(entries):
+    """Keep each explicit pool ticket when multiple rows share a name.
+
+    A repeated wide-sheet/PDF row represents another ticket, not an update
+    to the first. Long-format rows are grouped by entry/ticket ID BEFORE this
+    function, so weekly picks for the same ticket are not split apart.
+    """
+    reserved = {str(entry.get("entry_name") or "") for entry in entries}
+    seen = Counter()
+    unique = []
+    for entry in entries:
+        original = str(entry.get("entry_name") or "")
+        seen[original] += 1
+        if seen[original] == 1:
+            unique.append(entry)
+            continue
+        ordinal = seen[original]
+        candidate = f"{original} [ENTRY {ordinal}]"
+        while candidate in reserved:
+            ordinal += 1
+            candidate = f"{original} [ENTRY {ordinal}]"
+        reserved.add(candidate)
+        unique.append({
+            **entry, "entry_name": candidate,
+            "source_entry_name": original,
+            "duplicate_entry_ordinal": ordinal,
+        })
+    return unique
+
+
 def parse_pdf_bytes(file_bytes: bytes):
     reader = PdfReader(BytesIO(file_bytes))
     entries = []
@@ -212,7 +242,7 @@ def parse_pdf_bytes(file_bytes: bytes):
 
             entries.append(parsed)
 
-    entries = _dedupe_entries(entries)
+    entries = _preserve_duplicate_tickets(entries)
     if not entries:
         raise ValueError(
             "No Survivor entries could be parsed from this PDF. "
@@ -459,7 +489,7 @@ def _parse_wide_frame(df, source_label):
                 "picks": picks,
             })
 
-    return entries
+    return _preserve_duplicate_tickets(entries)
 
 
 def _parse_long_frame(df, source_label):
@@ -476,6 +506,10 @@ def _parse_long_frame(df, source_label):
     )
     result_col = next(
         (c for c in columns if c in {"result", "status", "marker", "outcome"}),
+        None,
+    )
+    ticket_col = next(
+        (c for c in columns if c in {"ticket_id", "entry_id", "ticket_number", "pool_entry_id"}),
         None,
     )
 
@@ -504,7 +538,8 @@ def _parse_long_frame(df, source_label):
             elif status in {"WIN", "W", "SURVIVED", "Y"}:
                 marker = "Y"
 
-        key = parts["entry_name"]
+        ticket_id = str(row.get(ticket_col) or "").strip() if ticket_col else ""
+        key = (parts["entry_name"], ticket_id if ticket_id else None)
         if key not in grouped:
             grouped[key] = {
                 **parts,
@@ -523,7 +558,7 @@ def _parse_long_frame(df, source_label):
     for entry in grouped.values():
         entry["picks"] = sorted(entry["picks"], key=lambda x: x["week_position"])
 
-    return list(grouped.values())
+    return _preserve_duplicate_tickets(list(grouped.values()))
 
 
 def _parse_frame(df, source_label):
@@ -617,6 +652,7 @@ def parse_upload(file_bytes: bytes, filename: str):
     return {
         "filename": filename,
         "sha256": hashlib.sha256(file_bytes).hexdigest(),
+        "duplicate_ticket_instances": sum(bool(e.get("duplicate_entry_ordinal")) for e in entries),
         "entry_count": len(entries),
         "pick_rows": sum(len(entry.get("picks") or []) for entry in entries),
         "max_week": max_week,
