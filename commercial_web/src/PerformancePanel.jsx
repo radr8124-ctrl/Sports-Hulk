@@ -4,6 +4,7 @@ import {
   ShieldCheck, Target, TrendingUp, Trophy, Zap,
 } from 'lucide-react'
 import { allMarketsProofRows } from './allMarketsProofRows.js'
+import { mlbPendingProgress } from './mlbPendingProgress.js'
 
 const SPORTS = ['ALL', 'NFL', 'CFB', 'MLB', 'NBA', 'NHL']
 
@@ -26,6 +27,60 @@ function StatusPill({ value }) {
     <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${tone}`}>
       {pretty(text)}
     </span>
+  )
+}
+
+function MlbPendingProgress({ brain }) {
+  const progress = mlbPendingProgress(brain)
+  if (!progress) return null
+  const stats = [
+    ['Pending', progress.pending],
+    ['Settled', progress.settled],
+    ['Wins', progress.wins],
+    ['Losses', progress.losses],
+  ]
+  const reasons = [
+    ['Awaiting official final', progress.awaitingFinal],
+    ['Participation not verified', progress.participationHold],
+    ['Pregame timing hold', progress.pregameHold],
+  ]
+  if (progress.otherHold) reasons.push(['Other source holds', progress.otherHold])
+  if (progress.readyToGrade) reasons.push(['Verified, queued to grade', progress.readyToGrade])
+  return (
+    <section aria-label="MLB research forward settlement progress" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft md:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Frozen forward research · MLB props</div>
+          <h3 className="mt-1 text-xl font-black tracking-tight text-slate-950">What’s left to settle?</h3>
+        </div>
+        <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wide ${progress.sourceValid ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-amber-200 bg-amber-50 text-amber-800'}`}>
+          {progress.sourceValid ? 'Source checked' : 'Source proof pending'}
+        </span>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {stats.map(([label, value]) => (
+          <div key={label} className="rounded-xl bg-slate-50 px-3 py-3">
+            <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">{label}</div>
+            <div className="mt-1 text-2xl font-black tabular-nums text-slate-950">{integer(value)}</div>
+          </div>
+        ))}
+      </div>
+      {progress.sourceValid ? (
+        <div className="mt-3 grid gap-x-4 gap-y-2 border-t border-slate-100 pt-3 sm:grid-cols-3">
+          {reasons.map(([label, amount]) => (
+            <div key={label} className="flex items-center justify-between gap-2 text-xs">
+              <span className="font-semibold text-slate-600">{label}</span>
+              <span className="font-black tabular-nums text-slate-900">{integer(amount)}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-3 text-xs font-semibold text-amber-800">Detailed reasons are hidden until the latest official source receipt matches the frozen ledger.</p>
+      )}
+      <div className="mt-3 text-xs leading-5 text-slate-500">
+        These are frozen research predictions, not the official published-bets record. An unverified player appearance is not an automatic loss or sportsbook void. Only verified final box scores can settle a result.
+      </div>
+    </section>
   )
 }
 
@@ -1780,6 +1835,7 @@ export default function PerformancePanel() {
   return (
     <div className="space-y-8">
       <OfficialRecord data={data} />
+      <MlbPendingProgress brain={brain} />
       <AskQualityPanel data={askQuality} trace={askTrace} />
 
       {error && (
