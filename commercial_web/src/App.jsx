@@ -26,6 +26,7 @@ const PersonalWaiverPanel = lazy(() => import('./PersonalWaiverPanel'))
 const PersonalStartSitPanel = lazy(() => import('./PersonalStartSitPanel'))
 const FantasyTeamControl = lazy(() => import('./FantasyTeamControl'))
 const FantasyPlatformConnections = lazy(() => import('./FantasyPlatformConnections'))
+const FantasyTradeResearch = lazy(() => import('./FantasyTradeResearch'))
 const ResearchLab = lazy(() => import('./ResearchLab'))
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
@@ -3150,6 +3151,7 @@ function FantasyCommercialPanel() {
     ['my_teams', 'My Teams / Rate My Team'],
     ['weekly', 'Start / Sit'],
     ['faab', 'Waivers & FAAB'],
+    ['trades', 'Trades'],
     ['ir_stash', 'IR Stash'],
     ['defense_streaming', 'Defense'],
     ['idp', 'IDP'],
@@ -3248,7 +3250,7 @@ function FantasyCommercialPanel() {
           <div>
             <p className="eyebrow">Fantasy</p>
             <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Fantasy command center</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">Weekly decisions, waivers, FAAB, IR stash, defense streaming, IDP and DFS — with research labels that stay separate from proven forward performance.</p>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">Weekly decisions, trades, waivers, FAAB, IR stash, defense streaming, IDP and DFS — with research labels that stay separate from proven forward performance.</p>
           </div>
           <div className="flex w-full min-w-0 gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 sm:w-auto sm:p-2">
             {['Season-Long','DFS Lineup Lab'].map((item) => (
@@ -3296,6 +3298,15 @@ function FantasyCommercialPanel() {
               openLeagueSettings={openLeagueSettingsRequest}
               onLeagueSettingsOpened={() => setOpenLeagueSettingsRequest(false)}
             />
+          ) : lane === 'trades' ? (
+            <Suspense fallback={<LoadingSurface label="Loading your trade research" />}>
+              <FantasyTradeResearch
+                weeklyRows={decisions.lanes?.weekly?.rows || []}
+                generatedAt={decisions.generated_at || null}
+                teams={teamOptions}
+                selectedLeagueId={selectedLeagueId}
+              />
+            </Suspense>
           ) : (
             <>
           {lane === 'weekly' && (

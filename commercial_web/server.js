@@ -27,6 +27,7 @@ import { reportingConsensus } from './reporting_consensus.js'
 import { validateAskOutput, outputValidationFallback } from './ask_output_validation.js'
 import { newAskTraceId, buildAskTraceRecord, appendAskTrace, askTraceSummary } from './ask_trace.js'
 import { resilientFetch } from './resilient_fetch.js'
+import { missingStaticResourceKind, pathIsInsideDir } from './staticRoutePolicy.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -3592,8 +3593,20 @@ async function personalizedFantasyAsk(req, question, context={}) {
 
 async function serveStatic(req,res,pathname) {
   let requested=pathname==='/'?'/index.html':pathname, filePath=path.resolve(DIST,'.'+requested)
-  if(!filePath.startsWith(path.resolve(DIST))){res.writeHead(403,SECURITY_HEADERS);res.end('Forbidden');return}
-  try{const info=await stat(filePath); if(info.isDirectory()) filePath=path.join(filePath,'index.html')}catch{filePath=path.join(DIST,'index.html')}
+  if(!pathIsInsideDir(DIST,filePath)){res.writeHead(403,SECURITY_HEADERS);res.end('Forbidden');return}
+  try{
+    const info=await stat(filePath)
+    if(info.isDirectory()) {
+      filePath=path.join(filePath,'index.html')
+      await stat(filePath)
+    }
+  }catch{
+    const miss=missingStaticResourceKind(pathname)
+    if(miss!=='SPA_FALLBACK'){
+      return json(res,404,{status:'NOT_FOUND',message:miss==='API_NOT_FOUND'?'Unknown API endpoint.':'Data or asset not found.'})
+    }
+    filePath=path.join(DIST,'index.html')
+  }
   const ext=path.extname(filePath).toLowerCase()
   res.writeHead(200,{
     ...SECURITY_HEADERS,
