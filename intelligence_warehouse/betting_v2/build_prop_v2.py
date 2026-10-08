@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import math
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -1051,6 +1052,30 @@ def data_quality(book_count, sample_games):
     return "D"
 
 
+def read_stable_live_decisions(path, *, attempts=20, delay=0.5):
+    """Wait for concurrent sport collectors to finish publishing a CSV.
+
+    A direct CSV rewrite can briefly expose an empty/partially written file.
+    Do not replace current forward research with missing/partial source data,
+    and never invent bets. On continued failure, fail closed with an explicit
+    error so the next scheduled refresh retries independently.
+    """
+    if isinstance(attempts, bool) or not isinstance(attempts, int) or attempts < 1:
+        raise ValueError("Source-read attempts must be positive")
+    for attempt in range(attempts):
+        try:
+            before = path.stat()
+            data = pd.read_csv(path, low_memory=False)
+            after = path.stat()
+            if (before.st_mtime_ns, before.st_size) != (after.st_mtime_ns, after.st_size):
+                raise pd.errors.EmptyDataError("CSV changed while being read")
+            return data
+        except pd.errors.EmptyDataError:
+            if attempt + 1 == attempts:
+                raise RuntimeError(f"Transient source never became valid: {path}")
+            time.sleep(delay)
+
+
 def build_current_lane(lane_key, cfg, validation):
     path = cfg["current"]
     if not path.exists():
@@ -1058,7 +1083,7 @@ def build_current_lane(lane_key, cfg, validation):
 
     validation_ready = validation.get("status") == "READY"
     reference_prices = build_reference_price_map(cfg)
-    d = pd.read_csv(path, low_memory=False)
+    d = read_stable_live_decisions(path)
     rows = []
     for _, row in d.iterrows():
         mapping = cfg["current_map"]
