@@ -26,6 +26,7 @@ const PersonalWaiverPanel = lazy(() => import('./PersonalWaiverPanel'))
 const PersonalStartSitPanel = lazy(() => import('./PersonalStartSitPanel'))
 const FantasyTeamControl = lazy(() => import('./FantasyTeamControl'))
 const FantasyPlatformConnections = lazy(() => import('./FantasyPlatformConnections'))
+const FantasyRosterLocalImport = lazy(() => import('./FantasyRosterLocalImport'))
 const FantasyTradeResearch = lazy(() => import('./FantasyTradeResearch'))
 const ResearchLab = lazy(() => import('./ResearchLab'))
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
@@ -2971,6 +2972,18 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
             className="mt-2 w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50"
           />
         </label>
+
+        <Suspense fallback={<LoadingSurface label="Loading local roster import" />}>
+          <FantasyRosterLocalImport
+            existingCount={rosterNames.length}
+            onApply={names => {
+              setRosterText(names.join('\n'))
+              setResult(null)
+              setSavedSummary(null)
+              setError('')
+            }}
+          />
+        </Suspense>
 
         <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs font-semibold leading-5 text-blue-900">
           Quick Setup is provider-neutral. It does not require your fantasy-site password. League scoring and starter-slot rules are not applied yet, so the result is a research index—not a projected record or win probability.
