@@ -26,6 +26,7 @@ const PersonalWaiverPanel = lazy(() => import('./PersonalWaiverPanel'))
 const PersonalStartSitPanel = lazy(() => import('./PersonalStartSitPanel'))
 const FantasyTeamControl = lazy(() => import('./FantasyTeamControl'))
 const FantasyPlatformConnections = lazy(() => import('./FantasyPlatformConnections'))
+const ResearchLab = lazy(() => import('./ResearchLab'))
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
@@ -3249,9 +3250,9 @@ function FantasyCommercialPanel() {
             <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Fantasy command center</h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">Weekly decisions, waivers, FAAB, IR stash, defense streaming, IDP and DFS — with research labels that stay separate from proven forward performance.</p>
           </div>
-          <div className="flex gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
+          <div className="flex w-full min-w-0 gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 sm:w-auto sm:p-2">
             {['Season-Long','DFS Lineup Lab'].map((item) => (
-              <button key={item} onClick={() => setMode(item)} className={`min-h-11 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black ${mode === item ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{item}</button>
+              <button key={item} onClick={() => setMode(item)} className={`min-h-11 min-w-0 flex-1 rounded-xl px-2 py-2.5 text-xs font-black leading-4 sm:flex-none sm:whitespace-nowrap sm:px-4 sm:text-sm ${mode === item ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{item}</button>
             ))}
           </div>
         </div>
@@ -3629,13 +3630,7 @@ export default function App() {
             {active === 'News & Insights' && <NewsInsightsPanel />}
             {active === 'Brain Record' && <Suspense fallback={<LoadingSurface label="Loading Brain Record" />}><PerformancePanel /></Suspense>}
 
-            {active === 'Research' && (
-              <EmptyPanel
-                icon={Brain}
-                title="Research lab"
-                text="Advanced diagnostics, experiment detail and model-development evidence live here so the consumer experience can stay clean. Research never silently becomes a public recommendation."
-              />
-            )}
+            {active === 'Research' && <Suspense fallback={<LoadingSurface label="Loading Research Lab" />}><ResearchLab /></Suspense>}
           </>
         )}
       </main>
