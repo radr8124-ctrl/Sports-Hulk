@@ -2,7 +2,7 @@ import http from 'node:http'
 import { createReadStream, readFileSync } from 'node:fs'
 import { appendFile, readFile, rename, stat, writeFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
-import { createHash, timingSafeEqual } from 'node:crypto'
+import { createHash, timingSafeEqual, randomBytes } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createAdminClient, createClient } from '@insforge/sdk'
@@ -17,6 +17,7 @@ import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
+import { canManageSurvivorPool } from './survivor_pool_permissions.js'
 import { survivorPersonalScoreCards } from './survivor_pick_scores.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
 import { askClaimCoverage } from './ask_claim_coverage.js'
@@ -32,6 +33,7 @@ const PORT = Number(process.env.PORT || 8510)
 const SPORTS_ROOT = path.resolve(__dirname, '..')
 const DFS_BRIDGE = path.join(__dirname, 'dfs_optimizer_bridge.py')
 const SURVIVOR_PICK_BRIDGE = path.join(__dirname, 'survivor_pick_bridge.py')
+const SURVIVOR_POOL_BRIDGE = path.join(__dirname, 'survivor_pool_bridge.py')
 const RATE_MY_TEAM_BRIDGE = path.join(__dirname, 'rate_my_team_bridge.py')
 const WAIVER_FIT_BRIDGE = path.join(__dirname, 'waiver_fit_bridge.py')
 const IR_STASH_FIT_BRIDGE = path.join(__dirname, 'ir_stash_fit_bridge.py')
@@ -275,6 +277,17 @@ async function authenticatedUser(req) {
     return null
   }
 }
+
+function poolManagerPermitted(user) {
+  return canManageSurvivorPool(user, {
+    ids:process.env.SURVIVOR_POOL_ADMIN_IDS||LOCAL_ENV.SURVIVOR_POOL_ADMIN_IDS||'',
+    emails:process.env.SURVIVOR_POOL_ADMIN_EMAILS||LOCAL_ENV.SURVIVOR_POOL_ADMIN_EMAILS||'',
+  })
+}
+
+// One-time, account-bound preview tokens never hold the pool's raw file bytes.
+const SURVIVOR_POOL_PREVIEWS = new Map()
+let SURVIVOR_POOL_COMMIT_BUSY = false
 
 async function linkedSurvivorEntries(req, userId) {
   if (!userId) return []
@@ -2639,6 +2652,45 @@ function runSurvivorPickSave(payload) {
   })
 }
 
+async function readSurvivorPoolUpload(req) {
+  let total = 0
+  const chunks = []
+  for await (const chunk of req) {
+    total += chunk.length
+    if (total > 7_500_000) throw new Error('Pool file exceeds upload limit.')
+    chunks.push(chunk)
+  }
+  return JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}')
+}
+
+function runSurvivorPoolBridge(payload) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(SPORTS_PYTHON, [SURVIVOR_POOL_BRIDGE], {
+      cwd:SPORTS_ROOT, stdio:['pipe','pipe','pipe'],
+    })
+    let stdout=''
+    let stderr=''
+    const timer=setTimeout(() => {
+      child.kill('SIGKILL')
+      reject(new Error('The Survivor pool import timed out.'))
+    },30000)
+    child.stdout.on('data', chunk => {
+      stdout+=chunk.toString()
+      if(stdout.length>80000) child.kill('SIGKILL')
+    })
+    child.stderr.on('data', chunk => { stderr=(stderr+chunk.toString()).slice(-1000) })
+    child.on('error', err => { clearTimeout(timer);reject(err) })
+    child.on('close', code => {
+      clearTimeout(timer)
+      let result=null
+      try { result=JSON.parse(stdout) } catch {}
+      if(code!==0 || !result) reject(new Error('The pool file could not be verified.'))
+      else resolve(result)
+    })
+    child.stdin.end(JSON.stringify(payload))
+  })
+}
+
 function runDfsOptimizer(payload) {
   return new Promise((resolve, reject) => {
     const child = spawn(SPORTS_PYTHON, [DFS_BRIDGE], {
@@ -4923,6 +4975,67 @@ const server=http.createServer(async(req,res)=>{
       return json(res,400,{status:'ERROR',message:'Could not link Survivor entry.',error:err instanceof Error?err.message:String(err)})
     }
   }
+  if(req.method==='GET'&&url.pathname==='/api/survivor/pool-manager'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED',can_manage:false})
+    return json(res,200,{status:'READY',can_manage:poolManagerPermitted(user)})
+  }
+  if(req.method==='POST'&&url.pathname==='/api/survivor/pool/preview'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED'})
+    if(!poolManagerPermitted(user)) return json(res,403,{status:'MANAGER_REQUIRED'})
+    const limit=consumeRateLimit('survivor-pool-preview:'+user.id,8,15*60*1000)
+    if(!limit.ok) return json(res,429,{status:'RATE_LIMITED',message:'Try again shortly.'})
+    try {
+      const body=await readSurvivorPoolUpload(req)
+      const preview=await runSurvivorPoolBridge({
+        action:'preview',filename:body.filename,base64:body.base64,
+      })
+      if(preview.status!=='PREVIEW_READY') return json(res,422,preview)
+      const token=randomBytes(24).toString('base64url')
+      for(const [key,item] of SURVIVOR_POOL_PREVIEWS) {
+        if(item.expires<Date.now() || item.user_id===user.id) SURVIVOR_POOL_PREVIEWS.delete(key)
+      }
+      SURVIVOR_POOL_PREVIEWS.set(token,{
+        user_id:user.id, file_sha:preview.sha256, filename:preview.filename,
+        pool_week:preview.pool_week_before,
+        prior_sha:preview.official_source_before_sha256,
+        expires:Date.now()+15*60*1000,
+      })
+      return json(res,200,{...preview,preview_token:token})
+    } catch {
+      return json(res,422,{status:'PREVIEW_ERROR',message:'Could not preview this pool file safely.'})
+    }
+  }
+  if(req.method==='POST'&&url.pathname==='/api/survivor/pool/confirm'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED'})
+    if(!poolManagerPermitted(user)) return json(res,403,{status:'MANAGER_REQUIRED'})
+    const rate=consumeRateLimit('survivor-pool-confirm:'+user.id,4,15*60*1000)
+    if(!rate.ok) return json(res,429,{status:'RATE_LIMITED',message:'Wait before another import.'})
+    if(SURVIVOR_POOL_COMMIT_BUSY) return json(res,409,{status:'IMPORT_IN_PROGRESS'})
+    try {
+      const body=await readSurvivorPoolUpload(req)
+      const ticket=SURVIVOR_POOL_PREVIEWS.get(body.preview_token)
+      if(!ticket || ticket.user_id!==user.id || ticket.expires<Date.now()) {
+        return json(res,409,{status:'PREVIEW_EXPIRED',message:'Preview this file again before importing.'})
+      }
+      SURVIVOR_POOL_PREVIEWS.delete(body.preview_token)
+      SURVIVOR_POOL_COMMIT_BUSY=true
+      const committed=await runSurvivorPoolBridge({
+        action:'confirm',filename:ticket.filename,base64:body.base64,
+        expected_sha256:ticket.file_sha,
+        pool_week_before:ticket.pool_week,
+        official_source_before_sha256:ticket.prior_sha,
+      })
+      return json(res,committed.status==='IMPORTED'||committed.status==='ALREADY_IMPORTED'?200:409,committed)
+    } catch {
+      return json(res,503,{status:'IMPORT_UNAVAILABLE',message:'Import failed; your existing pool remains authoritative. Review again.'})
+    } finally {
+      SURVIVOR_POOL_COMMIT_BUSY=false
+    }
+  }
+
   if(req.method==='POST'&&url.pathname==='/api/survivor/save-picks'){
     const user=await authenticatedUser(req)
     if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to save private Survivor picks.'})

@@ -57,6 +57,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_prop_v2_csv_stability.py'
           python -m unittest discover -s tests -p 'test_survivor_duplicate_tickets.py'
           python -m unittest discover -s tests -p 'test_survivor_private_picks.py'
+          python -m unittest discover -s tests -p 'test_survivor_pool_manager_bridge.py'
           python -m unittest discover -s tests -p 'test_mlb_rolling_schedule_windows.py'
           python -m unittest discover -s tests -p 'test_mlb_frozen_event_fallback.py'
           python -m unittest discover -s tests -p 'test_mlb_master_freshness.py'

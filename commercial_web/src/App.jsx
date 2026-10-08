@@ -26,6 +26,7 @@ const PersonalWaiverPanel = lazy(() => import('./PersonalWaiverPanel'))
 const PersonalStartSitPanel = lazy(() => import('./PersonalStartSitPanel'))
 const FantasyTeamControl = lazy(() => import('./FantasyTeamControl'))
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
+const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
 
 function LoadingSurface({ label = 'Loading' }) {
@@ -1004,6 +1005,15 @@ function SurvivorCommercialPanel() {
           </div>
         </div>
       </section>
+
+      {isSignedIn && (
+        <Suspense fallback={null}>
+          <SurvivorPoolImport
+            getAccessToken={getAccessToken}
+            onImported={() => setLinkRefresh(value => value + 1)}
+          />
+        </Suspense>
+      )}
 
       {isSignedIn && linkedEntries.length > 0 && (
         <section>
