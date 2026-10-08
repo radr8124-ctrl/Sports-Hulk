@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ArrowLeft, ArrowRight, CheckCircle2, LogOut, Mail, ShieldCheck, UserRound, X } from 'lucide-react'
 import { insforge, insforgeConfigured } from './insforge'
 
@@ -338,16 +339,15 @@ function AccountModal({ onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-[5px] sm:items-center sm:p-6" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/50 p-3 backdrop-blur-[5px] sm:p-6" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="sports-zenith-auth-title"
         onClick={(event) => event.stopPropagation()}
-        className="max-h-[92vh] w-full overflow-y-auto rounded-t-[32px] border-t border-white/80 bg-white shadow-2xl sm:max-w-[520px] sm:rounded-[32px] sm:border"
+        className="max-h-[calc(100dvh-1.5rem)] w-full max-w-[520px] overflow-y-auto overscroll-contain rounded-[28px] border border-white/80 bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)] sm:rounded-[32px]"
       >
         <div className="h-1.5 bg-blue-700" />
-        <div className="mx-auto mt-3 h-1 w-11 rounded-full bg-slate-200 sm:hidden" />
         <div className="px-5 pb-7 pt-4 sm:p-7">
           {!configured ? (
             <>
@@ -533,7 +533,7 @@ function AccountModal({ onClose }) {
               <label htmlFor="sports-zenith-email" className="mt-7 block text-xs font-black uppercase tracking-[0.12em] text-slate-600">Email address</label>
               <div className="mt-2 flex h-14 items-center gap-3 rounded-2xl border border-slate-300 bg-white px-4 shadow-sm transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50">
                 <Mail size={19} className="text-slate-400" />
-                <input id="sports-zenith-email" required autoFocus type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="min-w-0 flex-1 bg-transparent text-base font-semibold text-slate-950 outline-none placeholder:text-slate-400" />
+                <input id="sports-zenith-email" required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="min-w-0 flex-1 bg-transparent text-base font-semibold text-slate-950 outline-none placeholder:text-slate-400" />
               </div>
 
               {authConfig?.requireEmailVerification && <div className="mt-3 text-[11px] font-semibold leading-5 text-slate-400">Your email is verified as part of this secure sign-in.</div>}
@@ -600,7 +600,10 @@ export function AccountButton({ compact = false }) {
         <UserRound size={16} />
         {!compact && <span className="max-w-32 truncate">{configured ? label : 'Account'}</span>}
       </button>
-      {open && <AccountModal onClose={() => setOpen(false)} />}
+      {open && typeof document !== 'undefined' && createPortal(
+        <AccountModal onClose={() => setOpen(false)} />,
+        document.body,
+      )}
     </>
   )
 }
