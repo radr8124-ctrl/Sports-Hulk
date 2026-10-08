@@ -1,0 +1,9 @@
+# CBS Fantasy and free league-tool links — production acceptance (2026-10-08)
+
+Source feature commit: `47fec75`. Rollback directory: `.deploy_backups/zenith_cbs_fantasy_20261008T053213Z`. Recovery branch: `backup/pre-zenith-cbs-fantasy-20261008T053213Z`.
+
+- Sports Zenith Fantasy now lists four providers: Sleeper public read-only import, and Yahoo, ESPN and CBS with accurate NOT CONNECTED statuses and provider-owned external links. New GET `/api/fantasy/providers` advertises CBS as `PRIVATE_SIGN_IN_NOT_CONFIGURED`, never as an authenticated sync.
+- A collapsed free comparison tools section provides independently verified URLs for Footballguys Rate My Team (free tool; CBS availability in the *free* path unconfirmed) and FantasyPros My Playbook (one free synced league including ESPN/Yahoo/CBS). It expressly notes that those external sites do not sync data into Sports Zenith or grant Sports Zenith permission to reuse proprietary APIs.
+- Live HTML, health, Fantasy feed, provider status, new hashed component and Survivor health HTTP 200. An unauthenticated Sleeper lookup POST still returns HTTP 401.
+- 106/106 Node tests and a hybrid Vite build using preexisting user App.jsx/PropsV2Panel.jsx changes passed. Browser DOM checks on the *published* page passed at 1365x768, 390x844 and 320x568, showing 4 platform cards and 6 valid official/comparison links, no new component overflow and no JS runtime errors. The global Fantasy tabs' preexisting narrow-screen document overflow remains a separate item.
+- Live initial App.jsx, PropsV2Panel.jsx and unrelated modifications were preserved exactly; no user league accounts, current rosters, OAuth tokens, passwords, cookies, Survivor picks or predictions were touched. Yahoo OAuth registration, ESPN private league authorization and CBS private league integration remain future work.
