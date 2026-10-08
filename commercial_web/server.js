@@ -17,6 +17,8 @@ import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
+import { fantasyProviderStatus, lookupSleeperLeagues, fetchSleeperRosterByLeague } from './sleeper_fantasy.js'
+import { saveSleeperFantasyTeam } from './sleeper_account_store.js'
 import { canManageSurvivorPool } from './survivor_pool_permissions.js'
 import { survivorPersonalScoreCards } from './survivor_pick_scores.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
@@ -3685,6 +3687,48 @@ const server=http.createServer(async(req,res)=>{
         })),
       },
     })
+  }
+  if(req.method==='GET'&&url.pathname==='/api/fantasy/providers'){
+    return json(res,200,{status:'READY',providers:fantasyProviderStatus})
+  }
+  if(req.method==='POST'&&url.pathname==='/api/fantasy/sleeper/lookup'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to Sports Zenith before looking up a Sleeper roster.'})
+    const limit=consumeRateLimit('sleeper-lookup:'+user.id,12,15*60*1000)
+    if(!limit.ok) return json(res,429,{status:'RATE_LIMITED',message:'Too many Sleeper lookups. Try again later.'})
+    try {
+      const body=await readBody(req)
+      const result=await lookupSleeperLeagues(body.username,{season:body.season})
+      return json(res,200,result)
+    } catch(err) {
+      const invalid=['INVALID_INPUT','SLEEPER_USER_NOT_FOUND'].includes(err?.code)
+      return json(res,invalid?400:503,{
+        status:invalid?'INPUT_ERROR':'SLEEPER_UNAVAILABLE',
+        message:invalid?err.message:'The Sleeper service is unavailable right now. Try again later.',
+      })
+    }
+  }
+  if(req.method==='POST'&&url.pathname==='/api/fantasy/sleeper/connect'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to Sports Zenith before importing a Sleeper team.'})
+    const limit=consumeRateLimit('sleeper-import:'+user.id,6,15*60*1000)
+    if(!limit.ok) return json(res,429,{status:'RATE_LIMITED',message:'Too many Sleeper imports. Try again later.'})
+    try {
+      const body=await readBody(req)
+      const team=await fetchSleeperRosterByLeague({
+        username:body.username,league_id:body.league_id,season:body.season,
+      })
+      const client=scopedInsForgeClient(req)
+      if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private league storage is temporarily unavailable.'})
+      const result=await saveSleeperFantasyTeam(client,user.id,team)
+      return json(res,200,result)
+    } catch(err) {
+      const invalid=['INVALID_INPUT','SLEEPER_USER_NOT_FOUND','SLEEPER_OWNER_MISMATCH'].includes(err?.code)
+      return json(res,invalid?409:503,{
+        status:invalid?'LINK_FAILED':'SLEEPER_IMPORT_UNAVAILABLE',
+        message:invalid?err.message:'Could not safely import your Sleeper roster. Please try again later.',
+      })
+    }
   }
   if(req.method==='GET'&&url.pathname==='/api/fantasy/my-teams'){
     try{

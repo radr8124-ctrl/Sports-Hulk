@@ -25,6 +25,7 @@ const PersonalIrStashPanel = lazy(() => import('./PersonalIrStashPanel'))
 const PersonalWaiverPanel = lazy(() => import('./PersonalWaiverPanel'))
 const PersonalStartSitPanel = lazy(() => import('./PersonalStartSitPanel'))
 const FantasyTeamControl = lazy(() => import('./FantasyTeamControl'))
+const FantasyPlatformConnections = lazy(() => import('./FantasyPlatformConnections'))
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
@@ -2669,7 +2670,7 @@ function LeagueSettingsPanel({ team, onSaved, autoOpen = false, onAutoOpened }) 
   )
 }
 
-function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onTeamUpsert, openLeagueSettings = false, onLeagueSettingsOpened }) {
+function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onTeamUpsert, openLeagueSettings = false, onLeagueSettingsOpened, refreshKey = 0 }) {
   const { user, getAccessToken } = useAuth()
   const [leagueName, setLeagueName] = useState('My Team')
   const [teamName, setTeamName] = useState('')
@@ -2783,7 +2784,7 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken])
+  }, [user, getAccessToken, refreshKey])
 
   const analyze = async () => {
     if (!user || !rosterNames.length) return
@@ -3120,6 +3121,7 @@ function FantasyCommercialPanel() {
   const [sport, setSport] = useState('NFL')
   const [teamOptions, setTeamOptions] = useState([])
   const [teamOptionsLoading, setTeamOptionsLoading] = useState(false)
+  const [fantasyImportRefresh, setFantasyImportRefresh] = useState(0)
   const [openLeagueSettingsRequest, setOpenLeagueSettingsRequest] = useState(false)
   const [selectedLeagueId, setSelectedLeagueId] = useState(() => {
     try { return window.localStorage.getItem('sports-zenith-active-fantasy-league') || null }
@@ -3201,7 +3203,13 @@ function FantasyCommercialPanel() {
 
     load()
     return () => { active = false }
-  }, [user, getAccessToken, authLoading])
+  }, [user, getAccessToken, authLoading, fantasyImportRefresh])
+
+  const onFantasyImported = (linked) => {
+    if (linked?.league_id) setSelectedLeagueId(linked.league_id)
+    setFantasyImportRefresh(value => value + 1)
+    setLane('my_teams')
+  }
 
   const upsertTeamOption = (team) => {
     if (!team?.league_id) return
@@ -3259,6 +3267,13 @@ function FantasyCommercialPanel() {
             </div>
           </section>
 
+          <Suspense fallback={<LoadingSurface label="Loading Fantasy league connections" />}>
+            <FantasyPlatformConnections
+              onImported={onFantasyImported}
+              onManualSetup={() => switchLane('my_teams')}
+            />
+          </Suspense>
+
           {user && (
             <Suspense fallback={<LoadingSurface label="Loading Fantasy Team Control" />}>
               <FantasyTeamControl
@@ -3276,6 +3291,7 @@ function FantasyCommercialPanel() {
               preferredLeagueId={selectedLeagueId}
               onSelectedLeagueChange={setSelectedLeagueId}
               onTeamUpsert={upsertTeamOption}
+              refreshKey={fantasyImportRefresh}
               openLeagueSettings={openLeagueSettingsRequest}
               onLeagueSettingsOpened={() => setOpenLeagueSettingsRequest(false)}
             />
