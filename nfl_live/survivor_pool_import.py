@@ -11,16 +11,14 @@ import pandas as pd
 from pypdf import PdfReader
 
 
-ROOT = Path("/home/ubuntu/sports-hulk")
+# Resolve this checkout, not a machine-specific VPS path. GitHub CI and
+# isolated worktrees must be able to import the parser without /home/ubuntu.
+ROOT = Path(__file__).resolve().parents[1]
 
 BASE = ROOT / "nfl_live" / "survivor_pool"
 RAW = BASE / "raw"
 SNAPSHOTS = BASE / "snapshots"
 DERIVED = BASE / "derived"
-
-for p in (RAW, SNAPSHOTS, DERIVED):
-    p.mkdir(parents=True, exist_ok=True)
-
 
 TEAM_MAP = {
     "49ERS": "San Francisco 49ers",
@@ -213,6 +211,10 @@ def parse_entry_line(line: str, page: int):
 
 
 def import_pdf(pdf_bytes: bytes, filename: str):
+    # Parsing/importing the module never mutates the filesystem. The explicit
+    # import operation alone creates destination directories.
+    for directory in (RAW, SNAPSHOTS, DERIVED):
+        directory.mkdir(parents=True, exist_ok=True)
     sha = hashlib.sha256(pdf_bytes).hexdigest()
 
     stamp = datetime.now(timezone.utc).strftime(

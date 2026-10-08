@@ -27,7 +27,7 @@ from nfl_live.survivor_pool_import import (
     parse_entry_line,
 )
 
-ROOT = Path("/home/ubuntu/sports-hulk")
+ROOT = Path(__file__).resolve().parents[1]
 
 NFL_ABBR = {
     "ARI": "Arizona Cardinals", "ATL": "Atlanta Falcons", "BAL": "Baltimore Ravens",
@@ -676,6 +676,10 @@ def _write_frame_atomic(df: pd.DataFrame, csv_path: Path, parquet_path: Path | N
 
 
 def commit_preview(preview: dict, file_bytes: bytes):
+    # The explicit, reviewed import may create directories; just importing
+    # this module or rendering a preview must not touch personal pool state.
+    for directory in (RAW, SNAPSHOTS, DERIVED):
+        directory.mkdir(parents=True, exist_ok=True)
     entries = preview["entries"]
     filename = preview["filename"]
     sha = preview["sha256"]

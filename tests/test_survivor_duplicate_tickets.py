@@ -42,6 +42,31 @@ def workbook_bytes():
 
 
 class DuplicateSurvivorTicketsTests(unittest.TestCase):
+    def test_import_paths_follow_current_checkout_not_fixed_vps_location(self):
+        from nfl_live import survivor_pool_import as old_importer
+        expected_root = Path(upload.__file__).resolve().parents[1]
+        self.assertEqual(upload.ROOT, expected_root)
+        self.assertEqual(old_importer.ROOT, expected_root)
+        self.assertEqual(upload.DERIVED, expected_root / "nfl_live/survivor_pool/derived")
+        self.assertEqual(old_importer.RAW, upload.RAW)
+
+    def test_import_module_does_not_create_pool_directories(self):
+        # This was the GitHub CI failure: import had tried to make a directory
+        # under /home/ubuntu instead of running from the GitHub checkout.
+        import subprocess
+        import sys
+        root = Path(upload.__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as home:
+            before = (root / "nfl_live/survivor_pool").exists()
+            completed = subprocess.run(
+                [sys.executable, "-c",
+                 "from nfl_live import survivor_pool_import, survivor_pool_upload"],
+                cwd=root, env={"PYTHONPATH": str(root), "HOME": home},
+                capture_output=True, text=True, timeout=20,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertEqual((root / "nfl_live/survivor_pool").exists(), before)
+
     def test_wide_csv_same_name_represents_two_tickets(self):
         raw = b"Entry,Week 1,Week 2\nAlex Smith,KC,BUF\nAlex Smith,SF,NE\n"
         output = upload.parse_upload(raw, "pool.csv")
