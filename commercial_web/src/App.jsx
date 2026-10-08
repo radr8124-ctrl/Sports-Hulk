@@ -25,6 +25,7 @@ const PersonalIrStashPanel = lazy(() => import('./PersonalIrStashPanel'))
 const PersonalWaiverPanel = lazy(() => import('./PersonalWaiverPanel'))
 const PersonalStartSitPanel = lazy(() => import('./PersonalStartSitPanel'))
 const FantasyTeamControl = lazy(() => import('./FantasyTeamControl'))
+const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
 
 function LoadingSurface({ label = 'Loading' }) {
@@ -1183,6 +1184,22 @@ function SurvivorCommercialPanel() {
             </div>
           </div>
         </section>
+      )}
+
+      {hasEntry && (
+        <Suspense fallback={<LoadingSurface label="Loading pick editor" />}>
+          <SurvivorPickEditor
+            entryName={saved.active_entry}
+            poolWeek={saved.pool_current_week}
+            usedTeams={usedTeams}
+            currentPicks={currentPicks}
+            entryStatus={entryStatus}
+            requiredPicks={Number.isInteger(saved.required_picks) ? saved.required_picks : null}
+            ruleConfirmed={ruleConfirmed}
+            getAccessToken={getAccessToken}
+            onSaved={() => setLinkRefresh(value => value + 1)}
+          />
+        </Suspense>
       )}
 
       {hasEntry && Array.isArray(saved.pick_scores) && saved.pick_scores.length > 0 && (

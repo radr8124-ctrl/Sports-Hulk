@@ -31,6 +31,7 @@ const DIST = path.join(__dirname, 'dist')
 const PORT = Number(process.env.PORT || 8510)
 const SPORTS_ROOT = path.resolve(__dirname, '..')
 const DFS_BRIDGE = path.join(__dirname, 'dfs_optimizer_bridge.py')
+const SURVIVOR_PICK_BRIDGE = path.join(__dirname, 'survivor_pick_bridge.py')
 const RATE_MY_TEAM_BRIDGE = path.join(__dirname, 'rate_my_team_bridge.py')
 const WAIVER_FIT_BRIDGE = path.join(__dirname, 'waiver_fit_bridge.py')
 const IR_STASH_FIT_BRIDGE = path.join(__dirname, 'ir_stash_fit_bridge.py')
@@ -2605,6 +2606,39 @@ async function readBody(req) {
   return body ? JSON.parse(body) : {}
 }
 
+function runSurvivorPickSave(payload) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(SPORTS_PYTHON, [SURVIVOR_PICK_BRIDGE], {
+      cwd: SPORTS_ROOT, stdio: ['pipe', 'pipe', 'pipe'],
+    })
+    let output = ''
+    let diagnostics = ''
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL')
+      reject(new Error('Survivor save timed out; refresh before retrying.'))
+    }, 12000)
+    child.stdout.on('data', chunk => {
+      output += chunk.toString()
+      if (output.length > 30000) child.kill('SIGKILL')
+    })
+    child.stderr.on('data', chunk => {
+      diagnostics = (diagnostics + chunk.toString()).slice(-1000)
+    })
+    child.on('error', err => { clearTimeout(timer); reject(err) })
+    child.on('close', code => {
+      clearTimeout(timer)
+      let parsed = null
+      try { parsed = JSON.parse(output) } catch {}
+      if (code !== 0 || !parsed) {
+        reject(new Error('Survivor save is unavailable. Refresh and try again.'))
+        return
+      }
+      resolve(parsed)
+    })
+    child.stdin.end(JSON.stringify(payload))
+  })
+}
+
 function runDfsOptimizer(payload) {
   return new Promise((resolve, reject) => {
     const child = spawn(SPORTS_PYTHON, [DFS_BRIDGE], {
@@ -4889,6 +4923,33 @@ const server=http.createServer(async(req,res)=>{
       return json(res,400,{status:'ERROR',message:'Could not link Survivor entry.',error:err instanceof Error?err.message:String(err)})
     }
   }
+  if(req.method==='POST'&&url.pathname==='/api/survivor/save-picks'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to save private Survivor picks.'})
+    const rate=consumeRateLimit('survivor-save:'+user.id,10,10*60*1000)
+    if(!rate.ok) return json(res,429,{status:'RATE_LIMITED',message:'Wait before saving more Survivor changes.'})
+    try {
+      const body=await readBody(req)
+      const entry=String(body.entry_name||'').trim()
+      const week=body.week
+      const teams=body.teams
+      if(!entry || entry.length>160 || !Number.isInteger(week) || week<1 || week>25 || !Array.isArray(teams) || teams.length>4){
+        return json(res,400,{status:'INVALID_INPUT',message:'Select a linked entry, the current week and up to four teams.'})
+      }
+      const linked=await linkedSurvivorEntries(req,user.id)
+      if(!linked.includes(entry)){
+        return json(res,403,{status:'NOT_ENTRY_OWNER',message:'This Survivor entry is not linked to your account.'})
+      }
+      const saved=await runSurvivorPickSave({entry_name:entry,week,teams})
+      if(saved.status!=='SAVED_NOT_SUBMITTED'){
+        return json(res,409,{status:'PICK_SAVE_BLOCKED',message:saved.message||'Could not safely save picks.'})
+      }
+      return json(res,200,saved)
+    } catch(err) {
+      return json(res,503,{status:'SAVE_UNAVAILABLE',message:'Survivor pick saving is temporarily unavailable.'})
+    }
+  }
+
   if(req.method==='GET'&&url.pathname==='/api/survivor/state'){
     const user=await authenticatedUser(req)
     if(!user) return json(res,401,{

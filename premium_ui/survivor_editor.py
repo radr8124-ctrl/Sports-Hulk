@@ -6,7 +6,7 @@ import json
 import os
 import tempfile
 
-ROOT = Path("/home/ubuntu/sports-hulk")
+ROOT = Path(__file__).resolve().parents[1]
 ENTRIES_PATH = ROOT / "nfl_live" / "derived" / "SURVIVOR_ENTRIES.json"
 AUDIT_PATH = ROOT / "nfl_live" / "derived" / "SURVIVOR_ENTRY_AUDIT.jsonl"
 
@@ -97,7 +97,12 @@ def save_entry(
     entry = entries[entry_name]
     now = _now()
     pool_week = int(data.get("pool_current_week") or entry.get("current_week") or 1)
-    burned = _burned_teams(entry)
+    # The original pool can designate teams as used even when the actual
+    # game result has not been recorded yet. Never allow reusing those picks.
+    burned = _burned_teams(entry) | {
+        str(team).strip() for team in (entry.get("used_teams") or [])
+        if str(team).strip()
+    }
 
     if used_teams is not None:
         normalized_used = []
