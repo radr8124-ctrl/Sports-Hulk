@@ -25,6 +25,7 @@ const PersonalIrStashPanel = lazy(() => import('./PersonalIrStashPanel'))
 const PersonalWaiverPanel = lazy(() => import('./PersonalWaiverPanel'))
 const PersonalStartSitPanel = lazy(() => import('./PersonalStartSitPanel'))
 const FantasyTeamControl = lazy(() => import('./FantasyTeamControl'))
+const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
 
 function LoadingSurface({ label = 'Loading' }) {
   return (
@@ -1182,6 +1183,12 @@ function SurvivorCommercialPanel() {
             </div>
           </div>
         </section>
+      )}
+
+      {hasEntry && Array.isArray(saved.pick_scores) && saved.pick_scores.length > 0 && (
+        <Suspense fallback={<LoadingSurface label="Loading My Pick Score" />}>
+          <SurvivorScoreCards cards={saved.pick_scores} entryName={saved.active_entry} />
+        </Suspense>
       )}
 
       {hasEntry && !ruleConfirmed && (

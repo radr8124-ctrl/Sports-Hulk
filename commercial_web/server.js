@@ -17,6 +17,7 @@ import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
+import { survivorPersonalScoreCards } from './survivor_pick_scores.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
 import { askClaimCoverage } from './ask_claim_coverage.js'
 import { reportingConsensus } from './reporting_consensus.js'
@@ -4951,6 +4952,7 @@ const server=http.createServer(async(req,res)=>{
       state_week_matches_pool:governedEntry?.state_week_matches_pool??null,
       used_teams:Array.isArray(entry?.used_teams)?entry.used_teams:[],
       current_picks:Array.isArray(entry?.current_picks)?entry.current_picks:[],
+      pick_scores:survivorPersonalScoreCards(entry,poolWeek,data.nflScores),
       required_picks:entryRequiredPicks,
       rule_status:entryRuleStatus,
       rule_confirmed:Boolean(entryRuleConfirmed),
