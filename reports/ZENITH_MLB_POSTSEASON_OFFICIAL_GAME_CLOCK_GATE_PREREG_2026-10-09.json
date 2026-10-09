@@ -1,0 +1,42 @@
+{
+  "alternative_source_line_with_wrong_event_start_must_not_survive": true,
+  "automatic_PLAY_promotion_allowed": false,
+  "clock_skew_observed_hours": -3,
+  "created_at_utc": "2026-10-09T20:18:43.695398+00:00",
+  "existing_Betting_V2_forward_predictions_changed": false,
+  "external_off_VPS_backup_verified": false,
+  "independent_sportsbook_price_executability_verified": false,
+  "initial_current_MLB_PROP_and_PP_qualified_rows": 246,
+  "initial_exact_schedule_match_rows": 228,
+  "initial_source_start_conflict_rows": 18,
+  "input_sha256": {
+    "mlb_current_original_pp_decisions": {
+      "backup": ".deploy_backups/zenith_mlb_official_fixture_clock_gate_20261009T201600Z/MLB_PRIZEPICKS_DECISIONS.csv",
+      "path": "mlb_live/decision/MLB_PRIZEPICKS_DECISIONS.csv",
+      "sha256": "890acf34a6a2326f9dfb215d10940c3a911538ad7366f44be010766503948172"
+    },
+    "mlb_current_original_prop_decisions": {
+      "backup": ".deploy_backups/zenith_mlb_official_fixture_clock_gate_20261009T201600Z/MLB_PROP_DECISIONS.csv",
+      "path": "mlb_live/decision/MLB_PROP_DECISIONS.csv",
+      "sha256": "b6db8363f49e38815c5fb158d97cb811fae24e3e8abe215cf3b0682bd03fc79d"
+    },
+    "mlb_current_prop_V2_public": {
+      "backup": ".deploy_backups/zenith_mlb_official_fixture_clock_gate_20261009T201600Z/prop_v2_current.json",
+      "path": "commercial_web/public/prop_v2_current.json",
+      "sha256": "b2a89582b631b462d48ac52333364e4fe21dd784873d5313f45de6a91097beb3"
+    },
+    "mlb_official_2026_schedule": {
+      "backup": ".deploy_backups/zenith_mlb_official_fixture_clock_gate_20261009T201600Z/MLB_SCHEDULE.csv",
+      "path": "baseball_vault/latest/MLB_SCHEDULE.csv",
+      "sha256": "48932c25ebae7afc2d7d3a7725f18b458f4f4fe4fa6b55e8b63a7280916edbe6"
+    }
+  },
+  "official_game_type_regimes_separated": true,
+  "prior_28day_mlb_form_repair_unchanged": true,
+  "prop_and_pp_event_type_are_not_real_bets": true,
+  "safe_allow_rule": "Exact away team and home team identities and game start within 180 seconds; uniquely matched official MLB gamePk; player team equals one competing club; source player original ID validated. Otherwise hold, never fabricate matchup mapping.",
+  "schema": "ZENITH_MLB_POSTSEASON_PRETIP_OFFICIAL_FIXTURE_GATE_PREREG_V1",
+  "source_invalid_rows_archived_original_records_remain": true,
+  "source_market_probability_change_prohibited": true,
+  "source_provenance": "Read-only original provider price decisions and official MLB StatsAPI-derived schedule"
+}
