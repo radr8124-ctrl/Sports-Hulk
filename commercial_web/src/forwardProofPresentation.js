@@ -77,3 +77,47 @@ export function brierDescription(lane) {
   if (lane.model_brier < lane.source_market_brier) return 'Model Brier lower than sportsbook; advantage not proven'
   return 'Sportsbook Brier is better than model'
 }
+
+export const NBA_QUALITY_SCHEMA = 'ZENITH_NBA_TOTAL_SOURCE_QUALITY_SENSITIVITY_PUBLIC_V1'
+
+export function nbaTotalsSourceQualityView(raw) {
+  if (!raw || typeof raw !== 'object' ||
+      raw.schema !== NBA_QUALITY_SCHEMA ||
+      raw.audited_original_snapshot_only !== true ||
+      raw.real_money_wagers_or_executable_prices_verified !== false ||
+      raw.source_frozen_model_or_grade_ledger_mutated !== false ||
+      raw.genuine_unseen_NBA_regular_season_profitability_proven !== false ||
+      !/^[0-9a-f]{16}$/.test(raw.audit_sha256_prefix || '')) return null
+
+  const original = raw.retrospective_original_game_lines
+  const adjusted = raw.isolated_source_quality_sensitivity
+  const nba = raw.nba_preseason_audit
+  if (!original || !adjusted || !nba ||
+      !integer(original.priced_line_observations) ||
+      !integer(original.wins) || !integer(original.losses) ||
+      original.wins + original.losses !== original.priced_line_observations ||
+      !finite(original.original_quoted_paper_roi_pct) ||
+      !integer(adjusted.quote_observations) ||
+      !integer(adjusted.wins) || !integer(adjusted.losses) ||
+      adjusted.wins + adjusted.losses !== adjusted.quote_observations ||
+      adjusted.quote_observations >= original.priced_line_observations ||
+      adjusted.not_official_restatement_of_all_sports !== true ||
+      adjusted.all_other_sport_market_lanes_not_yet_source_graded !== true ||
+      !finite(adjusted.hypothetical_quote_paper_roi_pct) ||
+      !integer(nba.duplicate_regime_positions) ||
+      !integer(nba.incorrect_original_start_rows_held) ||
+      !integer(nba.source_ESPN_start_matched_unique_lines) ||
+      !integer(nba.independent_preseason_games) ||
+      nba.independent_preseason_games === 0 ||
+      nba.source_ESPN_start_matched_unique_lines >= nba.original_total_line_records ||
+      nba.original_total_line_records - nba.source_ESPN_start_matched_unique_lines !==
+        nba.duplicate_regime_positions + nba.incorrect_original_start_rows_held ||
+      nba.held_source_start_difference_minutes !== 15 ||
+      !finite(nba.model_Brier) || !finite(nba.bookmaker_Brier) ||
+      nba.model_probability_edge_proven !== false ||
+      !Array.isArray(nba.game_cluster_95pct_quote_paper_roi_interval_pct) ||
+      nba.game_cluster_95pct_quote_paper_roi_interval_pct.length !== 2 ||
+      !nba.game_cluster_95pct_quote_paper_roi_interval_pct.every(finite)) return null
+
+  return raw
+}

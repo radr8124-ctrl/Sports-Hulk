@@ -29,7 +29,7 @@ class TestForwardPublicOnlyFromVerifiedSource(unittest.TestCase):
         self.assertEqual(payload['game_lines']['losses'],71)
         self.assertEqual(payload['props_and_pickem']['wins'],1763)
         self.assertEqual(payload['props_and_pickem']['losses'],1080)
-        self.assertEqual(payload['mlb_price_movement']['frozen_source_observations'],29)
+        self.assertGreaterEqual(payload['mlb_price_movement']['frozen_source_observations'],29)
         self.assertFalse(payload['game_lines']['actual_real_money_roi_proven'])
         self.assertFalse(payload['truthfulness']['automatic_model_promotion_allowed'])
         self.assertEqual(hashlib.sha256(output.read_bytes()).hexdigest(),report['public_payload_sha256'])

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Activity, AlertTriangle, Clock3, ShieldCheck } from 'lucide-react'
-import { brierDescription, forwardProofView, researchRoi } from './forwardProofPresentation.js'
+import { brierDescription, forwardProofView, researchRoi, nbaTotalsSourceQualityView } from './forwardProofPresentation.js'
 
 const count = n => Number(n || 0).toLocaleString('en-US')
 const percent = n => typeof n === 'number' ? `${n.toFixed(1)}%` : 'Waiting'
@@ -42,6 +42,7 @@ function ProofDetail({ label, value, secondary }) {
 
 export default function ForwardProofPanel() {
   const [evidence, setEvidence] = useState(null)
+  const [sourceQuality, setSourceQuality] = useState(null)
   const [status, setStatus] = useState('LOADING')
 
   useEffect(() => {
@@ -53,8 +54,14 @@ export default function ForwardProofPanel() {
         const raw = await response.json()
         const validated = forwardProofView(raw)
         if (!validated) throw new Error('Forward source proof failed validation')
+        let quality = null
+        try {
+          const check = await fetch(`/nba_total_source_quality.json?ts=${Date.now()}`, { cache: 'no-store' })
+          if (check.ok) quality = nbaTotalsSourceQualityView(await check.json())
+        } catch { /* Preserve source-verified raw performance but show audit-warning fallback. */ }
         if (active) {
           setEvidence(validated)
+          setSourceQuality(quality)
           setStatus('READY')
         }
       } catch {
@@ -100,6 +107,25 @@ export default function ForwardProofPanel() {
           {evidence.isStale && <span className="font-black text-amber-700">Source report is older than 95 minutes</span>}
           {status === 'UNAVAILABLE' && <span className="font-black text-amber-700">Feed unavailable; showing last validated snapshot</span>}
         </div>
+      </div>
+
+      <div role="note" className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+        <div className="flex items-center gap-2 text-xs font-black text-amber-950">
+          <AlertTriangle size={15} /> NBA preseason totals · original-source quality check
+        </div>
+        {sourceQuality ? (
+          <>
+            <p className="mt-1 text-xs leading-5 text-amber-950">
+              The original pooled game-line result of <b>{researchRoi(sourceQuality.retrospective_original_game_lines.original_quoted_paper_roi_pct)}</b> source-price paper ROI is sensitive to NBA duplicate and off-time quotes.
+              Replacing only those NBA totals entries produces <b>{researchRoi(sourceQuality.isolated_source_quality_sensitivity.hypothetical_quote_paper_roi_pct)}</b> in a historical source-quality sensitivity, <b>not a revised official ROI</b>. Other sports still need independent audits.
+            </p>
+            <p className="mt-1 text-[11px] leading-5 text-amber-800">
+              {count(sourceQuality.nba_preseason_audit.duplicate_regime_positions)} duplicate entries and {count(sourceQuality.nba_preseason_audit.incorrect_original_start_rows_held)} start-time mismatches flagged; {count(sourceQuality.nba_preseason_audit.source_ESPN_start_matched_unique_lines)} unique source-verified total lines across {count(sourceQuality.nba_preseason_audit.independent_preseason_games)} preseason games. Model Brier is identical to the sportsbook. No profitable edge proven.
+            </p>
+          </>
+        ) : (
+          <p className="mt-1 text-xs text-amber-900">Source-quality correction temporarily unavailable. The raw quote-weight paper ROI shown below is unadjusted and should not be treated as verified profitability.</p>
+        )}
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">

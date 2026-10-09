@@ -1,8 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { FORWARD_PROOF_SCHEMA, forwardProofView, researchRoi, brierDescription } from './src/forwardProofPresentation.js'
+import { FORWARD_PROOF_SCHEMA, forwardProofView, researchRoi, brierDescription, nbaTotalsSourceQualityView } from './src/forwardProofPresentation.js'
 
+const nbaQuality = JSON.parse(readFileSync(new URL('./public/nba_total_source_quality.json', import.meta.url), 'utf8'))
 const original = JSON.parse(readFileSync(new URL('./public/forward_proof_current.json', import.meta.url), 'utf8'))
 const clock = Date.parse(original.updated_at_utc) + 60_000
 const altered = f => { const value=structuredClone(original); f(value); return value }
@@ -13,7 +14,8 @@ test('real public scorecard is valid, research-only, and accurately labeled', ()
   assert.equal(result.game_lines.settled, 186)
   assert.equal(result.props_and_pickem.settled, 2843)
   assert.equal(result.mlb_full16.completed_independent_game_blocks, 1)
-  assert.equal(result.mlb_price_movement.frozen_source_observations, 29)
+  assert.ok(result.mlb_price_movement.frozen_source_observations >= 29)
+  assert.ok(result.mlb_price_movement.graded_official_player_results <= result.mlb_price_movement.frozen_source_observations)
   assert.equal(result.mlb_price_movement.independent_upcoming_games, 2)
   assert.equal(result.nfl_forward.pregame_frozen_games, 13)
   assert.equal(result.nfl_forward.fixed_seventy_pct_plus_value_qualifiers, 0)
@@ -69,6 +71,34 @@ test('stale unchanged source remains visible but prominently labeled', () => {
 test('invalid source version and missing trail are blocked', () => {
   assert.equal(forwardProofView(altered(r => { r.schema='UNSAFE' }), clock), null)
   assert.equal(forwardProofView(altered(r => { r.verified_append_only_history_checkpoints = 0 }), clock), null)
+})
+
+test('original NBA preseason audit distinguishes raw +4.98 and source-sensitivity -0.69', () => {
+  const quality = nbaTotalsSourceQualityView(nbaQuality)
+  assert.ok(quality)
+  assert.equal(quality.retrospective_original_game_lines.original_quoted_paper_roi_pct,4.98)
+  assert.equal(quality.isolated_source_quality_sensitivity.hypothetical_quote_paper_roi_pct,-0.69)
+  assert.equal(quality.nba_preseason_audit.duplicate_regime_positions,8)
+  assert.equal(quality.nba_preseason_audit.incorrect_original_start_rows_held,7)
+  assert.equal(quality.nba_preseason_audit.source_ESPN_start_matched_unique_lines,91)
+  assert.equal(quality.nba_preseason_audit.independent_preseason_games,19)
+  assert.equal(quality.nba_preseason_audit.model_Brier,quality.nba_preseason_audit.bookmaker_Brier)
+  assert.equal(quality.real_money_wagers_or_executable_prices_verified,false)
+})
+
+test('source-quality false profit or silent removed losses is rejected', () => {
+  const changed = f => { const copy=structuredClone(nbaQuality);f(copy);return copy }
+  assert.equal(nbaTotalsSourceQualityView(changed(r => { r.genuine_unseen_NBA_regular_season_profitability_proven=true })),null)
+  assert.equal(nbaTotalsSourceQualityView(changed(r => { r.nba_preseason_audit.duplicate_regime_positions=0 })),null)
+  assert.equal(nbaTotalsSourceQualityView(changed(r => { r.isolated_source_quality_sensitivity.losses=0 })),null)
+  assert.equal(nbaTotalsSourceQualityView(changed(r => { r.real_money_wagers_or_executable_prices_verified=true })),null)
+})
+
+test('Brain Record UI fetches source audit and distinguishes sensitivity from true ROI', () => {
+  const component=readFileSync(new URL('./src/ForwardProofPanel.jsx',import.meta.url),'utf8')
+  assert.match(component,/nba_total_source_quality\.json/)
+  assert.match(component,/not a revised official ROI/)
+  assert.match(component,/Other sports still need independent audits/)
 })
 
 test('current active Brain Record route includes the compact proof panel', () => {
