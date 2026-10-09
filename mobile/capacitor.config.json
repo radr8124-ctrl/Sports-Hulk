@@ -1,0 +1,16 @@
+{
+  "appId": "com.sportszenith.mobile",
+  "appName": "Sports Zenith",
+  "webDir": "www",
+  "backgroundColor": "#f6f8fb",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

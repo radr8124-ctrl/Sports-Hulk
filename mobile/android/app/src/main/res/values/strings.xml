@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sports Zenith</string>
+    <string name="title_activity_main">Sports Zenith</string>
+    <string name="package_name">com.sportszenith.mobile</string>
+    <string name="custom_url_scheme">com.sportszenith.mobile</string>
+</resources>

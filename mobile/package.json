@@ -1,0 +1,23 @@
+{
+  "name": "sports-zenith-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Sports Zenith shared-React native package (iOS/Android)",
+  "scripts": {
+    "doctor": "node scripts/doctor.mjs",
+    "build:web": "node scripts/build-web.mjs",
+    "native:sync": "npx cap sync",
+    "native:android": "npx cap open android",
+    "native:ios": "npx cap open ios",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.3",
+    "@capacitor/android": "8.5.3",
+    "@capacitor/ios": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  }
+}
