@@ -1,0 +1,27 @@
+{
+  "accepted_utc": "2026-10-09T08:10:06.034903+00:00",
+  "actual_payouts": 0,
+  "all_mlb_regression_tests_passed": 412,
+  "book_source_website_prices_verified_executable": false,
+  "fixed_current_known_official_lineups": 0,
+  "game_paired_book_research_counts": {
+    "849809": 11,
+    "849831": 28
+  },
+  "governed_manual_source_audit_exit_code": 0,
+  "independent_verified_official_game_blocks": 2,
+  "market_source_rows_screened": 1895,
+  "new_model_predictions_from_audit": 0,
+  "normal_timer_after_new_audit_stage_accepted": false,
+  "off_vps_backup_restore_verified": false,
+  "original_16_feature_prospective_model_sha256_unchanged": "0cea5e38c94451cacbc1ff552276c5df7aa1e341296b127fd0cfa6a2d19c66a8",
+  "reported_source_rows_as_independent_wagers": false,
+  "same_book_same_capture_player_half_hit_two_sided_pairs": 39,
+  "schema": "ZENITH_MLB_STRICT_ASOF_MARKET_FIXTURE_SOURCE_AUDIT_V1",
+  "scope": "RESEARCH_SOURCE_IDENTITY_ONLY_NO_MODEL_FITTING_NO_MARKET_EDGE",
+  "source_audit_result_sha256": "226636c0b707f0bcf4a81f445e077bc23ce7b2cae1556931e7d2a905b5a47a8e",
+  "source_historical_master_sha256": "f0cf17ddb8609def3cc5269cb3e1d42000196a359335524c1857265156a9d60c",
+  "source_market_original_snapshot_sha256": "a212b69671e436fd3e0a989421443194c4a2684cc339031a5a84df18fbf7f753",
+  "source_original_schedule_canonical_sha256": "149caa269e737b071fdcc955d52521ca868651eb922824d7c0b4f030cc80d725",
+  "wrong_official_start_provider_rows_rejected": 36
+}

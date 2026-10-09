@@ -170,6 +170,15 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
       || echo "WARNING: independent source readiness check failed; original master, source and forecasts preserved."
 
     echo
+    echo "=== MLB EXACT OFFICIAL GAME VERSUS SAME-BOOK PLAYER HITS QUOTES (RESEARCH ONLY) ==="
+
+    SPORTS_LABEL=mlb-source-book-official-alignment-audit \
+    SPORTS_MAX_SECONDS=12 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.mlb_pregame_capture.audit_upcoming_market_alignment \
+      || echo "WARNING: MLB source-book fixture alignment could not be verified; original odds, context and games preserved."
+
+    echo
     echo "MLB REFRESH COMPLETE"
 
 } >> "$LOG" 2>&1
