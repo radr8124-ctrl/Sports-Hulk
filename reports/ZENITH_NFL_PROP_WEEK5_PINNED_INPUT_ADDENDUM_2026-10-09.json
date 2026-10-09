@@ -1,0 +1,36 @@
+{
+  "all_40_source_prop_entries_match_pinned_ESPN_kickoff_and_team": true,
+  "first_game_future_asof_registration": true,
+  "off_VPS_source_restoration_verified": false,
+  "official_future_distinct_games_matched": 11,
+  "original_preregistration_commit": "4694d2e",
+  "original_preregistration_sha256": "c6f5c62617d07807e50934cde5c322bdeb5e48e1ad7cbf9fb2e820d2ee320bf1",
+  "original_three_model_inputs_unchanged": true,
+  "pinned_input_directory_VPS_only": ".deploy_backups/zenith_nfl_prop_week5_preregistered_inputs_20261009T190600Z/RESTORED",
+  "pinned_inputs": {
+    "nfl_official_scheduled_games": {
+      "path": ".deploy_backups/zenith_nfl_prop_week5_preregistered_inputs_20261009T190600Z/RESTORED/commercial_web/public/nfl_scores.json",
+      "prereg_original_sha256": "a168f12f1b4683d3d363de6298837b06706f8b8042cd6185d2fc4979b52cda6e",
+      "sha256": "ead13f62bd2a2d683e7665a01dee43723daed5864ad644771d022639d570cf64"
+    },
+    "nfl_player_stat_history": {
+      "path": ".deploy_backups/zenith_nfl_prop_week5_preregistered_inputs_20261009T190600Z/RESTORED/nfl_live/player_context/raw/player_stats.parquet",
+      "prereg_original_sha256": "0df04909dd3eb9f961e50469faa3bd56b5651a8f02eb087f131d4f03231056f5",
+      "sha256": "0df04909dd3eb9f961e50469faa3bd56b5651a8f02eb087f131d4f03231056f5"
+    },
+    "nfl_prop_identity_fusion": {
+      "path": ".deploy_backups/zenith_nfl_prop_week5_preregistered_inputs_20261009T190600Z/RESTORED/nfl_live/fusion/NFL_PROP_CONTEXT_READY_V2.csv",
+      "prereg_original_sha256": "a72a6cdd3f5ad5686d6762cd749e8d293fa6224cd04f1039df079a9da12cd2cf",
+      "sha256": "a72a6cdd3f5ad5686d6762cd749e8d293fa6224cd04f1039df079a9da12cd2cf"
+    },
+    "nfl_prop_v2_current": {
+      "path": ".deploy_backups/zenith_nfl_prop_week5_preregistered_inputs_20261009T190600Z/RESTORED/commercial_web/public/prop_v2_current.json",
+      "prereg_original_sha256": "e01959fcf032f12cbff3788f9b1f3dc1b3087c0dc82ad0fe52a730a84abafa64",
+      "sha256": "e01959fcf032f12cbff3788f9b1f3dc1b3087c0dc82ad0fe52a730a84abafa64"
+    }
+  },
+  "reason": "Official NFL scoreboard public file refreshes while frozen props/fusion/stat inputs remain byte-identical; pin updated official ESPN schedule after exact all-40 identity/start/team crosswalk, before games. Preserve original prereg original schedule SHA unchanged.",
+  "registered_at_utc": "2026-10-09T19:06:23.523229+00:00",
+  "schema": "ZENITH_NFL_PLAYER_PROP_PREREG_INPUT_PINNING_ADDENDUM_V1",
+  "updated_scoreboard_is_not_training_target_or_model_feature": true
+}
