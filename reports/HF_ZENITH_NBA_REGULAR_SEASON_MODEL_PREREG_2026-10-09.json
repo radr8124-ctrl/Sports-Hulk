@@ -1,0 +1,56 @@
+{
+  "acceptance": "no promotion under any retrospective results; need independent original bookmaker quote snapshots with timestamp and future freeze and positive outperformance on prospective games",
+  "bootstrap_repetitions": 2000,
+  "bootstrap_seed": 20261009,
+  "features": {
+    "NBA_HOME_MONEYLINE_REGULAR_SEASON": [
+      "intercept",
+      "logit(source_close_home_win_prob)",
+      "(source_close_home_win_prob-source_open_home_win_prob)/0.15 clipped [-3,3]",
+      "source_close_spread_home/12 clipped [-3,3]",
+      "(source_close_total-230)/25 clipped [-3,3]"
+    ],
+    "NBA_SPREAD_REGULAR_SEASON": [
+      "intercept",
+      "logit(source_close_home_cover_prob)",
+      "(source_close_spread_home-source_open_spread_home)/8 clipped [-3,3]",
+      "(source_close_total-230)/25 clipped [-3,3]",
+      "abs(source_close_spread_home)/12 clipped [0,3]"
+    ],
+    "NBA_TOTAL_REGULAR_SEASON": [
+      "intercept",
+      "logit(source_close_over_prob)",
+      "(source_close_total-source_open_total)/8 clipped [-3,3]",
+      "(source_close_total-230)/25 clipped [-3,3]",
+      "abs(source_close_spread_home)/12 clipped [0,3]"
+    ]
+  },
+  "holdout_comparison": "source raw close probability vs train-only market-calibrated logistic vs train-only expanded logistic; report Brier, log loss, 95% game + calendar-day bootstrap of paired difference",
+  "identity_rule": "exact full name (allow explicitly declared Clippers alias), exact UTC start <=3 minutes, unique home-away-day ESPN Final fixture, matching official scores; reject other matches, preseason, playoffs, play-in, source-label score disagreements",
+  "license_for_commercial_uses_verified": false,
+  "market_types": [
+    "NBA_TOTAL_REGULAR_SEASON",
+    "NBA_SPREAD_REGULAR_SEASON",
+    "NBA_HOME_MONEYLINE_REGULAR_SEASON"
+  ],
+  "model_form": "RIDGE_LOGISTIC, prior beta=[0,1,0,0,0] with market-logit coefficient one; unpenalized intercept",
+  "n_features_per_market": 5,
+  "nba_hf_source_file": "reports/hf_nba_closinglines_audit_20261009/SOURCE_original_hf_nba_2025_26.parquet",
+  "nba_hf_source_sha256": "6364a163288e10b207d694043c0f11802737a1b5571b4604d274c9cc883974e6",
+  "no_hf_paid_job": true,
+  "official_nba_snapshot": "reports/hf_nba_closinglines_audit_20261009/SOURCE_official_nba_history_at_comparison.csv",
+  "official_nba_snapshot_sha256": "0be09e81fa61426602966faeaf1c181f11b14a192ff2e547e0f00ecb29e7a7f1",
+  "prior_results_seen": true,
+  "production_changes_allowed": false,
+  "registered_at": "2026-10-09T05:14:45.343569+00:00",
+  "ridge_lambda": 25.0,
+  "selection_rule": "symmetric probability >=70% in either direction, report winner rate, coverage and distinct games; prices are fair only and NO actual ROI computed",
+  "source_dataset": "minmaxxxer/nba-closing-lines-ats-2025-26",
+  "source_label": "cc-by-4.0 on Hub; source bookmaker quotation timestamps and upstream commercial rights NOT independently verified",
+  "study_id": "HF_ZENITH_NBA_CLOSING_LINES_2025_26_FIXED_MARKET_COMPARISON_20261009_V1",
+  "test_data": "2025-26 verified regular-season NBA games Feb-Apr 2026",
+  "test_first_start_inclusive": "2026-02-01T00:00:00+00:00",
+  "train_data": "2025-26 verified regular-season NBA games Oct 2025-Jan 2026",
+  "training_last_start_exclusive": "2026-02-01T00:00:00+00:00",
+  "trial_class": "HISTORICAL_SECONDARY_SAME_SEASON_NOT_PRISTINE_FORWARD_PROOF"
+}
