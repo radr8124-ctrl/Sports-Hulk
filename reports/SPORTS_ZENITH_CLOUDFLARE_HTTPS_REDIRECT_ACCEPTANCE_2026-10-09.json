@@ -1,0 +1,33 @@
+{
+  "HTTPS_mobile_browser_PWA_eligibility_supported": true,
+  "cloudflare_301_http_to_https_for_both_hosts": true,
+  "cloudflare_Always_Use_HTTPS_verified_effective": true,
+  "domains": {
+    "sportszenith.com": {
+      "HTTPS_API_health_response_code": 200,
+      "HTTPS_root_response_code": 200,
+      "http_response_code": 301,
+      "location": "https://sportszenith.com/",
+      "ssl_certificate_verified": true
+    },
+    "www.sportszenith.com": {
+      "HTTPS_API_health_response_code": 200,
+      "HTTPS_root_response_code": 200,
+      "http_response_code": 301,
+      "location": "https://www.sportszenith.com/",
+      "ssl_certificate_verified": true
+    }
+  },
+  "existing_OVH_API_still_http200": true,
+  "existing_live_research_or_betting_model_data_changed": false,
+  "external_off_VPS_restore_verified": false,
+  "real_iOS_Android_app_signed_or_store_approved": false,
+  "schema": "ZENITH_CLOUDFLARE_HTTPS_REDIRECT_FINISHED_V1",
+  "tunnel_id": "37727b31-5a2a-4376-b28d-629af6926d61",
+  "tunnel_name": "sports-zenith-ovh",
+  "tunnel_restart_count": 0,
+  "tunnel_systemd_user_service_active": true,
+  "tunnel_user_service_enabled_for_restart": true,
+  "verified_at_utc": "2026-10-09T17:24:48.341082+00:00",
+  "zone": "sportszenith.com"
+}
