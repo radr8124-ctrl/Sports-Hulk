@@ -19,6 +19,8 @@ ROOT=Path(__file__).resolve().parents[2]
 BASE="intelligence_warehouse/brain_performance"
 HISTORY="FORWARD_PROOF_TREND_APPEND_ONLY.jsonl"
 CURRENT="FORWARD_PROOF_CURRENT.json"
+PUBLIC_FILENAME="forward_proof_current.json"
+PUBLIC_SCHEMA="ZENITH_RESEARCH_ONLY_PUBLIC_FORWARD_PROOF_V1"
 SCHEMA="ZENITH_AUDITABLE_FORWARD_PROOF_TREND_V1"
 SOURCE_FILES={
     "game_forward":"intelligence_warehouse/betting_v2/BETTING_V2_ALL_MARKETS_FORWARD_SUMMARY.json",
@@ -308,8 +310,114 @@ def capture(*,root=ROOT,history=None,current=None,clock=None):
                 "history_entries":len(final),"latest":entry}
 
 
+def public_projection(entry:dict, *,history_entries:int) -> dict:
+    """Whitelist ONLY aggregate research metrics; no athletes, source paths or raw odds."""
+    view=entry["view"]
+    if (view.get("schema")!=SCHEMA or
+        view.get("research_model_records_only") is not True or
+        view.get("experiment_result",{}).get("profitable_70_percent_betting_strategy_proven") is not False or
+        len(str(entry.get("entry_sha256") or ""))!=64):
+        raise ValueError("PUBLIC_FORWARD_PROOF_MUST_DERIVE_FROM_VERIFIED_RESEARCH")
+    src={}
+    for name,source in (("game_lines",view["game_lines"]),
+                        ("props_and_pickem",view["props_and_pickem"])):
+        src[name]={
+          "model_version":source["model_version"],
+          "source_generated_at_utc":source["source_generated_at_utc"],
+          "wins":source["wins"],"losses":source["losses"],"pushes":source["pushes"],
+          "settled":source["settled"],"independent_game_blocks":source["independent_game_blocks"],
+          "hit_rate_pct":source["hit_rate_pct"],
+          "source_book_quoted_paper_roi_pct":source["source_book_quoted_paper_roi_pct"],
+          "source_market_brier":source["source_no_vig_market_brier"],
+          "model_brier":source["model_frozen_brier"],
+          "model_minus_market_brier":source["model_minus_market_brier"],
+          "proof_status":source["source_promotion_proof_status"],
+          "actual_real_money_roi_proven":False,
+        }
+    mlb=view["mlb_full16"]
+    movement=view["mlb_source_price_movement"]
+    nfl=view["nfl_frozen_70_screen"]
+    cfb=view["cfb_original_research_learning"]
+    return {
+      "schema":PUBLIC_SCHEMA,
+      "research_only":True,
+      "proof_status":"NOT_PROVEN",
+      "updated_at_utc":view["observed_at_utc"],
+      "verified_append_only_history_checkpoints":history_entries,
+      "source_receipt_hash_prefix":entry["entry_sha256"][:16],
+      "game_lines":src["game_lines"],"props_and_pickem":src["props_and_pickem"],
+      "mlb_full16":{
+         "completed_independent_game_blocks":mlb["completed_independent_original_full16_games"],
+         "same_game_player_predictions":mlb["completed_original_hit_predictions_in_same_game"],
+         "source_market_brier":mlb["source_book_market_brier"],
+         "original_full16_model_brier":mlb["frozen_16_feature_model_brier"],
+         "improvement_statistically_proven":False,
+      },
+      "mlb_price_movement":{
+         "frozen_source_observations":movement["source_frozen_future_two_hour_book_move_rows"],
+         "independent_upcoming_games":movement["independent_upcoming_games"],
+         "graded_official_player_results":movement["future_graded_player_market_rows"],
+         "waiting_for_official_player_bridge":movement["future_movement_blocked_pending_official_player_identity"],
+         "research_price_signal_proven":False,
+      },
+      "nfl_forward":{
+         "pregame_frozen_games":nfl["original_forward_games"],
+         "source_grade_pending":max(0,nfl["original_forward_games"]-nfl["official_future_game_results"]),
+         "fixed_seventy_pct_plus_value_qualifiers":nfl["provisional_70_and_value_qualifiers"],
+         "official_game_results":nfl["official_future_game_results"],
+         "profitable_betting_strategy_proven":False,
+      },
+      "cfb_research":{
+         "latest_distinct_recommendations":cfb["unique_recommendations"],
+         "historically_settled_research_grades":cfb["settled_research_grades"],
+         "not_executable_real_money_bets":True,
+      },
+      "truthfulness":{
+         "all_values_based_on_original_source_snapshots":True,
+         "paper_roi_not_sportsbook_winnings":True,
+         "book_offer_executability_proven":False,
+         "automatic_model_promotion_allowed":False,
+         "not_real_wager_profit_or_guaranteed_win_rate":True,
+         "mlb_price_observations_are_correlated_within_independent_games":True,
+      },
+    }
+
+
+def publish_public_proof(*,root=ROOT,history=None,output_paths=None):
+    """Only publish a sanitized snapshot copied from a VERIFIED private chain."""
+    root=Path(root)
+    original=Path(history) if history else root/BASE/HISTORY
+    entries=verify_history(original)
+    if not entries:raise ValueError("PUBLIC_PROOF_CANNOT_PUBLISH_EMPTY_HISTORY")
+    latest=entries[-1]
+    if json.loads((root/BASE/CURRENT).read_bytes())!=latest:
+        raise ValueError("PRIVATE_CURRENT_NOT_EQUAL_VERIFIED_PROOF_HISTORY")
+    public=public_projection(latest,history_entries=len(entries))
+    if output_paths is None:
+        destinations=[root/"commercial_web/public"/PUBLIC_FILENAME]
+        if (root/"commercial_web/dist").is_dir():
+            destinations.append(root/"commercial_web/dist"/PUBLIC_FILENAME)
+    else:
+        destinations=[Path(v) for v in output_paths]
+    payload=json.dumps(public,sort_keys=True,indent=2).encode()+b"\n"
+    for dest in destinations:
+        dest.parent.mkdir(parents=True,exist_ok=True)
+        pending=dest.with_suffix(dest.suffix+".tmp")
+        with pending.open("wb") as f:
+            f.write(payload)
+            f.flush();os.fsync(f.fileno())
+        os.replace(pending,dest)
+        if dest.read_bytes()!=payload:
+            raise ValueError("PUBLISHED_SCORECARD_READBACK_CHANGED")
+    return {"published":[str(v) for v in destinations],
+            "public_payload_bytes":len(payload),
+            "public_payload_sha256":sha(payload),
+            "history_checkpoint_count":len(entries)}
+
+
 def main():
     r=capture()
+    publish=publish_public_proof()
     view=r["latest"]["view"]
     summary={
         "status":r["state"],"history_entries":r["history_entries"],

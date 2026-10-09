@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { allMarketsProofRows } from './allMarketsProofRows.js'
 import { mlbPendingProgress } from './mlbPendingProgress.js'
+import ForwardProofPanel from './ForwardProofPanel.jsx'
 
 const SPORTS = ['ALL', 'NFL', 'CFB', 'MLB', 'NBA', 'NHL']
 
@@ -1835,6 +1836,7 @@ export default function PerformancePanel() {
   return (
     <div className="space-y-8">
       <OfficialRecord data={data} />
+      <ForwardProofPanel />
       <MlbPendingProgress brain={brain} />
       <AskQualityPanel data={askQuality} trace={askTrace} />
 

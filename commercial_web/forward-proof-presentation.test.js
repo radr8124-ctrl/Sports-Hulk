@@ -1,0 +1,83 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { FORWARD_PROOF_SCHEMA, forwardProofView, researchRoi, brierDescription } from './src/forwardProofPresentation.js'
+
+const original = JSON.parse(readFileSync(new URL('./public/forward_proof_current.json', import.meta.url), 'utf8'))
+const clock = Date.parse(original.updated_at_utc) + 60_000
+const altered = f => { const value=structuredClone(original); f(value); return value }
+
+test('real public scorecard is valid, research-only, and accurately labeled', () => {
+  const result = forwardProofView(original, clock)
+  assert.equal(result.schema, FORWARD_PROOF_SCHEMA)
+  assert.equal(result.game_lines.settled, 186)
+  assert.equal(result.props_and_pickem.settled, 2843)
+  assert.equal(result.mlb_full16.completed_independent_game_blocks, 1)
+  assert.equal(result.mlb_price_movement.frozen_source_observations, 29)
+  assert.equal(result.mlb_price_movement.independent_upcoming_games, 2)
+  assert.equal(result.nfl_forward.pregame_frozen_games, 13)
+  assert.equal(result.nfl_forward.fixed_seventy_pct_plus_value_qualifiers, 0)
+  assert.equal(result.truthfulness.paper_roi_not_sportsbook_winnings, true)
+  assert.equal(result.game_lines.actual_real_money_roi_proven, false)
+})
+
+test('positive source-book paper ROI is not a claim of executed wagers', () => {
+  const result = forwardProofView(original, clock)
+  assert.equal(researchRoi(result.game_lines.source_book_quoted_paper_roi_pct), '+4.98%')
+  assert.equal(researchRoi(result.props_and_pickem.source_book_quoted_paper_roi_pct), '-1.79%')
+  assert.match(brierDescription(result.props_and_pickem), /Sportsbook Brier is better/)
+  assert.match(brierDescription(result.game_lines), /Same as sportsbook baseline/)
+  assert.equal(result.proof_status, 'NOT_PROVEN')
+})
+
+test('concealed extra win without settlement is rejected, not counted', () => {
+  assert.equal(forwardProofView(altered(r => { r.game_lines.wins = 116 }), clock), null)
+})
+
+test('false 70 percent profit claim is rejected', () => {
+  assert.equal(forwardProofView(altered(r => { r.truthfulness.not_real_wager_profit_or_guaranteed_win_rate = false }), clock), null)
+  assert.equal(forwardProofView(altered(r => { r.proof_status = 'PROVEN' }), clock), null)
+  assert.equal(forwardProofView(altered(r => { r.game_lines.actual_real_money_roi_proven = true }), clock), null)
+})
+
+test('probability-review candidate still clearly lacks real-money proof', () => {
+  const projected = altered(r => { r.game_lines.proof_status = 'PROBABILITY_REVIEW_CANDIDATE' })
+  const view = forwardProofView(projected, clock)
+  assert.equal(view.game_lines.proof_status, 'PROBABILITY_REVIEW_CANDIDATE')
+  assert.equal(view.proof_status, 'NOT_PROVEN')
+  assert.equal(view.truthfulness.paper_roi_not_sportsbook_winnings, true)
+})
+
+test('incorrect source settled hit rate cannot masquerade as higher precision', () => {
+  assert.equal(forwardProofView(altered(r => { r.props_and_pickem.hit_rate_pct = 99.9 }), clock), null)
+})
+
+test('unverified player outcomes and missing game block counts never become results', () => {
+  assert.equal(forwardProofView(altered(r => { r.mlb_price_movement.graded_official_player_results = 90 }), clock), null)
+  assert.equal(forwardProofView(altered(r => { r.nfl_forward.source_grade_pending = 0 }), clock), null)
+})
+
+test('source proof timestamp in future is rejected', () => {
+  assert.equal(forwardProofView(altered(r => { r.updated_at_utc = '2099-01-01T01:00:00Z' }), clock), null)
+})
+
+test('stale unchanged source remains visible but prominently labeled', () => {
+  const result = forwardProofView(original, clock + 101*60_000)
+  assert.equal(result.isStale, true)
+})
+
+test('invalid source version and missing trail are blocked', () => {
+  assert.equal(forwardProofView(altered(r => { r.schema='UNSAFE' }), clock), null)
+  assert.equal(forwardProofView(altered(r => { r.verified_append_only_history_checkpoints = 0 }), clock), null)
+})
+
+test('current active Brain Record route includes the compact proof panel', () => {
+  const app = readFileSync(new URL('./src/App.jsx', import.meta.url), 'utf8')
+  const performance = readFileSync(new URL('./src/PerformancePanel.jsx', import.meta.url), 'utf8')
+  const component = readFileSync(new URL('./src/ForwardProofPanel.jsx', import.meta.url), 'utf8')
+  assert.match(app, /<PerformancePanel\s*\/>/)
+  assert.match(performance, /<ForwardProofPanel\s*\/>/)
+  assert.ok(performance.indexOf('<OfficialRecord data={data} />') < performance.indexOf('<ForwardProofPanel />'))
+  assert.match(component, /forward_proof_current\.json/)
+  assert.match(component, /not placed bets|not placed bets|not real wager|not proven|Not proven profitable/i)
+})
