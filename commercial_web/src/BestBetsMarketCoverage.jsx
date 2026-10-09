@@ -54,7 +54,7 @@ export default function BestBetsMarketCoverage({ sport, market, currentData, pri
           What the brain knows now
         </div>
         <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-600">
-          Research only · {proof.approvedPlayCount} approved plays
+          {proof.approvedPlayCount ? `${proof.approvedPlayCount} paper qualifiers · no wagers` : '0 verified plays · research only'}
         </span>
       </div>
       <p className="mt-2 text-sm leading-5 text-slate-700">
