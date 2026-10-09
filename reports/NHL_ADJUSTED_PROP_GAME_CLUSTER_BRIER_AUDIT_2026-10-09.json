@@ -1,0 +1,28 @@
+{
+  "audited_at_utc": "2026-10-09T10:58:28.533442+00:00",
+  "bootstrap_game_block_draws": 3000,
+  "bootstrap_seed": 20261009,
+  "correlated_nhl_player_prop_rows": 799,
+  "equal_game_model_minus_market_Brier_excluding_worst_one_block": 0.012759,
+  "equal_game_weighted_mean_model_minus_market_Brier": 0.01834,
+  "game_identity_and_final_source_is_existing_forward_research_not_verified_bookmaker_settlement": true,
+  "games_equal_Brier": 0,
+  "games_model_adjustment_improved_Brier": 5,
+  "games_model_adjustment_worsened_Brier": 11,
+  "independent_game_blocks": 16,
+  "independent_game_bootstrap_95ci_model_minus_market_Brier": [
+    0.006759,
+    0.032415
+  ],
+  "live_model_or_betting_picks_unchanged": true,
+  "market_in_current_historical_cohort_best_probability_baseline": true,
+  "model_minus_source_market_brier_quote_weighted": 0.013571,
+  "not_future_independent_training_or_trial": true,
+  "off_VPS_restore_verified": false,
+  "original_prop_source_sha256": "2c60d2220d35b767e0061f907d2a63ebe9812c338433e1c9296bde73c5bfc515",
+  "original_source_data_mutated": false,
+  "registered_as": "RETROSPECTIVE_ALREADY_GRADED_SAMPLE_SECONDARY_DIAGNOSTIC_NOT_FORWARD_CHALLENGER",
+  "schema": "ZENITH_NHL_16_INDEPENDENT_GAME_MARKET_MODEL_CALIBRATION_AUDIT_V1",
+  "selected_provenance": "PROP_V2_PHASE4_SUBTYPE_VETO_2026_10_05 NHL_PROP LANE_CORE_MODEL",
+  "statistical_interval_not_proof_of_long_run_out_of_sample_loss_or_bet_roi": true
+}

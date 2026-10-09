@@ -1,0 +1,249 @@
+{
+  "NBA_spread_eight_game_preseason": {
+    "all_39_shadow_PASS_not_real_bets": true,
+    "all_39_source_lines_graded_against_official_NBA_scores": true,
+    "independent_official_preseason_game_blocks": 8,
+    "one_quote_per_game_RETROSPECTIVE_ONLY": {
+      "entries": 8,
+      "losses": 5,
+      "paper_roi_pct": -31.63,
+      "paper_units": -2.530113,
+      "wins": 3
+    },
+    "source_evidence_spread_lines": {
+      "entries": 39,
+      "losses": 29,
+      "paper_roi_pct": -55.02,
+      "paper_units": -21.459484,
+      "wins": 10
+    }
+  },
+  "NBA_totals_source_defects": {
+    "duplicate_semantic_total_lines": 8,
+    "incorrect_original_tipoff_source_rows": 7,
+    "independent_strictly_verified_preseason_games": 19,
+    "model_brier_equals_bookmaker": true,
+    "other_sports_not_yet_fully_source_audited": true,
+    "strict_qualified_unique_preseason_lines": 91
+  },
+  "actual_live_model_or_betting_play_modified": false,
+  "experiment_release_guardrails": {
+    "NHL_core_adjustments_only_as_research_challenger_until_proven": true,
+    "all_source_market_reference_only_results_label_as_BENCHMARK_NOT_ZENITH_EDGE": true,
+    "game_markets_in_same_sport_must_be_evaluated_separately": true,
+    "live_bet_model_or_wager_changes_authorized": false,
+    "no_cherry_pick_ex_post_70percent_hits_or_favorites": true,
+    "one_precommitted_line_or_team_per_independent_game_for_primary_profitability": true,
+    "preserve_current_independent_NFL_MLB_future_freezes": true,
+    "require_market_v_model_Brier_game_cluster_interval_and_source_priced_paper_ROI": true,
+    "verify_kickoff_sport_team_player_source_quote_and_final_at_original_event_time": true
+  },
+  "frozen_original_source_sha256": {
+    "game_ledger": "e1a9b9892a554d9d4304420885b3bdc4fb29d38b3389230d846225cb1e351dcd",
+    "game_summary": "36f29c161af8fc8215b38f8c6f2cf41a89c26e7888b9c301764a92ee44634456",
+    "nba_hf_benchmark": "2f154360a0efe271d1061069c37c04a6e04f660b0547ff34919f5787a70a7d0d",
+    "nba_spread_audit": "5a34966775dbd52e3ec58806ad2f0284c1429a1b1caae0b9aa38f2eef5dc26a6",
+    "nba_total_audit": "bba77d15a3e56d4ffa9a20acffe4589e9d0c3bc8a12e13c321f81e0788d688ae",
+    "prop_ledger": "2c60d2220d35b767e0061f907d2a63ebe9812c338433e1c9296bde73c5bfc515",
+    "prop_summary": "165c07c10839afeea826520edba78ab3ec2bf13cfdf62fadcdfba52ee373eecf"
+  },
+  "game_predictions": {
+    "by_lane": {
+      "CFB_MONEYLINE": {
+        "independent_source_game_blocks": 4,
+        "losses": 1,
+        "market_mirror_probabilities": 4,
+        "not_live_approved": true,
+        "settled_source_line_observations": 4,
+        "source_market_reference_only": true,
+        "wins": 3
+      },
+      "MLB_MONEYLINE": {
+        "independent_source_game_blocks": 9,
+        "losses": 6,
+        "market_mirror_probabilities": 12,
+        "not_live_approved": true,
+        "settled_source_line_observations": 12,
+        "source_market_reference_only": true,
+        "wins": 6
+      },
+      "NBA_MONEYLINE": {
+        "independent_source_game_blocks": 8,
+        "losses": 5,
+        "market_mirror_probabilities": 8,
+        "not_live_approved": true,
+        "settled_source_line_observations": 8,
+        "source_market_reference_only": true,
+        "wins": 3
+      },
+      "NBA_SPREAD": {
+        "independent_source_game_blocks": 8,
+        "losses": 29,
+        "market_mirror_probabilities": 39,
+        "not_live_approved": true,
+        "settled_source_line_observations": 39,
+        "source_market_reference_only": true,
+        "wins": 10
+      },
+      "NBA_TOTAL": {
+        "independent_source_game_blocks": 20,
+        "losses": 22,
+        "market_mirror_probabilities": 106,
+        "not_live_approved": true,
+        "settled_source_line_observations": 106,
+        "source_market_reference_only": true,
+        "wins": 84
+      },
+      "NFL_MONEYLINE": {
+        "independent_source_game_blocks": 1,
+        "losses": 1,
+        "market_mirror_probabilities": 1,
+        "not_live_approved": true,
+        "settled_source_line_observations": 1,
+        "source_market_reference_only": true,
+        "wins": 0
+      },
+      "NHL_MONEYLINE": {
+        "independent_source_game_blocks": 16,
+        "losses": 7,
+        "market_mirror_probabilities": 16,
+        "not_live_approved": true,
+        "settled_source_line_observations": 16,
+        "source_market_reference_only": true,
+        "wins": 9
+      }
+    },
+    "model_probability_exactly_equal_market_count": 186,
+    "no_independent_game_model_edge_shown": true,
+    "original_all_settled_game_line_ROI_proven_executable": false,
+    "original_all_settled_game_line_paper_roi_pct": 4.98,
+    "original_frozen_research_decision_counts": {
+      "PASS_CONTRADICTORY_GAME_SIDES": 6,
+      "PASS_NO_PROVEN_INDEPENDENT_LANE_EDGE": 180
+    },
+    "original_price_reference_type_counts": {
+      "MARKET_REFERENCE": 4,
+      "MARKET_REFERENCE_INSUFFICIENT_HISTORY": 182
+    },
+    "original_settled_alternative_game_line_observations": 186
+  },
+  "generated_at_utc": "2026-10-09T10:55:09.298870+00:00",
+  "hugging_face_independent_market_benchmark": {
+    "NBA_spread_feature_model_Brier": 0.248672,
+    "NBA_spread_market_Brier": 0.249909,
+    "NBA_spread_statistically_proven_edge": false,
+    "NBA_total_feature_model_Brier": 0.254588,
+    "NBA_total_market_Brier": 0.250004,
+    "independent_historical_holdout_regular_season_games": 503,
+    "new_2026_NBA_regular_season_forward_games_used": 0,
+    "original_historical_dataset": "minmaxxxer/nba-closing-lines-ats-2025-26",
+    "original_regular_season_games_source_matched": 1214,
+    "source_close_original_book_updated_at_and_executable_market_not_verified": true
+  },
+  "player_props": {
+    "NHL_core_model": {
+      "average_abs_model_market_probability_shift_pp": 7.214,
+      "by_player_prop_market": {
+        "PLAYER_TOTAL_ASSISTS": {
+          "average_abs_model_market_probability_shift_pp": 7.8,
+          "independent_nhl_game_blocks": 13,
+          "model_brier": 0.213947,
+          "model_minus_market_brier": 0.013968,
+          "research_source_rows": 295,
+          "same_market_probability_rows": 1,
+          "source_market_brier": 0.199979
+        },
+        "PLAYER_TOTAL_GOALS": {
+          "average_abs_model_market_probability_shift_pp": 7.01,
+          "independent_nhl_game_blocks": 16,
+          "model_brier": 0.210722,
+          "model_minus_market_brier": 0.005707,
+          "research_source_rows": 218,
+          "same_market_probability_rows": 0,
+          "source_market_brier": 0.205015
+        },
+        "PLAYER_TOTAL_POINTS": {
+          "average_abs_model_market_probability_shift_pp": 7.916,
+          "independent_nhl_game_blocks": 13,
+          "model_brier": 0.236573,
+          "model_minus_market_brier": 0.025342,
+          "research_source_rows": 163,
+          "same_market_probability_rows": 2,
+          "source_market_brier": 0.21123
+        },
+        "PLAYER_TOTAL_SHOTS": {
+          "average_abs_model_market_probability_shift_pp": 5.239,
+          "independent_nhl_game_blocks": 13,
+          "model_brier": 0.26062,
+          "model_minus_market_brier": 0.010957,
+          "research_source_rows": 123,
+          "same_market_probability_rows": 0,
+          "source_market_brier": 0.249663
+        }
+      },
+      "correlated_player_quote_rows": 799,
+      "independent_game_blocks": 16,
+      "model_brier": 0.224868,
+      "model_confidence_buckets_diagnostic_only": {
+        "MODEL_70_TO_80": {
+          "correlated_player_prop_rows": 159,
+          "independent_games_not_line_count": 16,
+          "original_predicted_probability_mean_pct": 75.07,
+          "realized_grade_WIN_pct": 68.55
+        },
+        "MODEL_OVER_80": {
+          "correlated_player_prop_rows": 86,
+          "independent_games_not_line_count": 14,
+          "original_predicted_probability_mean_pct": 84.28,
+          "realized_grade_WIN_pct": 75.58
+        }
+      },
+      "model_minus_market_brier": 0.013571,
+      "original_model_adjustments_on_average_make_Brier_worse": true,
+      "same_market_probability_rows": 3,
+      "source_market_brier": 0.211297
+    },
+    "NHL_source_market_reference_only": {
+      "average_abs_model_market_probability_shift_pp": 0.0,
+      "correlated_player_quote_rows": 772,
+      "independent_game_blocks": 13,
+      "model_brier": 0.18712,
+      "model_minus_market_brier": 0.0,
+      "same_market_probability_rows": 772,
+      "source_market_brier": 0.18712
+    },
+    "all_settled_prop_quote_rows": 2843,
+    "market_reference_only_MLB_player_props": 988,
+    "source_MLB_prop_high_wins_not_necessarily_valuable": {
+      "average_abs_model_market_probability_shift_pp": 0.0,
+      "games": 9,
+      "losses": 295,
+      "model_brier": 0.176625,
+      "model_minus_market_brier": 0.0,
+      "original_priced_paper_roi_pct": -0.94,
+      "same_market_probability_rows": 988,
+      "source_market_brier": 0.176625,
+      "wins": 693
+    },
+    "source_model_provenance_count": {
+      "LANE_CORE_MODEL": 870,
+      "MARKET_CALIBRATED": 17,
+      "MARKET_REFERENCE": 1897,
+      "MARKET_REFERENCE_UNTRAINED": 59
+    },
+    "source_paper_roi_not_real_paid_bets": true
+  },
+  "schema": "ZENITH_SOURCE_TIME_MODEL_MARKET_FAILURE_ROOT_CAUSE_V1",
+  "scope": "RETROSPECTIVE_SOURCE_FAILURE_DIAGNOSTIC_NOT_NEW_PROSPECTIVE_BETTING_EDGE",
+  "separate_failure_cause_codes": [
+    "MARKET_REFERENCE_OUTPUTS_MISTAKEN_FOR_MODEL_INDEPENDENT_GAME_PREDICTIONS",
+    "FROZEN_ALTERNATE_LINES_CORRELATED_WITHIN_OFFICIAL_GAME_BLOCKS",
+    "PRESEASON_NOT_COMPARABLE_TO_REGULAR_SEASON",
+    "NBA_TOTAL_DUPLICATE_REGIME_SOURCE_AND_WRONG_15_MIN_KICKOFF",
+    "NHL_CORE_PLAYER_MODEL_CALIBRATION_WORSE_THAN_SPORTSBOOK",
+    "HIGH_FAVORITE_WIN_RATE_NOT_EQUAL_PROFIT_AFTER_QUOTED_PRICE",
+    "INSUFFICIENT_INDEPENDENT_GAMES_FOR_FUTURE_EDGE_PROOF",
+    "NO_INDEPENDENT_EXECUTABLE_NAMED_BOOK_QUOTES_OR_REAL_WAGERS"
+  ],
+  "statistically_or_commercially_proven_predictive_edge": false
+}
