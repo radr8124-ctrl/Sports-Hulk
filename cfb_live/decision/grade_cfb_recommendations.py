@@ -10,6 +10,12 @@ import math
 
 import pandas as pd
 
+try:
+    from cfb_live.decision.cfb_incremental_ledger_index import read_latest_complete, INDEX
+except ModuleNotFoundError:
+    # Direct script invocation sets sys.path[0] to this directory.
+    from cfb_incremental_ledger_index import read_latest_complete, INDEX
+
 
 ROOT = Path(
     "/home/ubuntu/sports-hulk"
@@ -1419,44 +1425,13 @@ def write_empty_outputs():
 
 def main():
 
-    ledger = read_csv(
-        LEDGER
-    )
+    # The 8GB+ append-only source is never loaded as a full DataFrame.
+    # The independent SQLite index must have scanned EVERY original row and
+    # be fully caught up with the unchanged source before grading can run.
+    episodes, source_raw_rows = read_latest_complete(source=LEDGER,index=INDEX)
 
-
-    if ledger.empty:
-
-        write_empty_outputs()
-
-        return
-
-
-    ledger[
-        "_snapshot"
-    ] = pd.to_datetime(
-        ledger[
-            "snapshot_at"
-        ],
-        utc=True,
-        errors="coerce",
-    )
-
-
-    episodes = (
-        ledger
-        .sort_values(
-            "_snapshot"
-        )
-        .drop_duplicates(
-            "recommendation_key",
-            keep="last",
-        )
-        .drop(
-            columns=[
-                "_snapshot"
-            ]
-        )
-    )
+    if episodes.empty:
+        raise RuntimeError("No CFB source recommendations; preserve old outputs")
 
 
     episodes.to_csv(
@@ -1583,11 +1558,9 @@ def main():
             ).isoformat(),
 
         "ledger_rows":
-            int(
-                len(
-                    ledger
-                )
-            ),
+            int(source_raw_rows),
+        "source_history_ingestion":
+            "ALL_ROWS_INDEXED_STREAMING_APPEND_ONLY_NO_TRUNCATION",
 
         "unique_recommendations":
             int(
@@ -1666,10 +1639,8 @@ def main():
 
 
     print(
-        "LEDGER ROWS:",
-        len(
-            ledger
-        )
+        "LEDGER RAW ROWS:",
+        source_raw_rows
     )
 
     print(

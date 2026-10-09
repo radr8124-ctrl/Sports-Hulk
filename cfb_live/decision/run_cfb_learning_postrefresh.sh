@@ -29,22 +29,37 @@ DEFERRED=0
     "$PY" \
       "$DEC/archive_cfb_decisions.py"
 
-    echo "ARCHIVE RC: $?"
+    ARCHIVE_RC=$?
+    echo "ARCHIVE RC: $ARCHIVE_RC"
 
     echo
-    echo "=== GRADE / LEARN ==="
+    echo "=== BOUNDED INCREMENTAL INDEX OF ORIGINAL 8GB+ CFB LEDGER ==="
 
-    # Grader currently reads the entire immutable ledger into pandas.
-    # An oversize source must not OOM-kill other sports refreshes.
-    LEDGER_BYTES=$(stat -c%s "$DEC/history/CFB_RECOMMENDATION_LEDGER.csv" 2>/dev/null || echo 0)
-    if [ "$LEDGER_BYTES" -gt 536870912 ]; then
-        echo "GRADE DEFERRED: OVERSIZE_SOURCE_LEDGER bytes=$LEDGER_BYTES"
-        echo "GRADE RC: 85 (incremental grader required; no prior data removed)"
+    if [ "$ARCHIVE_RC" -ne 0 ]; then
+        echo "INDEX DEFERRED: ORIGINAL ARCHIVE FAILED, no source history removed"
         DEFERRED=1
     else
-        "$PY" \
-          "$DEC/grade_cfb_recommendations.py"
-        echo "GRADE RC: $?"
+        (cd "$ROOT" && "$PY" -m cfb_live.decision.cfb_incremental_ledger_index --max-megabytes 128)
+        INDEX_RC=$?
+        echo "INDEX RC: $INDEX_RC"
+        if [ "$INDEX_RC" -ne 0 ]; then
+            echo "GRADE DEFERRED: SOURCE_INDEX_NOT_COMPLETE_OR_SOURCE_VALIDATION_FAILED"
+            DEFERRED=1
+        fi
+    fi
+
+    echo
+    echo "=== GRADE / LEARN (ONLY FROM FULLY CAUGHT-UP ORIGINAL SOURCE) ==="
+    if [ "$DEFERRED" -eq 0 ]; then
+        (cd "$ROOT" && "$PY" -m cfb_live.decision.grade_cfb_recommendations)
+        GRADE_RC=$?
+        echo "GRADE RC: $GRADE_RC"
+        if [ "$GRADE_RC" -ne 0 ]; then
+            echo "GRADE DEFERRED: SOURCE_INDEX_OR_GRADER_REJECTED"
+            DEFERRED=1
+        fi
+    else
+        echo "GRADE RC: 85 (original source still safe, no unverified learning written)"
     fi
 
     echo
