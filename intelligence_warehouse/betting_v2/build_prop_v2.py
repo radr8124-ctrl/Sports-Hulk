@@ -703,6 +703,38 @@ def feature_values(source, score, market_prob):
     }
 
 
+def quarantine_conflicting_game_starts(frame):
+    """Keep raw grades intact; exclude all lines from disputed kickoff blocks.
+
+    Source-timestamp disagreements cannot contribute to fitted coefficients,
+    market baseline comparisons, calibration, or prospective folds. This
+    quarantine is separate from game-blocked train/test eligibility.
+    """
+    if frame.empty:
+        return frame.copy()
+    required = {"block_key", "event_start"}
+    if not required.issubset(frame.columns):
+        raise ValueError("Historical game source identity/start missing")
+    started = pd.to_datetime(frame["event_start"], utc=True, errors="coerce")
+    if started.isna().any():
+        raise ValueError("Unverifiable historical kickoff cannot enter model")
+    grouped = frame.assign(_start=started).groupby("block_key", dropna=False)
+    spread = grouped["_start"].max() - grouped["_start"].min()
+    bad = set(spread[spread > pd.Timedelta(minutes=MAX_WITHIN_GAME_KICKOFF_DRIFT_MINUTES)].index)
+    keep = frame[~frame["block_key"].isin(bad)].copy().reset_index(drop=True)
+    keep.attrs["source_quarantine"] = {
+        "method": "QUARANTINE_WHOLE_GAME_IF_KICKOFF_DISAGREES_OVER_3_MIN",
+        "original_model_eligible_rows": len(frame),
+        "original_independent_games": int(frame["block_key"].nunique()),
+        "conflicting_game_blocks": len(bad),
+        "quarantined_model_rows": int(frame["block_key"].isin(bad).sum()),
+        "remaining_model_rows": len(keep),
+        "remaining_independent_games": int(keep["block_key"].nunique()),
+        "raw_graded_source_was_modified": False,
+    }
+    return keep
+
+
 def build_history(cfg):
     path = cfg["history"]
     if not path.exists():
@@ -727,7 +759,10 @@ def build_history(cfg):
         payload = parse_payload(row.get("payload_json"))
         start = parse_dt(row.get("start") or payload.get("start") or payload.get("start_dt"))
         snapshot = row.get("_snapshot")
-        if start is not None and pd.notna(snapshot) and snapshot >= start:
+        # An event without an original pregame clock cannot enter a
+        # prospective training fold. Neither a missing time nor a missing
+        # event identity is a substitute for an independently graded game.
+        if start is None or pd.isna(snapshot) or snapshot >= start:
             continue
 
         score = num(row.get("score"))
@@ -760,7 +795,9 @@ def build_history(cfg):
         elif start is not None:
             block_key = f"{cfg['sport']}|{cfg['lane']}|date|{start.date().isoformat()}"
         else:
-            block_key = f"{cfg['sport']}|{cfg['lane']}|row|{recommendation_key or len(rows)}"
+            # Without an actual game/event identifier, each player-prop row
+            # must not masquerade as one independent completed game.
+            continue
 
         rows.append({
             "outcome": 1 if text_value(row.get("grade")).upper() == "WIN" else 0,
@@ -774,12 +811,17 @@ def build_history(cfg):
             "devig_paired_books": fair_books,
             "market_reference_type": "DEVIG_FAIR" if fair_prob is not None else "RAW_FALLBACK",
             "score": score,
-            "time": snapshot if pd.notna(snapshot) else pd.Timestamp("1970-01-01", tz="UTC"),
+            "time": snapshot,
+            "event_start": start,
             "block_key": block_key,
             **features,
         })
 
-    return pd.DataFrame(rows).sort_values("time").reset_index(drop=True) if rows else pd.DataFrame()
+    historical = (
+        pd.DataFrame(rows).sort_values("time").reset_index(drop=True)
+        if rows else pd.DataFrame()
+    )
+    return quarantine_conflicting_game_starts(historical)
 
 
 def matrix(frame, feature_names, include_score=False):
@@ -791,22 +833,99 @@ def matrix(frame, feature_names, include_score=False):
     return np.column_stack(cols)
 
 
+MIN_INDEPENDENT_GAMES_FOR_VALIDATION = 30
+MIN_INDEPENDENT_TRAIN_GAMES = 15
+OUTCOME_POSTSTART_EMBARGO_HOURS = 24
+MAX_WITHIN_GAME_KICKOFF_DRIFT_MINUTES = 3
+
+
+def game_blocked_rolling_origin_folds(frame):
+    """Never put one game in train/test, or train on unfinished test-era games.
+
+    The original grade file lacks a trusted outcome-publication timestamp.
+    As a conservative *proxy* (NOT verified source-final availability), each
+    complete game must have started at least 24h before the earliest test
+    prediction. Opposing markets and players from a single game move as one
+    block. Future-only Final source provenance still requires separate proof.
+    """
+    required = {"block_key", "time", "event_start"}
+    if not required.issubset(frame.columns):
+        raise ValueError("Pregame source time and independent game identity required")
+    if frame.empty:
+        return []
+    d = frame.copy()
+    d["time"] = pd.to_datetime(d["time"], errors="coerce", utc=True)
+    d["event_start"] = pd.to_datetime(d["event_start"], errors="coerce", utc=True)
+    if (d["time"].isna().any() or d["event_start"].isna().any()
+            or d["block_key"].isna().any() or
+            not d["time"].lt(d["event_start"]).all()):
+        raise ValueError("Cannot validate missing or post-kickoff model evidence")
+    groups = d.groupby("block_key", sort=False)
+    starts = groups["event_start"].min()
+    ends = groups["event_start"].max()
+    first_prediction = groups["time"].min()
+    # Quarantine entire events if the provider's kickoff varies within one
+    # claimed game. Selecting the lucky side of a conflicting clock leaks.
+    consistent = (ends - starts) <= pd.Timedelta(
+        minutes=MAX_WITHIN_GAME_KICKOFF_DRIFT_MINUTES)
+    keys = sorted(
+        (str(key) for key in first_prediction.index if bool(consistent.loc[key])),
+        key=lambda key: (first_prediction.loc[key], key),
+    )
+    count = len(keys)
+    if count < MIN_INDEPENDENT_GAMES_FOR_VALIDATION:
+        return []
+    first_test = max(MIN_INDEPENDENT_TRAIN_GAMES, int(math.floor(count * 0.50)))
+    step = max(3, int(math.ceil(count * 0.10)))
+    folds = []
+    for at in range(first_test, count, step):
+        test_keys = set(keys[at:min(count, at + step)])
+        test = d[d["block_key"].isin(test_keys)].copy()
+        cutoff = test["time"].min()
+        barrier = cutoff - pd.Timedelta(hours=OUTCOME_POSTSTART_EMBARGO_HOURS)
+        # Entire train games only: all observations for a historic game are
+        # either available before the cutoff or excluded, never split.
+        train_keys = {key for key in keys[:at] if ends.loc[key] <= barrier}
+        train = d[d["block_key"].isin(train_keys)].copy()
+        if len(train) < 30 or train["block_key"].nunique() < MIN_INDEPENDENT_TRAIN_GAMES:
+            continue
+        if not set(train["block_key"]).isdisjoint(set(test["block_key"])):
+            raise AssertionError("Game overlap in prospective validation")
+        if train["event_start"].max() > barrier or train["time"].max() >= cutoff:
+            raise AssertionError("Future game/quote in training features")
+        folds.append((train.sort_values("time"), test.sort_values("time")))
+    return folds
+
+
 def walk_forward(frame, cfg):
     n = len(frame)
-    if n < 40:
-        return {"status": "INSUFFICIENT_HISTORY", "history_n": n}
+    distinct_games = int(frame["block_key"].nunique()) if not frame.empty else 0
+    split_method = "GAME_BLOCKED_ROLLING_ORIGIN_24H_POSTSTART_EMBARGO"
+    if n < 40 or distinct_games < MIN_INDEPENDENT_GAMES_FOR_VALIDATION:
+        return {
+            "status": "INSUFFICIENT_HISTORY", "history_n": n,
+            "independent_game_blocks": distinct_games,
+            "minimum_independent_game_blocks": MIN_INDEPENDENT_GAMES_FOR_VALIDATION,
+            "validation_split": split_method,
+        }
 
-    min_train = max(30, int(math.floor(n * 0.50)))
-    step = max(8, int(math.ceil(n * 0.10)))
     feature_names = cfg["features"]
     records = []
+    fold_provenance = []
 
-    for test_start in range(min_train, n, step):
-        test_end = min(n, test_start + step)
-        train = frame.iloc[:test_start]
-        test = frame.iloc[test_start:test_end]
+    for train, test in game_blocked_rolling_origin_folds(frame):
         if test.empty:
             continue
+        if len(set(train["outcome"].astype(int))) < 2:
+            continue
+        fold_provenance.append({
+            "training_independent_games": int(train["block_key"].nunique()),
+            "test_independent_games": int(test["block_key"].nunique()),
+            "latest_training_kickoff": train["event_start"].max().isoformat(),
+            "earliest_test_prediction": test["time"].min().isoformat(),
+            "shared_train_test_games": 0,
+            "outcome_availability": "24H_POST_KICKOFF_PROXY_NOT_VERIFIED_FINAL_PUBLICATION",
+        })
 
         y_train = train["outcome"].astype(int).to_numpy()
         y_test = test["outcome"].astype(int).to_numpy()
@@ -833,7 +952,12 @@ def walk_forward(frame, cfg):
         })
 
     if not records:
-        return {"status": "NO_FOLDS", "history_n": n}
+        return {
+            "status": "NO_VALID_GAME_BLOCK_FOLDS", "history_n": n,
+            "independent_game_blocks": distinct_games,
+            "validation_split": split_method,
+            "outcome_availability": "24H_POST_KICKOFF_PROXY_NOT_VERIFIED_FINAL_PUBLICATION",
+        }
 
     y = np.concatenate([r["y"] for r in records])
     predictions = {
@@ -946,6 +1070,10 @@ def walk_forward(frame, cfg):
     return {
         "status": "READY",
         "history_n": n,
+        "independent_game_blocks": distinct_games,
+        "validation_split": split_method,
+        "fold_provenance": fold_provenance,
+        "outcome_availability": "24H_POST_KICKOFF_PROXY_NOT_VERIFIED_FINAL_PUBLICATION",
         "walk_forward_n": int(len(y)),
         "folds": len(records),
         "feature_names": feature_names,
@@ -1467,7 +1595,17 @@ def main():
 
     for lane_key, cfg in LANES.items():
         history = build_history(cfg)
+        quarantine = history.attrs.get("source_quarantine", {
+            "method": "QUARANTINE_WHOLE_GAME_IF_KICKOFF_DISAGREES_OVER_3_MIN",
+            "original_model_eligible_rows": len(history),
+            "conflicting_game_blocks": 0,
+            "quarantined_model_rows": 0,
+            "remaining_model_rows": len(history),
+            "remaining_independent_games": int(history["block_key"].nunique()) if not history.empty else 0,
+            "raw_graded_source_was_modified": False,
+        })
         validation = walk_forward(history, cfg)
+        validation["history_source_quarantine"] = quarantine
         if validation.get("status") != "READY":
             validation = {
                 **validation,
