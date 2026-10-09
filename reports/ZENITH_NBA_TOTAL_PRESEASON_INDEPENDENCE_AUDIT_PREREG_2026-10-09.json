@@ -1,0 +1,40 @@
+{
+  "class": "RETROSPECTIVE_SOURCE_TRUTH_DIAGNOSTIC_NOT_PRISTINE_UNSEEN_PROOF",
+  "deduplication_rule": "earliest first captured price/time, then smallest original forward_key; never grade-based, never best hindsight sportsbook price",
+  "estimated_ci_method": "group resampling by independent ESPN event/game for both unique-line and one-per-game alternative, 2000 nonparam resamples 95% two-sided, seed 20261009",
+  "historical_grade_rows_intended_to_reweight_no_live_change": false,
+  "include_all_duplicate_rows": true,
+  "model_promotion_allowed": false,
+  "no_modification_to_original_ledgers_or_public_betting_dashboard": true,
+  "no_paid_data": true,
+  "no_retraining_or_optimization": true,
+  "official_identity_rule": "unique finished official ESPN season2027 PRESEASON game with exact UTC start <=3m, exact home and away team abbreviation alias and noncontradictory final points; every quote selected side graded from independently final total+original quoted line",
+  "one_quote_per_official_game_rule": "earliest original frozen game-market TOTAL quote by capture timestamp, then smallest immutable forward_key",
+  "registered_at_utc": "2026-10-09T10:03:03.283817+00:00",
+  "report_concentration_top3_game_paper_units": true,
+  "report_preseason_and_missing_regime_labels": true,
+  "results_previously_examined": true,
+  "retrospective_de_dup_diagnostics_do_not_verify_future_profit": true,
+  "source_grades": [
+    "WIN",
+    "LOSS",
+    "PUSH"
+  ],
+  "source_input_sha256": {
+    "independent_NBA_ESPN_game_history": "1aab7e12454ab76f2c79fa5225ab0efe1e4ab8ef411958ff33291c6be372c6fa",
+    "original_game_forward_ledger": "e1a9b9892a554d9d4304420885b3bdc4fb29d38b3389230d846225cb1e351dcd",
+    "original_game_forward_summary": "36f29c161af8fc8215b38f8c6f2cf41a89c26e7888b9c301764a92ee44634456"
+  },
+  "source_lane": "NBA_TOTAL",
+  "source_pre_game_rule": "original quote captured before ESPN official first pitch and original source game event kickoff",
+  "source_price_metric": "original price American implied unit net win odds/100 or 100/abs(odds), loss -1, push 0; NOT independently executable",
+  "source_probability_comparator": "original source entry_v2_probability_pct versus entry_market_reference_probability_pct on exact same frozen side and actual independently verified NBA final, Brier",
+  "source_relative_paths": {
+    "independent_NBA_ESPN_game_history": "nba_live/history/NBA_GAME_HISTORY.csv",
+    "original_game_forward_ledger": "intelligence_warehouse/betting_v2/BETTING_V2_ALL_MARKETS_FORWARD_LEDGER.jsonl",
+    "original_game_forward_summary": "intelligence_warehouse/betting_v2/BETTING_V2_ALL_MARKETS_FORWARD_SUMMARY.json"
+  },
+  "study_id": "ZENITH_NBA_TOTAL_SOURCE_GRADE_DUPLICATE_INDEPENDENCE_AUDIT_20261009_V1",
+  "target_model_version": "BETTING_V2_ALL_MARKETS_2026_10_05",
+  "unique_immutable_market_identity": "NBA, exact official game_key, TOTAL, OVER/UNDER, exact source line; ignores retrospective legacy regime-key duplication"
+}
