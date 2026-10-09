@@ -29,6 +29,26 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
       || echo "WARNING: MLB official core refresh failed; prior data preserved."
 
     echo
+    echo "=== MLB PREGAME PROVENANCE CAPTURE (RESEARCH ONLY) ==="
+
+    SPORTS_LABEL=mlb-pregame-evidence \
+    SPORTS_MAX_SECONDS=35 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.mlb_pregame_capture.capture_evidence \
+        --lookahead-hours 48 --feed-max-games 4 --weather-max-games 2 \
+      || echo "WARNING: pregame evidence capture skipped or failed; prior data preserved."
+
+    echo
+    echo "=== MLB OFFICIAL PREKICKOFF V2 RESEARCH (VERIFIED POSTSEASON FORM, NO BETTING) ==="
+
+    SPORTS_LABEL=mlb-asof-research-v2 \
+    SPORTS_MAX_SECONDS=35 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.historical_recovery.mlb_live_research_feature_freeze_v2 \
+      || echo "WARNING: MLB V2 feature freezing failed; source research prior records preserved; previous V1 frozen history preserved."
+
+    echo
+
     echo "=== OFFICIAL MLB MASTER STATUS FRESHNESS ==="
 
     SPORTS_LABEL=mlb-master-status \
@@ -39,6 +59,26 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
       || echo "WARNING: MLB master status freshness held; previous master preserved."
 
     echo
+    echo "=== MLB SOURCE-TIME PROBABLE PITCHER AND PRIOR-2025 PARK RESEARCH (NO BETS) ==="
+
+    SPORTS_LABEL=mlb-probable-pitcher-park-research \
+    SPORTS_MAX_SECONDS=45 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.historical_recovery.mlb_pitcher_park_source_asof --stage freeze_research_context \
+      || echo "WARNING: pregame pitcher/park verification skipped; older source research preserved."
+
+    echo
+
+    echo "=== MLB PREQUOTE FULL HISTORICAL OPPONENT TEAM/PARK/ROLE RESEARCH CONTEXT (NO BETS) ==="
+
+    SPORTS_LABEL=mlb-v4-full-team-source-context \
+    SPORTS_MAX_SECONDS=45 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.historical_recovery.mlb_full_context_source_time --stage freeze_prior_context \
+      || echo "WARNING: completed prior full-context research failed; original source-time context records preserved."
+
+    echo
+
     echo "=== MLB MARKETS ==="
 
     SPORTS_LABEL=mlb-markets \
@@ -57,6 +97,46 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
       || echo "WARNING: MLB fusion failed; prior fusion preserved."
 
     echo
+    echo "=== MLB TRUE PREMATCH PAIRED BOOK PRICE RESEARCH (NO BETS) ==="
+
+    SPORTS_LABEL=mlb-paired-book-source-research \
+    SPORTS_MAX_SECONDS=28 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.historical_recovery.mlb_paired_pregame_market_freeze \
+      || echo "WARNING: paired market source research failed; previous research book-price evidence preserved."
+
+    echo
+
+    echo "=== MLB FIRST TRUE MARKET-CONTROL SHADOW PROBABILITIES (NO BETS) ==="
+
+    SPORTS_LABEL=mlb-market-only-shadow-model \
+    SPORTS_MAX_SECONDS=20 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.historical_recovery.mlb_shadow_market_control \
+      || echo "WARNING: market-only shadow research failed; prior source-time shadow forecasts preserved."
+
+    echo
+
+    echo "=== MLB FROZEN LIMITED SPEED/BAT/WALKS FORWARD SHADOW (RESEARCH, NO BETS) ==="
+
+    SPORTS_LABEL=mlb-restricted-speed-walk-shadow \
+    SPORTS_MAX_SECONDS=20 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.historical_recovery.mlb_restricted_speed_walk_shadow --stage freeze_forecasts \
+      || echo "WARNING: restricted prequote advanced research freeze failed; original source-time advanced shadow records preserved."
+
+    echo
+
+    echo "=== MLB FROZEN PREQUOTE FULL SIXTEEN-COLUMN PROSPECTIVE RESEARCH CHALLENGER (NO BETS) ==="
+
+    SPORTS_LABEL=mlb-v4-full-sixteen-shadow \
+    SPORTS_MAX_SECONDS=25 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.historical_recovery.mlb_full_context_true_forward_shadow --stage freeze_latest_pregame_quote \
+      || echo "WARNING: 16-column model same-book shadow failed; previous context model forecasts preserved."
+
+    echo
+
     echo "=== MLB DECISION BRAIN ==="
 
     SPORTS_LABEL=mlb-decision \
