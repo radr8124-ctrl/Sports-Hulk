@@ -492,27 +492,27 @@
       ],
       "contextFiles": [
         ".superdesign/design-system.md",
-        "commercial_web/src/styles.css",
+        "commercial_web/src/styles.css:1:235",
         "commercial_web/tailwind.config.js",
         "commercial_web/src/dashboardConfig.js",
-        "commercial_web/src/App.jsx:21:296",
-        "commercial_web/src/App.jsx:859:1001",
-        "commercial_web/src/AskSportsHulk.jsx:361:383"
+        "commercial_web/src/App.jsx:1865:2015",
+        "commercial_web/src/App.jsx:3445:3565",
+        "commercial_web/betting_proof_presentation.js"
       ],
       "designSystemPath": ".superdesign/design-system.md",
       "drafts": {
         "7f42e794-a8f2-49bb-8c3a-7a4ca0653950": {
-          "currentVersion": 1,
-          "title": "Sports HULK \u2014 Mobile Bets Shell",
-          "visualDirection": "task-first mobile bets shell"
+          "currentVersion": 4,
+          "title": "Sports Zenith \u2014 Game Intelligence Audit",
+          "visualDirection": "Proof-first dense mobile betting research; permanent NFL and spread and totals choices; stale source explanation; 0 invented plays"
         }
       },
       "fingerprints": {
         ".superdesign/design-system.md": "4be8acc864fcab221f05dd3be1b5b0be904b214caf1746d59ea73b28a04a1a2e",
-        "commercial_web/src/App.jsx": "83c8cc59712698f37f6fa32ae34da788d1f5ffab48bacd3e0297b173d1c99d85",
-        "commercial_web/src/AskSportsHulk.jsx": "7a9ff1c0414240795c4d6e866420be44bb67833341f968274ca4f7239d4ed1cb",
-        "commercial_web/src/dashboardConfig.js": "03c5f16692d1b3c2de03b4363f86ebccc5e0b7977bf44a188645d10358a100d5",
-        "commercial_web/src/styles.css": "3d0f0600a440ec415833bad73e08ed69d296cf559693b80a21fbfc7f7d753d23",
+        "commercial_web/betting_proof_presentation.js": "9145dae28e7a15eb884d4794943bb6acad67517ab8cc1032aefda0a85d529c0b",
+        "commercial_web/src/App.jsx": "1d016b2c250855f0f99f1e7fb3fd9aa09b3e4dedabcfe1da527adf0551d192fe",
+        "commercial_web/src/dashboardConfig.js": "d6894480c758a9afc7192751d077ed6341708f8431e863d14bbbce97859a3d26",
+        "commercial_web/src/styles.css": "f7516f19418a132e840619035c13171018d04c3058d40c55252141aa1f55b05b",
         "commercial_web/tailwind.config.js": "453a2e4d26a341ef18654b92e4ec7c1a317e8cbcbd01c699c9260f36e0aa8afe"
       },
       "projectId": "144cb851-d868-4d2b-8d78-74ce26fe0ce8",
@@ -523,7 +523,7 @@
       "sourceDraftId": "07c52044-7b4a-4483-b0ed-c68c9f8c0740",
       "sourceTarget": "/",
       "targetKind": "new-ui",
-      "updatedAt": "2026-10-05T23:26:15.934644+00:00"
+      "updatedAt": "2026-10-09T18:15:39.901897+00:00"
     },
     "mobile:more-sheet": {
       "activeDraftId": "fb8d4a10-70b2-42ed-b5e3-6bcc06b51562",

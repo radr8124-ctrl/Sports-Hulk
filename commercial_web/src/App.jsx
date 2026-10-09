@@ -9,6 +9,9 @@ import { AccountButton, useAuth } from './AuthShell'
 import { bettingNavItems, navItems, nflSections, scoreLeagues, statusCards } from './dashboardConfig'
 import { PUBLIC_BRAND, PUBLIC_BRAND_WORD_1, PUBLIC_BRAND_WORD_2, PUBLIC_TAGLINE } from './brandConfig'
 import BetMeaning, { betDisplayLabel } from './BetMeaning'
+import BestBetsMarketCoverage from './BestBetsMarketCoverage'
+import { BET_SPORT_FILTERS, BET_MARKET_FILTERS } from '../best_bets_market_availability.js'
+import { explainBetProof, organizeBetResearch } from '../betting_proof_presentation.js'
 import { survivorHomeSummary } from '../survivor_home_summary.js'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
@@ -1835,69 +1838,121 @@ function SportFilter({ sports, active, onChange }) {
 
 function BestBetsV2Panel() {
   const data = useJsonEndpoint('/betting_v2_all_markets_current.json', { summary: {}, picks: [] })
+  const priorBoard = useJsonEndpoint('/betting_v2_current.json', { market_board: [] })
+  const nflScores = useJsonEndpoint('/nfl_scores.json', { next_games: [] })
   const [sport, setSport] = useState('ALL')
+  const [market, setMarket] = useState('ALL')
+  const [showAllResearch, setShowAllResearch] = useState(false)
   const rows = data.picks || []
-  const sports = Array.from(new Set(rows.map((row) => row.sport).filter(Boolean))).sort()
-  const visible = rows
-    .filter((row) => sport === 'ALL' || row.sport === sport)
-    .sort((a, b) => (b.shadow_decision === 'SHADOW_PLAY') - (a.shadow_decision === 'SHADOW_PLAY') || (b.conservative_expected_value_pct ?? -999) - (a.conservative_expected_value_pct ?? -999))
-    .slice(0, 12)
+  // Navigation is permanent; the research feed must not erase NFL or spreads
+  // merely because none of the quotes is source-fresh and proven.
+  const sports = BET_SPORT_FILTERS
+  const grouped = organizeBetResearch(rows, sport, market)
+  const byProofLane = data.by_proof_lane || {}
+  const researched = [...grouped.research].sort((a, b) => {
+    const ta = Date.parse(String(a.event_start || '').replace(' ', 'T'))
+    const tb = Date.parse(String(b.event_start || '').replace(' ', 'T'))
+    return (Number.isFinite(ta) ? ta : Infinity) - (Number.isFinite(tb) ? tb : Infinity)
+      || (Number(b.book_count || 0) - Number(a.book_count || 0))
+  })
+  const visibleResearch = showAllResearch ? researched : researched.slice(0, 6)
   const summary = data.summary || {}
+  const insufficientCount = grouped.research.filter(r => String(r.selection_rule_status || '').includes('INSUFFICIENT_HISTORY')).length
+  const noEdgeCount = grouped.research.filter(r => r.selection_rule_status === 'NO_INDEPENDENT_MODEL_EDGE').length
+
+  const renderBetCard = (row, i) => {
+    const proof = explainBetProof(row, byProofLane)
+    const isPlay = proof.isPlay
+    return (
+      <article key={`${row.game_key}-${row.market}-${row.selection_key}-${i}`} className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">{row.sport} · {humanize(row.market)}</div>
+            <div className="mt-2 break-words text-xl font-black tracking-tight text-slate-950 sm:text-2xl">{betDisplayLabel(row)}</div>
+          </div>
+          <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black ${isPlay ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+            {isPlay ? 'SHADOW PLAY' : 'RESEARCH'}
+          </span>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-500">
+          {row.american_odds != null && <span>Last observed quote {Number(row.american_odds) > 0 ? '+' : ''}{row.american_odds}</span>}
+          {row.book_count != null && <span>· {row.book_count} books</span>}
+          <span>· Paper research, not an approved bet</span>
+        </div>
+        <div className={`mt-3 rounded-xl border px-3 py-2 ${isPlay ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'}`}>
+          <div className={`text-sm font-black ${isPlay ? 'text-emerald-800' : 'text-slate-800'}`}>{proof.label}</div>
+          <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-4 text-slate-600">{proof.description}</p>
+        </div>
+        <details className="group mt-4 rounded-2xl border border-slate-200 bg-white">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-black text-slate-700">
+            <span>View evidence</span>
+            <ChevronRight size={16} className="shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
+          </summary>
+          <div className="border-t border-slate-100 px-4 pb-4 pt-4">
+            <div className="mb-3"><BetMeaning row={row} /></div>
+            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.calibrated_win_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">{proof.estimateLabel}</div></div>
+              <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.market_reference_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Market fair</div></div>
+              <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.conservative_expected_value_pct == null ? '—' : `${row.conservative_expected_value_pct}%`}</div><div className="mt-1 text-slate-400">Conservative EV</div></div>
+            </div>
+            <div className="mt-4 text-xs font-semibold leading-5 text-slate-500">{humanize(row.historical_edge_confidence)} · {row.book_count ?? '—'} books · quality {row.data_quality_grade || '—'}</div>
+            {proof.historyCount != null && <p className="mt-2 text-xs text-slate-500">Pregame outcomes: {proof.historyCount} / 50{proof.independentGameCount == null ? '' : ` · Independent games: ${proof.independentGameCount} / 25`}</p>}
+            <div className="mt-2 text-[11px] leading-5 text-slate-400">Model gate: {humanize(row.selection_rule_status)}</div>
+          </div>
+        </details>
+      </article>
+    )
+  }
 
   return (
     <section className="space-y-5">
       <div className="section-heading">
-        <div><p className="eyebrow">Betting</p><h2>Best Bets</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Every game market is compared with the market baseline first. A research candidate is not a PLAY unless the independent model, price and forward-proof gates all clear.</p></div>
-        <span className="health-pill">{summary.candidates ?? 0} CURRENT</span>
+        <div>
+          <p className="eyebrow">Betting intelligence</p>
+          <h2>Best Bets</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Start with tested selections, then explore market research. A strong-looking favorite is not necessarily a profitable bet.</p>
+        </div>
+        <span className="health-pill">{summary.candidates ?? 0} EVALUATED</span>
       </div>
-      <div className={`rounded-2xl border p-4 text-sm font-semibold ${(summary.shadow_plays || 0) > 0 ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-blue-200 bg-blue-50 text-blue-900'}`}>
-        {(summary.shadow_plays || 0) > 0
-          ? `${summary.shadow_plays} independently qualified play${summary.shadow_plays === 1 ? '' : 's'} are being tracked.`
-          : `No independently proven PLAY right now. ${summary.candidates ?? 0} candidates were evaluated and ${summary.passes ?? 0} failed at least one proof gate.`}
+
+      <SportFilter sports={sports} active={sport} onChange={next => {setSport(next); setShowAllResearch(false)}} />
+      <div role="group" aria-label="Betting market filter" className="flex gap-2 overflow-x-auto pb-1">
+        {BET_MARKET_FILTERS.map(item => (
+          <button type="button" key={item.id} onClick={() => {setMarket(item.id); setShowAllResearch(false)}}
+            className={`min-h-10 whitespace-nowrap rounded-full px-3 py-2 text-xs font-black ${market === item.id ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600'}`}>
+            {item.label}
+          </button>
+        ))}
       </div>
-      <SportFilter sports={sports} active={sport} onChange={setSport} />
-      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        {visible.map((row, i) => {
-          const isPlay = row.shadow_decision === 'SHADOW_PLAY'
-          const zenithStatus = isPlay ? 'PLAY' : 'PASS'
-          return (
-            <article key={`${row.game_key}-${row.market}-${row.selection_key}-${i}`} className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-              <div className="flex min-w-0 items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">{row.sport} · {humanize(row.market)}</div>
-                  <div className="mt-2 truncate text-2xl font-black tracking-tight text-slate-950">{betDisplayLabel(row)}</div>
-                </div>
-                <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black ${isPlay ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{zenithStatus}</span>
-              </div>
-
-              <div className="mt-4">
-                <BetMeaning row={row} />
-              </div>
-
-              <div className={`mt-4 rounded-2xl border px-4 py-3 ${isPlay ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'}`}>
-                <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Sports Zenith status</div>
-                <div className={`mt-1 text-sm font-black ${isPlay ? 'text-emerald-800' : 'text-slate-800'}`}>{zenithStatus} · {humanize(row.selection_rule_status || row.shadow_decision)}</div>
-              </div>
-
-              <details className="group mt-4 rounded-2xl border border-slate-200 bg-white">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-black text-slate-700">
-                  <span>View evidence</span>
-                  <ChevronRight size={16} className="shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
-                </summary>
-                <div className="border-t border-slate-100 px-4 pb-4 pt-4">
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.calibrated_win_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Zenith probability</div></div>
-                    <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.market_reference_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Market fair</div></div>
-                    <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.conservative_expected_value_pct == null ? '—' : `${row.conservative_expected_value_pct}%`}</div><div className="mt-1 text-slate-400">Conservative EV</div></div>
-                  </div>
-                  <div className="mt-4 text-xs font-semibold leading-5 text-slate-500">{humanize(row.historical_edge_confidence)} · {row.book_count ?? '—'} books · quality {row.data_quality_grade || '—'}</div>
-                  <div className="mt-2 text-[11px] leading-5 text-slate-400">{humanize(row.selection_rule_status)}</div>
-                </div>
-              </details>
-            </article>
-          )
-        })}
+      <BestBetsMarketCoverage sport={sport} market={market} currentData={data} priorBoard={priorBoard} nflScores={nflScores} />
+      {grouped.plays.length > 0 && (
+        <div className="space-y-3">
+          <div className="section-heading"><div><p className="eyebrow">Forward paper testing</p><h3>Qualified shadow selections</h3></div></div>
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{grouped.plays.map(renderBetCard)}</div>
+        </div>
+      )}
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Not official picks</p>
+          <h3>Research watchlist</h3>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Browse lines and explanations without mistaking research for a betting recommendation. Sorted by upcoming kickoff, not projected profit.</p>
+        </div>
+        <span className="health-pill">{grouped.research.length} RESEARCH</span>
       </div>
+      <div className="flex flex-wrap gap-2 text-xs font-bold text-slate-600">
+        {insufficientCount > 0 && <span className="rounded-full bg-amber-50 px-3 py-2 text-amber-800">{insufficientCount} still building history</span>}
+        {noEdgeCount > 0 && <span className="rounded-full bg-slate-100 px-3 py-2 text-slate-700">{noEdgeCount} with no proven model edge</span>}
+      </div>
+      {visibleResearch.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{visibleResearch.map(renderBetCard)}</div>
+      ) : (
+        <p className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm font-semibold text-slate-600">No research candidates match this filter.</p>
+      )}
+      {!showAllResearch && grouped.research.length > visibleResearch.length && (
+        <button type="button" onClick={() => setShowAllResearch(true)} className="min-h-11 rounded-xl border border-blue-200 bg-white px-5 py-3 text-sm font-black text-blue-800 hover:bg-blue-50">
+          Show all {grouped.research.length} research candidates
+        </button>
+      )}
     </section>
   )
 }
