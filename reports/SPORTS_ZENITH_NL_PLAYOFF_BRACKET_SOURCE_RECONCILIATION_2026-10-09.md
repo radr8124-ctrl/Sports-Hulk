@@ -1,0 +1,19 @@
+# Zenith — first officially resolved NL playoff bracket fixture (October 9, 2026)
+
+**Status: VERIFIED SOURCE-CONSISTENT FUTURE SCHEDULE REPAIR; no new betting edge or player prediction.**
+
+Exact event: MLB official gamePk **849809**, **Los Angeles Dodgers @ Milwaukee Brewers**, 2026-10-12T00:00:00Z (Sunday October 11, 8 PM US Eastern), **NL Championship Series**, American Family Field. The old historical game master had this upcoming game as NL Lower Seed @ NL Higher Seed, venue NL Stadium, with approximate first pitch 2026-10-11T07:33:00Z.
+
+Three separately observed public MLB StatsAPI schedule responses underpinned the exact change: existing original source-capture record 2026-10-09T07:12:05Z (SHA-256 `7bcbed1b6fc41009d002d3f235a37936e2134afb905902fdc0897e5a5dbc3e93`), second independent-in-time public raw HTTP capture on 2026-10-09T07:46:14.218336Z (SHA-256 `f323aa9aab25d3a30582556478700c8e0e2a7c6c515905ee3612086150523533`), and a third freshly fetched public MLB schedule immediately before apply. These were **separate captures from the same official provider**, not three independent providers.
+
+The strict one-time reconciliation requires original placeholder NL team IDs/names, legitimate real National League opponents and source team IDs, actual venue ID/name, exact same gamePk and officialDate, exact MLB game type and gameNumber, two distinct timestamped original response hashes and the fresh third official response. It excludes any game after original placeholder start, unverified teams, missing source receipts and forged venue, quotation or timestamps. The allowed change targets only this single future game.
+
+Original 7,911-game master was fully backed up and SHA checked before apply. Direct source dry run proposed exactly seven existing-game cell changes. The manual apply changed exactly seven cells for gamePk 849809: scheduled start, both team names/IDs and venue name/ID. All other original historical cells and 7,910 other games stayed identical. Original master SHA **6ad270f021e85c63a76cddd7b31b3c4dc6724039afa70bec4cf81777832e58ae**; revised master SHA **f0cf17ddb8609def3cc5269cb3e1d42000196a359335524c1857265156a9d60c**.
+
+New research guard `baseball_vault/mlb_future_bracket_attestation.py`, one-time CLI `scripts/mlb_attested_future_bracket_reconcile.py`, and `tests/test_mlb_future_nl_bracket_resolution.py`. The CLI has a dry-run mode and refuses all non-target game IDs, repeat changes and source tampering. **All 403 MLB regression tests passed after the real source change**, plus ten targeted replay tests using an isolated old-placeholder fixture, allowing future reruns even after master correction.
+
+The existing research-only official fixture auditor now reports **two exact source-matched future MLB games**: 849831 (White Sox @ Cleveland Guardians) and 849809 (Dodgers @ Milwaukee Brewers). A fully confirmed 18-player lineup and actually contemporaneous paired bookmaker price are still required before any new Full16 forecast. Earlier real-game 18 Full16 forecast rows retain original SHA `0cea5e38c94451cacbc1ff552276c5df7aa1e341296b127fd0cfa6a2d19c66a8`; original results, market odds, training model, bankroll and public betting recommendations were not modified.
+
+Machine acceptance: `reports/MLB_NL_BRACKET_849809_SINGLE_CELL_RECONCILIATION_2026-10-09.json`. Protected private original/public raw-source and code bundle with readback: `.deploy_backups/zenith_future_nl_official_bracket_849809_PREAPPLY_20261009T075500Z/PRIVATE_PREAPPLY_SOURCE.tar.gz`, SHA `7898ffca32d42566f6096e482468c87f868deb296f3c3403e68e954e7251804e`, **11/11 source files restored with matching hashes**. Raw sportsbook/player data and original provider records are not committed to Git. Independent **off-VPS disaster recovery remains unverified**.
+
+Caution: a schedule-ready game is not a source-confirmed lineup, a trustworthy player model prediction, a pricing edge, a 70% strategy or an approved bet.

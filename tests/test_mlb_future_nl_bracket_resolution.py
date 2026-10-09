@@ -42,6 +42,19 @@ class TestNLFutureAttestation(unittest.TestCase):
         src=fix.ROOT/'intelligence_warehouse/mlb_pregame_capture/official_future_schedule_raw'
         target=self.root/'intelligence_warehouse/mlb_pregame_capture/official_future_schedule_raw'
         shutil.copytree(src,target)
+        # Keep a deliberately old placeholder in the ISOLATED test copy even
+        # after production has legitimately corrected its master source.
+        initial=self.root/fix.MASTER_REL
+        fixture=pd.read_csv(initial,dtype=str,low_memory=False)
+        mask=fixture.gamePk.eq('849809')
+        self.assertEqual(int(mask.sum()),1)
+        for field,value in {
+            'gameDate':'2026-10-11T07:33:00Z',
+            'home_team':'NL Higher Seed','home_team_id':'5517',
+            'away_team':'NL Lower Seed','away_team_id':'5525',
+            'venue':'NL Stadium','venue_id':'3833',
+        }.items():fixture.loc[mask,field]=value
+        fixture.to_csv(initial,index=False)
         self.raw_file=next(target.glob('*074614Z.json'))
         self.receipt=next(target.glob('*074614Z_RECEIPT.json'))
         self.payload=json.loads(self.raw_file.read_text())

@@ -1,0 +1,91 @@
+{
+  "changes": [
+    {
+      "field": "gameDate",
+      "gamePk": "849809",
+      "new": "2026-10-12T00:00:00Z",
+      "old": "2026-10-11T07:33:00Z"
+    },
+    {
+      "field": "away_team",
+      "gamePk": "849809",
+      "new": "Los Angeles Dodgers",
+      "old": "NL Lower Seed"
+    },
+    {
+      "field": "away_team_id",
+      "gamePk": "849809",
+      "new": "119",
+      "old": "5525"
+    },
+    {
+      "field": "home_team",
+      "gamePk": "849809",
+      "new": "Milwaukee Brewers",
+      "old": "NL Higher Seed"
+    },
+    {
+      "field": "home_team_id",
+      "gamePk": "849809",
+      "new": "158",
+      "old": "5517"
+    },
+    {
+      "field": "venue",
+      "gamePk": "849809",
+      "new": "American Family Field",
+      "old": "NL Stadium"
+    },
+    {
+      "field": "venue_id",
+      "gamePk": "849809",
+      "new": "32",
+      "old": "3833"
+    }
+  ],
+  "checked_at_utc": "2026-10-09T07:55:38.550848+00:00",
+  "corrected_master_sha256": "f0cf17ddb8609def3cc5269cb3e1d42000196a359335524c1857265156a9d60c",
+  "corrected_parquet_sha256": "1635bd4e3f202e2de961858d4d1080f02875f88af9f1f7340894d0ccd58a09f2",
+  "fresh_third_schedule_sha256": "f323aa9aab25d3a30582556478700c8e0e2a7c6c515905ee3612086150523533",
+  "future_play_or_proven_edge_claim": false,
+  "gamePk": 849809,
+  "new_gamepk_rows_count": 7911,
+  "off_vps_source_restore_verified": false,
+  "original_18_completed_game_official_scores_sha256": "965ee31e119d891925648aebc7e2dd36b4c0a6950395c01b41932e4cda7ef98d",
+  "original_18_full16_frozen_forecast_sha256": "0cea5e38c94451cacbc1ff552276c5df7aa1e341296b127fd0cfa6a2d19c66a8",
+  "original_gamepk_rows_count": 7911,
+  "original_master_sha256": "6ad270f021e85c63a76cddd7b31b3c4dc6724039afa70bec4cf81777832e58ae",
+  "original_parquet_sha256": "21a3bfef4a1a6b849f17cd331d9d2fa744bcf2f06a79034d40da8dd605743192",
+  "original_source_evidence_sha256": "bde763a647b4bd773754da5f3d197db04286cf9dfef06087ba07fd2c6fcb9653",
+  "proof": {
+    "first_source_captured_utc": "2026-10-09T07:12:05+00:00",
+    "gamePk": "849809",
+    "independent_original_captures": 2,
+    "official_date": "2026-10-11",
+    "original_batting_orders_or_starters_verified": false,
+    "original_bets_or_model_predictions_changed": false,
+    "original_old_start": "2026-10-11T07:33:00Z",
+    "original_placeholder_away": "NL Lower Seed",
+    "original_placeholder_game_type": "L",
+    "original_placeholder_home": "NL Higher Seed",
+    "original_pregame_evidence_id": "e0fa7f6bc7741f4b4519b85ce5cd8ece",
+    "original_pregame_line_sha256": "7bcbed1b6fc41009d002d3f235a37936e2134afb905902fdc0897e5a5dbc3e93",
+    "proof_type": "NL_FUTURE_PLACEHOLDER_REPLACEMENT_FROM_TWO_ORIGINAL_OFFICIAL_SOURCE_CAPTURES",
+    "resolved_away_team_id": "119",
+    "resolved_away_team_name": "Los Angeles Dodgers",
+    "resolved_home_team_id": "158",
+    "resolved_home_team_name": "Milwaukee Brewers",
+    "resolved_venue_id": "32",
+    "resolved_venue_name": "American Family Field",
+    "second_original_schedule_response_sha256": "f323aa9aab25d3a30582556478700c8e0e2a7c6c515905ee3612086150523533",
+    "second_source_captured_utc": "2026-10-09T07:46:14.218336+00:00",
+    "source_payloads_held_private": true,
+    "verified_real_start": "2026-10-12T00:00:00Z"
+  },
+  "real_batting_orders_verified": false,
+  "retroactive_prediction_modified": false,
+  "source_archived_second_raw_sha256": "f323aa9aab25d3a30582556478700c8e0e2a7c6c515905ee3612086150523533",
+  "source_attestation": "VERIFIED_TWO_DISTINCT_EARLIER_ORIGINAL_OFFICIAL_MLB_CAPTURES_AND_FRESH_THIRD_PUBLIC_MLB_SCHEDULE",
+  "source_game_first_pitch_utc": "2026-10-12T00:00:00Z",
+  "state": "VERIFIED_FUTURE_FIXTURE_MASTER_CORRECTED"
+}
