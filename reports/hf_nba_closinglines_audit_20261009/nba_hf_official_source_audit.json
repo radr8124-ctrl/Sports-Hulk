@@ -1,0 +1,12 @@
+{
+  "independently_confirmed_matchup_time_final_score_and_grade": true,
+  "official_nba_history_rows": 1401,
+  "official_pregame_odds_execution_verified": false,
+  "source_dataset_rows": 1315,
+  "source_original_book_quote_timestamps_verified": false,
+  "source_rejection_counts": {
+    "NOT_REGULAR_SEASON": 91,
+    "NO_UNIQUE_OFFICIAL_MATCH": 10
+  },
+  "verified_regular_game_rows": 1214
+}

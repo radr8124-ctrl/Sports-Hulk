@@ -1,0 +1,266 @@
+{
+  "actual_betting_placement": false,
+  "commercial_odds_license_verified": false,
+  "cross_market_outcomes_correlated_same_games": true,
+  "data_audit": {
+    "independently_confirmed_matchup_time_final_score_and_grade": true,
+    "official_nba_history_rows": 1401,
+    "official_pregame_odds_execution_verified": false,
+    "source_dataset_rows": 1315,
+    "source_original_book_quote_timestamps_verified": false,
+    "source_rejection_counts": {
+      "NOT_REGULAR_SEASON": 91,
+      "NO_UNIQUE_OFFICIAL_MATCH": 10
+    },
+    "verified_regular_game_rows": 1214
+  },
+  "generated_at": "2026-10-09T05:17:22.061072+00:00",
+  "market_comparisons": {
+    "NBA_HOME_MONEYLINE_REGULAR_SEASON": {
+      "calibrated_market_high_confidence": {
+        "coverage_pct": 48.71,
+        "hit_rate_pct": 87.76,
+        "losses": 30,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 245,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 215
+      },
+      "feature_challenger_high_confidence": {
+        "coverage_pct": 49.11,
+        "hit_rate_pct": 87.04,
+        "losses": 32,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 247,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 215
+      },
+      "frozen_feature_challenger": {
+        "brier": 0.167687,
+        "log_loss": 0.510454
+      },
+      "model_promotion_allowed": false,
+      "original_quote_timestamps": false,
+      "raw_close_market": {
+        "brier": 0.164504,
+        "log_loss": 0.500393
+      },
+      "raw_market_high_confidence": {
+        "coverage_pct": 51.09,
+        "hit_rate_pct": 87.55,
+        "losses": 32,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 257,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 225
+      },
+      "research_status": "HISTORICAL_ONLY_NOT_PROSPECTIVE_PROOF",
+      "test_first_start": "2026-02-01T00:00:00+00:00",
+      "test_games": 503,
+      "train_calibrated_market": {
+        "brier": 0.166583,
+        "log_loss": 0.50713
+      },
+      "train_games": 711,
+      "train_last_start": "2026-01-31T17:00:00+00:00",
+      "trained_feature_coefficients": [
+        0.07194521,
+        0.910630656,
+        0.190810181,
+        0.043861117,
+        -0.098448226
+      ],
+      "trained_market_only_coefficients": [
+        0.054473336,
+        0.90266059
+      ],
+      "uncertainty": {
+        "day_cluster_95ci": [
+          -0.002867,
+          0.000468
+        ],
+        "game_bootstrap_95ci": [
+          -0.002443,
+          0.000164
+        ],
+        "independent_games": 503,
+        "market_only_minus_augmented_brier_gain": -0.001104,
+        "one_event_per_game": true,
+        "statistical_advantage_proven": false,
+        "unique_calendar_days": 65
+      }
+    },
+    "NBA_SPREAD_REGULAR_SEASON": {
+      "calibrated_market_high_confidence": {
+        "coverage_pct": 0.0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 0,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 0
+      },
+      "feature_challenger_high_confidence": {
+        "coverage_pct": 0.0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 0,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 0
+      },
+      "frozen_feature_challenger": {
+        "brier": 0.248672,
+        "log_loss": 0.690484
+      },
+      "model_promotion_allowed": false,
+      "original_quote_timestamps": false,
+      "raw_close_market": {
+        "brier": 0.249909,
+        "log_loss": 0.692964
+      },
+      "raw_market_high_confidence": {
+        "coverage_pct": 0.0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 0,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 0
+      },
+      "research_status": "HISTORICAL_ONLY_NOT_PROSPECTIVE_PROOF",
+      "test_first_start": "2026-02-01T00:00:00+00:00",
+      "test_games": 503,
+      "train_calibrated_market": {
+        "brier": 0.249456,
+        "log_loss": 0.69206
+      },
+      "train_games": 711,
+      "train_last_start": "2026-01-31T17:00:00+00:00",
+      "trained_feature_coefficients": [
+        0.048425468,
+        0.965609779,
+        -0.258079621,
+        0.043501973,
+        -0.025853951
+      ],
+      "trained_market_only_coefficients": [
+        0.03162038,
+        0.963656531
+      ],
+      "uncertainty": {
+        "day_cluster_95ci": [
+          -0.00083,
+          0.002303
+        ],
+        "game_bootstrap_95ci": [
+          -0.000828,
+          0.002463
+        ],
+        "independent_games": 503,
+        "market_only_minus_augmented_brier_gain": 0.000785,
+        "one_event_per_game": true,
+        "statistical_advantage_proven": false,
+        "unique_calendar_days": 65
+      }
+    },
+    "NBA_TOTAL_REGULAR_SEASON": {
+      "calibrated_market_high_confidence": {
+        "coverage_pct": 0.0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 0,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 0
+      },
+      "feature_challenger_high_confidence": {
+        "coverage_pct": 0.0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 0,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 0
+      },
+      "frozen_feature_challenger": {
+        "brier": 0.254588,
+        "log_loss": 0.702385
+      },
+      "model_promotion_allowed": false,
+      "original_quote_timestamps": false,
+      "raw_close_market": {
+        "brier": 0.250004,
+        "log_loss": 0.693155
+      },
+      "raw_market_high_confidence": {
+        "coverage_pct": 0.0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "probability_gate": 0.7,
+        "profit_and_roi": null,
+        "selected_games": 0,
+        "source_odds_not_executable": true,
+        "total_available_games": 503,
+        "wins": 0
+      },
+      "research_status": "HISTORICAL_ONLY_NOT_PROSPECTIVE_PROOF",
+      "test_first_start": "2026-02-01T00:00:00+00:00",
+      "test_games": 503,
+      "train_calibrated_market": {
+        "brier": 0.252564,
+        "log_loss": 0.698283
+      },
+      "train_games": 711,
+      "train_last_start": "2026-01-31T17:00:00+00:00",
+      "trained_feature_coefficients": [
+        -0.159280207,
+        1.014002643,
+        0.241047311,
+        -0.051273307,
+        0.065181268
+      ],
+      "trained_market_only_coefficients": [
+        -0.1227585,
+        1.012047042
+      ],
+      "uncertainty": {
+        "day_cluster_95ci": [
+          -0.00442,
+          0.000263
+        ],
+        "game_bootstrap_95ci": [
+          -0.004428,
+          0.000333
+        ],
+        "independent_games": 503,
+        "market_only_minus_augmented_brier_gain": -0.002025,
+        "one_event_per_game": true,
+        "statistical_advantage_proven": false,
+        "unique_calendar_days": 65
+      }
+    }
+  },
+  "new_forward_picks": 0,
+  "new_paid_hf_cloud_jobs": 0,
+  "source_price_timestamps_verified": false,
+  "spec_sha256": "d90dc358c4f5a01c9340beede23348dc0b760d1827c014d04a0e47ad76cd25de",
+  "status": "HISTORICAL_HF_NBA_RESEARCH_NO_BETTING_MODEL_PROMOTION",
+  "study_id": "HF_ZENITH_NBA_CLOSING_LINES_2025_26_FIXED_MARKET_COMPARISON_20261009_V1"
+}

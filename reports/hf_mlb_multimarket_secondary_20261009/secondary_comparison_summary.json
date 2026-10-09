@@ -1,0 +1,329 @@
+{
+  "fresh_future_games_evaluated": 0,
+  "generated_at": "2026-10-09T05:11:24.151316+00:00",
+  "holdout_prediction_rows": 151,
+  "live_models_picks_ledgers_changed": false,
+  "model_comparison": {
+    "player bases": {
+      "calibrated_market_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "comparisons": {
+        "brier_gain_market_minus_trend": -0.002288,
+        "calendar_day_blocks": 5,
+        "confidence_supported": false,
+        "day_cluster_bootstrap95_ci": [
+          -0.019501,
+          0.013327
+        ],
+        "game_bootstrap95_ci": [
+          -0.018667,
+          0.01507
+        ],
+        "independent_game_blocks": 44
+      },
+      "fair_book_market": {
+        "brier": 0.264673,
+        "log_loss": 0.729913
+      },
+      "frozen_calibrated_market": {
+        "brier": 0.287647,
+        "log_loss": 0.780957
+      },
+      "frozen_market_plus_prior_player_stat": {
+        "brier": 0.289934,
+        "log_loss": 0.78553
+      },
+      "market_only_beta": [
+        -0.3311703917,
+        1.0886812579
+      ],
+      "market_plus_last5_beta": [
+        -0.3624751416,
+        1.129215981,
+        -0.3301528909
+      ],
+      "market_plus_player_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "official_grades_source": "OFFICIAL_DERIVED_HISTORICAL, NOT PLATFORM_SETTLEMENT",
+      "production_model_approved": false,
+      "raw_market_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "status": "SECONDARY_HISTORICAL_COMPARISON_COMPLETE_NOT_FUTURE_PROOF",
+      "test_first_start": "2026-07-01T01:40:00+00:00",
+      "test_independent_games": 44,
+      "test_last_start": "2026-07-05T02:10:00+00:00",
+      "train_game_id_manifest_sha256": "ac7af3e9758eab66e62e160cfb2e62fcea34627ef75bdb546c00605831338770",
+      "train_independent_games": 92,
+      "train_last_start": "2026-06-18T18:10:00+00:00"
+    },
+    "player hits": {
+      "calibrated_market_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "comparisons": {
+        "brier_gain_market_minus_trend": 0.000402,
+        "calendar_day_blocks": 5,
+        "confidence_supported": false,
+        "day_cluster_bootstrap95_ci": [
+          -0.003607,
+          0.003186
+        ],
+        "game_bootstrap95_ci": [
+          -0.004565,
+          0.005342
+        ],
+        "independent_game_blocks": 46
+      },
+      "fair_book_market": {
+        "brier": 0.258127,
+        "log_loss": 0.710573
+      },
+      "frozen_calibrated_market": {
+        "brier": 0.254916,
+        "log_loss": 0.703556
+      },
+      "frozen_market_plus_prior_player_stat": {
+        "brier": 0.254513,
+        "log_loss": 0.702727
+      },
+      "market_only_beta": [
+        0.2263781964,
+        0.8688166258
+      ],
+      "market_plus_last5_beta": [
+        0.2191618186,
+        0.9014352764,
+        -0.2112309592
+      ],
+      "market_plus_player_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "official_grades_source": "OFFICIAL_DERIVED_HISTORICAL, NOT PLATFORM_SETTLEMENT",
+      "production_model_approved": false,
+      "raw_market_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "status": "SECONDARY_HISTORICAL_COMPARISON_COMPLETE_NOT_FUTURE_PROOF",
+      "test_first_start": "2026-07-01T01:40:00+00:00",
+      "test_independent_games": 46,
+      "test_last_start": "2026-07-05T02:10:00+00:00",
+      "train_game_id_manifest_sha256": "2ca176a4534d7f76727d2b59e9009d92eaf3815a6ddf6f8ff2486e317d27a1d6",
+      "train_independent_games": 94,
+      "train_last_start": "2026-06-18T18:10:00+00:00"
+    },
+    "player rbis": {
+      "calibrated_market_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "comparisons": {
+        "brier_gain_market_minus_trend": 0.000154,
+        "calendar_day_blocks": 5,
+        "confidence_supported": false,
+        "day_cluster_bootstrap95_ci": [
+          -0.000394,
+          0.000491
+        ],
+        "game_bootstrap95_ci": [
+          -0.00052,
+          0.000826
+        ],
+        "independent_game_blocks": 46
+      },
+      "fair_book_market": {
+        "brier": 0.190172,
+        "log_loss": 0.562321
+      },
+      "frozen_calibrated_market": {
+        "brier": 0.192604,
+        "log_loss": 0.569814
+      },
+      "frozen_market_plus_prior_player_stat": {
+        "brier": 0.19245,
+        "log_loss": 0.569416
+      },
+      "market_only_beta": [
+        0.1015440763,
+        0.9570595606
+      ],
+      "market_plus_last5_beta": [
+        0.1029886702,
+        0.956233436,
+        0.0444613281
+      ],
+      "market_plus_player_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "official_grades_source": "OFFICIAL_DERIVED_HISTORICAL, NOT PLATFORM_SETTLEMENT",
+      "production_model_approved": false,
+      "raw_market_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "status": "SECONDARY_HISTORICAL_COMPARISON_COMPLETE_NOT_FUTURE_PROOF",
+      "test_first_start": "2026-07-01T00:40:00+00:00",
+      "test_independent_games": 46,
+      "test_last_start": "2026-07-05T02:10:00+00:00",
+      "train_game_id_manifest_sha256": "d46c9dd6ac0c7987078ece57c106fc686460c779d60400380010a4ad26a7cc72",
+      "train_independent_games": 94,
+      "train_last_start": "2026-06-18T18:10:00+00:00"
+    },
+    "player strikeouts": {
+      "calibrated_market_selected": {
+        "count": 2,
+        "coverage_pct": 13.33,
+        "distinct_official_games": 2,
+        "hit_rate_pct": 50.0,
+        "losses": 1,
+        "paper_roi_pct": -28.5,
+        "paper_units": -0.57,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 1
+      },
+      "comparisons": {
+        "brier_gain_market_minus_trend": 0.001344,
+        "calendar_day_blocks": 5,
+        "confidence_supported": false,
+        "day_cluster_bootstrap95_ci": [
+          -0.003179,
+          0.008445
+        ],
+        "game_bootstrap95_ci": [
+          -0.002446,
+          0.005419
+        ],
+        "independent_game_blocks": 15
+      },
+      "fair_book_market": {
+        "brier": 0.261969,
+        "log_loss": 0.716281
+      },
+      "frozen_calibrated_market": {
+        "brier": 0.324767,
+        "log_loss": 0.846199
+      },
+      "frozen_market_plus_prior_player_stat": {
+        "brier": 0.323424,
+        "log_loss": 0.843335
+      },
+      "market_only_beta": [
+        0.3373571654,
+        0.9977766016
+      ],
+      "market_plus_last5_beta": [
+        0.3336242677,
+        0.9990234558,
+        -0.0539267901
+      ],
+      "market_plus_player_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "official_grades_source": "OFFICIAL_DERIVED_HISTORICAL, NOT PLATFORM_SETTLEMENT",
+      "production_model_approved": false,
+      "raw_market_selected": {
+        "count": 0,
+        "coverage_pct": 0.0,
+        "distinct_official_games": 0,
+        "hit_rate_pct": null,
+        "losses": 0,
+        "paper_roi_pct": null,
+        "paper_units": 0,
+        "price_caution": "Historical quoted lines, not independently proven executable bets or paid PrizePicks payouts",
+        "wins": 0
+      },
+      "status": "SECONDARY_HISTORICAL_COMPARISON_COMPLETE_NOT_FUTURE_PROOF",
+      "test_first_start": "2026-07-01T01:40:00+00:00",
+      "test_independent_games": 15,
+      "test_last_start": "2026-07-05T00:08:00+00:00",
+      "train_game_id_manifest_sha256": "91873163236cfcc5aed3fafd5b2d1d4d098a06faf8db22e129a92015af71855f",
+      "train_independent_games": 37,
+      "train_last_start": "2026-06-17T23:40:00+00:00"
+    }
+  },
+  "new_cloud_hf_compute_spend": false,
+  "preregistration_sha256": "da5418a2b55a6a72521ccdc92940e98b40c6c604183f6409b492666914eeaf40",
+  "source_license_cleared_for_commercial_use": false,
+  "status": "RESEARCH_ONLY_ALREADY_SEEN_JULY_NO_PRODUCTION_PROMOTION",
+  "study_id": "HF_ZENITH_MLB_MULTI_MARKET_JULY_SECONDARY_FIXED_L2_20261009_V1"
+}
