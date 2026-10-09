@@ -97,7 +97,9 @@ test('All game cards remain reachable through incremental Show more',async({page
   start:new Date(Date.parse(originals[i%3].start)+1000*i).toISOString(),
  }))
  await open(page,'best-bets',{...small,games,game_count:20})
- await expect(region(page).locator('article')).toHaveCount(8)
+ await expect(region(page).locator('article')).toHaveCount(4)
+ await region(page).getByRole('button',{name:/Show 12 more/}).click()
+ await expect(region(page).locator('article')).toHaveCount(16)
  await region(page).getByRole('button',{name:/Show 12 more/}).click()
  await expect(region(page).locator('article')).toHaveCount(20)
 })
@@ -110,7 +112,7 @@ test('Props has reference odds, market probability, search and more lines',async
  await search.fill('Jalen Hurts')
  await expect(page.getByText('Jalen Hurts',{exact:true}).first()).toBeVisible()
  await expect(page.getByText(/Market fair probability/).first()).toBeVisible()
- await expect(page.getByText(/Reference odds/).first()).toBeVisible()
+ await expect(page.getByText(/Bookmaker reference/).first()).toBeVisible()
  await expect(page.getByText(/not a verified live or executable offer/i).first()).toBeVisible()
 })
 

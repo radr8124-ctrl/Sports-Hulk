@@ -1,6 +1,7 @@
 import React, {useEffect,useMemo,useState} from 'react'
 import {ChevronDown, ShieldCheck} from 'lucide-react'
 import {showFrozenNFLResearch} from '../nfl_frozen_forecast_presentation.js'
+import {quotedSideMeaning} from '../odds_selection_display.js'
 
 const MARKET_NAMES={MONEYLINE:'Moneyline',SPREAD:'Spread',TOTAL:'Game total'}
 const MARKETS=['MONEYLINE','SPREAD','TOTAL']
@@ -13,6 +14,10 @@ const humanTime=value=>{
 }
 const american=n=>Number.isFinite(n)&&Math.abs(n)>=100?(n>0?'+'+n:String(n)):'—'
 const signed=n=>Number.isFinite(n)?(n>0?'+'+n:String(n)):'—'
+const bookDisplay={fanduel:'FanDuel',draftkings:'DraftKings',betmgm:'BetMGM',
+ caesars:'Caesars',fanatics:'Fanatics',pinnacle:'Pinnacle',thescore:'theScore',
+ betrivers:'BetRivers',bet365:'bet365',hardrock:'Hard Rock',betparx:'betPARX'}
+const bookmaker=x=>bookDisplay[String(x||'').toLowerCase()]||String(x||'Unknown book')
 const valid=(data,now)=>data&&data.status==='RESEARCH_ONLY'
   &&data.verified_positive_expected_value_bets===0
   &&data.no_approved_pick_or_bet_created===true
@@ -29,32 +34,34 @@ const recentlyCaptured=(game,now)=>{
   return age<=(hoursToStart<=24?6:24)
 }
 
-function BetMarket({game,market,item}){
+function BetMarket({game,market,item,recent}){
   const sides=market==='TOTAL'?['OVER','UNDER']:['AWAY','HOME']
   return <div className="border-t border-slate-100 py-2.5">
     <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
       <p className="text-xs font-black text-slate-800">{MARKET_NAMES[market]}{market==='TOTAL'?' · '+item.line+' '+(item.market_subtype==='TOTAL_RUNS'?'runs':item.market_subtype==='TOTAL_GOALS'?'goals':'points'):''}</p>
       <span className="text-[10px] text-slate-500">{item.paired_book_count} paired books</span>
     </div>
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
       {sides.map(side=>{
         const q=item.sides?.[side]
         if(!q)return null
-        const selection=market==='TOTAL'?(side==='OVER'?'Over':'Under'):
-          side==='AWAY'?game.away:game.home
-        const line=market==='SPREAD'?' '+signed(q.line):market==='TOTAL'?' '+item.line:''
-        return <div key={side} className="min-w-0 rounded-xl bg-slate-50 p-2.5">
-          <p className="truncate text-[11px] font-bold text-slate-700" title={selection}>{selection}{line}</p>
+        const meaning=quotedSideMeaning(game,market,side,item)
+        if(!meaning)return null
+        return <div key={side} className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+          <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">{side==='HOME'?'HOME':side==='AWAY'?'AWAY':side}</span>
+          <p className="mt-0.5 break-words text-sm font-black leading-5 text-slate-900">{meaning.label}</p>
           <div className="mt-1 flex flex-wrap items-baseline gap-1.5">
             <strong className="text-xl tabular-nums text-slate-950">{american(q.best_american_odds)}</strong>
-            <span className="truncate text-[10px] font-semibold text-slate-600">{q.best_sportsbook}</span>
+            <span className="truncate text-[10px] font-semibold text-slate-600">{bookmaker(q.best_sportsbook)}</span>
           </div>
-          <div className="mt-1 text-[10px] leading-4 text-slate-500">
-            Typical {american(q.median_book_american_odds)} · Fair {q.market_consensus_no_vig_probability_pct}%
+          <p className="mt-1 text-[11px] font-medium leading-4 text-slate-600">{meaning.requirement}</p>
+          <div className="mt-2 text-[10px] leading-4 text-slate-500">
+            Typical competing price {american(q.median_book_american_odds)} · No-vig market estimate {q.market_consensus_no_vig_probability_pct}%
+            <span className="mt-0.5 block">Book quote updated {humanTime(q.source_updated_at)}</span>
           </div>
-          <p className={'mt-1 text-[10px] font-black '+(q.price_assessment==='BETTER PRICE THAN PEERS'?'text-emerald-700':q.price_improvement_pct_points>=.4?'text-blue-700':'text-slate-500')}>
-            {q.price_assessment==='BETTER PRICE THAN PEERS'?'Notably better than peers':q.price_improvement_pct_points>=.4?'Small price improvement':'Near typical price'}
-            {q.price_improvement_pct_points>=.4?' · '+q.price_improvement_pct_points+'pp':''}
+          <p className={'mt-1 text-[10px] font-black '+(!recent?'text-amber-800':q.price_assessment==='BETTER PRICE THAN PEERS'?'text-emerald-700':q.price_improvement_pct_points>=.4?'text-blue-700':'text-slate-500')}>
+            {!recent?'Old quote · recheck required':q.price_assessment==='BETTER PRICE THAN PEERS'?'Notably better than peers':q.price_improvement_pct_points>=.4?'Small price improvement':'Near typical price'}
+            {recent&&q.price_improvement_pct_points>=.4?' · '+q.price_improvement_pct_points+'pp':''}
           </p>
         </div>
       })}
@@ -77,7 +84,7 @@ function GameCard({game,market,frozenModel=null,now=Date.now()}){
         {recent?'DATED':'STALE'}
       </span>
     </div>
-    <p className="mt-1.5 text-[10px] font-medium text-slate-500">Book-source capture: {humanTime(game.source_capture_at)} · quote not independently verified executable</p>
+    <p className="mt-1.5 text-[11px] font-medium leading-4 text-slate-500">Each price is for the named <b>BET ON</b> side below—not for both teams. Book-source capture: {humanTime(game.source_capture_at)}.</p>
     {frozenModel && (
       <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2.5">
         <p className="text-[10px] font-black uppercase tracking-wider text-blue-700">Zenith NFL forecast · experimental</p>
@@ -94,7 +101,7 @@ function GameCard({game,market,frozenModel=null,now=Date.now()}){
     <p className="mt-2 text-[11px] font-semibold text-slate-600">
       Zenith price read: <span className={notable?'font-black text-emerald-700':'font-bold text-slate-700'}>{notable?'Notably better price on at least one line':maxGap>=.4?'Small price variations':'Typical market prices'}</span> · No proven betting edge
     </p>
-    <div className="mt-2">{markets.map(m=><BetMarket key={m} game={game} market={m} item={game.markets[m]}/>)}</div>
+    <div className="mt-2">{markets.map(m=><BetMarket key={m} game={game} market={m} item={game.markets[m]} recent={recent}/>)}</div>
     <details className="group border-t border-slate-100 pt-1">
       <summary className="flex min-h-9 cursor-pointer items-center justify-between text-xs font-black text-blue-700">
         Why Zenith rates these odds <ChevronDown size={15} className="transition-transform group-open:rotate-180"/>
@@ -112,7 +119,7 @@ function GameCard({game,market,frozenModel=null,now=Date.now()}){
 export default function BettingOddsBoard({sport='ALL',market='ALL'}){
   const [state,setState]=useState({loaded:false,data:null,frozen:null,checkedAt:Date.now()})
   const [sort,setSort]=useState('UPCOMING')
-  const [count,setCount]=useState(8)
+  const [count,setCount]=useState(4)
   useEffect(()=>{
     let active=true
     const load=async()=>{
@@ -131,7 +138,7 @@ export default function BettingOddsBoard({sport='ALL',market='ALL'}){
     const interval=setInterval(load,5*60*1000)
     return()=>{active=false;clearInterval(interval)}
   },[])
-  useEffect(()=>{setCount(8)},[sport,market,sort])
+  useEffect(()=>{setCount(4)},[sport,market,sort])
   const report=useMemo(()=>{
     if(!valid(state.data,state.checkedAt))return {rows:[],total:0,better:0}
     const relevant=state.data.games.filter(g=>(sport==='ALL'||g.sport===sport)

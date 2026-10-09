@@ -1873,13 +1873,24 @@ function HomeSnapshots({ onNavigate }) {
 
 function BettingSubnav({ active, onNavigate }) {
   const activeButtonRef = useRef(null)
+  const tabRailRef = useRef(null)
 
   useEffect(() => {
-    activeButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    const rail = tabRailRef.current
+    const button = activeButtonRef.current
+    if (!rail || !button) return
+    // Native scrollIntoView on a horizontally scrolling child also scrolls
+    // its vertical ancestor: this was moving the entire page on iPhone.
+    // Scroll ONLY this rail; never move the document to center a bet tab.
+    const railRect = rail.getBoundingClientRect()
+    const buttonRect = button.getBoundingClientRect()
+    const target = rail.scrollLeft + buttonRect.left - railRect.left
+      - (rail.clientWidth - buttonRect.width) / 2
+    rail.scrollTo({ left: Math.max(0, target), behavior: 'auto' })
   }, [active])
 
   return (
-    <div className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-soft">
+    <div ref={tabRailRef} aria-label="Betting sections" className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-soft">
       {bettingNavItems.map((item) => (
         <button
           key={item}
@@ -3613,7 +3624,9 @@ export default function App() {
     setAssistantOpen(false)
     setMoreOpen(false)
     window.requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      // Immediate route positioning avoids the long smooth-scroll rebound
+      // beneath the iPhone's fixed bottom navigation and Safari toolbar.
+      window.scrollTo({ top: 0, behavior: 'auto' })
       document.getElementById('main-content')?.focus({ preventScroll: true })
     })
   }
@@ -3621,7 +3634,7 @@ export default function App() {
   const navSelected = (item) => item === 'Betting' ? isBetting : active === item
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20 text-slate-900 lg:pb-0">
+    <div className="min-h-screen bg-slate-50 pb-[calc(6.5rem+env(safe-area-inset-bottom))] text-slate-900 lg:pb-0">
       <a href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus() }} className="skip-link">Skip to main content</a>
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-5 md:py-4">
@@ -3691,14 +3704,22 @@ export default function App() {
             {isBetting && (
               <>
                 <BettingSubnav active={active} onNavigate={navigate} />
-                {(active === 'Props' || active === 'PrizePicks') && (
-                  <Suspense fallback={<LoadingSurface label="Loading frozen NFL player-model research" />}>
-                    <NFLPlayerPropResearchPanel lane={active === 'PrizePicks' ? 'PRIZEPICKS' : 'PROP'} />
-                  </Suspense>
-                )}
                 {active === 'Best Bets' && <BestBetsV2Panel />}
                 {active === 'Props' && <Suspense fallback={<LoadingSurface label="Loading Props" />}><PropsV2Panel lane="PROP" /></Suspense>}
                 {active === 'PrizePicks' && <Suspense fallback={<LoadingSurface label="Loading PrizePicks" />}><PropsV2Panel lane="PRIZEPICKS" /></Suspense>}
+                {(active === 'Props' || active === 'PrizePicks') && (
+                  <details className="group rounded-2xl border border-slate-200 bg-white p-3 shadow-soft md:p-4">
+                    <summary className="flex min-h-10 cursor-pointer items-center justify-between gap-2 text-sm font-black text-blue-700">
+                      See the complete NFL four-week player research
+                      <ChevronRight size={17} className="shrink-0 transition-transform group-open:rotate-90" />
+                    </summary>
+                    <div className="mt-3 border-t border-slate-100 pt-3">
+                      <Suspense fallback={<LoadingSurface label="Loading frozen NFL player-model research" />}>
+                        <NFLPlayerPropResearchPanel lane={active === 'PrizePicks' ? 'PRIZEPICKS' : 'PROP'} />
+                      </Suspense>
+                    </div>
+                  </details>
+                )}
                 {active === 'Parlays' && <Suspense fallback={<LoadingSurface label="Loading Parlays" />}><ParlaysV2Panel /></Suspense>}
                 {active === 'Bet Lab' && <Suspense fallback={<LoadingSurface label="Loading Bet Lab" />}><PracticeBetting /></Suspense>}
               </>

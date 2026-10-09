@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronRight, ShieldCheck } from 'lucide-react'
-import BetMeaning, { formatAmericanOdds } from './BetMeaning'
+import BetMeaning, { formatAmericanOdds, explainBet } from './BetMeaning'
 import { explainPropProof } from '../prop_proof_presentation.js'
+import { validateIndependentForm, matchIndependentForm, recentFormDescription } from '../prop_independent_form_display.js'
 
 const humanize = value => String(value || '')
   .replaceAll('_', ' ')
@@ -26,10 +27,17 @@ function propRow(row) {
   }
 }
 
-function PropCard({ row, isPrize }) {
+function PropCard({ row, isPrize, form }) {
   const status = statusMeta(row.shadow_decision)
   const proof = explainPropProof(row)
   const display = propRow(row)
+  const formReading = recentFormDescription(form)
+  const presentation = status.label === 'PLAY' ? 'PAPER PLAY'
+    : status.label === 'MONITOR' ? 'MONITOR'
+      : form && form.hit_count >= 3 ? 'FORM WATCH' : 'RESEARCH'
+  const displayedSide = isPrize
+    ? row.side === 'OVER' ? 'MORE' : row.side === 'UNDER' ? 'LESS' : humanize(row.side)
+    : humanize(row.side)
 
   return (
     <article className="min-w-0 rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft">
@@ -39,14 +47,14 @@ function PropCard({ row, isPrize }) {
             {row.sport}{row.sport === 'NBA' ? ` · ${row.competition_regime === 'UNKNOWN' ? 'Unverified season' : humanize(row.competition_regime || 'UNKNOWN')}` : ''} · {humanize(row.market_subtype)}
           </div>
           <div className="mt-2 truncate text-xl font-black tracking-tight text-slate-950">{row.player}</div>
-          <div className="mt-1 text-2xl font-black text-slate-950">{humanize(row.side)} {row.line}</div>
+          <div className="mt-1 text-2xl font-black text-slate-950">{displayedSide} {row.line}</div>
           {!isPrize && row.american_odds != null && (
             <div className="mt-1 text-sm font-black text-slate-700">
-              Reference odds {formatAmericanOdds(row.american_odds)}
+              Bookmaker reference {formatAmericanOdds(row.american_odds)}
             </div>
           )}
         </div>
-        <span className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black ${status.tone}`}>{status.label}</span>
+        <span className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black ${presentation==='FORM WATCH' ? 'border-blue-200 bg-blue-50 text-blue-800' : status.tone}`}>{presentation}</span>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-xs">
@@ -56,14 +64,26 @@ function PropCard({ row, isPrize }) {
         </div>
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-            {row.probability_source?.startsWith('LANE_CORE') ? 'Zenith experimental estimate' : 'Zenith model proof'}
+            {row.probability_source?.startsWith('LANE_CORE') ? 'Zenith experimental estimate' : 'Independent model status'}
           </p>
           <p className="mt-0.5 text-sm font-black text-slate-900">
             {row.probability_source?.startsWith('LANE_CORE') && row.v2_probability_pct != null
-              ? row.v2_probability_pct+'%' : 'No proven edge'}
+              ? row.v2_probability_pct+'%' : 'Not validated'}
           </p>
         </div>
       </div>
+      {form && (
+        <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50/50 px-3 py-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-black text-blue-900">{formReading.label}</span>
+            <span className="text-xs font-black tabular-nums text-blue-800">{form.hit_count}/4 prior games</span>
+          </div>
+          <p className="mt-1 text-[11px] leading-5 text-slate-700">
+            {formReading.summary} Four-game mean: <b>{form.average}</b>.
+          </p>
+          <p className="mt-1 text-[10px] font-semibold leading-4 text-slate-600">Historical form only; not a validated future forecast or verified player availability.</p>
+        </div>
+      )}
       <p className="mt-2 text-[11px] font-medium leading-5 text-slate-500">
         {isPrize
           ? 'PrizePicks is a pick-em line, not a sportsbook odds quote. Entry payout and correlation must be checked separately.'
@@ -72,21 +92,15 @@ function PropCard({ row, isPrize }) {
           ? new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/New_York',timeZoneName:'short'}).format(Date.parse(row.event_start))
           : 'time unverified'}.
       </p>
-      <div className="mt-3">
-        <BetMeaning row={display} compact />
+      <div className="mt-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+        <span className="font-black text-slate-800">What {displayedSide} {row.line} means:</span>
+        <span className="ml-1 font-medium leading-5 text-slate-600">{explainBet(display).primary}</span>
       </div>
 
-      {isPrize && (
-        <div className="mt-4 rounded-2xl border border-violet-200 bg-violet-50 p-3 text-xs font-semibold leading-5 text-violet-950">
-          <b>Leg research only.</b> A good leg does not automatically make a profitable PrizePicks entry; payout economics and the other legs still matter.
-        </div>
-      )}
-
-      <div className={`mt-4 rounded-2xl border px-4 py-3 ${status.label === 'PLAY' ? 'border-emerald-200 bg-emerald-50' : status.label === 'MONITOR' ? 'border-amber-200 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}>
-        <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Sports Zenith status</div>
-        <div className="mt-1 text-sm font-black text-slate-800">{status.label} · {proof.label}</div>
-        <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">{proof.description}</p>
-      </div>
+      <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-600">
+        Zenith decision: <b className="text-slate-800">{status.label==='PLAY'?'Paper-qualified':'Not approved as a bet'}</b>
+        {' '}· {proof.label}. {isPrize?'Full pick-em payout and correlation are not yet validated.':''}
+      </p>
 
       <details className="group mt-4 rounded-2xl border border-slate-200 bg-white">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-black text-slate-700">
@@ -94,10 +108,13 @@ function PropCard({ row, isPrize }) {
           <ChevronRight size={16} className="shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
         </summary>
         <div className="border-t border-slate-100 px-4 pb-4 pt-4">
+          <div className="mb-3"><BetMeaning row={display} /></div>
+          <p className="mb-3 text-xs font-semibold leading-5 text-slate-700">{proof.description}</p>
+          {form && <p className="mb-2 text-[11px] leading-5 text-slate-600">Original four weekly outcomes: {form.historical_stats.join(' / ')}. Original bookmaker source updated: {new Date(form.quote_updated_at).toLocaleString('en-US',{timeZone:'America/New_York'})} ET. Verified by player, market, side, line and scheduled time; official provider UUID was not independently cross-checked.</p>}
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="font-black text-slate-950">{row.v2_probability_pct ?? '—'}%</div>
-              <div className="mt-1 text-slate-400">Model</div>
+              <div className="mt-1 text-slate-400">{row.probability_source?.startsWith('LANE_CORE')?'Experimental':'Book-based V2'}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="font-black text-slate-950">{row.market_reference_probability_pct ?? '—'}%</div>
@@ -134,30 +151,39 @@ function PropCard({ row, isPrize }) {
 
 export default function PropsV2Panel({ lane = 'PROP' }) {
   const [data, setData] = useState({ summary: {}, picks: [] })
+  const [playerResearch,setPlayerResearch] = useState(null)
+  const [viewMode,setViewMode] = useState('ALL')
   const [sport, setSport] = useState('ALL')
   const [nbaPhase, setNbaPhase] = useState('ALL')
   const [query, setQuery] = useState('')
-  const [limit, setLimit] = useState(12)
+  const [limit, setLimit] = useState(6)
   const [includePast, setIncludePast] = useState(false)
   const [clock, setClock] = useState(() => Date.now())
 
   useEffect(() => {
     let cancelled = false
     const load = async () => {
-      try {
-        const response = await fetch(`/prop_v2_current.json?ts=${Date.now()}`, { cache: 'no-store' })
-        const payload = response.ok ? await response.json() : { summary: {}, picks: [] }
-        if (!cancelled) setData(payload)
-      } catch {
-        if (!cancelled) setData({ summary: {}, picks: [] })
+      const pull=async path=>{
+        try{
+          const response=await fetch(path+'?ts='+Date.now(),{cache:'no-store'})
+          return response.ok?await response.json():null
+        }catch{return null}
+      }
+      const [payload,form]=await Promise.all([
+        pull('/prop_v2_current.json'),pull('/nfl_prop_independent_research.json')
+      ])
+      if(!cancelled){
+        setData(payload || {summary:{},picks:[]})
+        setPlayerResearch(form)
+        setClock(Date.now())
       }
     }
     load()
-    const timer=setInterval(()=>{load();setClock(Date.now())},5*60*1000)
+    const timer=setInterval(load,5*60*1000)
     return () => { cancelled = true; clearInterval(timer) }
   }, [])
 
-  useEffect(()=>{setLimit(12)},[sport,nbaPhase,lane,query,includePast])
+  useEffect(()=>{setLimit(6)},[sport,nbaPhase,lane,query,includePast,viewMode])
 
   const allRows = useMemo(
     () => (data.picks || []).filter(row => row.lane === lane),
@@ -169,20 +195,27 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
     [allRows],
   )
 
-  const rows = useMemo(() => {
-    const decisionRank = row => row.shadow_decision === 'SHADOW_PLAY' ? 3 : row.shadow_decision === 'SHADOW_MONITOR' ? 2 : 1
-    return allRows
-      .filter(row => (sport === 'ALL' || row.sport === sport)
-        && (sport !== 'NBA' || nbaPhase === 'ALL' || (row.competition_regime || 'UNKNOWN') === nbaPhase)
-        && (includePast || (Number.isFinite(Date.parse(row.event_start||'')) && Date.parse(row.event_start)>clock))
-        && (!query.trim() || [row.player,row.market_subtype,row.side,row.line]
-          .some(value=>String(value||'').toLowerCase().includes(query.trim().toLowerCase()))))
-      .sort((a, b) =>
-        decisionRank(b) - decisionRank(a)
-        || (Date.parse(a.event_start||'') || Infinity) - (Date.parse(b.event_start||'') || Infinity)
-        || (Number(b.data_quality_book_count||0) - Number(a.data_quality_book_count||0))
-      )
-  }, [allRows, sport, nbaPhase,includePast,query,clock])
+  const independentForm = useMemo(()=>validateIndependentForm(playerResearch,clock),[playerResearch,clock])
+  const matchedRows=useMemo(()=>allRows
+    .filter(row=>(sport==='ALL'||row.sport===sport)
+      &&(sport!=='NBA'||nbaPhase==='ALL'||(row.competition_regime||'UNKNOWN')===nbaPhase)
+      &&(includePast||(Number.isFinite(Date.parse(row.event_start||''))&&Date.parse(row.event_start)>clock)))
+    .map(row=>({...row,independentForm:matchIndependentForm(row,lane,independentForm,clock)}))
+  ,[allRows,sport,nbaPhase,includePast,clock,lane,independentForm])
+  const recentFormCount=matchedRows.filter(row=>row.independentForm?.hit_count>=3).length
+
+  const rows=useMemo(()=>{
+    const decisionRank=row=>row.shadow_decision==='SHADOW_PLAY'?3:row.shadow_decision==='SHADOW_MONITOR'?2:1
+    return matchedRows.filter(row=>(viewMode==='ALL'||row.independentForm?.hit_count>=3)
+      &&(!query.trim()||[row.player,row.market_subtype,row.side,row.line]
+        .some(value=>String(value||'').toLowerCase().includes(query.trim().toLowerCase()))))
+      .sort((a,b)=>viewMode==='FORM'
+        ?(b.independentForm?.hit_count||0)-(a.independentForm?.hit_count||0)
+          ||Date.parse(a.event_start||'')-Date.parse(b.event_start||'')
+        :decisionRank(b)-decisionRank(a)
+          ||(Date.parse(a.event_start||'')||Infinity)-(Date.parse(b.event_start||'')||Infinity)
+          ||Number(b.data_quality_book_count||0)-Number(a.data_quality_book_count||0))
+  },[matchedRows,viewMode,query])
 
   const nbaPhaseCounts = useMemo(() => {
     const tally = { PRESEASON: 0, REGULAR: 0, POSTSEASON: 0, UNKNOWN: 0 }
@@ -197,7 +230,7 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
   const isPrize = lane === 'PRIZEPICKS'
 
   return (
-    <section className="space-y-5">
+    <section aria-label={isPrize ? 'PrizePicks current line research' : 'Player props current line research'} className="space-y-5">
       <div className="section-heading">
         <div>
           <p className="eyebrow">{isPrize ? 'Pick-em research' : 'Player markets'}</p>
@@ -211,12 +244,12 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
         <span className="health-pill">{allRows.length} CURRENT</span>
       </div>
 
-      <div className={`rounded-2xl border p-4 text-sm font-semibold ${plays ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : monitors ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-blue-200 bg-blue-50 text-blue-900'}`}>
+      <div className={`rounded-2xl border p-3 text-xs font-semibold leading-5 ${plays ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : monitors ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-blue-200 bg-blue-50 text-blue-900'}`}>
         {plays
           ? `${plays} PLAY${plays === 1 ? '' : 'S'} currently cleared.`
           : monitors
             ? `${monitors} MONITOR${monitors === 1 ? '' : 'S'} are promising but not proven PLAYs.`
-            : 'No independently proven PLAY is being forced right now. PASS is a valid answer.'}
+            : `${recentFormCount} NFL lines have recent 3-of-4 or 4-of-4 form support. None has cleared the independent prediction or payout proof required for a qualified bet.`}
       </div>
 
       {isPrize && (
@@ -224,7 +257,7 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
           {[
             ['Leg proof', `${monitors} monitors · ${plays} plays`, 'A leg can be interesting without making the whole entry profitable.'],
             ['Entry economics', 'Payout proof required', 'The full entry needs actual payout economics before EV can be claimed.'],
-            ['Card discipline', 'No forced entries', 'If proof does not clear, the correct recommendation is to pass.'],
+            ['Historical trends', `${recentFormCount} form watches`, 'Four prior results can help research a leg, not prove future accuracy.'],
           ].map(([label, value, detail]) => (
             <div key={label} className="min-w-[240px] rounded-2xl border border-violet-100 bg-white p-4 shadow-soft md:min-w-0">
               <div className="text-[10px] font-black uppercase tracking-[0.12em] text-violet-700">{label}</div>
@@ -268,6 +301,15 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
         </div>
       )}
 
+      <div role="group" aria-label="Player research views" className="flex flex-wrap gap-2">
+        <button type="button" onClick={()=>setViewMode('ALL')} className={`min-h-10 rounded-xl px-3 py-2 text-xs font-black ${viewMode==='ALL'?'bg-slate-950 text-white':'border border-slate-200 bg-white text-slate-600'}`}>
+          All upcoming lines
+        </button>
+        <button type="button" onClick={()=>setViewMode('FORM')} className={`min-h-10 rounded-xl px-3 py-2 text-xs font-black ${viewMode==='FORM'?'bg-slate-950 text-white':'border border-slate-200 bg-white text-slate-600'}`}>
+          Recent-form watch ({recentFormCount})
+        </button>
+      </div>
+      {viewMode==='FORM'&&<p className="text-xs leading-5 text-slate-600">Four-game historical support is a research filter, not model validation or a recommendation. Currently supported for matched NFL player lines only.</p>}
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-3">
         <label className="min-w-[190px] flex-1">
           <span className="sr-only">Search props by player or market</span>
@@ -289,6 +331,7 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
               key={`${row.event_id}-${row.player_key}-${row.market_subtype}-${row.side}-${index}`}
               row={row}
               isPrize={isPrize}
+              form={row.independentForm}
             />
           ))}
         </div>
