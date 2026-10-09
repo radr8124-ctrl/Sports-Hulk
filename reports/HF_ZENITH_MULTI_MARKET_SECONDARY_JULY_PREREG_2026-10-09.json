@@ -1,0 +1,62 @@
+{
+  "created_utc": "2026-10-09T05:09:44.857393+00:00",
+  "evaluation": {
+    "bootstrap_repetitions": 2000,
+    "bootstrap_seed": 20261009,
+    "min_samples_per_market_for_comparison": 10,
+    "price_profit": "decimal odds gross return including initial stake; lose -1 unit; win odds-1 units",
+    "primary": "market-calibrated Brier vs market-and-player Brier; report all markets whether positive or negative",
+    "secondary": [
+      "log-loss",
+      "raw market Brier",
+      "95pct game bootstrap",
+      "95pct calendar day cluster bootstrap",
+      "retrospective >=70pct probability price-aware selection coverage+ROI"
+    ],
+    "selection_test": ">=70pct probability AND >=3pct paper expected value at recorded decimal odds; no in-test threshold adjustment"
+  },
+  "exact_same_book_time_opposite_side_prices_required": true,
+  "fixed_markets": [
+    "player hits",
+    "player bases",
+    "player rbis",
+    "player strikeouts"
+  ],
+  "frozen_inputs_sha256": {
+    "historical_july_test": "0841c259835c0f7c53a83fed2235a4d5cabc8d6a4b55a0261b7968c69256e725",
+    "historical_june_train": "1c726e43e3274d7d22692ab10d7f7224d3f601b18278bf117674d2683513c0e5",
+    "previous_locked_july_result": "1c8e292099ff6a7579bee7d4fc3f255f3dccec16b23a48f21c0d4d02ad262a38"
+  },
+  "input_paths": {
+    "historical_july_test": "reports/hf_mlb_unseen_0017_20261008/unseen_asof_audit.json",
+    "historical_june_train": "reports/hf_mlb_expanded_20261008/asof_audit.json",
+    "previous_locked_july_result": "reports/hf_mlb_unseen_0017_20261008/unseen_locked_result.json"
+  },
+  "known_limitations": [
+    "Prior July grades were inspected in earlier research; not pristine unseen holdout",
+    "Five July calendar days only",
+    "Selections chosen deterministically from external source and not contemporaneously published Zenith picks",
+    "Quoted sportsbook prices not guaranteed to be executable; third-party commercial rights unverified"
+  ],
+  "model_promotion_allowed": false,
+  "no_billable_hf_jobs": true,
+  "no_writes_to_live_predictions": true,
+  "one_entry_per_official_game_per_market": true,
+  "penalty_prior_coefficients": [
+    0,
+    1,
+    0
+  ],
+  "predictors": {
+    "calibrated_market": "ridge logistic intercept + logit(p_no_vig)",
+    "market_and_player_last5": "ridge logistic intercept + logit(p_no_vig) + direction-scaled last-five strictly-prior completed game stat vs line",
+    "market_raw": "paired quote normalized fair odds"
+  },
+  "ridge_lambda": 16.0,
+  "source_dataset": "SmartStake/mlb-player-props (Hugging Face)",
+  "strict_asof_priors_only": true,
+  "study_id": "HF_ZENITH_MLB_MULTI_MARKET_JULY_SECONDARY_FIXED_L2_20261009_V1",
+  "test_only": "2026-07-01 through 2026-07-05, official analytic grades where publisher grade absent",
+  "train_only": "2026-06-18 and earlier, vendor grades cross-verified official MLB",
+  "trial_class": "RETROSPECTIVE_SECONDARY_HISTORICAL_NOT_UNSEEN"
+}
