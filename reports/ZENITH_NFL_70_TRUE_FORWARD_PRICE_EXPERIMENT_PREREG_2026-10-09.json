@@ -1,0 +1,37 @@
+{
+  "all_games_and_fail_reasons_retained": true,
+  "automatic_wager": false,
+  "compare": [
+    "model_vs_raw_no_vig_brier",
+    "model_vs_frozen_market_calibration_brier",
+    "realistically_execution_verified_price_vs_real_grade_ROI",
+    "selection_rate_and_coverage"
+  ],
+  "experiment_id": "ZENITH_NFL_TRUE_FUTURE_SELECTIVE_70_PRICE_CONTROL_20261009_V1",
+  "frozen_original_13_game_count": 13,
+  "future_results_source": "original ESPN NFL Final exact event team and score, via existing NFL_NINE_FEATURE_SAME_BOOK_OFFICIAL_FINAL_SCORES",
+  "independent_game_blocks_for_review": 30,
+  "live_play_approved": false,
+  "model_coef_sha256": "7871fa9047146a81a557c3ba339840eb6dc703dd1bd97410ce6d93526a3b5ffd",
+  "model_version": "NFL_PREQUOTE_SCORE_FORM_9COL_2016_2024_RIDGE20_RESEARCH_V1",
+  "no_lanes_or_models_retrained": true,
+  "origin": "2026-10-09 predeclared 70-percent objective and 3-percent EV; additional 3-pp market edge requirement registered prior to all game kickoffs",
+  "original_pre_registration_nfl_predictions_sha256": "b74351d24c0cf591624a74c8dc2d33f84ea34f1374c65d782219bc5d95b60602",
+  "parent_preregistration": "ZENITH_SELECTIVE_HIGH_CONFIDENCE_70_V1_20261009",
+  "price_caveat": "Aggregated named book source quotes not independently verified as available to wager at the named sportsbook; paper EV is only a hypothesis",
+  "price_execution_independently_verified": false,
+  "published_recommendations_allowed": false,
+  "registered_at_utc": "2026-10-09T06:19:35.832777+00:00",
+  "research_type": "FUTURE_ONLY_PRIOR_TO_ALL_13_ORIGINAL_KICKOFFS_WITH_PREEXISTING_FROZEN_PROBABILITIES",
+  "statistically_proven_edge": false,
+  "thresholds_fixed_before_game_outcomes": {
+    "actual_book_offer_verified_required_for_real_money_classification": true,
+    "chosen_side": "the single team with the higher previously frozen model win probability for that game",
+    "max_age_of_quote_at_original_model_freeze_seconds": 300,
+    "minimum_advantage_over_no_vig_book_probability_pp": 3.0,
+    "minimum_model_win_probability": 0.7,
+    "minimum_paper_expected_roi_at_original_book_price_pct": 3.0,
+    "original_quote_must_postdate_independent_verified_team_context": true,
+    "source_and_predicted_game_identity_exact": true
+  }
+}
