@@ -1,0 +1,22 @@
+[Unit]
+Description=Sports Zenith Cloudflare Tunnel (OVH origin)
+After=network-online.target sports-hulk-commercial.service
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/home/ubuntu/bin/cloudflared tunnel --no-autoupdate --config /home/ubuntu/.cloudflared/config.yml run
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=default.target

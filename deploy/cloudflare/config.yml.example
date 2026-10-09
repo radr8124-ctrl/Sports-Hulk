@@ -1,0 +1,16 @@
+# Restorable source configuration (no keys committed).
+# The credentials JSON and Cloudflare account certificate are private and
+# intentionally held ONLY under /home/ubuntu/.cloudflared/ with strict modes.
+tunnel: 37727b31-5a2a-4376-b28d-629af6926d61
+credentials-file: /home/ubuntu/.cloudflared/37727b31-5a2a-4376-b28d-629af6926d61.json
+loglevel: info
+ingress:
+  - hostname: sportszenith.com
+    service: http://127.0.0.1:8510
+    originRequest:
+      connectTimeout: 10s
+  - hostname: www.sportszenith.com
+    service: http://127.0.0.1:8510
+    originRequest:
+      connectTimeout: 10s
+  - service: http_status:404
