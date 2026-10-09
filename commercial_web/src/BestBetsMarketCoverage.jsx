@@ -1,4 +1,5 @@
 import React from 'react'
+import NFLFrozenModelPanel from './NFLFrozenModelPanel'
 import { AlertTriangle, ArrowUpRight, CalendarDays, Database, ShieldCheck } from 'lucide-react'
 import { sourceMarketStatus, nflUpcomingSchedule } from '../best_bets_market_availability.js'
 
@@ -91,6 +92,9 @@ export default function BestBetsMarketCoverage({ sport, market, currentData, pri
           {relevant.map(item=><LaneStatus item={item} key={item.market}/>)}
           <p className="mt-1 text-[10px] leading-4 text-slate-500">Game counts are from the research ledger, not a promise of winning or a sportsbook payout.</p>
         </div>
+      )}
+      {sport==='NFL' && (market==='ALL' || market==='MONEYLINE') && (
+        <div className="mt-3"><NFLFrozenModelPanel /></div>
       )}
       {sport==='NFL' && (
         <div className="mt-3 border-t border-slate-100 pt-3">

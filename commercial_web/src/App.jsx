@@ -21,6 +21,7 @@ const DfsLineupLab = lazy(() => import('./DfsLineupLab'))
 const PerformancePanel = lazy(() => import('./PerformancePanel'))
 const PracticeBetting = lazy(() => import('./PracticeBetting'))
 const ParlaysV2Panel = lazy(() => import('./ParlaysV2Panel'))
+const NFLPlayerPropResearchPanel = lazy(() => import('./NFLPlayerPropResearchPanel'))
 const ScoreGameCenter = lazy(() => import('./ScoreGameCenter'))
 const PersonalIdpPanel = lazy(() => import('./PersonalIdpPanel'))
 const PersonalDefenseStreamingPanel = lazy(() => import('./PersonalDefenseStreamingPanel'))
@@ -3696,6 +3697,11 @@ export default function App() {
             {isBetting && (
               <>
                 <BettingSubnav active={active} onNavigate={navigate} />
+                {(active === 'Props' || active === 'PrizePicks') && (
+                  <Suspense fallback={<LoadingSurface label="Loading frozen NFL player-model research" />}>
+                    <NFLPlayerPropResearchPanel lane={active === 'PrizePicks' ? 'PRIZEPICKS' : 'PROP'} />
+                  </Suspense>
+                )}
                 {active === 'Best Bets' && <BestBetsV2Panel />}
                 {active === 'Props' && <PropsV2Panel lane="PROP" />}
                 {active === 'PrizePicks' && <PropsV2Panel lane="PRIZEPICKS" />}
