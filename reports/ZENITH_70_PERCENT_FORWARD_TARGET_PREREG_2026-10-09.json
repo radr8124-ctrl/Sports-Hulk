@@ -1,0 +1,64 @@
+{
+  "automatic_model_promotion": false,
+  "automatic_play_or_wager": false,
+  "candidate_filters_prespecified": {
+    "actual_prizepicks_entry_payout_required_for_pickem_roi": true,
+    "max_quote_age_seconds": 300,
+    "max_start_discrepancy_seconds": 180,
+    "min_calibrated_probability_pct": 70.0,
+    "min_conservative_priced_roi_estimate_pct": 3.0,
+    "min_conservative_probability_pct": 70.0,
+    "original_prediction_must_predate_game_start": true,
+    "price_and_book_verified": true,
+    "quote_must_be_exact_game_player_stat_side_line_identity": true
+  },
+  "connected_new_paid_odds_source": false,
+  "evaluation": {
+    "calibration_comparison": "paired future Brier plus log loss against no-vig sportsbook",
+    "independent_game_is_unit_of_uncertainty": true,
+    "minimum_independent_game_blocks_for_review": 30,
+    "minimum_priced_settled_per_lane_for_review": 50,
+    "profit_comparison": "realistically executable original frozen price, confidence interval on ROI lower bound must exceed zero",
+    "report_all_abstentions_and_remaining_lanes": true,
+    "selection_coverage_must_be_reported": true,
+    "strategy_parameters_must_not_be_retuned_on_test_set": true,
+    "target_hit_rate_pct": 70.0
+  },
+  "experiment_id": "ZENITH_SELECTIVE_HIGH_CONFIDENCE_70_V1_20261009",
+  "first_eligible_prediction_timestamp_utc": "2026-10-09T04:35:49.435028+00:00",
+  "frozen_baseline": {
+    "game_lines": {
+      "generated_at": "2026-10-09T03:56:51.468476+00:00",
+      "independent_game_blocks": 44,
+      "losses": 70,
+      "model_version": "BETTING_V2_ALL_MARKETS_2026_10_05",
+      "paper_roi_pct": 2.04,
+      "paper_units": 3.5499,
+      "proof_status": "NOT_PROVEN",
+      "settled": 174,
+      "source_sha256": "65fbbdb6355a110831241512923a67e921e063e30f4141bcba629428e0935dbb",
+      "wins": 104
+    },
+    "props": {
+      "generated_at": "2026-10-09T03:59:14.494120+00:00",
+      "independent_game_blocks": 70,
+      "losses": 1030,
+      "model_version": "PROP_V2_PHASE4_SUBTYPE_VETO_2026_10_05",
+      "paper_roi_pct": -1.52,
+      "paper_units": -41.415,
+      "proof_status": "NOT_PROVEN",
+      "settled": 2741,
+      "source_sha256": "d09a3f1aea1acd398a389e0ab23fe3f309eaf58bbcaadb13d6c973924ccd3bca",
+      "wins": 1711
+    }
+  },
+  "purpose": "Evaluate whether separately selected future high-confidence opportunities reach a 70 percent hit rate while beating source market probabilities and producing positive realistically priced ROI.",
+  "reason_not_armed": "Current models do not yet beat market baseline with statistical support; paid feed and additional features not verified/licensed.",
+  "registered_at_utc": "2026-10-09T04:35:49.435028+00:00",
+  "reproducibility": "Historical forward predictions and previous results remain immutable; post-registration forward trials must maintain separate versioned ledgers.",
+  "scope": [
+    "GAME_LINES",
+    "PROP_AND_PICKEM"
+  ],
+  "status": "PREREGISTERED_UNARMED_RESEARCH_ONLY"
+}
