@@ -37,7 +37,44 @@ RECEIPT_OUT = RECEIPTS / "MLB_FUSION_RECEIPT_LATEST.json"
 
 ET = ZoneInfo("America/New_York")
 TODAY = datetime.now(ET).date()
-RECENT_START = TODAY - timedelta(days=14)
+POSTSEASON_GAME_TYPES = frozenset({"W", "D", "L", "F"})  # Wild Card, DS, LCS, World Series
+REGULAR_RECENT_LOOKBACK_DAYS = 14
+POSTSEASON_RECENT_LOOKBACK_DAYS = 28
+
+
+def recent_context_days(official_schedule, today):
+    """Allow a wider *labeled* rolling player context only during MLB playoffs.
+
+    The original batting quality gate requires >=4 games, but a two-week
+    Oct playoff-only sample currently contains <=3. We do NOT lower the
+    minimum; regular-season trailing games can contribute to 28-day form.
+    Schedule gameType comes from the official MLB StatsAPI schedule.
+    """
+    if not isinstance(official_schedule, pd.DataFrame) or official_schedule.empty:
+        return REGULAR_RECENT_LOOKBACK_DAYS
+    if not {"gameType", "officialDate"}.issubset(official_schedule.columns):
+        return REGULAR_RECENT_LOOKBACK_DAYS
+    dates = pd.to_datetime(official_schedule["officialDate"], errors="coerce", utc=True)
+    begin = pd.Timestamp(today - timedelta(days=14), tz="UTC")
+    end = pd.Timestamp(today + timedelta(days=14), tz="UTC")
+    postseason = official_schedule["gameType"].astype(str).isin(POSTSEASON_GAME_TYPES)
+    if bool((postseason & dates.between(begin, end)).any()):
+        return POSTSEASON_RECENT_LOOKBACK_DAYS
+    return REGULAR_RECENT_LOOKBACK_DAYS
+
+
+def current_recent_context_days(schedule=SCHEDULE, today=TODAY):
+    if not schedule.is_file():
+        return REGULAR_RECENT_LOOKBACK_DAYS
+    try:
+        official = pd.read_csv(schedule, usecols=["gameType", "officialDate"])
+        return recent_context_days(official, today)
+    except (ValueError, OSError, pd.errors.ParserError):
+        return REGULAR_RECENT_LOOKBACK_DAYS
+
+
+RECENT_LOOKBACK_DAYS = current_recent_context_days()
+RECENT_START = TODAY - timedelta(days=RECENT_LOOKBACK_DAYS)
 
 
 STAT_MAP = {
@@ -864,6 +901,14 @@ def main():
 
     receipt = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "recent_context_window_days": RECENT_LOOKBACK_DAYS,
+        "recent_context_window_start": RECENT_START.isoformat(),
+        "recent_context_window_end": TODAY.isoformat(),
+        "recent_context_official_schedule_game_types": "POSTSEASON_ACTIVE" if RECENT_LOOKBACK_DAYS == POSTSEASON_RECENT_LOOKBACK_DAYS else "STANDARD_OR_UNKNOWN",
+        "recent_context_may_include_prior_regular_season_games": RECENT_LOOKBACK_DAYS == POSTSEASON_RECENT_LOOKBACK_DAYS,
+        "recent_context_min_batter_games_unmodified": 4,
+        "recent_context_min_pitcher_games_unmodified": 2,
+        "recent_context_not_a_validated_model_betting_edge": True,
         "player_context_rows": int(len(context)),
         "game_context_rows": int(len(game_context)),
         "game_fusion_rows": int(len(game)),

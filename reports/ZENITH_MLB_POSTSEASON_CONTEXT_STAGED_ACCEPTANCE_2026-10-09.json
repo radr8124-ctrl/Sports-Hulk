@@ -1,0 +1,45 @@
+{
+  "finished_utc": "2026-10-09T19:29:12.386220+00:00",
+  "off_VPS_restoration_verified": false,
+  "original_context_batting_min_recent_games": 4,
+  "original_context_pitching_min_recent_games": 2,
+  "original_prereg_sha256": "24d94f394f05324ad1263f33ba90ef152ff17d20c23bf856ca30e69bd553ad93",
+  "other_regime_window_days": 14,
+  "playoff_context_includes_tail_of_regular_season": true,
+  "playoff_window_days": 28,
+  "production_betting_engine_retrained": false,
+  "production_play_or_profit_promoted": false,
+  "production_website_model_or_market_file_modified_in_staging": false,
+  "regime_source": "MLB StatsAPI official schedule playoff gameType W/D/L/F",
+  "schema": "ZENITH_MLB_POSTSEASON_RESEARCH_CONTEXT_FIX_STAGED_V1",
+  "source_context_repair_only_no_betting_threshold_reduction": true,
+  "source_registered_market_provenance_time_within_booking_not_verified": true,
+  "staged_MLB_PP_v2_shadow_reasons": [
+    "PASS_DATA_QUALITY",
+    "PASS_NO_DEVIG_REFERENCE"
+  ],
+  "staged_MLB_PRIZEPICKS_v2_current_research_candidates": 20,
+  "staged_MLB_PROP_v2_current_research_candidates": 243,
+  "staged_MLB_PROP_v2_shadow_decision": "PASS_NO_PROVEN_MODEL_EDGE",
+  "staged_decision_distribution": {
+    "PRIZEPICKS": {
+      "QUALIFIED_RESEARCH": 20,
+      "WATCH": 58
+    },
+    "PROP": {
+      "HIGH_JUICE": 132,
+      "QUALIFIED_RESEARCH": 111,
+      "WATCH": 491
+    }
+  },
+  "staged_original_source_lines": {
+    "PRIZEPICKS": 78,
+    "PROP": 734
+  },
+  "staged_output_files": {
+    "context": ".deploy_backups/zenith_mlb_postseason_recent_context_20261009T1925Z/staged/MLB_PLAYER_CONTEXT.csv",
+    "pp_decisions": ".deploy_backups/zenith_mlb_postseason_recent_context_20261009T1925Z/staged/MLB_PRIZEPICKS_DECISIONS.csv",
+    "prop_decisions": ".deploy_backups/zenith_mlb_postseason_recent_context_20261009T1925Z/staged/MLB_PROP_DECISIONS.csv"
+  },
+  "staged_source_inputs_only_reused_readonly": true
+}
