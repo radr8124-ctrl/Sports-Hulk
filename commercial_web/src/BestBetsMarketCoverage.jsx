@@ -1,7 +1,8 @@
 import React from 'react'
+import NFLBookResearch from './NFLBookResearch'
 import NFLFrozenModelPanel from './NFLFrozenModelPanel'
-import { AlertTriangle, ArrowUpRight, CalendarDays, Database, ShieldCheck } from 'lucide-react'
-import { sourceMarketStatus, nflUpcomingSchedule } from '../best_bets_market_availability.js'
+import { AlertTriangle, ArrowUpRight, Database, ShieldCheck } from 'lucide-react'
+import { sourceMarketStatus } from '../best_bets_market_availability.js'
 
 const humanMarket = { MONEYLINE: 'Moneyline', SPREAD: 'Point spread', TOTAL: 'Game total' }
 const readableTime = value => {
@@ -39,9 +40,6 @@ export default function BestBetsMarketCoverage({ sport, market, currentData, pri
   const focused=proof.categories.filter(row => row.sport === (sport==='ALL'?'NFL':sport))
   const relevant=focused.filter(row => market==='ALL'||row.market===market)
   const summaryMarket = market==='ALL' ? 'current markets' : humanMarket[market]?.toLowerCase()||'current markets'
-  const nfl=(sport==='NFL') ? nflUpcomingSchedule(nflScores,Date.now(),15) : []
-  const preview=nfl.slice(0,4)
-  const hidden=nfl.slice(4)
   const totalCandidates=(Array.isArray(currentData?.picks)?currentData.picks:[]).length
   const rawTimestamp=currentData?.generated_at
   const updated=Number.isFinite(Date.parse(rawTimestamp||''))?
@@ -96,37 +94,7 @@ export default function BestBetsMarketCoverage({ sport, market, currentData, pri
       {sport==='NFL' && (market==='ALL' || market==='MONEYLINE') && (
         <div className="mt-3"><NFLFrozenModelPanel /></div>
       )}
-      {sport==='NFL' && (
-        <div className="mt-3 border-t border-slate-100 pt-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-xs font-black text-slate-900">
-              <CalendarDays size={15} className="text-blue-700" /> Upcoming NFL games · no betting recommendations
-            </div>
-            <span className="shrink-0 text-[10px] text-slate-500">{nfl.length} shown from official feed</span>
-          </div>
-          {preview.length ? (
-            <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
-              {preview.map(game => (
-                <div key={game.event_id} className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2.5">
-                  <div className="min-w-0">
-                    <div className="truncate text-xs font-black text-slate-900">{game.away_abbr || game.away} @ {game.home_abbr || game.home}</div>
-                    <div className="mt-0.5 text-[11px] text-slate-500">{readableTime(game.start_time)}</div>
-                  </div>
-                  <span className="shrink-0 text-[10px] font-bold text-amber-700">Price pending</span>
-                </div>
-              ))}
-            </div>
-          ) : <p className="mt-2 text-xs text-slate-500">No upcoming verified NFL fixtures in the official current window.</p>}
-          {hidden.length>0 && (
-            <details className="mt-2 text-xs">
-              <summary className="cursor-pointer py-2 font-black text-blue-700">See {hidden.length} more scheduled games</summary>
-              <div className="mt-1 grid gap-1 sm:grid-cols-2">
-                {hidden.map(g=><div key={g.event_id} className="rounded-lg bg-slate-50 px-3 py-2 text-slate-600"><b>{g.away_abbr} @ {g.home_abbr}</b> · {readableTime(g.start_time)}</div>)}
-              </div>
-            </details>
-          )}
-        </div>
-      )}
+      {sport==='NFL' && <NFLBookResearch nflScores={nflScores} market={market} />}
     </section>
   )
 }

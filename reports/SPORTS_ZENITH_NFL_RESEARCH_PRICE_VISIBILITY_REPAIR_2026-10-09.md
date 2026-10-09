@@ -1,0 +1,26 @@
+# Sports Zenith — NFL sportsbook research price-visibility repair (2026-10-09 UTC)
+
+## Problem found
+The NFL game-decision primary source `nfl_live/derived/NFL_LIVE_MARKET.csv` still contains genuine collector/provider source times from **October 2**, despite text saying LIVE. The production safety gate correctly rejects these stale moneyline and point-spread prices. That gate was NOT removed or weakened. Another existing source, SportWizzard, held fresh-for-research paired bookmaker snapshots from October 9, yet the Bets screen said **Price pending** for every upcoming NFL game.
+
+## Source-safe repair actually deployed
+- New pure source layer: `nfl_live/game_fusion/build_nfl_research_book_refs.py`. Reads the preserved original SportWizzard source CSV and checks SHA256 equality against the latest archived CSV. Uses the archive timestamp as original collector evidence and each sportsbook row's own original `updated` timestamp. Does **not** issue API calls.
+- Matches games against the **official ESPN NFL scoreboard** by canonical away/home teams, distinct official event ID and kickoff within three minutes. Distinct source sportsbook event UUID is retained. Missing, conflicting, late, future, unmatched or started game evidence is rejected.
+- Uses only genuinely paired **two-sided same-book** lines. Opposing moneylines, equal/opposite spreads and exact same-total OVER/UNDER with consistent same-book source updates are required. Conflicting duplicates, multiple plausible lines within a book, and extreme alternative price ladders are quarantined. No inferred main line, executable price, model edge, or real bet.
+- Research quote age policy: up to 24 hours if a game is over 24 hours away, only six hours within 24 hours, no quotes after kickoff. The website independently rechecks original quote and collector clock every five minutes (including on browser refresh).
+- Outputs: `commercial_web/public/nfl_research_book_refs.json` and byte-corresponding `commercial_web/dist/nfl_research_book_refs.json`. Each has `RESEARCH_ONLY`, false model-edge and false betting-approval contracts. As observed October 9 ~21:00 UTC: **13 of 15** upcoming ESPN games have matched source quotes, with **13 paired moneyline, 13 paired spread, and 13 paired total reference pairs**. The remaining two had no qualifying source pair.
+- Website: new `commercial_web/src/NFLBookResearch.jsx` and research-only source display validator, used by existing Bets page. Its compact expandable price details show exact book, prices, timestamp and research limitations instead of falsely implying all prices are unavailable. The primary stale warning and **zero verified PLAY** gates remain.
+- User's existing hourly NFL paid-provider quota window (only near kickoff) was **not** expanded. Added one read-only cron job at minute 52 each hour to rebuild the research JSON from already archived source with no paid bookmaker API calls: `SPORTSZENITH_NFL_READONLY_QUOTES_V1`. User's pre-existing cron tasks were verified byte-for-byte preserved. Original cron was backed up before change.
+- No user's Survivor picks, Fantasy/DFS, original prop results, bookmaker history, model coefficients, source market snapshots, or frozen forward NFL forecasts were changed by this fix.
+
+## Actual checks
+- **39 Python tests passed** for the new source, existing NFL market freshness and NFL/NHL source evidence protections.
+- **6 JavaScript tests passed** for source-only price presentation, immutability of the 'not executable' contract, timestamp freshness, exact ESPN match and conflicts.
+- **3 Playwright tests passed** for valid references, expired references and iPhone-width market filter.
+- React production build succeeded.
+- Actual `https://sportszenith.com/#best-bets` browser inspection at **390 px and 1280 px**: '13 of 15 games with source-matched research quotes', 13 research price badges, **zero 'Price pending'** labels, no horizontal viewport overflow. HTTPS endpoint `/nfl_research_book_refs.json` returned 200.
+- Prechange website source/manifest copied to `.deploy_backups/nfl_secondary_book_references_before_20261009T2110Z` with SHA256 readback verification. Original SportWizzard source checksum and Survivor entries were checked read-only. Cron-before archive preserved in same backup folder.
+- Upcoming hourly cron job is installed and read back; **the first automatic scheduled execution must be separately observed** before claiming an end-to-end recurring-run pass.
+
+## What this does not prove
+This is a verified source-visibility fix, not a profitable-bet fix. Original primary odds remain stale until the quota-governed upstream collector receives genuine fresh source. SportWizzard archived quotes are historical research references, **not confirmed currently executable sportsbook lines** and **not independently identified as primary/main lines**. The original 13 future-only NFL model forecasts remain paper predictions with no Week 5 outcomes settled; earlier retrospective 2025 model checks failed to beat the bookmaker. Real positive, calibrated model edge is still unproven; no bets were placed or qualified. Google Drive and off-VPS full raw-data recovery remain **unverified** despite VPS-local checksum backups and versioned source code.
