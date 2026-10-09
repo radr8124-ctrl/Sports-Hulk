@@ -91,7 +91,7 @@ def parse_schedule(schedule:dict,now:datetime,*,lookahead_hours:int=DEFAULT_LOOK
             away_team=away.get('team') or {}
             if not all([home_team.get('id'),away_team.get('id'),home_team.get('name'),away_team.get('name'),g.get('gamePk')]):
                 continue
-            if any(x in str(home_team['name'])+' '+str(away_team['name']) for x in ('TBD','/','Winner')):
+            if any(x in str(home_team['name'])+' '+str(away_team['name']) for x in ('TBD','/','Winner','Higher Seed','Lower Seed')):
                 continue
             venue=g.get('venue') or {}
             row={

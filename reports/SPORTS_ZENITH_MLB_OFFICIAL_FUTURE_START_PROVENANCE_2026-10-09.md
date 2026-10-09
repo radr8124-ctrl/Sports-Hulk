@@ -17,3 +17,13 @@ At latest offline official-fixture readiness check, gamePk 849831 moved from `OF
 **No new eligible player freeze yet**: both verified official batting orders and a fresh same-book source quote still must become available prior to actual kickoff. The original 18 completed Full16 research forecasts, training coefficients, original outcomes, player statistics and live bets were not changed.
 
 All original source files were copied with checksum verification to `.deploy_backups/mlb_verified_future_kickoff_repair_PRECHANGE_20261009T071200Z`. Git stores tests and code, not paid/private sportsbook ledgers or original historical masters. **Independent off-VPS backup recovery remains unverified.**
+
+## Next official playoff fixture source, 72-hour protected horizon
+
+The original public MLB schedule pregame-evidence window was extended from 48 to **72 hours** without increasing the budget for live feed (maximum four game-feed checks) or weather (maximum two game forecasts) and without invoking any paid sportsbook API. The public official source capturer additionally rejects unresolved Higher Seed / Lower Seed names, as well as previous TBD/Winner placeholders.
+
+**Actual ordinary 07:12 UTC systemd timer** passed with no warnings, exit result SUCCESS. It appended **one new source-time original schedule observation** for **gamePk 849809, Los Angeles Dodgers at Milwaukee Brewers, 2026-10-12T00:00Z**, exact official MLB IDs 119 at 158, venue ID 32. The record was captured before kickoff with full team identity and source time. It is a **future schedule observation only**: lineups, confirmed pitchers and weather were not verified; no model prediction or sportsbook bet was created.
+
+This original source game is still a bracket placeholder in the older historical master, so no Full16 forecast is allowed until a separate authenticated future-fixture participant reconciliation has enough repeated source observations. The 180-minute far-future source capture cadence permits later independent verification; this was the first captured source observation. Do not silently fill in the participant/venue fields from one source sample.
+
+**Full MLB regression suite: 393 passed.** The previous true forward MLB Full16 first 18 predictions and 13 NFL game predictions retained exactly their prior byte SHA-256 values. Official 72-hour capture machine acceptance: reports/MLB_PUBLIC_OFFICIAL_72H_CAPTURE_ACCEPTANCE_2026-10-09.json. Off-VPS recovery remains unverified.

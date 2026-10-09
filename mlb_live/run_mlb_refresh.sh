@@ -35,7 +35,7 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
     SPORTS_MAX_SECONDS=35 \
     "$ROOT/scripts/sports-safe-run.sh" \
       "$PY" -m intelligence_warehouse.mlb_pregame_capture.capture_evidence \
-        --lookahead-hours 48 --feed-max-games 4 --weather-max-games 2 \
+        --lookahead-hours 72 --feed-max-games 4 --weather-max-games 2 \
       || echo "WARNING: pregame evidence capture skipped or failed; prior data preserved."
 
     echo
