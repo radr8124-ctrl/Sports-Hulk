@@ -1,0 +1,54 @@
+{
+  "allowed_lanes": [
+    "NFL_PROP",
+    "NFL_PRIZEPICKS"
+  ],
+  "allowed_sports": [
+    "NFL"
+  ],
+  "candidate_empirical_probability_rule": "Over = (hits > line in 4 prior regular-season games + 2)/(4+4); Under uses hits < line; push if at-line, preserve separately. Fixed Beta(2,2) smoothing. This is a crude, independent and uncalibrated empirical challenger, not a validated winning probability.",
+  "comparison_market_executable_price_roi_allowed": false,
+  "comparison_proper_scores": [
+    "Brier",
+    "log_loss"
+  ],
+  "eligible_source_rows_must_match": "Exact source event UUID/player norm/market/side/line with original fusion, unique official ESPN scheduled fixture (home, away, <=3 minutes) and player team. Fail closed.",
+  "event_start_after_run_required": true,
+  "exact_bookmaker_player_prop_payout_and_pp_pickem_payout_not_equivalent": true,
+  "future_grade_only_via_verified_ESPN_or_other_official_box_source": true,
+  "future_required_game_cluster_bootstrap": true,
+  "historic_player_stats_cutoff": "2026 regular-season completed weeks 1 through 4 exclusively; exclude any week 5+ records, even those already final at freeze time.",
+  "historical_player_games_required": 4,
+  "independent_off_VPS_recovery_verified": false,
+  "independent_opportunity_key": "official_ESPN_event_id/player_id/market_subtype/side/original_line",
+  "market_adjusted_challenger_rule": "0.8 * frozen source sportsbook reference plus 0.2 * empirical smoothed hit frequency, computed separately for PROP and PrizePicks source probabilities. Comparison only, no automatic picks.",
+  "model_chosen_without_receiving_future_outcomes": true,
+  "nfl_prop_and_prizepicks_same_key_de_duplicate": true,
+  "no_paid_api_calls": true,
+  "play_decisions_changed": false,
+  "pregame_quote_requirements": "Provider quote last_updated must parse as a UTC timestamp <= original freeze and < official kickoff. If >24h age, research only/stale.",
+  "preregistered_utc": "2026-10-09T19:02:13.198520+00:00",
+  "promotion_allowed_without_independent_future_game_edge_and_current_quote": false,
+  "prop_original_market_reference_probability_preserved_as_control": true,
+  "publish_as_research_only": true,
+  "purpose": "Frozen candidate-only empirical player-form challenger vs corresponding sportsbook reference in NFL PROP and separate PrizePicks lanes. Not a proven betting strategy.",
+  "schema": "ZENITH_NFL_INDEPENDENT_PLAYER_LINE_BASELINE_PREREG_V1",
+  "source_sha256": {
+    "nfl_official_scheduled_games": {
+      "path": "commercial_web/public/nfl_scores.json",
+      "sha256": "a168f12f1b4683d3d363de6298837b06706f8b8042cd6185d2fc4979b52cda6e"
+    },
+    "nfl_player_stat_history": {
+      "path": "nfl_live/player_context/raw/player_stats.parquet",
+      "sha256": "0df04909dd3eb9f961e50469faa3bd56b5651a8f02eb087f131d4f03231056f5"
+    },
+    "nfl_prop_identity_fusion": {
+      "path": "nfl_live/fusion/NFL_PROP_CONTEXT_READY_V2.csv",
+      "sha256": "a72a6cdd3f5ad5686d6762cd749e8d293fa6224cd04f1039df079a9da12cd2cf"
+    },
+    "nfl_prop_v2_current": {
+      "path": "commercial_web/public/prop_v2_current.json",
+      "sha256": "e01959fcf032f12cbff3788f9b1f3dc1b3087c0dc82ad0fe52a730a84abafa64"
+    }
+  }
+}
