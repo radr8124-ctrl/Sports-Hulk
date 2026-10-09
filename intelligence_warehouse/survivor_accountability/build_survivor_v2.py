@@ -27,6 +27,11 @@ DIST = ROOT / "commercial_web" / "dist"
 DIST_CURRENT = DIST / "survivor_v2_current.json"
 DIST_FORWARD = DIST / "survivor_v2_forward.json"
 
+import sys
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from nfl_live.survivor_pool_rules import resolve_week_rule
+
 MODEL_VERSION = "SURVIVOR_V2_FORWARD_2026_10_05"
 
 TEAM_TO_ABBR = {
@@ -146,24 +151,31 @@ def ownership_context(current_week, official, ownership):
 def rule_state(entry, week):
     state = entry.get(f"week_{week}") if isinstance(entry, dict) else {}
     state = state if isinstance(state, dict) else {}
-    required = None
-    try:
-        raw = state.get("required_picks")
-        required = int(raw) if raw is not None else None
-    except Exception:
-        required = None
-    if required is not None and required <= 0:
-        required = None
+    resolved = resolve_week_rule(week, state)
+    return state, resolved["required_picks"], resolved["rule_status"], resolved["rule_confirmed"]
 
-    status = clean(state.get("rule_status"))
-    confirmed = bool(
-        required
-        and (
-            "CONFIRMED" in status.upper()
-            or state.get("official_pool_sheet_confirmed") is True
-        )
+
+def authentic_current_market_ready(row):
+    """Survivor decision requires an actual fresh, independently timestamped primary market.
+
+    A stale high-juice price, WATCH label, or context score never makes a
+    personal pick eligible. Archived secondary book references are shown
+    separately as labeled research and do NOT silently repair this gate.
+    """
+    freshness = clean(row.get("primary_market_fresh_enough_for_live_decision")).lower()
+    prob = num(row.get("market_prob_pct"))
+    score = num(row.get("strategy_index"))
+    action = clean(row.get("strategy_action")).upper()
+    tier = clean(row.get("hulk_decision_tier")).upper()
+    return bool(
+        freshness == "true" and clean(row.get("market_status")).upper() not in
+        {"STALE_PRIMARY_MARKET", "STALE", "UNKNOWN"}
+        and prob is not None and math.isfinite(prob) and 0 < prob < 100
+        and score is not None and math.isfinite(score)
+        and action in {"VIABLE", "WATCH"}
+        and tier not in {"AVOID", "CAUTION", "WAIT_FOR_FRESH_PRICES"}
     )
-    return state, required, status, confirmed
+
 
 def unique_game_picks(rows, required):
     required = int(required or 0)
@@ -221,17 +233,22 @@ def current_payload():
                 continue
             action = clean(row.get("strategy_action")).upper()
             tier = clean(row.get("hulk_decision_tier")).upper()
-            safe_for_shadow = action not in {"AVOID"} and tier not in {"CAUTION"}
+            safe_for_shadow = authentic_current_market_ready(row)
             slot_shares = own["by_team"].get(team, {})
             rows.append({
                 "team": team,
                 "opponent": clean(row.get("opponent")),
                 "start": clean(row.get("start")),
-                "market_prob_pct": num(row.get("market_prob_pct")),
-                "spread": num(row.get("survivor_spread")),
+                "market_prob_pct": num(row.get("market_prob_pct")) if safe_for_shadow else None,
+                "spread": num(row.get("survivor_spread")) if safe_for_shadow else None,
+                "primary_market_source_status": (
+                    "VERIFIED_FRESH_PRIMARY" if safe_for_shadow
+                    else "PRIMARY_PRICE_UNVERIFIED_OR_STALE"
+                ),
                 "hulk_context_score": num(row.get("hulk_context_score")),
                 "future_value_index": num(row.get("future_value_index")),
                 "future_value_label": clean(row.get("future_value_label")),
+                "future_schedule": clean(row.get("next_four_week_schedule")),
                 "strategy_index": num(row.get("strategy_index")),
                 "strategy_action": action,
                 "decision_tier": tier,
@@ -268,6 +285,8 @@ def current_payload():
         recommendation_status = "WAITING_OFFICIAL_RULE_CONFIRMATION"
     elif not required:
         recommendation_status = "WAITING_REQUIRED_PICK_COUNT"
+    elif not any(r.get("eligible_for_shadow") for r in rows):
+        recommendation_status = "WAIT_FOR_FRESH_VERIFIED_MARKET_QUOTES"
     elif len(safe_combo) < required:
         recommendation_status = "INSUFFICIENT_UNIQUE_GAME_TEAMS"
     elif len(baseline_combo) < required:
@@ -291,6 +310,7 @@ def current_payload():
         "current_saved_picks": current_picks,
         "required_picks": required,
         "rule_status": rule_status or None,
+        "rule_source": resolve_week_rule(pool_week, week_state).get("rule_source"),
         "rule_confirmed": rule_confirmed,
         "ownership": {
             "status": own["status"],
@@ -303,7 +323,7 @@ def current_payload():
         "shadow_recommendation": shadow_picks,
         "safest_market_baseline": baseline_picks,
         "rules": [
-            "No Survivor recommendation is frozen until the official current-week pick count is confirmed.",
+            "The original verified 2026 season rules determine the weekly pick count; current-week ownership requires a separate sheet.",
             "Used teams are removed before ranking.",
             "Already-started games are removed before ranking.",
             "CAUTION and AVOID candidates cannot become a shadow recommendation.",
@@ -506,21 +526,27 @@ def public_current_payload(current):
                 continue
             action = clean(row.get("strategy_action")).upper()
             tier = clean(row.get("hulk_decision_tier")).upper()
+            verified = authentic_current_market_ready(row)
             rows.append({
                 "team": team,
                 "opponent": clean(row.get("opponent")),
                 "start": clean(row.get("start")),
-                "market_prob_pct": num(row.get("market_prob_pct")),
-                "spread": num(row.get("survivor_spread")),
+                "market_prob_pct": num(row.get("market_prob_pct")) if verified else None,
+                "spread": num(row.get("survivor_spread")) if verified else None,
+                "primary_market_source_status": (
+                    "VERIFIED_FRESH_PRIMARY" if verified
+                    else "PRIMARY_PRICE_UNVERIFIED_OR_STALE"
+                ),
                 "hulk_context_score": num(row.get("hulk_context_score")),
                 "future_value_index": num(row.get("future_value_index")),
                 "future_value_label": clean(row.get("future_value_label")),
+                "future_schedule": clean(row.get("next_four_week_schedule")),
                 "strategy_index": num(row.get("strategy_index")),
                 "strategy_action": action,
                 "decision_tier": tier,
                 "risk_signals": clean(row.get("risk_signals")),
                 "positive_signals": clean(row.get("positive_signals")),
-                "eligible_for_shadow": action not in {"AVOID"} and tier not in {"CAUTION"},
+                "eligible_for_shadow": verified,
             })
 
     rows.sort(

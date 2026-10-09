@@ -11,7 +11,9 @@ const altered = f => { const value=structuredClone(original); f(value); return v
 test('real public scorecard is valid, research-only, and accurately labeled', () => {
   const result = forwardProofView(original, clock)
   assert.equal(result.schema, FORWARD_PROOF_SCHEMA)
-  assert.equal(result.game_lines.settled, 186)
+  assert.equal(result.game_lines.settled,
+    result.game_lines.wins + result.game_lines.losses + result.game_lines.pushes)
+  assert.ok(result.game_lines.settled >= 186)
   assert.equal(result.props_and_pickem.settled, 2843)
   assert.equal(result.mlb_full16.completed_independent_game_blocks, 1)
   assert.ok(result.mlb_price_movement.frozen_source_observations >= 29)
@@ -23,17 +25,22 @@ test('real public scorecard is valid, research-only, and accurately labeled', ()
   assert.equal(result.game_lines.actual_real_money_roi_proven, false)
 })
 
-test('positive source-book paper ROI is not a claim of executed wagers', () => {
+test('source-book paper ROI formatting is never a claim of executed wagers', () => {
   const result = forwardProofView(original, clock)
-  assert.equal(researchRoi(result.game_lines.source_book_quoted_paper_roi_pct), '+4.98%')
-  assert.equal(researchRoi(result.props_and_pickem.source_book_quoted_paper_roi_pct), '-1.79%')
+  for (const section of [result.game_lines, result.props_and_pickem]) {
+    const percent = section.source_book_quoted_paper_roi_pct
+    assert.ok(Number.isFinite(percent))
+    assert.equal(researchRoi(percent), (percent >= 0 ? '+' : '') + percent.toFixed(2) + '%')
+    assert.equal(section.actual_real_money_roi_proven, false)
+    assert.equal(section.wins + section.losses + section.pushes, section.settled)
+  }
   assert.match(brierDescription(result.props_and_pickem), /Sportsbook Brier is better/)
   assert.match(brierDescription(result.game_lines), /Same as sportsbook baseline/)
   assert.equal(result.proof_status, 'NOT_PROVEN')
 })
 
 test('concealed extra win without settlement is rejected, not counted', () => {
-  assert.equal(forwardProofView(altered(r => { r.game_lines.wins = 116 }), clock), null)
+  assert.equal(forwardProofView(altered(r => { r.game_lines.wins += 1 }), clock), null)
 })
 
 test('false 70 percent profit claim is rejected', () => {

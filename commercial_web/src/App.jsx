@@ -21,6 +21,7 @@ const DfsLineupLab = lazy(() => import('./DfsLineupLab'))
 const PerformancePanel = lazy(() => import('./PerformancePanel'))
 const PracticeBetting = lazy(() => import('./PracticeBetting'))
 const ParlaysV2Panel = lazy(() => import('./ParlaysV2Panel'))
+const PropsV2Panel = lazy(() => import('./PropsV2Panel'))
 const NFLPlayerPropResearchPanel = lazy(() => import('./NFLPlayerPropResearchPanel'))
 const ScoreGameCenter = lazy(() => import('./ScoreGameCenter'))
 const PersonalIdpPanel = lazy(() => import('./PersonalIdpPanel'))
@@ -34,7 +35,9 @@ const FantasyRosterLocalImport = lazy(() => import('./FantasyRosterLocalImport')
 const FantasyTradeResearch = lazy(() => import('./FantasyTradeResearch'))
 const ResearchLab = lazy(() => import('./ResearchLab'))
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
+const SurvivorMarketReview = lazy(() => import('./SurvivorMarketReview'))
 const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
+import { rankSurvivorCandidates } from '../survivor_week5_rank'
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
 
 function LoadingSurface({ label = 'Loading' }) {
@@ -957,10 +960,14 @@ function SurvivorCommercialPanel() {
   const poolDynamics = saved.pool_dynamics || {}
   const usedTeams = hasEntry ? (saved.used_teams || []) : []
   const currentPicks = hasEntry ? (saved.current_picks || []) : []
-  const candidates = [...(survivor.candidates || [])]
-    .filter((row) => !usedTeams.includes(row.team))
-    .sort((a, b) => Number(b.strategy_index || 0) - Number(a.strategy_index || 0))
+  const candidates = rankSurvivorCandidates(survivor.candidates || [], usedTeams)
   const ruleConfirmed = hasEntry && Boolean(saved.rule_confirmed)
+  const modelPickReady = ruleConfirmed && saved.recommendation_status === 'SHADOW_RECOMMENDATION_READY'
+  const modelResearchPicks = modelPickReady && Array.isArray(saved.shadow_recommendation)
+    ? saved.shadow_recommendation : []
+  const personalShortlist = modelResearchPicks.length > 0
+    ? modelResearchPicks : candidates.filter(row => String(row.strategy_action || '').toUpperCase() === 'VIABLE').slice(0, 3)
+  const currentPoolSheetMissing = hasEntry && Number(saved.ownership?.official_pool_week || 0) !== Number(saved.pool_current_week || 0)
   const requiredPicks = hasEntry
     ? (saved.required_picks == null ? 'UNKNOWN' : saved.required_picks)
     : '—'
@@ -1014,6 +1021,56 @@ function SurvivorCommercialPanel() {
         </div>
       </section>
 
+      {hasEntry && entryStatus === 'ALIVE' && (
+        <section aria-label="Personal Survivor pick research" className="rounded-3xl border border-blue-200 bg-white p-5 shadow-soft md:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="eyebrow">Week {saved.pool_current_week ?? survivor.pool_current_week ?? '—'} · Your eligible teams</p>
+              <h2 className="mt-2 text-xl font-black text-slate-950">
+                {ruleConfirmed ? `${saved.required_picks} pick${saved.required_picks === 1 ? '' : 's'} required this week` : 'Personal picks pending rule review'}
+              </h2>
+            </div>
+            <span className={`rounded-full px-3 py-2 text-[10px] font-black ${ruleConfirmed ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`}>
+              {ruleConfirmed ? 'ORIGINAL 2026 RULES VERIFIED' : 'RULE REVIEW NEEDED'}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {ruleConfirmed
+              ? 'Your original 2026 Knockout Pool rules confirm the pick count. Previously used teams are excluded. These are research choices, not picks submitted to the external pool.'
+              : 'Your current-week rule sources conflict or are unavailable. The research candidates below are not approved picks.'}
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {personalShortlist.map((row, index) => (
+              <div key={row.team} className={`rounded-2xl border p-4 ${modelPickReady ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200 bg-slate-50'}`}>
+                <div className="text-[10px] font-black uppercase tracking-wider text-blue-700">
+                  {modelPickReady ? `Model research choice ${index + 1}` : `Research option ${index + 1}`}
+                </div>
+                <div className="mt-2 text-lg font-black text-slate-950">{row.team}</div>
+                <div className="mt-1 text-xs font-semibold text-slate-500">vs {row.opponent || 'Opponent pending'}</div>
+                <div className="mt-2 text-xs font-bold text-blue-800">{row.market_prob_pct ?? '—'}% market-implied survival estimate</div>
+                <div className="mt-2 text-xs text-slate-500">{humanize(row.strategy_action || row.decision_tier || 'RESEARCH')}</div>
+              </div>
+            ))}
+          </div>
+          {!personalShortlist.length && <p className="mt-3 text-sm font-semibold text-slate-600">No eligible current-week research choice is available yet.</p>}
+          <div className="mt-4 space-y-2 text-xs font-semibold leading-5 text-slate-600">
+            <p><b className="text-slate-800">Pool deadline:</b> Saturday 6 PM; games played earlier must be picked at least two hours before that day's first kickoff, per the original rules.</p>
+            {currentPoolSheetMissing && <p className="text-amber-800"><b>Ownership data still pending:</b> The most recent imported picks sheet is for Week {saved.ownership?.official_pool_week ?? '—'}. This does not change the verified Week {saved.pool_current_week} pick count.</p>}
+          </div>
+        </section>
+      )}
+
+      <Suspense fallback={<LoadingSurface label="Loading Week 5 sportsbook comparison" />}>
+        <SurvivorMarketReview
+          week={survivor.pool_current_week ?? saved.pool_current_week ?? null}
+          candidates={survivor.candidates || []}
+          usedTeams={usedTeams}
+          personal={hasEntry}
+          recommendedStatus={hasEntry ? saved.recommendation_status : ''}
+          requiredPicks={hasEntry && Number.isInteger(saved.required_picks) ? saved.required_picks : null}
+        />
+      </Suspense>
+
       {isSignedIn && (
         <Suspense fallback={null}>
           <SurvivorPoolImport
@@ -1063,6 +1120,12 @@ function SurvivorCommercialPanel() {
                       <div className="mt-1 text-slate-400">Current pick</div>
                     </div>
                   </div>
+                  {entry.last_completed_picks?.length > 0 && (
+                    <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs font-semibold text-slate-700">
+                      <span className="font-black">Week {entry.last_completed_week} saved result:</span>{' '}
+                      {entry.last_completed_picks.map(pick => `${pick.team} — ${pick.result}`).join(' · ')}
+                    </div>
+                  )}
                   {entry.entry_name === saved.active_entry && (
                     <div className="mt-3 text-[10px] font-black uppercase tracking-[0.12em] text-blue-700">Primary detail view</div>
                   )}
@@ -1232,7 +1295,7 @@ function SurvivorCommercialPanel() {
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700"><AlertTriangle size={20} /></div>
             <div>
               <div className="text-lg font-black text-slate-950">Week {saved.pool_current_week ?? survivor.pool_current_week ?? '—'} recommendation is locked</div>
-              <p className="mt-2 text-sm leading-6 text-amber-950">Your current-week pool state has not cleared the official rule gate. The research board remains visible, but no candidate is promoted to a final personal recommendation.</p>
+              <p className="mt-2 text-sm leading-6 text-amber-950">The original season rules are missing, or their required pick count conflicts with an entry record. The research board remains visible, but no candidate is promoted until this rule conflict is resolved.</p>
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-black">
                 <span className="rounded-full bg-white px-3 py-1.5 text-amber-800">{humanize(saved.rule_status || 'AWAITING OFFICIAL POOL SHEET')}</span>
                 <span className="rounded-full bg-white px-3 py-1.5 text-amber-800">{humanize(saved.ownership?.status || 'WAITING OWNERSHIP')}</span>
@@ -1271,8 +1334,11 @@ function SurvivorCommercialPanel() {
           <span className={`health-pill ${hasEntry && ruleConfirmed ? 'emerald' : ''}`}>{hasEntry && ruleConfirmed ? 'PERSONAL RULE CONFIRMED' : 'RESEARCH ONLY'}</span>
         </div>
 
+        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold leading-6 text-blue-950">
+          Viable teams are listed first, followed by watchlist research. AVOID teams are moved to the end and are not recommended. {hasEntry && !ruleConfirmed ? 'Your final Week 5 selection remains locked until the official pool rules are confirmed.' : ''}
+        </div>
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          {candidates.slice(0, 9).map((row, index) => (
+          {candidates.filter(row => String(row.strategy_action || '').toUpperCase() !== 'AVOID').slice(0, 9).map((row, index) => (
             <div key={row.team} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -1954,84 +2020,6 @@ function BestBetsV2Panel() {
           Show all {grouped.research.length} research candidates
         </button>
       )}
-    </section>
-  )
-}
-
-function PropsV2Panel({ lane = 'PROP' }) {
-  const data = useJsonEndpoint('/prop_v2_current.json', { summary: {}, picks: [] })
-  const [sport, setSport] = useState('ALL')
-  const allRows = (data.picks || []).filter((row) => row.lane === lane)
-  const sports = Array.from(new Set(allRows.map((row) => row.sport).filter(Boolean))).sort()
-  const decisionRank = (row) => row.shadow_decision === 'SHADOW_PLAY' ? 3 : row.shadow_decision === 'SHADOW_MONITOR' ? 2 : 1
-  const rows = allRows
-    .filter((row) => sport === 'ALL' || row.sport === sport)
-    .sort((a, b) =>
-      decisionRank(b) - decisionRank(a)
-      || (b.conservative_edge_pct_points ?? -999) - (a.conservative_edge_pct_points ?? -999)
-      || (b.edge_pct_points ?? -999) - (a.edge_pct_points ?? -999)
-    )
-  const plays = allRows.filter((row) => row.shadow_decision === 'SHADOW_PLAY').length
-  const monitors = allRows.filter((row) => row.shadow_decision === 'SHADOW_MONITOR').length
-  const isPrize = lane === 'PRIZEPICKS'
-
-  return (
-    <section className="space-y-5">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">{isPrize ? 'Pick-em research' : 'Player markets'}</p>
-          <h2>{isPrize ? 'PrizePicks' : 'Props'}</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{isPrize ? 'Leg quality and entry profitability are separate. A strong leg never becomes a recommended entry without payout economics and forward proof.' : 'Player lines are evaluated by sport and market subtype. Model probability must beat the market reference before price/EV can matter.'}</p>
-        </div>
-        <span className="health-pill">{allRows.length} CURRENT</span>
-      </div>
-      <div className={`rounded-2xl border p-4 text-sm font-semibold ${monitors ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-blue-200 bg-blue-50 text-blue-900'}`}>
-        {plays ? `${plays} PLAY${plays === 1 ? '' : 'S'} currently cleared.` : monitors ? `${monitors} shadow monitor${monitors === 1 ? '' : 's'} are promising but not proven PLAYs.` : 'No independently proven PLAY is being forced right now.'}
-      </div>
-
-      {isPrize && (
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
-            <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Leg proof</div>
-            <div className="mt-2 text-2xl font-black text-slate-950">{monitors}</div>
-            <div className="mt-1 text-xs font-semibold text-slate-500">promising monitors · {plays} proven plays</div>
-          </div>
-          <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
-            <div className="text-[10px] font-black uppercase tracking-[0.12em] text-violet-700">Entry economics</div>
-            <div className="mt-2 text-lg font-black text-slate-950">Payout proof required</div>
-            <div className="mt-1 text-xs leading-5 text-violet-900">A good leg does not automatically make a profitable multi-pick entry.</div>
-          </div>
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <div className="text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">Card discipline</div>
-            <div className="mt-2 text-lg font-black text-slate-950">No forced entries</div>
-            <div className="mt-1 text-xs leading-5 text-emerald-900">If the proof gate does not clear, the correct recommendation is to pass.</div>
-          </div>
-        </div>
-      )}
-
-      <SportFilter sports={sports} active={sport} onChange={setSport} />
-      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        {rows.slice(0, 12).map((row, i) => {
-          const decision = row.shadow_decision || 'PASS'
-          const statusClass = decision === 'SHADOW_PLAY' ? 'bg-emerald-50 text-emerald-700' : decision === 'SHADOW_MONITOR' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600'
-          return (
-            <div key={`${row.event_id}-${row.player_key}-${row.market_subtype}-${row.side}-${i}`} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-              <div className="flex items-start justify-between gap-3">
-                <div><div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">{row.sport} · {humanize(row.market_subtype)}</div><div className="mt-2 text-xl font-black text-slate-950">{row.player}</div></div>
-                <span className={`rounded-full px-3 py-1 text-[10px] font-black ${statusClass}`}>{decision === 'SHADOW_MONITOR' ? 'MONITOR' : decision === 'SHADOW_PLAY' ? 'PLAY' : 'PASS'}</span>
-              </div>
-              <div className="mt-4 text-2xl font-black text-slate-950">{row.side} {row.line}</div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-                <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.v2_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Model</div></div>
-                <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.market_reference_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Market</div></div>
-                <div className="rounded-xl bg-slate-50 p-3"><div className="font-black text-slate-950">{row.conservative_probability_pct ?? '—'}%</div><div className="mt-1 text-slate-400">Conservative</div></div>
-              </div>
-              <div className="mt-4 text-xs font-semibold leading-5 text-slate-500">Quality {row.data_quality_grade || '—'} · {row.data_quality_book_count ?? '—'} books · {humanize(row.historical_edge_confidence)}</div>
-              <div className="mt-2 text-[11px] leading-5 text-slate-400">{humanize(row.selection_rule_status)}</div>
-            </div>
-          )
-        })}
-      </div>
     </section>
   )
 }
@@ -3703,8 +3691,8 @@ export default function App() {
                   </Suspense>
                 )}
                 {active === 'Best Bets' && <BestBetsV2Panel />}
-                {active === 'Props' && <PropsV2Panel lane="PROP" />}
-                {active === 'PrizePicks' && <PropsV2Panel lane="PRIZEPICKS" />}
+                {active === 'Props' && <Suspense fallback={<LoadingSurface label="Loading Props" />}><PropsV2Panel lane="PROP" /></Suspense>}
+                {active === 'PrizePicks' && <Suspense fallback={<LoadingSurface label="Loading PrizePicks" />}><PropsV2Panel lane="PRIZEPICKS" /></Suspense>}
                 {active === 'Parlays' && <Suspense fallback={<LoadingSurface label="Loading Parlays" />}><ParlaysV2Panel /></Suspense>}
                 {active === 'Bet Lab' && <Suspense fallback={<LoadingSurface label="Loading Bet Lab" />}><PracticeBetting /></Suspense>}
               </>

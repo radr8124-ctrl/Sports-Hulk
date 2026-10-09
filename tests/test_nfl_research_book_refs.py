@@ -124,6 +124,41 @@ class NflResearchBookSourceTests(unittest.TestCase):
         rows = [dict(x, updated=(CAPTURE + timedelta(minutes=30)).isoformat()) for x in complete_rows()]
         self.assertEqual(payload(rows)["paired_quote_games"], 0)
 
+    def test_expired_current_prices_remain_separate_as_historical_preview(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "nfl_live/game_fusion/NFL_GAME_SPORTWIZZARD_RAW.csv"
+            source.parent.mkdir(parents=True)
+            archive = source.parent / "history/NFL_GAME_SPORTWIZZARD_20261009T060000Z.csv"
+            archive.parent.mkdir(parents=True)
+            with source.open("w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=list(complete_rows()[0]))
+                writer.writeheader()
+                writer.writerows(complete_rows())
+            archive.write_bytes(source.read_bytes())
+            official = root / "commercial_web/public/nfl_scores.json"
+            official.parent.mkdir(parents=True)
+            official.write_text(json.dumps(score()))
+            # Less than 24h to game, 39h after the original quote:
+            # absolutely no live source candidate may survive.
+            day_after = BASE + timedelta(hours=25)
+            expired = run(root, now=day_after)
+            self.assertEqual(expired["paired_quote_games"], 0)
+            self.assertEqual(expired["fixtures"], [])
+            archived = expired["archived_snapshot"]
+            self.assertEqual(archived["status"], "ARCHIVED_SOURCE_ONLY_NOT_CURRENT")
+            self.assertEqual(archived["paired_quote_games_at_capture"], 1)
+            self.assertEqual(len(archived["fixtures"]), 1)
+            self.assertFalse(archived["is_current_quote"])
+            self.assertFalse(archived["is_approved_bet"])
+            self.assertFalse(archived["model_advantage_proven"])
+            self.assertEqual(archived["original_archive_sha256"],
+                             hashlib.sha256(source.read_bytes()).hexdigest())
+            self.assertEqual(
+                json.loads((root/"commercial_web/public/nfl_research_book_refs.json").read_text()),
+                expired,
+            )
+
     def test_original_archive_checksum_controls_publication(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -271,8 +271,25 @@ def run(root=ROOT, now=None):
     capture, source = archived_capture(root, raw)
     if not capture or capture > now:
         raise RuntimeError("Original market source missing or archive checksum mismatch; output untouched")
-    payload = research_payload(read_csv(raw), json.loads(snapshot.read_text()),
-                               capture, source, now)
+    original_rows = read_csv(raw)
+    official_scoreboard = json.loads(snapshot.read_text())
+    payload = research_payload(original_rows, official_scoreboard, capture, source, now)
+    # Independent historical comparison channel. Recompute from the same
+    # archived SHA-verified rows at the original capture clock, *never* using
+    # the current clock for eligibility or copying a stale quote into fixtures.
+    # A later automatic refresh may have zero fresh quotes; this separate
+    # archive still permits a prominently EXPIRED Saturday preview.
+    archived = research_payload(original_rows, official_scoreboard, capture, source, capture)
+    payload["archived_snapshot"] = {
+        "status": "ARCHIVED_SOURCE_ONLY_NOT_CURRENT",
+        "source_captured_at": capture.isoformat(),
+        "original_archive_sha256": source["sha256"],
+        "is_current_quote": False,
+        "is_approved_bet": False,
+        "model_advantage_proven": False,
+        "paired_quote_games_at_capture": archived["paired_quote_games"],
+        "fixtures": archived["fixtures"],
+    }
     output = root / "commercial_web/public/nfl_research_book_refs.json"
     atomic_json(output, payload)
     if (root / "commercial_web/dist").is_dir():
