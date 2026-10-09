@@ -36,3 +36,9 @@ cd /home/ubuntu/sports-hulk
 ```
 
 Manual first-restore private log: `reports/cfb_incremental_recovery_20261009/CFB_INDEXED_GRADE_EXECUTION_PRIVATE.log`. Historical comparator source backup and readback manifest: `.deploy_backups/cfb_incremental_grader_pregraft_20261009T055700Z/SHA256_BEFORE.txt`. A true off-VPS raw-data restore remains **NOT VERIFIED**.
+
+## Confirmed ordinary systemd integration — October 9, 06:01 and 06:11 UTC
+
+The scheduled 06:02 learning run appended 7,640 observations, caught up the incremental index with all 14,084,133 added bytes, ran the restored grader rc=0, and exited with `CFB LEARNING COMPLETE`, systemd `Result=success`. The following 06:12 run, after the separate clock-only append fix, archived **only nine genuine changed rows** from a 7,640-row source bundle and preserved the other 7,631 observations solely in the original per-bundle snapshot/manifest. It likewise caught up its source index, completed grading rc=0, and exited `Result=success`. No original past rows were removed or trimmed.
+
+The full 8,476,961,400-byte raw source SHA-256 at the 06:12 accepted snapshot is `9ad2ed2fea690f77e252cafd3c31d392debc69ad06cb71e0ab31c84a78cf49e8`. The acceptance receipt reverified **4,600,674 source rows**, **20,995 distinct current keys**, **12,267 settled research grades**, and **zero reversals among 10,629 previously settled legacy grades**. Model changes/wagers remained zero. An 18-file on-VPS archive of the index, recovered grades, code and receipts was restored and checksum-verified; compressed backup SHA-256 `7aa01ebabc6a43bb65413d345f266ec9ec539456a82baac4d4a07408829d7132`. **This smaller archive does not include the original 8.47GB source and does not prove off-VPS raw recovery.**

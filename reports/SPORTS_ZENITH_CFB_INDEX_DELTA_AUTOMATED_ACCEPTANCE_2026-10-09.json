@@ -1,0 +1,29 @@
+{
+  "automatic_model_adjustment": false,
+  "grade_counts": {
+    "LOSS": 6041,
+    "PENDING": 8728,
+    "PUSH": 98,
+    "WIN": 6128
+  },
+  "last_bundle_actual_rows_appended": 9,
+  "last_bundle_archive_would_have_rows": 7640,
+  "last_bundle_clock_only_rows_preserved_in_manifest_not_duplicated": 7631,
+  "new_real_bookmaker_wagers": 0,
+  "original_raw_source_off_vps_recovery_verified": false,
+  "original_wager_profit_proven": false,
+  "previously_settled_grades_crosschecked": 10629,
+  "previously_settled_grades_reversed": 0,
+  "provider_data_commercial_license_verified": false,
+  "receipt_created_at_utc": "2026-10-09T06:14:54.500237+00:00",
+  "settled_research_recommendations": 12267,
+  "source_index_completely_caught_up": true,
+  "source_index_path": "cfb_live/decision/history/CFB_RECOMMENDATION_LATEST_INDEX.sqlite3",
+  "source_ledger_bytes": 8476961400,
+  "source_ledger_inode": 2366622,
+  "source_ledger_original_raw_rewritten_or_deleted": false,
+  "source_ledger_sha256": "9ad2ed2fea690f77e252cafd3c31d392debc69ad06cb71e0ab31c84a78cf49e8",
+  "source_total_original_rows_scanned": 4600674,
+  "status": "PASS_AUTOMATED_INDEX_GRADE_AND_CLOCK_ONLY_DELTA_REPLAY",
+  "unique_latest_recommendations": 20995
+}

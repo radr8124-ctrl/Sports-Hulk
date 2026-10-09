@@ -25,7 +25,7 @@ If index cannot be proven caught up or is unavailable, fallback **appends every 
 - Unit and temp-directory integration tests: **17 passed** across original incremental scanner, indexed grader and new clock-only archive tests.
 - The full temp source test appended exactly two first-proven game recommendations, then simulated a new snapshot where one record changed only hours and the other changed actual price. It appended **only one** new market observation, preserving a byte-identical original CSV prefix and both snapshot manifests.
 - Source-verified latest-row readback works and refuses an index stale behind source append. Bad/malformed prior price payload fails closed (append real observation, do not suppress).
-- Live production acceptance of this new optimization from the next 10-minute scheduled CFB refresh is still required. **No verified reduction should be claimed until that actual timer report.**
+- **Live scheduled acceptance PASS:** the 2026-10-09T06:12:37Z CFB archive preserved the complete 7,640-row source snapshot manifest but appended only **9 material records**, skipping **7,631 derived clock-only duplicates**. The index caught up (16,083 source bytes; index exit 0), graded **20,995 latest recommendations and 12,267 settled research grades** (grader exit 0), and the systemd service completed successfully. Every one of the 10,629 earlier settled legacy grades remained unchanged. Full source SHA-256 and recovery receipt: `reports/SPORTS_ZENITH_CFB_INDEX_DELTA_AUTOMATED_ACCEPTANCE_2026-10-09.json`.
 - Original 06:01 CFB automatic index+grader previously finished with `INDEX RC:0`, `GRADE RC:0`, `CFB LEARNING COMPLETE` and `Result=success` while preserving all 10,629 previously settled legacy grades exactly.
 
 ## Private-data Git safety
