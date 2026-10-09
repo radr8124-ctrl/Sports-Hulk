@@ -1,0 +1,34 @@
+{
+  "acceptance": "PASS_CFB_AUTOMATIC_RESEARCH_LEARNING_AND_CLOCK_ONLY_DELTA",
+  "automatic_model_or_bet_promotion": false,
+  "automatic_refresh_log": "cfb_live/decision/history/logs/CFB_LEARNING_20261009T061237Z.log",
+  "automatic_refresh_proof": [
+    "LEDGER ROWS ADDED: 9",
+    "INDEX RC: 0",
+    "GRADE RC: 0",
+    "CFB LEARNING COMPLETE"
+  ],
+  "clock_only_rows_skipped": 7631,
+  "index_cursor_at_exact_source_end": true,
+  "latest_original_source_rows_appended": 9,
+  "latest_unique_recommendations": 20995,
+  "manifest_recorded_private_sources": true,
+  "manifest_sha256": "3b4e361406d0b1288cfbd0a5aa2df51a667acebf9ab727f1e6d88438ead46e57",
+  "off_vps_raw_restore_verified": false,
+  "original_ledger_bytes": 8476961400,
+  "original_raw_source_rows_indexed": 4600674,
+  "previously_settled_graded_rows_checked": 10629,
+  "previously_settled_grades_reversed": 0,
+  "private_original_raw_source_committed_to_git": false,
+  "settled_research_recommendations": 12267,
+  "source_file_inode": "2366622",
+  "source_log_sha256": "1ae086465ebe78260ac41665690a56eb31689e579754a590a1218ae6fbd6701d",
+  "total_source_observations_processed_in_snapshot": 7640,
+  "verified_at_utc": "2026-10-09T06:14:15.532505+00:00",
+  "win_loss_push_pending": {
+    "LOSS": 6041,
+    "PENDING": 8728,
+    "PUSH": 98,
+    "WIN": 6128
+  }
+}
