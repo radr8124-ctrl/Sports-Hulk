@@ -46,7 +46,7 @@ export default function BestBetsMarketCoverage({ sport, market, currentData, pri
     readableTime(rawTimestamp):'Not verified'
 
   return (
-    <section aria-label="Best Bets source proof and game intelligence" className="rounded-2xl border border-slate-200 bg-white p-3 shadow-soft md:p-4">
+    <section aria-label="Best Bets source proof and game intelligence" className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-soft md:p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs font-black text-slate-900">
           <ShieldCheck size={16} className="text-blue-700" />
@@ -58,31 +58,35 @@ export default function BestBetsMarketCoverage({ sport, market, currentData, pri
       </div>
       <p className="mt-2 text-sm leading-5 text-slate-700">
         {proof.candidateCount
-          ? `${proof.candidateCount} ${summaryMarket} observations in this view. ${proof.researchCount} remain research-only; sportsbook probabilities alone are not a proven Zenith advantage.`
+          ? `${proof.candidateCount} ${summaryMarket} checked · ${proof.researchCount} research only. No independent edge claimed.`
           : `No verified ${sport==='ALL'?'sports':sport} ${summaryMarket} selection currently clears the source and model proof gates.`}
       </p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-[11px] text-slate-500">
-        <span className="inline-flex items-center gap-1"><Database size={13} /> Current qualified feed: {totalCandidates} records · updated {updated}</span>
+        <span className="inline-flex items-center gap-1"><Database size={13} /> Research feed: {totalCandidates} records · {updated}</span>
         <a href="#brain-record" className="inline-flex min-h-9 items-center gap-1 font-black text-blue-700 hover:underline">
           See Brain Record <ArrowUpRight size={13} />
         </a>
       </div>
       {(sport==='NFL' || (market!=='ALL' && proof.candidateCount===0)) && (
-        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
           <div className="flex items-center gap-2 text-xs font-black text-amber-950"><AlertTriangle size={15}/> Why this market is blocked</div>
           <p className="mt-1 text-xs leading-5 text-amber-900">
             {sport==='NFL'
-              ? 'The NFL primary market source failed freshness checks. Older prices and point spreads are deliberately hidden—not presented as live picks.'
-              : 'No current line was qualified for this sport and market. Existing historical research is not a substitute for a fresh, verifiable quote.'}
+              ? 'The NFL primary market source failed freshness checks. Dated quotes remain research, not live picks.'
+              : 'No fresh, source-qualified line clears this market. Historical research is not a current quote.'}
           </p>
-          {sport==='NFL' && proof.nflStaleUpstreamMoneylineCount>0 && (
-            <p className="mt-1 text-[11px] leading-4 text-amber-900">
-              {proof.nflStaleUpstreamMoneylineCount} separate upstream NFL <b>moneyline</b> rows are labeled STALE. This does not prove fresh point-spread pricing is available.
-            </p>
-          )}
-          <p className="mt-1 text-[11px] leading-4 text-amber-900">
-            Next: verify the sportsbook capture time, exact matchup and line, then beat the market baseline in independent future games.
-          </p>
+          <details className="group mt-1.5 border-t border-amber-200/60 pt-1">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center text-[11px] font-black text-amber-900">
+              View source verification details
+            </summary>
+            <div className="pb-1 text-[11px] leading-5 text-amber-900">
+              <p>Older prices and point spreads are excluded from live recommendations.</p>
+              {sport==='NFL' && proof.nflStaleUpstreamMoneylineCount>0 && (
+                <p className="mt-1">{proof.nflStaleUpstreamMoneylineCount} upstream NFL moneyline rows are STALE. This does not establish fresh spread pricing.</p>
+              )}
+              <p className="mt-1">A market reference needs an exact event, valid sportsbook quote time and independent future model proof.</p>
+            </div>
+          </details>
         </div>
       )}
       {sport!=='ALL' && relevant.length>0 && (

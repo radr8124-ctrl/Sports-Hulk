@@ -985,38 +985,31 @@ function SurvivorCommercialPanel() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-soft md:p-8">
-        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
-          <div>
+    <div className="space-y-5 md:space-y-7">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft md:p-6">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
+          <div className="w-full min-w-0 sm:w-auto sm:flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="eyebrow">Survivor</p>
-              <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${hasEntry && entryStatus === 'ALIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{entryStatus}</span>
+              <p className="eyebrow">Survivor · Week {saved.pool_current_week ?? survivor.pool_current_week ?? '—'}</p>
+              <span className={`rounded-full px-2 py-1 text-[10px] font-bold ${hasEntry && entryStatus === 'ALIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{entryStatus}</span>
             </div>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
-              {hasEntry ? saved.active_entry : isSignedIn ? 'No Survivor entry connected' : 'Your Survivor command center'}
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
+              {hasEntry ? saved.active_entry : isSignedIn ? 'Connect your pool entry' : 'Survivor'}
             </h1>
-            <p className="mt-2 text-sm font-semibold text-slate-500">
+            <p className="mt-1 text-xs font-medium leading-5 text-slate-500 md:text-sm">
               {hasEntry
-                ? `Pool week ${saved.pool_current_week ?? survivor.pool_current_week ?? '—'} · ${usedTeams.length} teams used · current pick ${currentPicks.length ? currentPicks.join(', ') : 'None'}`
+                ? `${usedTeams.length} teams already used · Current pick: ${currentPicks.length ? currentPicks.join(', ') : 'not saved'}`
                 : isSignedIn
-                  ? 'Your account is signed in. A personal pool can be linked without exposing it to anonymous visitors.'
-                  : `Week ${survivor.pool_current_week ?? '—'} generic research is visible. Sign in to load private entries, used teams and pool rules.`}
+                  ? 'Link an entry to view your picks, used teams, and pool rules privately.'
+                  : 'Week 5 market research. Sign in for your picks and used-team history.'}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Required picks</div>
-              <div className="mt-2 text-xl font-black text-slate-950">{requiredPicks}</div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Research candidates</div>
-              <div className="mt-2 text-xl font-black text-slate-950">{candidates.length}</div>
-            </div>
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <div className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Pool state</div>
-              <div className="mt-2 text-sm font-black text-slate-950">{hasEntry ? humanize(saved.ownership?.status || 'WAITING') : 'PRIVATE'}</div>
-            </div>
+          <div className="flex w-full flex-wrap items-center gap-2 text-[11px] font-bold text-slate-700 sm:w-auto sm:max-w-xs sm:justify-end">
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">
+              {hasEntry ? `${requiredPicks} required pick${requiredPicks === 1 ? '' : 's'}` : 'Research only'}
+            </span>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">{candidates.length} teams reviewed</span>
+            {hasEntry && <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">{currentPicks.length} saved</span>}
           </div>
         </div>
       </section>
@@ -1322,7 +1315,15 @@ function SurvivorCommercialPanel() {
         </section>
       )}
 
-      <section>
+      <details className="group rounded-2xl border border-slate-200 bg-white p-3 shadow-soft md:p-4">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-left">
+          <span className="min-w-0">
+            <span className="block text-sm font-black text-slate-900">Full Survivor research board</span>
+            <span className="block text-[11px] font-medium text-slate-500">All {candidates.length} team signals · odds and model evidence shown separately</span>
+          </span>
+          <ChevronRight size={18} className="shrink-0 text-blue-700 transition-transform group-open:rotate-90" />
+        </summary>
+        <section className="mt-3 border-t border-slate-100 pt-4">
         <div className="section-heading">
           <div>
             <p className="eyebrow">Week {survivor.pool_current_week ?? saved.pool_current_week ?? '—'} research</p>
@@ -1356,7 +1357,7 @@ function SurvivorCommercialPanel() {
               </div>
 
               <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2 text-xs">
-                <span className="font-black text-slate-600">Strategy {Number(row.strategy_index || 0).toFixed(1)}</span>
+                <span className="font-black text-slate-600">Strategy {row.strategy_index == null ? '—' : Number(row.strategy_index).toFixed(1)}</span>
                 <span className="font-bold text-slate-400">{humanize(row.future_value_label)}</span>
               </div>
 
@@ -1370,6 +1371,7 @@ function SurvivorCommercialPanel() {
           ))}
         </div>
       </section>
+      </details>
 
       <section className="grid gap-4 md:grid-cols-2">
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
@@ -1569,19 +1571,19 @@ function humanize(value) {
 function CommercialHero({ onNavigate }) {
   return (
     <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-soft">
-      <div className="grid gap-8 p-7 md:p-10 lg:grid-cols-[1.35fr_.65fr] lg:items-end">
+      <div className="grid gap-5 p-5 md:gap-8 md:p-10 lg:grid-cols-[1.35fr_.65fr] lg:items-end">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-700">
             <Activity size={14} /> Live sports intelligence
           </div>
-          <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-[-0.04em] text-slate-950 md:text-6xl">
-            One place for the game.
-            <span className="block text-blue-700">Answers first. Evidence underneath.</span>
+          <h1 className="mt-3 max-w-4xl text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
+            Sports intelligence.
+            <span className="block text-blue-700">Evidence behind every call.</span>
           </h1>
-          <p className="mt-5 max-w-3xl text-base font-medium leading-7 text-slate-500 md:text-lg">
-            Scores, betting research, props, PrizePicks, parlays, Survivor, fantasy, DFS and news — organized around the decisions you actually need to make.
+          <p className="mt-3 max-w-3xl text-sm font-medium leading-6 text-slate-500 md:text-base">
+            Scores, bets, props, PrizePicks, Survivor and fantasy — all in one place.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="mt-5 flex flex-wrap gap-3">
             <button onClick={() => onNavigate('Best Bets')} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5">
               See today's intelligence
             </button>
@@ -1590,7 +1592,7 @@ function CommercialHero({ onNavigate }) {
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="hidden grid-cols-2 gap-3 sm:grid">
           <div className="mini-metric"><Brain size={18} /><b>Learning</b><span>Forward tracked</span></div>
           <div className="mini-metric"><ShieldCheck size={18} /><b>Proof</b><span>Losses stay visible</span></div>
           <div className="mini-metric"><Radio size={18} /><b>Live</b><span>Scores + markets</span></div>
@@ -1977,7 +1979,7 @@ function BestBetsV2Panel() {
         <div>
           <p className="eyebrow">Betting intelligence</p>
           <h2>Best Bets</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Start with tested selections, then explore market research. A strong-looking favorite is not necessarily a profitable bet.</p>
+          <p className="mt-1 max-w-3xl text-sm leading-5 text-slate-500">Tested selections first. Unproven lines stay in research.</p>
         </div>
         <span className="health-pill">{summary.candidates ?? 0} EVALUATED</span>
       </div>
