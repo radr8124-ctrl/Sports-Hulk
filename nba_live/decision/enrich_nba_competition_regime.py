@@ -18,9 +18,9 @@ from tempfile import NamedTemporaryFile
 import requests
 
 try:
-    from .espn_competition_regime import dates_to_query, fetch_scoreboard_events, label_decision
+    from .espn_competition_regime import dates_to_query, fetch_scoreboard_events, label_decision, label_player_decision
 except ImportError:  # script execution from nba_live/decision
-    from espn_competition_regime import dates_to_query, fetch_scoreboard_events, label_decision
+    from espn_competition_regime import dates_to_query, fetch_scoreboard_events, label_decision, label_player_decision
 
 
 def read_rows(path: Path) -> tuple[list[str], list[dict]]:
@@ -69,6 +69,10 @@ def enrich(root: Path, session, dry_run: bool = False) -> dict:
     files = [
         decision_dir / "NBA_GAME_DECISIONS.csv",
         decision_dir / "NBA_GAME_FINALISTS.csv",
+        decision_dir / "NBA_PROP_DECISIONS.csv",
+        decision_dir / "NBA_PROP_FINALISTS.csv",
+        decision_dir / "NBA_PRIZEPICKS_DECISIONS.csv",
+        decision_dir / "NBA_PRIZEPICKS_FINALISTS.csv",
     ]
     snapshots = {str(path): read_rows(path) for path in files}
     primary = snapshots[str(files[0])][1]
@@ -79,13 +83,13 @@ def enrich(root: Path, session, dry_run: bool = False) -> dict:
         "source": "ESPN_SITE_SCOREBOARD",
         "source_method": "EXPLICIT_SEASON_TYPE_EXACT_TEAM_AND_START_JOIN",
         "maximum_start_drift_seconds": 20 * 60,
-        "status": "NO_GAME_DECISIONS" if not primary else "WAITING_FOR_SOURCE",
+        "status": "NO_DECISIONS" if not all_rows else "WAITING_FOR_SOURCE",
         "dry_run": dry_run,
         "proof_promotion_permitted": False,
         "dates": {}, "csv_files": {},
     }
 
-    if not primary:
+    if not all_rows:
         return report
 
     events, receipt = fetch_scoreboard_events(requested_dates, session)
@@ -108,7 +112,8 @@ def enrich(root: Path, session, dry_run: bool = False) -> dict:
         revised = []
         reasons = Counter()
         for row in rows:
-            labeled, reason = label_decision(row, events)
+            labeler = label_decision if path.name.startswith("NBA_GAME_") else label_player_decision
+            labeled, reason = labeler(row, events)
             revised.append(labeled)
             reasons[reason] += 1
             if path == files[0]:

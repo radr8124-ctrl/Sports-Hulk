@@ -313,6 +313,46 @@ LANES = {
 }
 
 
+
+NBA_REGIME_SOURCE = "ESPN_SITE_SCOREBOARD_EXACT_GAME"
+NBA_REGIMES = {"1": "PRESEASON", "2": "REGULAR", "3": "POSTSEASON"}
+
+
+def nba_competition_proof(row, cfg):
+    """Copy only exactly verified ESPN competition metadata from NBA decisions.
+
+    Unknown source, missing event ID or conflicting official season metadata
+    fails closed. Never infer the regime from the October calendar.
+    """
+    if cfg.get("sport") != "NBA":
+        return {}
+    season = text_value(row.get("season_type"))
+    regime = text_value(row.get("competition_regime")).upper()
+    source = text_value(row.get("competition_regime_source"))
+    official_id = text_value(row.get("espn_event_id"))
+    if source == NBA_REGIME_SOURCE and official_id and NBA_REGIMES.get(season) == regime:
+        return {"season_type": season, "competition_regime": regime,
+                "competition_regime_source": source, "espn_event_id": official_id,
+                "competition_gate_version": "NBA_ESPN_EXPLICIT_TYPE_2026_10_09"}
+    return {"season_type": "", "competition_regime": "UNKNOWN",
+            "competition_regime_source": "", "espn_event_id": "",
+            "competition_gate_version": "NBA_ESPN_EXPLICIT_TYPE_2026_10_09"}
+
+
+def nba_competition_veto(shadow, competition):
+    """Never promote preseason/postseason using regular-season historical proof."""
+    if not competition:
+        return shadow
+    regime = competition["competition_regime"]
+    if regime == "UNKNOWN":
+        return "PASS_NBA_COMPETITION_UNVERIFIED"
+    if regime == "PRESEASON":
+        return "PASS_NBA_PRESEASON_MODEL_UNVALIDATED"
+    if regime == "POSTSEASON":
+        return "PASS_NBA_POSTSEASON_MODEL_UNVALIDATED"
+    return shadow
+
+
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
@@ -1124,6 +1164,7 @@ def build_current_lane(lane_key, cfg, validation):
             if not mlb_verified_fixture:
                 continue
 
+        nba_regime = nba_competition_proof(row, cfg)
         market_raw_prob = current_market_probability(row, cfg, reference_prices)
         fair_prob, fair_books = current_devig(cfg, row)
         market_prob = fair_prob if fair_prob is not None else market_raw_prob
@@ -1318,9 +1359,11 @@ def build_current_lane(lane_key, cfg, validation):
         side_col = mapping.get("side")
         line_col = mapping.get("line")
 
+        shadow = nba_competition_veto(shadow, nba_regime)
         rows.append({
             **mlb_identity,
             **mlb_verified_fixture,
+            **nba_regime,
             "model_version": MODEL_VERSION,
             "lane_key": lane_key,
             "sport": cfg["sport"],

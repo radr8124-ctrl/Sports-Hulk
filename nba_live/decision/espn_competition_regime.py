@@ -166,3 +166,21 @@ def label_decision(row: dict, events: list[dict]) -> tuple[dict, str]:
         "espn_event_id": event["event_id"],
     })
     return result, "VERIFIED"
+
+
+def label_player_decision(row: dict, events: list[dict]) -> tuple[dict, str]:
+    """Source-label NBA player/PrizePicks research without changing any pick gate.
+
+    Player-market records use away_team/home_team rather than the canonical
+    game-board column names. The ESPN join still requires an exact game key,
+    two teams, explicit season.type and a close pregame start timestamp.
+    An official regime does NOT verify a PrizePicks bookmaker price.
+    """
+    normalized = dict(row)
+    normalized["away_team_canonical"] = row.get("away_team_canonical") or row.get("away_team")
+    normalized["home_team_canonical"] = row.get("home_team_canonical") or row.get("home_team")
+    labeled, reason = label_decision(normalized, events)
+    result = dict(row)
+    for key in ("season_type", "competition_regime", "competition_regime_source", "espn_event_id"):
+        result[key] = labeled[key]
+    return result, reason

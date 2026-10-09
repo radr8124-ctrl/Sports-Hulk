@@ -7,7 +7,7 @@ from unittest.mock import Mock
 
 from nba_live.build_nba_core import season_info
 from nba_live.decision.espn_competition_regime import (
-    dates_to_query, fetch_scoreboard_events, label_decision,
+    dates_to_query, fetch_scoreboard_events, label_decision, label_player_decision,
     parse_scoreboard_event, season_type_value,
 )
 from nba_live.decision.enrich_nba_competition_regime import enrich
@@ -227,6 +227,87 @@ class IntegrationTests(unittest.TestCase):
             row = next(csv.DictReader(handle))
         self.assertEqual(row["season_type"], "2")
         self.assertEqual(row["competition_regime"], "REGULAR")
+
+
+class PlayerRegimeIntegrationTests(unittest.TestCase):
+    """Keep NBA preseason, regular-season lines and source conflicts separated."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.folder = self.root / "nba_live" / "decision"
+        self.folder.mkdir(parents=True)
+        self.preregular = {
+            "game_key": "2026-10-20|PHI|NYK", "start_dt": "2026-10-20T23:10:00+00:00",
+            "away_team": "PHI", "home_team": "NYK", "player": "Sample regular-season player",
+            "decision": "EARLY_MARKET_WATCH", "sportsbook_reference_source_status": "START_TIME_DISAGREEMENT_REVIEW",
+            "prizepicks_actual_bookmaker_price_verified": "False", "probability_claim": "",
+        }
+        self.preseason = {
+            "game_key": "2026-10-07|MIN|IND", "start_dt": "2026-10-07T23:00:00+00:00",
+            "away_team": "MIN", "home_team": "IND", "player": "Sample preseason player",
+            "decision": "EARLY_MARKET_WATCH", "sportsbook_reference_source_status": "NO_SAME_EVENT_BOOK_PRICE_REFERENCE",
+            "prizepicks_actual_bookmaker_price_verified": "False", "probability_claim": "",
+        }
+        self.bad = dict(self.preseason, home_team="DAL", player="Unmatched player")
+        for name, rows in (
+            ("NBA_PROP_DECISIONS.csv", [self.preseason, self.bad]),
+            ("NBA_PRIZEPICKS_DECISIONS.csv", [self.preregular]),
+        ):
+            with (self.folder / name).open("w", newline="") as f:
+                writer=csv.DictWriter(f,fieldnames=list(rows[0]))
+                writer.writeheader();writer.writerows(rows)
+
+    def session(self):
+        return FakeSession({
+            "20261007": {"events": [fixture_event(
+                "pre1",start="2026-10-07T23:00Z",away="MIN",home="IND",season_type=1)]},
+            "20261020": {"events": [fixture_event()]},
+        })
+
+    def test_preseason_and_regular_prop_research_are_explicitly_separated(self):
+        result=enrich(self.root,self.session())
+        self.assertEqual(result["status"],"READY")
+        self.assertEqual(result["csv_files"]["NBA_PROP_DECISIONS.csv"]["reason_counts"],
+                         {"GAME_KEY_MISMATCH": 1,"VERIFIED": 1})
+        with (self.folder / "NBA_PROP_DECISIONS.csv").open() as f:
+            a,b=list(csv.DictReader(f))
+        with (self.folder / "NBA_PRIZEPICKS_DECISIONS.csv").open() as f:
+            prize=next(csv.DictReader(f))
+        self.assertEqual((a["competition_regime"],a["season_type"]),("PRESEASON","1"))
+        self.assertEqual(b["competition_regime"],"UNKNOWN")
+        self.assertEqual((prize["competition_regime"],prize["season_type"]),("REGULAR","2"))
+        self.assertEqual(prize["sportsbook_reference_source_status"],"START_TIME_DISAGREEMENT_REVIEW")
+        self.assertEqual(prize["prizepicks_actual_bookmaker_price_verified"],"False")
+        self.assertEqual(prize["decision"],"EARLY_MARKET_WATCH")
+        self.assertEqual(prize["probability_claim"],"")
+        self.assertEqual(prize["espn_event_id"],"401909089")
+        self.assertFalse(result["proof_promotion_permitted"])
+        self.assertEqual(result["verified_games"],0)
+
+    def test_offline_provenance_source_never_mutates_player_decisions(self):
+        before={p.name:p.read_bytes() for p in self.folder.glob("*.csv")}
+        offline=FakeSession({date:TimeoutError("offline") for date in
+                             ["20261006","20261007","20261019","20261020"]})
+        result=enrich(self.root,offline)
+        self.assertEqual(result["status"],"SOURCE_UNAVAILABLE")
+        self.assertEqual(before,{p.name:p.read_bytes() for p in self.folder.glob("*.csv")})
+
+    def test_dry_run_does_not_write_player_regime_or_receipt(self):
+        before={p.name:p.read_bytes() for p in self.folder.glob("*.csv")}
+        result=enrich(self.root,self.session(),dry_run=True)
+        self.assertEqual(result["status"],"READY")
+        self.assertEqual(before,{p.name:p.read_bytes() for p in self.folder.glob("*.csv")})
+        self.assertFalse((self.folder/"receipts").exists())
+
+    def test_one_hour_drift_cannot_relabel_player_as_official(self):
+        player=dict(self.preregular,start_dt="2026-10-20T22:00:00+00:00")
+        event=parse_scoreboard_event(fixture_event())
+        labeled,reason=label_player_decision(player,[event])
+        self.assertEqual(reason,"NO_EXACT_EVENT")
+        self.assertEqual(labeled["competition_regime"],"UNKNOWN")
+        self.assertNotIn("away_team_canonical",labeled)
 
 
 if __name__ == "__main__":

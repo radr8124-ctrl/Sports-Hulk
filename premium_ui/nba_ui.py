@@ -39,6 +39,36 @@ from premium_ui.pages import (
 NBA_ACCENT = "#EA580C"
 
 
+def _nba_phase_research_view(df, *, key):
+    """Only display NBA prop markets under their source-verified competition."""
+    if df.empty:
+        return df
+    if "competition_regime" not in df.columns:
+        st.caption("Competition source verification pending; records are not preseason evidence.")
+        return df.head(0)
+    phase = df["competition_regime"].fillna("UNKNOWN").str.upper()
+    counts = phase.value_counts()
+    order = ("PRESEASON", "REGULAR", "POSTSEASON", "UNKNOWN")
+    labels = {"PRESEASON": "Preseason", "REGULAR": "Regular season",
+              "POSTSEASON": "Postseason", "UNKNOWN": "Unverified season type"}
+    st.caption(
+        f"Official NBA season type · Preseason: {counts.get('PRESEASON', 0)} · "
+        f"Regular season: {counts.get('REGULAR', 0)} · "
+        f"Postseason: {counts.get('POSTSEASON', 0)} · "
+        f"Unverified: {counts.get('UNKNOWN', 0)}"
+    )
+    options = [value for value in order if counts.get(value, 0)]
+    if not options:
+        return df.head(0)
+    chosen = st.selectbox("Competition", options, key=key,
+                          format_func=lambda x: labels.get(x, x))
+    if chosen == "PRESEASON":
+        st.caption("Preseason research is separate; regular-season prices are not substitute lines.")
+    elif chosen == "REGULAR":
+        st.caption("These are upcoming regular-season market lines, not preseason picks.")
+    return df.loc[phase.eq(chosen)]
+
+
 def _sort_evidence(
     df,
 ):
@@ -553,10 +583,13 @@ def render_nba_props():
                 "View early prop research"
             ):
 
+                view = _nba_phase_research_view(decisions, key="nba-prop-competition")
                 cols = [
                     c
                     for c in [
                         "player",
+                        "competition_regime",
+                        "start_dt",
                         "current_team",
                         "market_subtype",
                         "side",
@@ -574,7 +607,7 @@ def render_nba_props():
 
                 st.dataframe(
                     _sort_evidence(
-                        decisions
+                        view
                     )[
                         cols
                     ].head(
@@ -656,15 +689,19 @@ def render_nba_prizepicks():
                 "View early PrizePicks research"
             ):
 
+                view = _nba_phase_research_view(decisions, key="nba-pp-competition")
                 cols = [
                     c
                     for c in [
                         "player",
+                        "competition_regime",
+                        "start_dt",
                         "current_team",
                         "market_subtype",
                         "side",
                         "line",
                         "sportsbook_book_count",
+                        "sportsbook_reference_source_status",
                         "stat_l5_avg",
                         "stat_l10_avg",
                         "l10_hit_rate",
@@ -677,7 +714,7 @@ def render_nba_prizepicks():
 
                 st.dataframe(
                     _sort_evidence(
-                        decisions
+                        view
                     )[
                         cols
                     ].head(
