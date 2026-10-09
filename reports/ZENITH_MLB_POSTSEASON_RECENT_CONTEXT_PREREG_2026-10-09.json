@@ -1,0 +1,37 @@
+{
+  "cross_regime_recent_form_is_late_regular_season_and_postseason": true,
+  "hitter_min_previous_games_remains": 4,
+  "input_sha256": {
+    "mlb_decision_builder": "127a529e7bcc8bc54eaf77aadf13c5558ae7745881c9fed21241b3507ff3de0f",
+    "mlb_fusion_builder": "291bd2a435374b452b4b6e3830214aff747fd7b25ce7700edcbf6e9cd46f7158",
+    "mlb_official_schedule": "e3143d67e6397035e0ad554d0f7be3cc661898f0fe75b10c69056efa88fdbdb3",
+    "original_prizepicks_decisions": "d5cb40bc4327dd12f57d476d1010f4b5748b594d054f82362624565464ec1425",
+    "original_prop_decisions": "b302f2292753194289b748ed3a8ce126bcc9c2b9c2577288fd64d46463473117",
+    "player_context": "44d49366845595a9eac452669c06cc9f8a0379a9846b8d2e6c4080261ba02735"
+  },
+  "mlb_official_schedule_game_types": [
+    "D",
+    "L"
+  ],
+  "mlb_official_upcoming_postseason_games_in_gate_window": 10,
+  "new_proven_roi_or_edge": false,
+  "non_postseason_window_days_remains": 14,
+  "observed_bug": "Current dateRange 14d yields max3 recent game samples but batter decision requires 4, so entire current MLB batting prop lane structurally cannot pass the recent context gate",
+  "off_server_restore_verified": false,
+  "official_MLB_StatsAPI_groups": [
+    "hitting",
+    "pitching"
+  ],
+  "official_MLB_StatsAPI_sample_comparison_28d_count": 812,
+  "official_MLB_StatsAPI_sample_comparison_original_14d_count": 0,
+  "original_recent_window_days": 14,
+  "pitcher_min_previous_games_remains": 2,
+  "proposed_postseason_window_days": 28,
+  "quote_bookmaker_venue_executable_not_verified": true,
+  "recorded_utc": "2026-10-09T19:24:17.937915+00:00",
+  "sample_source_total_prop_and_pp_not_independent_players": true,
+  "schema": "ZENITH_MLB_POSTSEASON_RECENT_FORM_COVERAGE_PREREG_V1",
+  "source_local_backup": ".deploy_backups/zenith_mlb_postseason_recent_context_20261009T1925Z/original",
+  "source_rows_checked_at_sample": 812,
+  "user_site_no_betting_promotion_without_independent_model_edge": true
+}
