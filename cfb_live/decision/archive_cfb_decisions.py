@@ -10,6 +10,11 @@ import hashlib
 import json
 import shutil
 
+try:
+    from cfb_live.decision.cfb_incremental_ledger_index import latest_source_rows_if_complete
+except ModuleNotFoundError:
+    from cfb_incremental_ledger_index import latest_source_rows_if_complete
+
 
 ROOT = Path(
     "/home/ubuntu/sports-hulk"
@@ -233,6 +238,28 @@ def recommendation_key(
     ).hexdigest()
 
 
+def redundant_clock_only_observation(previous:dict|None,current:dict)->bool:
+    """Suppress solely derived countdown recurrence, NEVER a changed source fact.
+
+    Original immutable evidence and per-bundle snapshot manifest remain on disk.
+    Every changed odds, score, decision, player, game or status is appended.
+    """
+    if not isinstance(previous,dict) or not isinstance(current,dict):return False
+    for field in FIELDS:
+        if field in ("snapshot_at","bundle_hash","payload_json"):
+            continue
+        if str(previous.get(field) or "")!=str(current.get(field) or ""):
+            return False
+    try:
+        old=json.loads(previous["payload_json"])
+        new=json.loads(current["payload_json"])
+    except (KeyError,TypeError,ValueError):return False
+    if not isinstance(old,dict) or not isinstance(new,dict):return False
+    old.pop("hours_to_start",None)
+    new.pop("hours_to_start",None)
+    return json.dumps(old,sort_keys=True,separators=(",",":"))==json.dumps(new,sort_keys=True,separators=(",",":"))
+
+
 def ensure_ledger():
 
     if LEDGER.exists():
@@ -420,6 +447,15 @@ def main():
 
 
     rows_added = 0
+    clock_only_skipped = 0
+    try:
+        previous_index = latest_source_rows_if_complete(source=LEDGER)
+        index_check_status = "VERIFIED_COMPLETE_SOURCE_INDEX_CLOCK_ONLY_DELTA_GUARD"
+    except ValueError as exc:
+        if str(exc) not in ("CFB_COMPLETE_SOURCE_INDEX_MISSING","CFB_SOURCE_INDEX_NOT_FULLY_CAUGHT_UP"):
+            raise  # A changed source fingerprint must never be ignored.
+        previous_index = {}
+        index_check_status = "INCOMPLETE_INDEX_FALLBACK_APPEND_EVERY_ORIGINAL_OBSERVATION"
 
 
     with LEDGER.open(
@@ -598,12 +634,24 @@ def main():
                     }
 
 
+                if redundant_clock_only_observation(
+                    previous_index.get(output["recommendation_key"]),output
+                ):
+                    clock_only_skipped += 1
+                    continue
+
                 writer.writerow(
                     output
                 )
 
                 rows_added += 1
 
+
+    manifest["source_index_verification"] = index_check_status
+    manifest["original_recommendation_rows_appended"] = rows_added
+    manifest["derived_clock_only_rows_not_repeated"] = clock_only_skipped
+    manifest["old_raw_source_history_rewritten_or_truncated"] = False
+    (snapshot / "manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True))
 
     LATEST.write_text(
         json.dumps(

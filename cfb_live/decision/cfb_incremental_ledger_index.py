@@ -238,6 +238,23 @@ def read_latest_complete(*,source:Path=LEDGER,index:Path=INDEX):
         return frame,int(m["processed_raw_rows"])
 
 
+def latest_source_rows_if_complete(*,source:Path=LEDGER,index:Path=INDEX)->dict[str,dict]:
+    """Read exact old CSV field strings only when every raw source byte was indexed.
+
+    Used solely for safe future duplicate suppression, never to rewrite history.
+    """
+    if not source.is_file() or not index.is_file():
+        raise ValueError("CFB_COMPLETE_SOURCE_INDEX_MISSING")
+    with source.open("rb") as f, connection(index) as con:
+        st=os.fstat(f.fileno())
+        m=prepare(con,f,st)
+        if int(m["cursor_bytes"])!=st.st_size:
+            raise ValueError("CFB_SOURCE_INDEX_NOT_FULLY_CAUGHT_UP")
+        return {key:json.loads(source_json) for key,source_json in con.execute(
+            "SELECT recommendation_key,serialized_row FROM latest"
+        )}
+
+
 def main():
     parser=argparse.ArgumentParser(description="Resumable memory-bounded CFB source index; NEVER delete original ledger")
     parser.add_argument("--max-megabytes",type=int,default=128)
