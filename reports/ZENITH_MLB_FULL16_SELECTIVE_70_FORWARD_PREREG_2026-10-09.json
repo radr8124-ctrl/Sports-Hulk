@@ -1,0 +1,28 @@
+{
+  "bookmaker_price_paper_roi_not_real_wager_roi": true,
+  "chosen_side": "OVER_0_5 if frozen over probability >=0.5 else UNDER_0_5; exactly one potential research leg per independently verified official player-game",
+  "excluded_already_graded_game_pk": 849832,
+  "experiment_id": "ZENITH_MLB_FULL16_FUTURE_SELECTIVE_70_SAME_BOOK_PRICE_20261009_V1",
+  "fixed_prejuly_ninefeature_market_context_plus_fourteen_prior_statistics_model_sha256": "1b825e93dc48729346619d4c61978e1cb939fc16bc6156b11394fb01ee9d8df5",
+  "historical_training_regular_to_postseason_shift_unresolved": true,
+  "independent_game_is_uncertainty_unit_not_player_leg": true,
+  "minimum_independent_game_blocks_before_recommendation": 30,
+  "model_train_on_future_results": false,
+  "no_model_promotion_or_plays": true,
+  "no_paid_service_calls": true,
+  "only_future_game_pks_after_registration": true,
+  "parent_research_nfl_and_mlb_70_registration": "ZENITH_SELECTIVE_HIGH_CONFIDENCE_70_V1_20261009",
+  "predeclared_thresholds": {
+    "maximum_original_price_age_seconds": 300,
+    "minimum_advantage_over_same_book_no_vig_pp": 3.0,
+    "minimum_chosen_win_probability": 0.7,
+    "minimum_quoted_price_paper_ev_pct": 3.0
+  },
+  "preserved_initial_old_records": 18,
+  "preserved_original_first_18_full16_sha256": "0cea5e38c94451cacbc1ff552276c5df7aa1e341296b127fd0cfa6a2d19c66a8",
+  "registered_at_utc": "2026-10-09T06:30:02.479260+00:00",
+  "require_original_MLBAM_ID_lineup_and_exact_game_pk": true,
+  "require_verified_independent_official_final_hits": true,
+  "scope": "NEW_ONLY_AFTER_THIS_REGISTRATION_GENUINELY_FROZEN_POSTSEASON_HITS_OVER_UNDER_0_5",
+  "underlying_source_book_offers_verified_executable": false
+}

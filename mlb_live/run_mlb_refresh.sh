@@ -152,6 +152,15 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
       || echo "WARNING: MLB learning failed; production refresh preserved."
 
     echo
+    echo "=== MLB NEW-FUTURE FULL16 70-PERCENT SOURCE-PRICED RESEARCH (NO BETS) ==="
+
+    SPORTS_LABEL=mlb-full16-selective70-future-research \
+    SPORTS_MAX_SECONDS=15 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.selective_forward.mlb_70_forward_evidence --stage both \
+      || echo "WARNING: MLB selective future-value source research incomplete; original Full16 predictions and grades preserved."
+
+    echo
     echo "=== MLB OFFICIAL SCHEDULE AND NEXT VERIFIED SOURCE READINESS (RESEARCH ONLY) ==="
 
     SPORTS_LABEL=mlb-official-fixture-readiness \
