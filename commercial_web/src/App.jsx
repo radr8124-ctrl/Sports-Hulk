@@ -22,6 +22,7 @@ const PerformancePanel = lazy(() => import('./PerformancePanel'))
 const PracticeBetting = lazy(() => import('./PracticeBetting'))
 const ParlaysV2Panel = lazy(() => import('./ParlaysV2Panel'))
 const PropsV2Panel = lazy(() => import('./PropsV2Panel'))
+const BettingOddsBoard = lazy(() => import('./BettingOddsBoard'))
 const NFLPlayerPropResearchPanel = lazy(() => import('./NFLPlayerPropResearchPanel'))
 const ScoreGameCenter = lazy(() => import('./ScoreGameCenter'))
 const PersonalIdpPanel = lazy(() => import('./PersonalIdpPanel'))
@@ -1979,7 +1980,7 @@ function BestBetsV2Panel() {
         <div>
           <p className="eyebrow">Betting intelligence</p>
           <h2>Best Bets</h2>
-          <p className="mt-1 max-w-3xl text-sm leading-5 text-slate-500">Tested selections first. Unproven lines stay in research.</p>
+          <p className="mt-1 max-w-3xl text-sm leading-5 text-slate-500">Compare sportsbook odds and price quality first. See Zenith's model evidence below.</p>
         </div>
         <span className="health-pill">{summary.candidates ?? 0} EVALUATED</span>
       </div>
@@ -1993,6 +1994,9 @@ function BestBetsV2Panel() {
           </button>
         ))}
       </div>
+      <Suspense fallback={<LoadingSurface label="Loading sportsbook odds and price comparisons" />}>
+        <BettingOddsBoard sport={sport} market={market} />
+      </Suspense>
       <BestBetsMarketCoverage sport={sport} market={market} currentData={data} priorBoard={priorBoard} nflScores={nflScores} />
       {grouped.plays.length > 0 && (
         <div className="space-y-3">

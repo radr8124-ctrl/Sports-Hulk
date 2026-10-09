@@ -41,14 +41,39 @@ function PropCard({ row, isPrize }) {
           <div className="mt-2 truncate text-xl font-black tracking-tight text-slate-950">{row.player}</div>
           <div className="mt-1 text-2xl font-black text-slate-950">{humanize(row.side)} {row.line}</div>
           {!isPrize && row.american_odds != null && (
-            <div className="mt-1 text-sm font-black text-slate-600">{formatAmericanOdds(row.american_odds)}</div>
+            <div className="mt-1 text-sm font-black text-slate-700">
+              Reference odds {formatAmericanOdds(row.american_odds)}
+            </div>
           )}
         </div>
         <span className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black ${status.tone}`}>{status.label}</span>
       </div>
 
-      <div className="mt-4">
-        <BetMeaning row={display} />
+      <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-xs">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Market fair probability</p>
+          <p className="mt-0.5 text-base font-black tabular-nums text-slate-900">{row.market_reference_probability_pct == null ? '—' : row.market_reference_probability_pct+'%'}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            {row.probability_source?.startsWith('LANE_CORE') ? 'Zenith experimental estimate' : 'Zenith model proof'}
+          </p>
+          <p className="mt-0.5 text-sm font-black text-slate-900">
+            {row.probability_source?.startsWith('LANE_CORE') && row.v2_probability_pct != null
+              ? row.v2_probability_pct+'%' : 'No proven edge'}
+          </p>
+        </div>
+      </div>
+      <p className="mt-2 text-[11px] font-medium leading-5 text-slate-500">
+        {isPrize
+          ? 'PrizePicks is a pick-em line, not a sportsbook odds quote. Entry payout and correlation must be checked separately.'
+          : 'Bookmaker reference price only, not a verified live or executable offer.'}
+        {' '}Event: {Number.isFinite(Date.parse(row.event_start||''))
+          ? new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/New_York',timeZoneName:'short'}).format(Date.parse(row.event_start))
+          : 'time unverified'}.
+      </p>
+      <div className="mt-3">
+        <BetMeaning row={display} compact />
       </div>
 
       {isPrize && (
@@ -111,6 +136,10 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
   const [data, setData] = useState({ summary: {}, picks: [] })
   const [sport, setSport] = useState('ALL')
   const [nbaPhase, setNbaPhase] = useState('ALL')
+  const [query, setQuery] = useState('')
+  const [limit, setLimit] = useState(12)
+  const [includePast, setIncludePast] = useState(false)
+  const [clock, setClock] = useState(() => Date.now())
 
   useEffect(() => {
     let cancelled = false
@@ -124,8 +153,11 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
       }
     }
     load()
-    return () => { cancelled = true }
+    const timer=setInterval(()=>{load();setClock(Date.now())},5*60*1000)
+    return () => { cancelled = true; clearInterval(timer) }
   }, [])
+
+  useEffect(()=>{setLimit(12)},[sport,nbaPhase,lane,query,includePast])
 
   const allRows = useMemo(
     () => (data.picks || []).filter(row => row.lane === lane),
@@ -141,13 +173,16 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
     const decisionRank = row => row.shadow_decision === 'SHADOW_PLAY' ? 3 : row.shadow_decision === 'SHADOW_MONITOR' ? 2 : 1
     return allRows
       .filter(row => (sport === 'ALL' || row.sport === sport)
-        && (sport !== 'NBA' || nbaPhase === 'ALL' || (row.competition_regime || 'UNKNOWN') === nbaPhase))
+        && (sport !== 'NBA' || nbaPhase === 'ALL' || (row.competition_regime || 'UNKNOWN') === nbaPhase)
+        && (includePast || (Number.isFinite(Date.parse(row.event_start||'')) && Date.parse(row.event_start)>clock))
+        && (!query.trim() || [row.player,row.market_subtype,row.side,row.line]
+          .some(value=>String(value||'').toLowerCase().includes(query.trim().toLowerCase()))))
       .sort((a, b) =>
         decisionRank(b) - decisionRank(a)
-        || (Number(b.conservative_edge_pct_points ?? -999) - Number(a.conservative_edge_pct_points ?? -999))
-        || (Number(b.edge_pct_points ?? -999) - Number(a.edge_pct_points ?? -999))
+        || (Date.parse(a.event_start||'') || Infinity) - (Date.parse(b.event_start||'') || Infinity)
+        || (Number(b.data_quality_book_count||0) - Number(a.data_quality_book_count||0))
       )
-  }, [allRows, sport, nbaPhase])
+  }, [allRows, sport, nbaPhase,includePast,query,clock])
 
   const nbaPhaseCounts = useMemo(() => {
     const tally = { PRESEASON: 0, REGULAR: 0, POSTSEASON: 0, UNKNOWN: 0 }
@@ -233,9 +268,23 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
         </div>
       )}
 
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-3">
+        <label className="min-w-[190px] flex-1">
+          <span className="sr-only">Search props by player or market</span>
+          <input value={query} onChange={event=>setQuery(event.target.value)}
+            placeholder="Search player, market or line" aria-label="Search props by player or market"
+            className="min-h-10 w-full min-w-0 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-800" />
+        </label>
+        <label className="flex items-center gap-2 text-xs font-bold text-slate-600">
+          <input type="checkbox" checked={includePast} onChange={event=>setIncludePast(event.target.checked)} />
+          Include past research
+        </label>
+        <span className="text-[11px] font-bold text-slate-500">{rows.length} lines</span>
+      </div>
+
       {rows.length ? (
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          {rows.slice(0, 12).map((row, index) => (
+          {rows.slice(0,limit).map((row, index) => (
             <PropCard
               key={`${row.event_id}-${row.player_key}-${row.market_subtype}-${row.side}-${index}`}
               row={row}
@@ -245,10 +294,14 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
         </div>
       ) : (
         <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm font-semibold text-slate-500 shadow-soft">
-          No current {isPrize ? 'PrizePicks' : 'prop'} rows are available for this filter.
+          No upcoming {isPrize ? 'PrizePicks' : 'prop'} lines match this filter. Try another sport, clear the search, or include past research.
         </div>
       )}
 
+      {rows.length>limit && <button type="button" onClick={()=>setLimit(n=>n+12)}
+        className="min-h-11 rounded-xl border border-blue-200 bg-white px-5 py-3 text-xs font-black text-blue-700">
+        Show 12 more {isPrize?'PrizePicks lines':'player props'} · {rows.length-limit} remaining
+      </button>}
       <div className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
         <ShieldCheck size={18} className="mt-0.5 shrink-0 text-blue-700" />
         <div>
