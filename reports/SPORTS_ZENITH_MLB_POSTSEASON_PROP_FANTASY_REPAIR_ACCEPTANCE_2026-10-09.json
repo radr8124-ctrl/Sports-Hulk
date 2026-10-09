@@ -1,0 +1,47 @@
+{
+  "all_current_props_and_PP_candidates_including_other_sports": 698,
+  "approved_MONITOR_count": 0,
+  "approved_PLAY_count": 0,
+  "fantasy_hourly_service_last_failure_cause": "Pandas Series was tested as a Boolean in four settlement code paths",
+  "fantasy_lookup_fixed_all_four": true,
+  "frozen_NFL_regression_tests_passed": 16,
+  "hourly_end_to_end_full_service_verified_after_fix": false,
+  "late_regular_season_and_postseason_rolling_history_mixed": true,
+  "live_API_status_200": true,
+  "live_MLB_PP_research_rows": 21,
+  "live_MLB_PROP_research_rows": 226,
+  "live_MLB_guest_phone_and_desktop_UI_test_passed": true,
+  "local_unrestored_backup_path": ".deploy_backups/zenith_mlb_postseason_recent_context_20261009T1925Z/v2_original_9_files_before_publish",
+  "nine_preexisting_pub_source_compiled_files_sha_backed_up_and_readable": true,
+  "no_offserver_disaster_restore_verified": true,
+  "no_real_wagers_placed": true,
+  "official_MLB_postseason_28day_context_rows_reached_history_gate": 812,
+  "original_MLB_14day_source_rows_failed_history_gate": 812,
+  "original_fantasy_ledger_unchanged_during_sandbox_test": true,
+  "real_fantasy_ledger_sandbox_results_settled": 1,
+  "regular_season_14day_setting_preserved": true,
+  "schema": "ZENITH_MLB_POSTSEASON_PROP_PLUS_HOURLY_FANTASY_REPAIR_V1",
+  "sha256": {
+    "fantasy_original_before_fix": "c80631e40798ead441f3c6d96379a2cd405de3b33a0a9b1df31ac2c7a8357448",
+    "fantasy_source_fix": "d8e35e86d2e0ae91b15c5bc23332b450c153a5f1d2a3fd2ab78707e043744e2f",
+    "mlb_source_fusion_builder": "5c89a3f1d68fed02fd1ee8398b725a15ab8cf4e7d4102456f146a9c1a1feea10",
+    "public_prop_feed_current": "45ebbc2fba1a86887c0f689eb5f1b4620936fcc37755fb79a9ae7e97d3119c80"
+  },
+  "source_MLB_fusion_fix_commit": "3641d9b",
+  "staged_qualified_MLB_research_decisions": {
+    "PRIZEPICKS": {
+      "QUALIFIED_RESEARCH": 20,
+      "WATCH": 58
+    },
+    "PROP": {
+      "HIGH_JUICE": 132,
+      "QUALIFIED_RESEARCH": 111,
+      "WATCH": 491
+    }
+  },
+  "targeted_MLB_Fantasy_and_Prop_tests_passed": 30,
+  "trained_model_coefficients_changed": false,
+  "unchanged_minimum_batting_games": 4,
+  "unchanged_minimum_pitching_games": 2,
+  "verified_utc": "2026-10-09T19:42:21.407166+00:00"
+}

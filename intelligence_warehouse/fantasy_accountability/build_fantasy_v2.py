@@ -455,6 +455,16 @@ def statmap(stats):
         if w and pk: out[(w,pk,team)]=r; out[(w,pk,"")]=r
     return out
 
+def source_stat_row(stat_index, week, player_key, team):
+    """Return a pandas Series without coercing it to boolean.
+
+    Previously `(stat_index.get(team_key) or stat_index.get(fallback_key))`
+    raised ValueError: The truth value of a Series is ambiguous, stopping the
+    entire hourly Sports Zenith performance and betting-accountability job.
+    """
+    row=stat_index.get((week,player_key,team))
+    return row if row is not None else stat_index.get((week,player_key,""))
+
 def idp_production_index(row):
     if row is None:
         return 0.0
@@ -483,14 +493,14 @@ def settle():
         if lane=="WEEKLY":
             team=clean(r.get("team")).upper()
             if not team_game_final(sch,team,w):continue
-            st=mp.get((w,norm(r.get("player_key") or r.get("player")),team)) or mp.get((w,norm(r.get("player_key") or r.get("player")),""))
+            st=source_stat_row(mp,w,norm(r.get("player_key") or r.get("player")),team)
             pts=0.0 if st is None else (num(st.get("fantasy_points_ppr")) or 0.0)
             pos=clean(r.get("position") if st is None else st.get("position") or r.get("position")).upper()
             append_jsonl(LEDGER,{"event_type":"SETTLED","forward_key":key,"status":"SETTLED","settled_at":iso(),"actual_ppr_points":round(float(pts),3),"actual_position":pos}); count+=1
         elif lane=="FAAB":
             team=clean(r.get("team")).upper()
             if not team_game_final(sch,team,w):continue
-            st=mp.get((w,norm(r.get("player_key") or r.get("player")),team)) or mp.get((w,norm(r.get("player_key") or r.get("player")),""))
+            st=source_stat_row(mp,w,norm(r.get("player_key") or r.get("player")),team)
             pts=0.0 if st is None else (num(st.get("fantasy_points_ppr")) or 0.0)
             pos=clean(r.get("position") if st is None else st.get("position") or r.get("position")).upper()
             append_jsonl(LEDGER,{"event_type":"SETTLED","forward_key":key,"status":"SETTLED","settled_at":iso(),"actual_ppr_points":round(float(pts),3),"actual_position":pos}); count+=1
@@ -501,7 +511,7 @@ def settle():
             deadline=int(num(r.get("deadline_week")) or min(18,start_week+3))
             returned=None
             for week in range(start_week,min(deadline,max_completed_week)+1):
-                st=mp.get((week,pk,team)) or mp.get((week,pk,""))
+                st=source_stat_row(mp,week,pk,team)
                 if st is not None:
                     returned=(week,st)
                     break
@@ -514,7 +524,7 @@ def settle():
         elif lane=="IDP":
             team=clean(r.get("team")).upper()
             if not team_game_final(sch,team,w):continue
-            st=mp.get((w,norm(r.get("player_key") or r.get("player")),team)) or mp.get((w,norm(r.get("player_key") or r.get("player")),""))
+            st=source_stat_row(mp,w,norm(r.get("player_key") or r.get("player")),team)
             idx=idp_production_index(st)
             append_jsonl(LEDGER,{"event_type":"SETTLED","forward_key":key,"status":"SETTLED","settled_at":iso(),"actual_idp_production_index":idx}); count+=1
         elif lane=="DEFENSE_STREAMING":
