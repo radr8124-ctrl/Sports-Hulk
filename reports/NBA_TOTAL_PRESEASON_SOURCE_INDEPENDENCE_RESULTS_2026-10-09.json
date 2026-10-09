@@ -1,0 +1,103 @@
+{
+  "all_original_ledger_rows_accounted_for": true,
+  "competition_regime_verified": "2026_OCTOBER_NBA_PRESEASON_ONLY",
+  "exact_quote_grade_dupe_market_identities": 8,
+  "exact_regime_duplicate_rows_not_independent": 8,
+  "first_version": "BETTING_V2_ALL_MARKETS_2026_10_05",
+  "forward_regular_season_results_included": 0,
+  "future_unseen_precommitted_strategy_verified": false,
+  "independent_official_game_blocks_verified": 19,
+  "independent_source_event_start_and_final_grade_all_verified": false,
+  "model_brier_better_than_book": false,
+  "new_model_training_or_live_betting_picks_changed": false,
+  "number_of_games_with_more_than_one_alternative_total_line": 17,
+  "official_start_conflict_minutes": [
+    15.0
+  ],
+  "official_start_conflict_reason_counts": {
+    "NBA_BOOK_EVENT_START_DIFFERS_FROM_OFFICIAL_ESPN_FINAL": 7
+  },
+  "official_start_conflicting_games": [
+    "2026-10-09|SAC|LAL"
+  ],
+  "original_all_alternative_quotes_as_original_ledger_report_NOT_fully_source_time_verified": {
+    "NOT_all_verified_for_exact_current_official_game_start": true,
+    "original_ledger_quote_rows": 106,
+    "original_source_research_game_blocks_claimed": 20,
+    "original_source_research_grade_losses": 22,
+    "original_source_research_grade_wins": 84,
+    "original_undifferentiated_alt_line_paper_roi_pct": 32.92,
+    "original_undifferentiated_alt_line_paper_units": 34.8942
+  },
+  "original_ledger_grade_rows_held_for_official_start_disagreement": 7,
+  "original_source_sha256": {
+    "independent_NBA_ESPN_game_history": "1aab7e12454ab76f2c79fa5225ab0efe1e4ab8ef411958ff33291c6be372c6fa",
+    "original_game_forward_ledger": "e1a9b9892a554d9d4304420885b3bdc4fb29d38b3389230d846225cb1e351dcd",
+    "original_game_forward_summary": "36f29c161af8fc8215b38f8c6f2cf41a89c26e7888b9c301764a92ee44634456"
+  },
+  "probability_market_edge_statistically_proven": false,
+  "qualified_as_money_making_invention": false,
+  "real_sportsbook_executable_market_price_verified": false,
+  "regime_source_tag_counts": {
+    "SOURCE_REGIME_TAG_MISSING": 65,
+    "SOURCE_REGIME_TAG_PRESEASON": 34
+  },
+  "research_lane": "NBA_TOTAL",
+  "research_only_not_true_executable_ROI": true,
+  "retrospective_earliest_market_quote_only_one_per_ESPN_game": {
+    "independent_game_bootstrap95_source_price_roi_interval_pct": [
+      1.747,
+      63.528
+    ],
+    "independent_game_equal_weight_average_per_line_paper_roi_pct": 35.0304,
+    "independent_official_game_blocks": 19,
+    "losses": 4,
+    "original_source_line_records": 19,
+    "pushes": 0,
+    "real_money_wager_return_or_book_executability_proven": false,
+    "source_price_paper_roi_pct": 35.0304,
+    "source_price_paper_units": 6.655768,
+    "source_top_three_official_games_paper_profit_share_pct": 40.613,
+    "win_rate_pct": 78.9474,
+    "wins": 15
+  },
+  "schema": "ZENITH_NBA_TOTAL_2026_PRESEASON_ORIGINAL_LINE_INDEPENDENCE_RESEARCH_V1",
+  "source_de_duplicated_exact_same_game_market_side_line_first_quote": {
+    "independent_game_bootstrap95_source_price_roi_interval_pct": [
+      -7.969,
+      54.398
+    ],
+    "independent_game_equal_weight_average_per_line_paper_roi_pct": 22.8974,
+    "independent_official_game_blocks": 19,
+    "losses": 22,
+    "original_source_line_records": 91,
+    "pushes": 0,
+    "real_money_wager_return_or_book_executability_proven": false,
+    "source_price_paper_roi_pct": 26.8781,
+    "source_price_paper_units": 24.459065,
+    "source_top_three_official_games_paper_profit_share_pct": 69.833,
+    "win_rate_pct": 75.8242,
+    "wins": 69
+  },
+  "source_preregistration_sha256": "dfd0f83b50f3b00c91ca596a78f3cea718457abaefe4e5c4459c64bdfbcf6c5b",
+  "status": "SOURCE_GRADE_RECONCILED_RETROSPECTIVE_NOT_PROSPECTIVE_PROOF",
+  "strict_official_time_matched_all_alternative_quotes": {
+    "independent_game_bootstrap95_source_price_roi_interval_pct": [
+      -5.803,
+      56.076
+    ],
+    "independent_game_equal_weight_average_per_line_paper_roi_pct": 22.9866,
+    "independent_official_game_blocks": 19,
+    "losses": 22,
+    "original_source_line_records": 99,
+    "pushes": 0,
+    "real_money_wager_return_or_book_executability_proven": false,
+    "source_price_paper_roi_pct": 30.1735,
+    "source_price_paper_units": 29.871756,
+    "source_top_three_official_games_paper_profit_share_pct": 75.299,
+    "win_rate_pct": 77.7778,
+    "wins": 77
+  },
+  "unique_line_model_Brier": 0.206625,
+  "unique_line_source_market_fair_Brier": 0.206625
+}
