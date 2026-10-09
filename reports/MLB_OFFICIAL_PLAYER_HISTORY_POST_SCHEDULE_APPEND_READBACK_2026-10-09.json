@@ -1,0 +1,22 @@
+{
+  "before_source_sha256": "de2f7f6b7384ae9ebaff42dd1c6f6acfdec65a66fe3d5f6ba247af454893aaf9",
+  "check_time_utc": "2026-10-09T05:43:22.322121+00:00",
+  "current_source_sha256": "e262985983354bdf272cfe9a3e4e2fad66c0333a427f1d76cd9a9bf05952e631",
+  "current_total_rows": 18810,
+  "new_automatic_betting_plays": 0,
+  "new_records_after_scheduled_run": 31,
+  "new_schedule_audit_timestamp": "2026-10-09T05:41:19.562902+00:00",
+  "new_schedule_fixture_status_counts": {
+    "MASTER_GAME_NOT_ON_CURRENT_OFFICIAL_SCHEDULE": 3,
+    "OFFICIAL_START_MISMATCH_REQUIRES_SOURCE_REPAIR": 1,
+    "PARTICIPANTS_NOT_RESOLVED": 1
+  },
+  "no_model_or_betting_rule_changed": true,
+  "off_vps_recovery_verified": false,
+  "official_game_pk_of_added_rows": 825047,
+  "original_full16_frozen_sha256": "0cea5e38c94451cacbc1ff552276c5df7aa1e341296b127fd0cfa6a2d19c66a8",
+  "original_full16_graded_player_count": 18,
+  "original_rows_at_restore": 18779,
+  "prior_prefix_byte_identical": true,
+  "result": "PASS_LEGITIMATE_APPEND_PRIOR_RAW_BYTES_UNCHANGED"
+}
