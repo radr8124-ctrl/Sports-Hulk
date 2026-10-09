@@ -928,11 +928,7 @@ def player_rows_from_boxscore(
                     "G",
 
                 "starter":
-                    bool(
-                        goalie.get(
-                            "starter"
-                        )
-                    ),
+                    goalie.get("starter") is True,
 
                 "decision":
                     clean(
@@ -1018,16 +1014,8 @@ def player_rows_from_boxscore(
             )
 
 
-        elif goalie_rows:
-
-            starter = max(
-                goalie_rows,
-                key=lambda x:
-                    x[
-                        "toi_minutes"
-                    ]
-                    or 0,
-            )
+        # Never promote a goalie based only on postgame ice time.
+        # No explicit starter=True means starter-dependent values stay empty.
 
 
         goals_for = game[

@@ -1,0 +1,26 @@
+{
+  "after_sha256": {
+    "nhl_live/history/NHL_GOALIE_GAME_HISTORY.csv": "dd096077171a36f27572673628b521b125f32e6cdb8dc39caecc1539f04bf2bc",
+    "nhl_live/history/NHL_TEAM_GAME_HISTORY.csv": "2b6a1d380f01ce6b0848c0f05913eed508210bf0d9253edc376382d3da0c60aa",
+    "nhl_live/history/NHL_TEAM_GAME_HISTORY.parquet": "b0962291b9762ece51fc219ed692d5450e233e3f8b17691f9947e8f010ffff6e"
+  },
+  "applied": true,
+  "backup_path": "/home/ubuntu/sports-hulk/.deploy_backups/nhl_starter_derived_reconcile_20261009T041415Z",
+  "before_sha256": {
+    "nhl_live/history/NHL_GOALIE_GAME_HISTORY.csv": "dd096077171a36f27572673628b521b125f32e6cdb8dc39caecc1539f04bf2bc",
+    "nhl_live/history/NHL_TEAM_GAME_HISTORY.csv": "324af75825377fe9a21fe837d72817bf2e90c0d92474dc6343e22949d85ecfcc",
+    "nhl_live/history/NHL_TEAM_GAME_HISTORY.parquet": "7f889421c75c4a889a93e90f1c3dfbc6506917358aec76a48cca37a52430e896"
+  },
+  "corrected_csv_parquet_rows": 364,
+  "explicit_starter_blocks": 2820,
+  "false_rows_by_season_game_type": {
+    "20252026/type1": 208,
+    "20252026/type9": 60,
+    "20262027/type2": 96
+  },
+  "game_team_blocks": 3184,
+  "generated_at_utc": "2026-10-09T04:14:15.704744+00:00",
+  "historical_false_starter_rows_to_clear": 364,
+  "source": "NHL_GAME_GOALIE_HISTORY_EXPLICIT_STARTER_BOOLEAN",
+  "without_flag_blocks": 364
+}
