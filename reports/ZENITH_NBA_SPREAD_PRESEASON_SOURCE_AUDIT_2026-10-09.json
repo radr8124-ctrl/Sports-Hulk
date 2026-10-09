@@ -1,0 +1,43 @@
+{
+  "actual_sportsbook_wager_executions_verified": false,
+  "all_alternate_lines": {
+    "entries": 39,
+    "losses": 29,
+    "paper_roi_pct": -55.02,
+    "paper_units": -21.459484,
+    "wins": 10
+  },
+  "all_original_event_begins_after_original_capture": true,
+  "all_original_grade_and_official_spread_margin_verified": true,
+  "all_original_market_source_start_within_3_min_ESPN_event": true,
+  "all_source_entries_already_pass_no_independent_lanes_edge": true,
+  "independent_off_VPS_backup_restore_verified": false,
+  "new_predictive_advantage_proven": false,
+  "no_source_grades_or_betting_models_changed": true,
+  "not_a_guarantee_that_future_spread_lanes_will_lose": true,
+  "official_NBA_season_type": "2026_27_PRESEASON_ONLY",
+  "official_independent_games": 8,
+  "one_per_game_2000_bootstrap95_source_price_paper_roi_pct": [
+    -78.57,
+    35.59
+  ],
+  "original_fixed_model_version": "BETTING_V2_ALL_MARKETS_2026_10_05",
+  "original_model_trained_on_preseason_games_proven": false,
+  "original_source_sha256": {
+    "independent_ESPN_preseason_final_games": "1aab7e12454ab76f2c79fa5225ab0efe1e4ab8ef411958ff33291c6be372c6fa",
+    "market_forward_ledger": "e1a9b9892a554d9d4304420885b3bdc4fb29d38b3389230d846225cb1e351dcd",
+    "market_forward_summary": "36f29c161af8fc8215b38f8c6f2cf41a89c26e7888b9c301764a92ee44634456"
+  },
+  "probabilities_equal_original_sportsbook_for_all_records": true,
+  "reported_utc": "2026-10-09T10:31:54.131490+00:00",
+  "retrospective_earliest_frozen_line_per_event_not_predeclared_strategy": {
+    "entries": 8,
+    "losses": 5,
+    "paper_roi_pct": -31.63,
+    "paper_units": -2.530113,
+    "wins": 3
+  },
+  "schema": "ZENITH_NBA_SPREAD_PRESEASON_RETROSPECTIVE_SOURCE_QUALITY_REVIEW_V1",
+  "semantic_duplicate_exact_line_positions": 0,
+  "status": "INDEPENDENT_PRESEASON_FINALS_REPRODUCE_BAD_SPREAD_RESULT"
+}

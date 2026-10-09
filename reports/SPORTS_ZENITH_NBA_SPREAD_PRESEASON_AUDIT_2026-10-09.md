@@ -1,0 +1,11 @@
+# Zenith — NBA spread preseason source results, October 9, 2026
+
+**No picks/bets changed. Retrospective data-quality audit, not a newly trained strategy.**
+
+The original `BETTING_V2_ALL_MARKETS_2026_10_05` NBA_SPREAD ledger contains **39** distinct alternate spread lines across **8** 2026-27 **preseason games**, **10W–29L**, **-55.02% source-priced paper ROI**. Exact same game/market/side/line **semantic duplicate count is zero**. Every row was originally **PASS_NO_PROVEN_INDEPENDENT_LANE_EDGE** and the model probability equals the source sportsbook reference probability (no demonstrated model edge). No production wager was approved or placed by this audit.
+
+All 39 original frozen source decisions and result grades agree with independent ESPN preseason final game margin after applying the original side's spread; all quoted game source times agreed with the corresponding official game start within three minutes and quotes were captured before tipoff. The negative result is **not explained by bad final scores or exact source identity duplicates**.
+
+The 39 correlated alternate prices exaggerate the number of independent trials. Selecting *retrospectively the single earliest frozen recorded quote* in each of 8 distinct official games yields **3W–5L**, **-31.63% paper ROI**. This is an after-the-fact diagnostic, NOT a preregistered strategy or market-executable price performance. With eight independent games, no model/payout lift is established.
+
+All source files were accessed **read-only**. Immutable source SHA: market ledger e1a9b9892a554d9d4304420885b3bdc4fb29d38b3389230d846225cb1e351dcd, forward summary 36f29c161af8fc8215b38f8c6f2cf41a89c26e7888b9c301764a92ee44634456, independent official NBA history 1aab7e12454ab76f2c79fa5225ab0efe1e4ab8ef411958ff33291c6be372c6fa. Machine proof: `reports/ZENITH_NBA_SPREAD_PRESEASON_SOURCE_AUDIT_2026-10-09.json`. Future work: strict league/competition regime separate, one line per independent **future NBA game** chosen in advance, exact same-source verified book market price and official ESPN outcome, and probability-vs-market and source-priced ROI with game-block uncertainty. Under no circumstance rebrand a collection of alternate prices as 39 independent correct/failing bets.
