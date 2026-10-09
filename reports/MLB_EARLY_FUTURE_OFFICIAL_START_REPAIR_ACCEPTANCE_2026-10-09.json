@@ -1,0 +1,53 @@
+{
+  "applied_source_status": "UPDATED",
+  "automatic_bets_or_market_selection_changed": false,
+  "corrected_master_sha256": "6ad270f021e85c63a76cddd7b31b3c4dc6724039afa70bec4cf81777832e58ae",
+  "field_changes": [
+    {
+      "field": "gameDate",
+      "gamePk": "849831",
+      "new": "2026-10-11T00:00:00Z",
+      "old": "2026-10-10T21:00:00Z"
+    }
+  ],
+  "frozen_model_or_market_prices_changed": false,
+  "full_mlb_regression_tests_passed": 390,
+  "historical_official_boxscore_source_rewritten": false,
+  "local_source_backup": ".deploy_backups/mlb_verified_future_kickoff_repair_PRECHANGE_20261009T071200Z",
+  "master_rows_after": 7911,
+  "master_rows_before": 7911,
+  "off_vps_restore_verified": false,
+  "official_game_pk": 849831,
+  "official_schedule_verified_capture_proof": {
+    "gamePk": "849831",
+    "independent_capture_count": 2,
+    "new_start": "2026-10-11T00:00:00Z",
+    "official_game_date": "2026-10-10",
+    "official_game_type": "D",
+    "official_venue_id": 5,
+    "old_start": "2026-10-10T21:00:00Z",
+    "original_market_prices_or_model_forecasts_changed": false,
+    "original_scheduled_kickoff_correction_minutes": 180,
+    "source_capture_times_utc": [
+      "2026-10-09T00:07:38+00:00",
+      "2026-10-09T06:01:16+00:00"
+    ],
+    "source_corroboration": "TWO_EARLY_ORIGINAL_MLB_OFFICIAL_SCHEDULE_CAPTURES_AND_FRESH_SCHEDULE",
+    "source_distinct_evidence_ids": [
+      "7817a66805d6b97edde8012b4e7a2083",
+      "514447c069ad7ecd490756b45ece8d5e"
+    ],
+    "source_lineups_verifiably_published_after_original_stale_time": false,
+    "source_original_line_sha256": [
+      "92588aa85633f57cef7e127ce768f8fa84888bf6e0c90d7a12b677ba8bebb0a8",
+      "3736bbe63acddbe5fa706030aeb3f51bce5b3dd17127bb4a084349322bd41ca9"
+    ],
+    "source_schedule_captures_verified_before_old_start": true
+  },
+  "old_Finals_or_scores_changed": false,
+  "original_full16_first_18_sha256": "0cea5e38c94451cacbc1ff552276c5df7aa1e341296b127fd0cfa6a2d19c66a8",
+  "original_master_sha256": "7689c795b81c6c989cbfc158474b0e5cbd39dc4b7fdabeaa9d6645875cf29a6a",
+  "original_pregame_evidence_sha256": "b898514635f149fe7cbfe8789466c3bb3b3f0b80c0c3397a5d8374c456c48e26",
+  "result": "PASS_ONLY_ONE_VERIFIED_FUTURE_KICKOFF_START_CELL_CHANGED",
+  "schema": "ZENITH_MLB_OFFICIAL_EARLY_FUTURE_FIXTURE_SHA256_RECEIPT_V1"
+}
