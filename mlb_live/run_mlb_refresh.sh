@@ -152,6 +152,15 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
       || echo "WARNING: MLB learning failed; production refresh preserved."
 
     echo
+    echo "=== MLB OFFICIAL SCHEDULE AND NEXT VERIFIED SOURCE READINESS (RESEARCH ONLY) ==="
+
+    SPORTS_LABEL=mlb-official-fixture-readiness \
+    SPORTS_MAX_SECONDS=16 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.mlb_pregame_capture.build_forward_readiness \
+      || echo "WARNING: independent source readiness check failed; original master, source and forecasts preserved."
+
+    echo
     echo "MLB REFRESH COMPLETE"
 
 } >> "$LOG" 2>&1
