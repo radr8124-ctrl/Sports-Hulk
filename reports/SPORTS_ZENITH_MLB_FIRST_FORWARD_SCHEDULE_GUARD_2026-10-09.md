@@ -53,3 +53,18 @@ Audit found many original MLB production research modules/tests from yesterday p
 2. Wait for **real current game's** authoritative lineup publication, then run independently attested identity/first-pitch reconciliation and freeze newly supported *future* 16-feature research candidates. Never backdate to stale local master time.
 3. Keep original frozen same-book probability, model/market Brier, ROI uncertainty and independent game counts separate. Require many future independent games, priced return evidence and robust improvement before commercial betting status. Do not chase 70% by selecting expensive favorites alone.
 4. Restore source code + raw private books and source results **from an independent destination** before claiming disaster recovery.
+
+## Append-only original player-source writer repaired (05:37–05:39 UTC)
+
+Full broad MLB test run after the prior schedule change initially showed **363 tests run, one failure** in `test_no_existing_source_ledger_bytes_rewritten_when_final_player_rows_append`. The existing official Final boxscore bridge appended correctly, but the separate older scheduled/backfill writer `intelligence_warehouse/mlb_player_history/build_mlb_player_game_history.py` was silently **sorting and overwriting** the entire source CSV on every run.
+
+Forensic row-level reconciliation proved none of the original source content was missing or changed: all **18,150 original rows** and their exact field values still appeared in the 18,779-row ledger, plus **629 additional genuinely new player-role rows** from completed official games. The failure was a source-order rewrite: first different byte at offset 4,518, even though the original records were intact.
+
+Safety-first repair:
+1. Backed up the current CSV/Parquet, code and original LAST_BUILD receipt with hashes under `.deploy_backups/mlb_player_ledger_append_only_repair_BEFORE_20261009T054100Z` before touching them.
+2. Fixed the old backfill builder to use the **same exclusive `.csv.lock`** as the independent official final bridge and to **append only new unique player/game/role rows**. Duplicate or changed official identities, corrupted header/newline, unknown columns and unreadable old ledgers now fail closed; the original CSV is no longer rewritten/sorted. Parquet is explicitly an independently rebuildable derivative.
+3. One-time repaired the already-reordered file: **exact original protected raw bytes restored at the beginning** and **all 629 new rows preserved byte/field-for-byte**, in the same official athlete/game identities, using exclusive lock and an atomic rename. Before the repair, source SHA was `2082a381b7c2a2ef6422e6aa8716304267b3f3431d9c67df6cceceb48367f618`. After repairing append-only order, SHA became `de2f7f6b7384ae9ebaff42dd1c6f6acfdec65a66fe3d5f6ba247af454893aaf9`. Original old-prefix SHA was `335c74e28219b1e1e8218dbf0f4140c0312a8f17f759536f8198e9c32265d818`. Forensic receipt saved: `reports/MLB_OFFICIAL_PLAYER_HISTORY_APPEND_ONLY_RECOVERY_2026-10-09.json`.
+4. A new 7-test source append/duplicate/conflict/crash guard suite passed.
+5. Final broad MLB regression suite: **370 tests run, all passing**. Source readback independently verified original prefix and entire corrected SHA. No original market or HULK forward predictions, grade outcomes, bookmaker prices or real-money bets changed.
+
+This fixes a real source preservation failure. It is a **data-integrity** improvement, not evidence of higher win rate. Prior independent off-VPS recovery remains unverified.

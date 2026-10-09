@@ -1,0 +1,17 @@
+{
+  "completed_at_utc": "2026-10-09T05:37:44.307345+00:00",
+  "corrected_only_source_record_order": true,
+  "historical_rows_protected": 18150,
+  "new_official_rows_preserved": 629,
+  "no_original_athlete_stat_changed": true,
+  "off_vps_copy_and_restore_verified": false,
+  "original_source_prefix_verified": true,
+  "production_betting_models_wagers_unchanged": true,
+  "protected_backup_path": ".deploy_backups/mlb_player_ledger_append_only_repair_BEFORE_20261009T054100Z",
+  "source_after_reconciliation_sha256": "de2f7f6b7384ae9ebaff42dd1c6f6acfdec65a66fe3d5f6ba247af454893aaf9",
+  "source_before_reconciliation_sha256": "2082a381b7c2a2ef6422e6aa8716304267b3f3431d9c67df6cceceb48367f618",
+  "source_lock_shared_with_official_final_bridge": true,
+  "source_old_prefix_sha256": "335c74e28219b1e1e8218dbf0f4140c0312a8f17f759536f8198e9c32265d818",
+  "status": "PASS_ALL_PRIOR_RAW_BYTES_RESTORED_AS_PREFIX_AND_ALL_NEW_ROWS_PRESERVED",
+  "total_rows_preserved": 18779
+}

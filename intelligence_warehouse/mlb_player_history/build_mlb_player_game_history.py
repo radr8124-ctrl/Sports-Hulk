@@ -4,7 +4,10 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import datetime, timezone
 import argparse
+import csv
+import fcntl
 import json
+import os
 import time
 
 import pandas as pd
@@ -113,10 +116,82 @@ def rows_from_box(game, payload):
 def load_existing():
     if not LEDGER.exists():
         return pd.DataFrame()
-    try:
-        return pd.read_csv(LEDGER, low_memory=False)
-    except Exception:
-        return pd.DataFrame()
+    # Never silently treat an unreadable protected ledger as empty history.
+    return pd.read_csv(LEDGER, low_memory=False)
+
+
+LEDGER_COLUMNS = [
+    "gamePk", "officialDate", "season", "player_id", "player", "team", "opponent",
+    "home_away", "position", "group", "started", "plate_appearances", "ab",
+    "runs", "hits", "doubles", "triples", "home_runs", "rbi", "walks",
+    "strikeouts", "stolen_bases", "singles", "total_bases", "hrr",
+    "innings_pitched", "games_started", "runs_allowed", "earned_runs",
+    "hits_allowed", "walks_allowed", "pitcher_strikeouts",
+    "home_runs_allowed", "batters_faced", "outs",
+]
+
+
+def append_official_player_rows_once(path: Path, new_rows: list[dict]) -> int:
+    """Append new game-player-role facts without resorting or rewriting old bytes.
+
+    Share the .csv.lock with the verified official Final player bridge.
+    Fail on existing source conflicts instead of silently keeping newer grades.
+    """
+    if not new_rows:
+        return 0
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.with_suffix(path.suffix + ".lock").open("a+b") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        has_source = path.is_file() and path.stat().st_size > 0
+        fieldnames = list(LEDGER_COLUMNS)
+        previous = {}
+        if has_source:
+            with path.open("rb") as raw:
+                raw.seek(-1, os.SEEK_END)
+                if raw.read(1) != b"\n":
+                    raise ValueError("Original protected MLB ledger has an incomplete final line")
+            with path.open("r", newline="", encoding="utf-8") as fd:
+                reader = csv.DictReader(fd)
+                fieldnames = list(reader.fieldnames or [])
+                if not fieldnames or len(set(fieldnames)) != len(fieldnames):
+                    raise ValueError("Protected player history column schema corrupted")
+                for prior in reader:
+                    key = (str(prior.get("gamePk") or ""), str(prior.get("player_id") or ""), str(prior.get("group") or ""))
+                    if any(not component for component in key) or key in previous:
+                        raise ValueError("Duplicate/missing original protected MLB player game identity")
+                    previous[key] = prior
+        extras = set().union(*(set(r) for r in new_rows)) - set(fieldnames)
+        if extras:
+            raise ValueError("Unexpected new official player history fields: " + str(sorted(extras)))
+        seen = set()
+        added = []
+        for row in new_rows:
+            key = (str(row.get("gamePk") or ""), str(row.get("player_id") or ""), str(row.get("group") or ""))
+            if any(not component for component in key) or key in seen:
+                raise ValueError("Duplicate or invalid incoming player identity")
+            seen.add(key)
+            original = previous.get(key)
+            if original is not None:
+                # Only exact serializable duplicate rows can be safely skipped.
+                # A change to existing official player results needs source review.
+                for col in fieldnames:
+                    before = str(original.get(col) or "")
+                    incoming = str(row.get(col) if row.get(col) is not None else "")
+                    if before != incoming:
+                        raise ValueError(f"Protected official player grade conflict: {key} {col}")
+                continue
+            added.append({col:row.get(col, "") for col in fieldnames})
+        if not added:
+            return 0
+        with path.open("a", encoding="utf-8", newline="") as fd:
+            writer = csv.DictWriter(fd, fieldnames=fieldnames, extrasaction="raise")
+            if not has_source:
+                writer.writeheader()
+            writer.writerows(added)
+            fd.flush()
+            os.fsync(fd.fileno())
+        return len(added)
+
 
 def build_features(df):
     if df.empty:
@@ -229,17 +304,14 @@ def main():
         except Exception as exc:
             errors.append({"gamePk": game_pk, "error": str(exc)[:300]})
 
-    if new_rows:
-        new = pd.DataFrame(new_rows)
-        combined = pd.concat([existing, new], ignore_index=True, sort=False)
-        combined = combined.drop_duplicates(["gamePk","player_id","group"], keep="last")
-    else:
-        combined = existing.copy()
-
+    # The official Final boxscore bridge and this backfill writer share one
+    # immutable source. Neither may re-sort/rewrite any existing CSV bytes.
+    appended = append_official_player_rows_once(LEDGER, new_rows)
+    combined = load_existing()
     if not combined.empty:
-        combined["officialDate"] = pd.to_datetime(combined["officialDate"], errors="coerce").dt.date.astype(str)
-        combined = combined.sort_values(["officialDate","gamePk","group","player_id"])
-        combined.to_csv(LEDGER, index=False)
+        if combined.duplicated(["gamePk", "player_id", "group"]).any():
+            raise ValueError("Protected player game source contains duplicate identities")
+        # Parquet is a rebuildable derivative; the original CSV is append-only.
         try:
             combined.to_parquet(OUTDIR / "MLB_PLAYER_GAME_LEDGER.parquet", index=False)
         except Exception:
@@ -269,7 +341,9 @@ def main():
         "covered_games": covered_games,
         "remaining_games": max(eligible_games - covered_games, 0),
         "new_games_attempted": int(len(todo)),
-        "new_player_game_rows": int(len(new_rows)),
+        "new_player_game_rows": int(appended),
+        "new_player_rows_seen_from_official_boxscores": int(len(new_rows)),
+        "original_official_source_csv_rewritten": False,
         "ledger_rows": int(len(combined)),
         "feature_rows": int(len(features)),
         "errors": errors,
