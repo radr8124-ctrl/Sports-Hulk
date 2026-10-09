@@ -44,6 +44,9 @@ const kickoffTime=value=>{
 export default function NFLPlayerPropResearchPanel({lane}) {
  const [data,setData]=useState(null)
  const [expanded,setExpanded]=useState(false)
+ // Props and PrizePicks reuse this component when the tab changes; collapse
+ // the previous lane's expanded list so the next page starts compact.
+ useEffect(()=>setExpanded(false),[lane])
  useEffect(()=>{
   let active=true
   const load=async()=>{
