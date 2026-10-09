@@ -118,16 +118,23 @@ def audit_quotes(raw:pd.DataFrame,fixtures:dict,now:datetime)->dict:
         if pd.isna(x["line"]) or abs(float(x["line"])-0.5)>1e-9:
             reasons["NOT_EXACT_HITS_0_5_LINE"]+=1
             continue
-        matches=[f for f in fixtures.values() if x["home_team"]==f["home"] and x["away_team"]==f["away"]]
-        if len(matches)!=1:
+        # MLB playoff series can have consecutive days with the SAME two teams.
+        # A name-only join would be ambiguous; require original event kickoff.
+        by_name=[f for f in fixtures.values() if x["home_team"]==f["home"] and x["away_team"]==f["away"]]
+        if not by_name:
             reasons["NOT_UNIQUE_OR_OFFICIAL_FIXTURE"]+=1
             continue
-        f=matches[0]
         bookstart=moment(x["start"])
-        captured=moment(x["captured_at"])
-        if bookstart is None or abs((bookstart-f["start"]).total_seconds())>180:
+        matches=[f for f in by_name if bookstart is not None and
+                 abs((bookstart-f["start"]).total_seconds())<=180]
+        if not matches:
             reasons["STALE_PROVIDER_FIXTURE_START"]+=1
             continue
+        if len(matches)!=1:
+            reasons["SAME_TEAM_MULTIPLE_OFFICIAL_GAME_STARTS_AMBIGUOUS"]+=1
+            continue
+        f=matches[0]
+        captured=moment(x["captured_at"])
         if captured is None or captured>now or captured>=f["start"] or now-captured>timedelta(minutes=30):
             reasons["SOURCE_CAPTURE_NOT_RECENT_PREGAME"]+=1
             continue

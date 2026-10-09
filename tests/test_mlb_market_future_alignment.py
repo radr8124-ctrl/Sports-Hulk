@@ -119,6 +119,35 @@ class TestSourceMarketIdentityAudit(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"HASH_CHANGED"):
             source_proof(readiness,cache,master,NOW)
 
+    def test_back_to_back_playoff_same_opponents_are_distinguished_by_exact_start(self):
+        second_start=(datetime(2026,10,12,0,tzinfo=timezone.utc))
+        second=dict(pk=849812,start=second_start,
+                    home=HOME,away=AWAY,lineup_confirmed=False)
+        new_start=second_start.isoformat()
+        quotes=pd.DataFrame([
+            odds("OVER",event="event-game-one",player="same-athlete",price=-115),
+            odds("UNDER",event="event-game-one",player="same-athlete",price=-105),
+            odds("OVER",source_start=new_start,event="event-game-two",player="same-athlete",price=-115),
+            odds("UNDER",source_start=new_start,event="event-game-two",player="same-athlete",price=-105),
+        ])
+        result=audit_quotes(quotes,{**fixture(),849812:second},NOW)
+        self.assertEqual(result["book_player_exact_same_source_time_pairs_accepted"],2)
+        self.assertEqual(set(result["official_game_blocks"]),{849831,849812})
+
+    def test_reused_provider_event_identity_across_two_games_cannot_be_paired(self):
+        second_start=datetime(2026,10,12,0,tzinfo=timezone.utc)
+        second=dict(pk=849812,start=second_start,
+                    home=HOME,away=AWAY,lineup_confirmed=False)
+        rows=[
+            odds("OVER",event="reused-event",price=-115),
+            odds("UNDER",event="reused-event",price=-105),
+            odds("OVER",source_start=second_start.isoformat(),event="reused-event",price=-115),
+            odds("UNDER",source_start=second_start.isoformat(),event="reused-event",price=-105),
+        ]
+        result=audit_quotes(pd.DataFrame(rows),{**fixture(),849812:second},NOW)
+        self.assertEqual(result["book_player_exact_same_source_time_pairs_accepted"],0)
+        self.assertEqual(result["rejected_source_row_reasons"]["PROVIDER_EVENT_ID_MAPPED_TO_MULTIPLE_OFFICIAL_GAMES"],4)
+
     def test_existing_refresh_runs_market_audit_only_after_official_identity(self):
         from pathlib import Path
         driver=Path("/home/ubuntu/sports-hulk/mlb_live/run_mlb_refresh.sh").read_text()

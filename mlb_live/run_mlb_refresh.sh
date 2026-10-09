@@ -179,6 +179,24 @@ LOG="$LOGDIR/MLB_REFRESH_$STAMP.log"
       || echo "WARNING: MLB source-book fixture alignment could not be verified; original odds, context and games preserved."
 
     echo
+    echo "=== MLB FIXED TWO-HOUR SOURCE PRICE MOVEMENT FUTURE RESEARCH (NO BETS) ==="
+
+    SPORTS_LABEL=mlb-frozen-source-price-movement \
+    SPORTS_MAX_SECONDS=16 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.mlb_pregame_capture.freeze_source_price_movement \
+      || echo "WARNING: pregame price-movement freeze failed; original full16 forecasts and historical book quotes preserved."
+
+    echo
+    echo "=== MLB SOURCE-VERIFIED MLBAM FUTURE PRICE MOVEMENT OFFICIAL GRADING (NO BETS) ==="
+
+    SPORTS_LABEL=mlb-price-movement-official-research-grade \
+    SPORTS_MAX_SECONDS=13 \
+    "$ROOT/scripts/sports-safe-run.sh" \
+      "$PY" -m intelligence_warehouse.mlb_pregame_capture.grade_future_price_movement \
+      || echo "WARNING: MLB movement grading source not yet independently verified; all frozen history and official grades preserved."
+
+    echo
     echo "MLB REFRESH COMPLETE"
 
 } >> "$LOG" 2>&1

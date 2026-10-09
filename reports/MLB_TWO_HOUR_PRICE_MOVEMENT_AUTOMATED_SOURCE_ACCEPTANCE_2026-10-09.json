@@ -1,0 +1,29 @@
+{
+  "accepted_at_utc": "2026-10-09T08:50:46.191766+00:00",
+  "actual_independent_official_games_final": 0,
+  "actual_mlb_systemd_full_refresh_log": "mlb_live/logs/MLB_REFRESH_20261009T084336Z.log",
+  "fixed_source_movement_ge_3_percentage_points": 0,
+  "independent_offsite_disaster_recovery_verified": false,
+  "independent_upcoming_game_blocks": 2,
+  "initial_local_14_file_source_recovery_passed": true,
+  "initial_old_frozen_move_original_sha256": "cc25ce065e417b507a498776a0be899814702cb3a4b9027f022abd9a3e942ca1",
+  "live_betting_decisions_changed": false,
+  "new_11_rows_appended_after_earlier_18": true,
+  "official_player_outcomes_graduated": 0,
+  "original_18_early_source_price_rows_exact_unchanged_prefix": true,
+  "original_full16_model_forecast_sha256_preserved": "0cea5e38c94451cacbc1ff552276c5df7aa1e341296b127fd0cfa6a2d19c66a8",
+  "original_log_sha256": "8d0f6d0bbfaded9f95fe096f7dc0e6ee5aa7e88435257f8ccebed39adb6c38d1",
+  "original_model_retrained": false,
+  "per_official_game_original_price_source_quote_rows": {
+    "849809": 11,
+    "849831": 18
+  },
+  "production_scheduled_both_research_stages_exit_code": 0,
+  "profitable_betting_edge_proven": false,
+  "real_sportsbook_payouts_verified": false,
+  "schema": "ZENITH_MLB_FIRST_AUTOMATIC_2H_PRICE_MOVEMENT_FORWARD_ACCEPTANCE_V1",
+  "source_frozen_move_sha256": "0d8a83a0a361ca2d8a59c3588fc0f84d5988c3bb584157c1dc48fbb9bbe56307",
+  "source_original_book_history_snapshots_sha256_individually_verified": 5,
+  "total_new_prospective_future_price_rows": 29,
+  "waiting_for_original_source_MLBAM_ID_bridge": 29
+}
