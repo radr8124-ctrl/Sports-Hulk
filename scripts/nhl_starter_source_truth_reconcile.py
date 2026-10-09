@@ -41,6 +41,14 @@ def csvrows(path):
         return list(reader), reader.fieldnames
 
 
+def canonical_nhl_player_id(value):
+    """Normalize pandas' integer ID serialized as N.0, not arbitrary decimals."""
+    value = str(value).strip()
+    if value.endswith(".0"):
+        value = value[:-2]
+    return str(int(value)) if value.isdigit() else ""
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--apply", action="store_true")
@@ -67,7 +75,9 @@ def main():
             raise ValueError(f"Conflicting source starter flags: {key}")
         flags_by_key[key] = bool(flagged)
         if flagged:
-            if row["starting_goalie_id"] != flagged[0]["player_id"]:
+            official_id = canonical_nhl_player_id(flagged[0]["player_id"])
+            derived_id = canonical_nhl_player_id(row["starting_goalie_id"])
+            if not official_id or derived_id != official_id:
                 raise ValueError(f"Historical verified starter mismatch: {key}")
         else:
             if any(row[field] for field in FIELDS):

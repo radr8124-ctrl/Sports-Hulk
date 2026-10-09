@@ -15,6 +15,7 @@ STAMP=$(
 )
 
 LOG="$LOGDIR/CFB_LEARNING_${STAMP}.log"
+DEFERRED=0
 
 {
     echo "=========================================="
@@ -33,15 +34,32 @@ LOG="$LOGDIR/CFB_LEARNING_${STAMP}.log"
     echo
     echo "=== GRADE / LEARN ==="
 
-    "$PY" \
-      "$DEC/grade_cfb_recommendations.py"
-
-    echo "GRADE RC: $?"
+    # Grader currently reads the entire immutable ledger into pandas.
+    # An oversize source must not OOM-kill other sports refreshes.
+    LEDGER_BYTES=$(stat -c%s "$DEC/history/CFB_RECOMMENDATION_LEDGER.csv" 2>/dev/null || echo 0)
+    if [ "$LEDGER_BYTES" -gt 536870912 ]; then
+        echo "GRADE DEFERRED: OVERSIZE_SOURCE_LEDGER bytes=$LEDGER_BYTES"
+        echo "GRADE RC: 85 (incremental grader required; no prior data removed)"
+        DEFERRED=1
+    else
+        "$PY" \
+          "$DEC/grade_cfb_recommendations.py"
+        echo "GRADE RC: $?"
+    fi
 
     echo
-    echo "CFB LEARNING COMPLETE"
+    if [ "$DEFERRED" -eq 1 ]; then
+        echo "CFB LEARNING INCOMPLETE: grading deferred; original evidence retained"
+    else
+        echo "CFB LEARNING COMPLETE"
+    fi
 
 } >> "$LOG" 2>&1
+
+if [ "$DEFERRED" -eq 1 ]; then
+    echo "WARNING: CFB grading deferred because its original history exceeds the safe full-load limit."
+    exit 85
+fi
 
 # Learning may never break production refresh.
 exit 0

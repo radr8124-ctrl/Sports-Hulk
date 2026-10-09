@@ -2,6 +2,7 @@
 import unittest
 
 from nhl_live.build_nhl_data import player_rows_from_boxscore
+from scripts.nhl_starter_source_truth_reconcile import canonical_nhl_player_id
 
 
 def make_game():
@@ -41,6 +42,12 @@ def goalie(player_id, starter, toi):
 
 
 class TestOfficialNhlStarterFlag(unittest.TestCase):
+    def test_source_integer_and_pandas_float_serialization_same_player(self):
+        self.assertEqual(canonical_nhl_player_id("8481519"), "8481519")
+        self.assertEqual(canonical_nhl_player_id("8481519.0"), "8481519")
+        self.assertEqual(canonical_nhl_player_id("8481519.1"), "")
+        self.assertNotEqual(canonical_nhl_player_id("8481519.0"), canonical_nhl_player_id("8481518"))
+
     def test_unflagged_maximum_toi_is_not_confirmed_starter(self):
         rows = team_rows([goalie(101, False, "60:00")], [])
         self.assertTrue(rows["AAA"]["starting_goalie"] in ("", None))
