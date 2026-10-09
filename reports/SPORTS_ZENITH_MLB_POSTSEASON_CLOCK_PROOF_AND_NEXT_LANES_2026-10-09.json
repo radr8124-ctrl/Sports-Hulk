@@ -1,0 +1,64 @@
+{
+  "MLB_precise_untested_quote_UTC_strictly_conflicting_original_rows_not_deleted": true,
+  "NBA_preseason_priority": "Separate official season_type 1 preseason game odds and player data; do not mix Oct20+ NBA regular season into preseason research or infer a current price",
+  "NBA_production_prop_source_is_later_regular_season_not_live_preseason": true,
+  "NBA_source_current_prizepicks_rows": 68,
+  "NFL_current_original_13_game_frozen_market_control_source_count": 13,
+  "NFL_current_original_26_player_line_unique_prop_PP_challenger_count": 26,
+  "NFL_frozen_player_prop_PP_cross_lane_duplicate_count": 14,
+  "NFL_live_approved_model_bets_proven": false,
+  "NHL_source_PP_no_verified_current_public_market_candidates": true,
+  "NHL_source_PP_priority": "Review exact bookmaker player, line, provider event start and source-time match, and confirm goalie before any PrizePicks projection; no forced payout",
+  "NHL_source_PP_upstream_decision_status_counts": {
+    "GOALIE_START_REVIEW": 10,
+    "HIGH_JUICE_WATCH": 192,
+    "INJURY_BLOCK": 2,
+    "INJURY_REVIEW": 2,
+    "SOURCE_TIME_REVIEW": 80,
+    "WATCH": 4
+  },
+  "NHL_source_PP_upstream_rows": 290,
+  "backup_current_and_original_public_picks_VPS_local_verified": true,
+  "existing_MLB_28_day_form_lookback_remains_active": true,
+  "existing_MLB_batter_min_recent_games_stays_four": true,
+  "existing_MLB_pitcher_min_recent_games_stays_two": true,
+  "live_props_and_pickem_browser_visible_on_mobile_and_desktop": true,
+  "live_website_login_or_personal_data_mutated": false,
+  "new_live_MLB_all_provider_start_within_180_seconds": true,
+  "new_live_MLB_approved_play_count": 0,
+  "new_live_MLB_forward_model_beats_book_proven": false,
+  "new_live_MLB_full_official_player_lineup_confirmed_for_each_prop": false,
+  "new_live_MLB_offered_book_prices_confirmed_executable": false,
+  "new_live_MLB_official_unique_game_pks": [
+    "849809",
+    "849831"
+  ],
+  "new_live_MLB_original_source_player_and_club_provenance_present": true,
+  "new_live_MLB_prizepicks_records_at_verified_snapshot": 22,
+  "new_live_MLB_probability_source": {
+    "MARKET_REFERENCE": 250
+  },
+  "new_live_MLB_prop_records_at_verified_snapshot": 228,
+  "new_live_MLB_regimes": {
+    "POSTSEASON_DIVISION_SERIES": 139,
+    "POSTSEASON_LEAGUE_CHAMPIONSHIP": 111
+  },
+  "no_sportsbook_wagers_or_true_PrizePicks_entries_submitted": true,
+  "non_secret_source_sha256": {
+    "after_source_guard_public_snapshot": "4bd17d1b8dfc230abf989490e5a41c76e61933c3b9d9c5f7b0f78ffecc547cf6",
+    "mlb_prop_clock_gate_module": "ce7272c99a74f1a2253a3991d9a2fe3f6b039a9e4feb5d04420625595dccd96f",
+    "original_pinned_public_snapshot": "b2a89582b631b462d48ac52333364e4fe21dd784873d5313f45de6a91097beb3",
+    "preregistered_audit_report": "0d23a820f144a00644dae43444d96141f39856d39d0b101f92b6903d4e07c972",
+    "prop_v2_current_publisher": "a89009674b3456a077e09bf809cc745262aa4d5026d8a05e22ed24c52eec999d"
+  },
+  "off_server_restore_verified": false,
+  "original_MLB_first_history_qualified_exact_official_rows": 228,
+  "original_pinned_MLB_rows": 246,
+  "original_source_time_conflict_in_preregistered_sample": 18,
+  "quarantined_unverified_source_event_start_three_hours_disagreement": true,
+  "rollback_vps_local_path": "/home/ubuntu/sports-hulk/.deploy_backups/zenith_mlb_official_fixture_clock_gate_20261009T201600Z",
+  "schema": "SPORTS_ZENITH_MLB_FIXTURE_CLOCK_GATE_AND_ALL_SPORT_PROP_READINESS_V1",
+  "source_model_weights_and_original_frozen_graded_ledgers_unchanged_by_this_repair": true,
+  "test_python_proof_and_form_regressions_passed": 15,
+  "verified_at_utc": "2026-10-09T20:25:19.525190+00:00"
+}

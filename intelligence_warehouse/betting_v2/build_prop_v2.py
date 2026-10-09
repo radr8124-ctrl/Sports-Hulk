@@ -12,8 +12,10 @@ import pandas as pd
 
 try:
     from .mlb_forward_capture_identity import frozen_mlb_identity
+    from .mlb_official_fixture_clock import schedule_index, crosswalk
 except ImportError:
     from mlb_forward_capture_identity import frozen_mlb_identity
+    from mlb_official_fixture_clock import schedule_index, crosswalk
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "intelligence_warehouse" / "betting_v2"
@@ -1082,6 +1084,13 @@ def build_current_lane(lane_key, cfg, validation):
         return []
 
     validation_ready = validation.get("status") == "READY"
+    # Official MLB StatsAPI schedule is an independent source from sportsbook
+    # event UUIDs. A missing/ambiguous official game ID or a wrong quoted
+    # start holds the row rather than silently publishing it as current.
+    mlb_schedule = (
+        schedule_index(read_stable_live_decisions(ROOT / "baseball_vault/latest/MLB_SCHEDULE.csv"))
+        if cfg["sport"] == "MLB" else {}
+    )
     reference_prices = build_reference_price_map(cfg)
     d = read_stable_live_decisions(path)
     rows = []
@@ -1103,6 +1112,17 @@ def build_current_lane(lane_key, cfg, validation):
         event_start_dt = parse_dt(event_start_value)
         if event_start_dt is not None and event_start_dt.to_pydatetime() <= datetime.now(timezone.utc):
             continue
+
+        # Reject provider event-time variants unless independently matched to
+        # the exact official MLB gamePk, away/home teams and scheduled start.
+        # Retain original provider rows and frozen historical ledgers intact.
+        mlb_identity = {}
+        mlb_verified_fixture = {}
+        if cfg["sport"] == "MLB":
+            mlb_identity = frozen_mlb_identity(row)
+            mlb_verified_fixture = crosswalk(mlb_identity, mlb_schedule)
+            if not mlb_verified_fixture:
+                continue
 
         market_raw_prob = current_market_probability(row, cfg, reference_prices)
         fair_prob, fair_books = current_devig(cfg, row)
@@ -1298,12 +1318,9 @@ def build_current_lane(lane_key, cfg, validation):
         side_col = mapping.get("side")
         line_col = mapping.get("line")
 
-        source_mlb_identity = (
-            frozen_mlb_identity(row)
-            if cfg["sport"] == "MLB" else {}
-        )
         rows.append({
-            **source_mlb_identity,
+            **mlb_identity,
+            **mlb_verified_fixture,
             "model_version": MODEL_VERSION,
             "lane_key": lane_key,
             "sport": cfg["sport"],
