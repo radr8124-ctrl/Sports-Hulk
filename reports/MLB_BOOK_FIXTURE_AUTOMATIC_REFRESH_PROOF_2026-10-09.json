@@ -1,0 +1,33 @@
+{
+  "accepted_utc": "2026-10-09T08:14:17.863182+00:00",
+  "actual_mlb_refresh_log": "mlb_live/logs/MLB_REFRESH_20261009T081314Z.log",
+  "commercial_bookmaker_offers_independently_executable": false,
+  "full_lineup_verified_game_count": 0,
+  "independent_completed_Full16_games": 1,
+  "independent_off_VPS_restore_verified": false,
+  "last_regression_count_passed": 412,
+  "model_coefficients_changed": false,
+  "new_wagers_or_proven_profitable_plays": 0,
+  "original_MLB_Full16_first_18_sha256": "0cea5e38c94451cacbc1ff552276c5df7aa1e341296b127fd0cfa6a2d19c66a8",
+  "private_raw_source_committed_to_git": false,
+  "result": "PASS_ACTUAL_10_MINUTE_MLB_REFRESH_AFTER_SOURCE_BOOK_ALIGNMENT_INSTALL",
+  "schema": "ZENITH_MLB_PREGAME_OFFICIAL_SOURCE_MARKET_AUTOMATIC_ACCEPTANCE_V1",
+  "source_0_5_hits_two_sided_book_pairs": 42,
+  "source_books_by_game": {
+    "849809": [
+      "thescore"
+    ],
+    "849831": [
+      "draftkings",
+      "thescore"
+    ]
+  },
+  "source_log_sha256": "be5ada88acc298ffe2f84a467050b71711d1d72a42e919f66adc7396728526cc",
+  "source_market_audit_private_sha256": "a6c3dea8e7c401bfa44193cd2e8d7f1a254253154b05544b86158d216be82dd4",
+  "source_matched_official_fixture_game_pks": [
+    849809,
+    849831
+  ],
+  "source_verified_official_games": 2,
+  "source_wrong_start_rows_rejected": 36
+}
