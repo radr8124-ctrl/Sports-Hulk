@@ -1904,7 +1904,16 @@ function newsAnswerV2(question, data) {
   })
 
   scored.sort((a,b)=>(b.matchedWords||0)-(a.matchedWords||0)||b.score-a.score||b.published-a.published)
-  let rows=scored.filter(x=>x.score>0 && (words.length===0 || (x.matchedWords||0)>0)).slice(0,8).map(x=>x.article)
+  // An injury/status/news question naming multiple words needs the WHOLE
+  // subject in the headline. A generic "quarterback rankings" story must
+  // never be reported as a current update on "Nebula Quarterback".
+  const requireWholeNamedSubject=words.length>=2
+    && /\b(injury|injured|status|practice|availability|update|report|news|return|returning)\b/.test(q)
+  let rows=scored.filter(x=>x.score>0 && (
+    words.length===0 || (
+      requireWholeNamedSubject ? (x.matchedWords||0)===words.length : (x.matchedWords||0)>0
+    )
+  )).slice(0,8).map(x=>x.article)
 
   if(!rows.length && words.length===0){
     rows=scored
