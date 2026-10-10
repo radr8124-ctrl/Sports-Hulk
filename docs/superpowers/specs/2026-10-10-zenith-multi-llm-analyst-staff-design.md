@@ -1,6 +1,6 @@
 # Sports Zenith — Multi-LLM Analyst Staff Pilot (Design for Review)
 Date: 2026-10-10
-Status: DESIGN DRAFT — awaiting user review, provider credentials, and a trial spending limit
+Status: DESIGN DRAFT — user explicitly requires $0 spend; awaiting design approval and any verified no-billing free-tier credentials
 Repository: /home/ubuntu/sports-hulk
 Live app: https://sportszenith.com
 Scope: read-only candidate analysis inside the current Sports Zenith system; no new website, no production activation in this document.
@@ -21,13 +21,13 @@ Reuse rather than replace:
 ### Production sports evidence analysts
 | Role | Initial intended provider | Allowed work | Not allowed |
 | --- | --- | --- | --- |
-| Source analyst | Google Gemini Developer API | Extract bounded injury, player, team, schedule, and news claims from **already-verified source packets**; separate confirmed facts from attributed reporting | Invent injuries, update team availability statuses, fetch unapproved sources |
-| Skeptical analyst | Anthropic Claude API | Challenge reasoning, identify contradictions, risk, unproven assumptions, as-of-time violations, and missing evidence | Rewrite sportsbook odds, claim sure wins or verified independent betting edge |
-| Independent reviewer | Microsoft Foundry inference deployment (not consumer Microsoft Copilot chat) | Compare analyst outputs using a genuinely distinct model family when available; flag unresolved claims | Treat a second deployment of the same model as an independent vote; promote picks |
+| Source analyst | Gemini free-tier API on an unbilled project | Extract bounded injury, player, team, schedule, and news claims from **already-verified source packets**; separate confirmed facts from attributed reporting | Invent injuries, update team availability statuses, fetch unapproved sources |
+| Skeptical analyst | GroqCloud Free API, using GPT-OSS or Qwen open models | Challenge reasoning, identify contradictions, risk, unproven assumptions, as-of-time violations, and missing evidence | Rewrite sportsbook odds, claim sure wins or verified independent betting edge |
+| Independent reviewer | OpenRouter Free model as capacity-limited challenger, never a paid Foundry deployment | Compare analyst outputs using a genuinely distinct model family when available; flag unresolved claims | Treat a second deployment of the same model as an independent vote; promote picks |
 | Deterministic supervisor | Sports Zenith server and existing validation | Require source IDs, source timestamps, eligible sport/season and competition regime, stop on conflicts, count actual receipts | Majority-vote unsupported claims into truth |
 | Public explainer | Existing The Ref app | Present grounded plain-English observations, risks, and clearly labeled RESEARCH/UNKNOWN status | Place bets, send Survivor entries, automatically change official picks or model weights |
 
-No consumer Gemini Advanced, Claude web subscription, or Microsoft Copilot subscription is silently treated as a server-side API credential. Each service needs its approved API access and cost limits. Microsoft Foundry requires an Azure subscription, a Foundry resource, and a model deployment.
+No consumer Gemini Advanced, Claude web subscription, or Microsoft Copilot subscription is silently treated as a server-side API credential. **No paid Claude API or Microsoft Foundry calls are permitted** under the user's $0 rule. Actual API models will be chosen from a verified free account only; private data is excluded from unpaid third-party services.
 
 ### Coding / operational workflow handoff
 Baton Pass (Claude Code and Codex) carries repository state and task ownership, **not sports model authority**. Its CLI/skill is not installed on the current VPS as of the initial Oct 10 preflight. Only install vetted packages after review. Use Git commits plus a versioned, minimal docs/ handoff: prior task, exact source/tests, next action, fail state, provenance, known blockers. A Git commit on the same VPS is *not* proof of off-server disaster recovery. Gemini coding CLI support is not assumed from the Baton Pass skill's declared Claude/Codex scope.
@@ -59,9 +59,9 @@ Reject extra unexpected fields in strict mode, missing evidence for verified cla
 Do not generate a `PLAY` or edit the official / performance ledger. Existing `validateAskOutput` remains an additional validation layer for any later *display* integration.
 
 ## 5. Read-only execution stages
-Stage A — inspect existing data contracts, verify providers, freeze an initial **no-cost evaluation source sample**, and record baseline from the existing deterministic Ask router. No calls if credentials or spend budget are missing.
-Stage B — enable explicit short-lived budget-limited `shadow` calls for Google Gemini and Anthropic Claude, max two provider calls per sampled question, strict timeouts, retries <=1, per-provider caps, abort and record `ERROR` on upstream failure.
-Stage C — after a Microsoft Foundry deployment exists, add a third *genuinely independent family* as challenger. Do not bill a second copy of the same foundational model and call it independence.
+Stage A — inspect existing data contracts, verify providers, freeze an initial **no-cost evaluation source sample**, and record baseline from the existing deterministic Ask router. No external LLM calls until an explicitly connected free-tier credential exists.
+Stage B — use **GroqCloud Free** for a skeptical LLM analyst (eligible open models include `openai/gpt-oss-120b` and Qwen), and **Gemini Free** for independent evidence interpretation using a currently listed free model such as `gemini-2.5-flash-lite`. Only explicitly connected unbilled projects and public/synthetic source packets qualify; each request must use a model confirmed free for that account. Claude API remains DISABLED where prepaid credits or billing are required. Cap requests/output and stop when free allowance is exhausted. No paid fallback.
+Stage C — optionally test an actual different model family from **OpenRouter Free** (25+ free models, 50 requests/day on Free) as a read-only challenger; never pass private records or route requests to a non-`:free` model. Microsoft Foundry remains DISABLED: no paid Azure provisioning or Copilot subscription is required. A paid model must never be selected, even if it has a trial promotional credit.
 Stage D — compare all against original no-LLM Ask baseline; keep model outputs outside the public The Ref until review.
 Stage E — separately approved canary behind `ZENITH_MULTI_LLM_MODE=off|shadow|canary` (default **off**); restrict canary to evidence explanations, never direct action or model promotion. Existing deterministic route remains fallback.
 
@@ -80,11 +80,11 @@ Each case must carry explicit expected source_ids and allowed/forbidden claims. 
 Go/no-go gates for possible public canary: 0 unauthorized actions, 0 fabricated quoted sportsbook prices labeled current, 0 private-user disclosures, 100% correct abstention on red-line adversarial tests, real source citations, and material improvement over the existing deterministic baseline on held-out cases. Independent sports-win prediction improvement must be shown by a separate pre-registered, forward-frozen scoreboard study before claiming predictive advantage.
 
 ## 7. Cost and security
-- STOP before first paid request until user sets explicit total trial budget and billing access. No accounts, keys, subscriptions, GPU jobs, or resource deployments created by mere planning.
+- **Hard cost ceiling is $0 by explicit user instruction. Do not initiate or authorize paid requests, billing account registration, credit card collection, paid subscriptions, GPU jobs, paid Foundry deployments, or charge-capable resources.** If a provider requires a payment method or upgrades on quota exhaustion, it is ineligible; requests fail closed instead.
 - Keys go in host protected environment/secrets only, never React bundle, Markdown docs, Git, logs, screenshots, local cached test fixtures, or public API response.
 - Prefer managed APIs over VPS-local large models for 4 vCPU / 7.6 GiB RAM / no GPU VPS.
-- Explicit per-provider, per-case token/output ceilings; provider allowlist; global hard spend cap, request cap, timeout and outage circuit breaker. Record cost estimate then reconcile actual provider bill.
-- Gemini free API terms may permit provider data improvement; do not send confidential user data or private sports credentials into free tier; review each provider's data processing terms and commercial/ToS rules.
+- Explicit per-provider, per-case token/output ceilings; allowlisted Free-only model IDs; local request/time budgets, hard zero-billing check, timeout and outage circuit breaker. Verify actual free-tier receipt and quota after calls. Never install a paid-token fallback or silently upgrade to a paid plan.
+- Google's unpaid Gemini API tier permits submitted content to be used for product improvement/human review under its terms. **Do not send user accounts, private tickets, personal rosters, unreleased strategy, sensitive information or restricted/paid licensed source text to any free provider**; only sanitized public facts and synthetic cases. Confirm each provider's commercial use, data retention, and free-tier policy before connection.
 - Protect commercial source licenses; do not retransmit paid content to external LLM vendors unless rights and processing terms permit.
 
 ## 8. Durability and acceptance
@@ -103,8 +103,15 @@ Go/no-go gates for possible public canary: 0 unauthorized actions, 0 fabricated 
 
 ## 10. Approval decisions needed before implementation plan
 1. Approve this read-only/shadow design, separate from the site's original predictor/picks and private account data.
-2. Choose an explicit trial spend limit (for example $10 or $25 total), or $0 for credentials-free baseline only.
-3. Provide or authorize setup of API credentials in a protected secrets manager for Gemini and Claude; Microsoft Foundry additionally requires Azure resource/deployment. No keys pasted into chat.
+2. **RESOLVED: $0 total budget**. The user explicitly declined paid API usage. No billing account, payment method, credits, subscription, paid GPU, or usage-based API services may be enabled.
+3. Only after the user explicitly connects an eligible **free, unbilled** provider, store its API credential securely on the VPS. No keys pasted into chat. No Claude prepay or Azure billing.
 4. Approve whether only anonymous public/synthetic sports packets are allowed during the pilot (recommended YES).
 
-After the written design is approved, write the implementation plan with individual TDD boundaries and staged connector-onboarding. No external model should be described as connected or benchmarked until an actual verified inference receipt exists.
+After the written design is approved, write the implementation plan with individual TDD boundaries and no-billing connector-onboarding. No external model is connected or benchmarked without a real, verified **free-tier** inference receipt. If no free credential exists, leave external calls OFF and continue the existing deterministic Sports Zenith evidence pipeline.
+
+## 11. Verified no-charge API routes (October 10, 2026 provider documentation)
+- **GroqCloud Free:** `https://console.groq.com/docs/rate-limits` confirms free-plan rate limits for open-source/open-weight models such as `openai/gpt-oss-120b`: 30 requests/min, 1,000 requests/day, 8,000 tokens/min, 200,000 tokens/day at the documentation snapshot. The billing FAQ `https://console.groq.com/docs/billing-faqs` says a payment method is needed to **upgrade** from Free to Developer. *Verify the user's actual new account is Free and unbilled before using a key.*
+- **Google Gemini Developer API Free:** `https://ai.google.dev/gemini-api/docs/billing` distinguishes unbilled Free and linked-billing paid tiers; `https://ai.google.dev/gemini-api/docs/pricing` lists selected models including `gemini-2.5-flash-lite` with free text input/output allowances, quota-dependent. `https://ai.google.dev/gemini-api/terms` permits free-tier input/output use for training/product improvement and review. Restrict to sanitized public/synthetic packets.
+- **OpenRouter Free:** `https://openrouter.ai/pricing` confirms API access to 25+ free models and 50 free requests/day, with no payment options on the Free plan. Model IDs must explicitly be currently priced $0/free in the user's account, and the route must never auto-escalate to pay-as-you-go.
+- **Cloudflare Workers AI Free optional backup:** `https://developers.cloudflare.com/workers-ai/platform/pricing/` lists a 10,000-neuron daily allowance on Workers Free with above-quota operations failing until reset, and identifies some models requiring a paid billing method. Use only eligible Free models without upgrading or purchasing credits.
+- A no-charge consumer chat session is **not** an authorized API key. Any actual provider connection requires the user to establish/connect an unbilled account via the provider and the server secret store; never post API keys in chat. No endpoint changes, predictions, or live outputs are claimed in this design.
