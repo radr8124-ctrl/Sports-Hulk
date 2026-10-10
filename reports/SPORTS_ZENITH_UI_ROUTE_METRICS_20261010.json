@@ -1,0 +1,400 @@
+{
+  "audit_date": "2026-10-10",
+  "kind": "anonymous_read_only_live_page_metrics",
+  "source": "https://sportszenith.com",
+  "checked_viewports": [
+    "390x844 iPhone",
+    "1280x800 laptop"
+  ],
+  "privacy": "NO_ACCOUNT_LOGIN_OR_PRIVATE_STATE",
+  "records": [
+    {
+      "viewport": "iphone",
+      "page": "Home",
+      "title": "Sports Zenith | Sports Intelligence",
+      "scrollHeight": 3395,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "The game. The numbers.The smarter call.",
+        "Scores & matchups",
+        "What matters now",
+        "No selection has cleared the proof check",
+        "Player props worth examining",
+        "Every pick-em line deserves proof",
+        "Combine legs only with evidence"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "iphone",
+      "page": "Scores",
+      "title": "Scores | Sports Zenith",
+      "scrollHeight": 933,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "Scores & box scores",
+        "Live & final scores",
+        "No NFL game in the active window"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "iphone",
+      "page": "Best Bets",
+      "title": "Best Bets | Sports Zenith",
+      "scrollHeight": 8198,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "Best Bets",
+        "Games, odds and better prices",
+        "Research watchlist"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "iphone",
+      "page": "Props",
+      "title": "Props | Sports Zenith",
+      "scrollHeight": 4238,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "Props"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "iphone",
+      "page": "PrizePicks",
+      "title": "PrizePicks | Sports Zenith",
+      "scrollHeight": 4610,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "PrizePicks"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "iphone",
+      "page": "Fantasy",
+      "title": "Fantasy | Sports Zenith",
+      "scrollHeight": 3702,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "Fantasy command center",
+        "Fantasy accounts & rosters",
+        "Sleeper NFL",
+        "Yahoo Fantasy",
+        "ESPN Fantasy",
+        "CBS Sports Fantasy",
+        "Rate my team"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "iphone",
+      "page": "Survivor",
+      "title": "Survivor | Sports Zenith",
+      "scrollHeight": 3237,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "Survivor",
+        "Week 5 · Survivor market review",
+        "Jacksonville Jaguars",
+        "Houston Texans",
+        "Cincinnati Bengals",
+        "Detroit Lions",
+        "New England Patriots"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "iphone",
+      "page": "Brain Record",
+      "title": "Brain Record | Sports Zenith",
+      "scrollHeight": 12658,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "How good is the brain?",
+        "What the official record means",
+        "How Zenith learns from mistakes",
+        "How is the brain performing now?",
+        "What’s left to settle?",
+        "Is the sports analyst staying grounded?",
+        "What is proven, what is promising, what is still building"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "iphone",
+      "page": "Ask",
+      "title": "Ask | Sports Zenith",
+      "scrollHeight": 1458,
+      "documentWidth": 390,
+      "viewportWidth": 390,
+      "headings": [
+        "Ask the Brain",
+        "What the market thinks. What Zenith thinks.",
+        "Jacksonville Jaguars",
+        "Cincinnati Bengals",
+        "New England Patriots"
+      ],
+      "nav": [
+        {
+          "label": "Mobile primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "Home",
+      "title": "Sports Zenith | Sports Intelligence",
+      "scrollHeight": 2688,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "The game. The numbers.The smarter call.",
+        "Scores & matchups",
+        "What matters now",
+        "No selection has cleared the proof check",
+        "Player props worth examining",
+        "Every pick-em line deserves proof",
+        "Combine legs only with evidence"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "Scores",
+      "title": "Scores | Sports Zenith",
+      "scrollHeight": 800,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "Scores & box scores",
+        "Live & final scores",
+        "No NFL game in the active window"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "Best Bets",
+      "title": "Best Bets | Sports Zenith",
+      "scrollHeight": 3813,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "Best Bets",
+        "Games, odds and better prices",
+        "Research watchlist"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "Props",
+      "title": "Props | Sports Zenith",
+      "scrollHeight": 2011,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "Props"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "PrizePicks",
+      "title": "PrizePicks | Sports Zenith",
+      "scrollHeight": 2226,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "PrizePicks"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "Fantasy",
+      "title": "Fantasy | Sports Zenith",
+      "scrollHeight": 2050,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "Fantasy command center",
+        "Fantasy accounts & rosters",
+        "Sleeper NFL",
+        "Yahoo Fantasy",
+        "ESPN Fantasy",
+        "CBS Sports Fantasy",
+        "Rate my team"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "Survivor",
+      "title": "Survivor | Sports Zenith",
+      "scrollHeight": 1710,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "Survivor",
+        "Week 5 · Survivor market review",
+        "Jacksonville Jaguars",
+        "Houston Texans",
+        "Cincinnati Bengals",
+        "Detroit Lions",
+        "New England Patriots"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "Brain Record",
+      "title": "Brain Record | Sports Zenith",
+      "scrollHeight": 5405,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "How good is the brain?",
+        "What the official record means",
+        "How Zenith learns from mistakes",
+        "How is the brain performing now?",
+        "What’s left to settle?",
+        "Is the sports analyst staying grounded?",
+        "What is proven, what is promising, what is still building"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "viewport": "laptop",
+      "page": "Ask",
+      "title": "Ask | Sports Zenith",
+      "scrollHeight": 1160,
+      "documentWidth": 1280,
+      "viewportWidth": 1280,
+      "headings": [
+        "Ask the Brain",
+        "What the market thinks. What Zenith thinks.",
+        "Jacksonville Jaguars",
+        "Cincinnati Bengals",
+        "New England Patriots"
+      ],
+      "nav": [
+        {
+          "label": "Primary navigation",
+          "visible": true
+        }
+      ],
+      "error": null
+    }
+  ]
+}
