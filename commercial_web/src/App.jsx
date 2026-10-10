@@ -1053,6 +1053,35 @@ function SurvivorCommercialPanel() {
         <span className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-[10px] font-black text-amber-900">SPORTS ZENITH DOES NOT SUBMIT TO YOUR EXTERNAL POOL</span>
       </section>
 
+      {(!isSignedIn || (saved.status !== 'LOADING' && !hasEntry)) && (
+        <section aria-label="Survivor review access shortcut" className="rounded-2xl border-2 border-[#B5D5D3] bg-[#EAF7F4] px-4 py-3 shadow-soft">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-black uppercase tracking-[.12em] text-[#176773]">YOUR PRIVATE SURVIVOR REVIEW</p>
+              <h2 className="mt-1 text-sm font-black text-[#173E52]">
+                {!isSignedIn ? 'Sign in to see your entry' : 'Connect your existing pool entry'}
+              </h2>
+              <p className="mt-1 text-[11px] font-semibold leading-[1.5] text-[#516E77]">
+                {!isSignedIn
+                  ? 'Only your signed-in account can display used teams, saved picks and personal scores.'
+                  : 'Your account is signed in, but no private entry is linked. Use your exact entry name and one-time claim code; no pick will be made.'}
+              </p>
+            </div>
+            <div className="shrink-0">
+              {!isSignedIn ? <AccountButton /> : (
+                <button type="button" onClick={() => {
+                  const form = document.getElementById('survivor-link-entry')
+                  form?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  form?.querySelector('input')?.focus({ preventScroll: true })
+                }} className="rounded-lg bg-[#173E52] px-4 py-2.5 text-[11px] font-black text-white hover:bg-[#26556B]">
+                  Link my Survivor entry <ChevronRight size={14} className="ml-1 inline" />
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {hasEntry && (
         <Suspense fallback={<LoadingSurface label="Loading pick editor" />}>
           <SurvivorPickEditor
@@ -1317,7 +1346,7 @@ function SurvivorCommercialPanel() {
       )}
 
       {isSignedIn && saved.status !== 'LOADING' && (
-        <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5 md:p-6">
+        <section id="survivor-link-entry" className="rounded-3xl border border-blue-200 bg-blue-50 p-5 md:p-6">
           <div className="flex gap-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-700"><CheckCircle2 size={20} /></div>
             <div className="min-w-0 flex-1">

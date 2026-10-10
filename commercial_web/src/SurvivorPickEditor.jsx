@@ -72,7 +72,7 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
       </div>
       <p className="mt-3 text-xs leading-5 text-slate-600">
         Select your current-week teams. Used teams are excluded. Picks are saved privately in Sports Zenith—not submitted to your pool.
-        Picks are locked after kickoff.
+        Pool deadline: Saturday 6 PM Eastern, or two hours before the day's first game for an earlier kickoff. Saving here does not submit to the pool.
       </p>
       {picks.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">

@@ -21,6 +21,8 @@ test('multiple linked entries preserve separate status and used-team counts', ()
     used_team_count: 3,
     used_teams: ['A', 'B', 'C'],
     current_picks: [],
+    last_completed_week: null,
+    last_completed_picks: [],
     current_week: 5,
   })
   assert.deepEqual(result[1], {
@@ -29,6 +31,8 @@ test('multiple linked entries preserve separate status and used-team counts', ()
     used_team_count: 2,
     used_teams: ['D', 'E'],
     current_picks: [],
+    last_completed_week: null,
+    last_completed_picks: [],
     current_week: 5,
   })
 })
@@ -41,6 +45,8 @@ test('missing linked entry state stays non-invented', () => {
     used_team_count: 0,
     used_teams: [],
     current_picks: [],
+    last_completed_week: null,
+    last_completed_picks: [],
     current_week: 5,
   }])
 })
