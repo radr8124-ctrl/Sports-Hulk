@@ -1795,18 +1795,31 @@ function BettingSubnav({ active, onNavigate }) {
   }, [active])
 
   return (
-    <div ref={tabRailRef} aria-label="Betting sections" className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-soft">
-      {bettingNavItems.map((item) => (
-        <button
-          key={item}
-          ref={active === item ? activeButtonRef : null}
-          onClick={() => onNavigate(item)}
-          className={`min-h-11 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black transition ${active === item ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
-        >
-          {item}
-        </button>
-      ))}
-    </div>
+    <section data-premium-market-board aria-label="Zenith market navigation"
+      className="min-w-0 overflow-hidden rounded-[22px] border-2 border-[#173E52] bg-[#FFF5E4] shadow-[4px_4px_0_#173E5224]">
+      <div ref={tabRailRef} role="group" aria-label="Betting sections"
+        className="flex min-w-0 snap-x gap-2 overflow-x-auto px-2 py-1 sm:px-3 sm:py-2">
+        <div data-market-board-heading
+          className="relative flex min-h-11 w-[118px] shrink-0 flex-col justify-center overflow-hidden rounded-xl bg-[#173E52] px-2 py-1 text-[#FFF5E4] sm:w-[170px] sm:px-3">
+          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-[linear-gradient(90deg,#FF7766_0%,#FF7766_34%,#FFD36A_34%,#FFD36A_67%,#46CDD2_67%,#46CDD2_100%)]"/>
+          <span className="text-[9px] font-black uppercase leading-3 tracking-[.04em] text-[#7DE4E1] sm:text-[10px]">THE MARKET BOARD</span>
+          <span className="mt-1 text-[9px] font-black leading-3 text-[#FFD36A] sm:text-[10px]">Proof before picks <span aria-hidden="true">↔</span></span>
+        </div>
+        {bettingNavItems.map((item) => (
+          <button type="button"
+            key={item}
+            ref={active === item ? activeButtonRef : null}
+            aria-current={active === item ? 'page' : undefined}
+            onClick={() => onNavigate(item)}
+            className={`min-h-11 shrink-0 snap-start whitespace-nowrap rounded-xl border-2 px-3.5 py-2 text-[12px] font-black transition sm:px-4 sm:text-sm ${active === item ?
+              'border-[#173E52] bg-[#FFD36A] text-[#173E52] shadow-[2px_2px_0_#173E52]' :
+              'border-[#D3DDDA] bg-white text-[#173E52] hover:border-[#46CDD2] hover:bg-[#E8F7F1]'}`}
+          >
+            {item}
+          </button>
+        ))}
+      </div>
+    </section>
   )
 }
 
