@@ -68,10 +68,10 @@ const toneClass = {
 function Brand() {
   return (
     <div>
-      <div className="text-lg font-black tracking-tight text-white md:text-xl">
-        {PUBLIC_BRAND_WORD_1} <span className="text-sky-300">{PUBLIC_BRAND_WORD_2}</span>
+      <div className="text-lg font-black tracking-tight text-[#173E52] md:text-xl">
+        {PUBLIC_BRAND_WORD_1} <span className="text-[#C84D42]">{PUBLIC_BRAND_WORD_2}</span>
       </div>
-      <div className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400 md:text-[10px]">
+      <div className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.22em] text-[#476572] md:text-[10px]">
         {PUBLIC_TAGLINE}
       </div>
     </div>
@@ -387,7 +387,7 @@ function LearningPanel() {
           <h2>Prediction → result → review → lesson</h2>
         </div>
       </div>
-      <div className="rounded-[24px] border border-[#25415D] bg-gradient-to-br from-[#0E2A46] to-[#081D32] p-4 text-white md:p-6">
+      <div className="rounded-[22px] border-2 border-[#173E52] bg-[#173E52] p-4 text-white shadow-[5px_5px_0_#46CDD2] md:p-6">
         <div className="grid gap-4 md:grid-cols-4">
           {[
             ['1', 'Freeze', 'Store exactly what was known before kickoff.'],
@@ -395,8 +395,8 @@ function LearningPanel() {
             ['3', 'Autopsy', 'Explain what changed and what was misread.'],
             ['4', 'Learn', 'Store validated lessons for future decisions.'],
           ].map(([n, title, text]) => (
-            <div key={n} className="rounded-2xl border border-sky-400/15 bg-white/[.04] p-4 md:p-5">
-              <div className="text-xs font-black text-sky-300">STEP {n}</div>
+            <div key={n} className="rounded-2xl border border-[#476C7A] bg-white/[.045] p-4 md:p-5">
+              <div className="text-xs font-black text-[#FFD36A]">STEP {n}</div>
               <div className="mt-2 text-lg font-black">{title}</div>
               <div className="mt-2 text-sm leading-6 text-slate-300">{text}</div>
             </div>
@@ -1663,28 +1663,35 @@ function HomeDecisionPanel({ onNavigate }) {
   ]
 
   const tone = {
-    blue: 'border-sky-400/25 bg-sky-400/10 text-sky-200',
-    emerald: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200',
-    amber: 'border-amber-400/25 bg-amber-400/10 text-amber-200',
-    violet: 'border-violet-400/25 bg-violet-400/10 text-violet-200',
+    blue: 'border-[#A2DAD9] bg-[#D9F5EC] text-[#0E5967]',
+    emerald: 'border-[#B1DCC5] bg-[#E2F6E8] text-[#21604A]',
+    amber: 'border-[#E6C17F] bg-[#FFF0C6] text-[#7B4A13]',
+    violet: 'border-[#D9CCED] bg-[#EFE8FA] text-[#5D4683]',
+  }
+  const cardAccent = {
+    'Best Bets': 'border-t-[#FF7766]',
+    Props: 'border-t-[#46CDD2]',
+    PrizePicks: 'border-t-[#FFD36A]',
+    Parlays: 'border-t-[#C5A6E8]',
+    Survivor: 'border-t-[#80C99D]',
   }
 
   return (
     <section aria-label="Home decision overview">
       <div className="section-heading">
         <div><p className="eyebrow">Right now</p><h2>What matters now</h2></div>
-        <button onClick={() => onNavigate('Brain Record')} className="text-sm font-black text-sky-300 hover:text-sky-200">How good is the brain? →</button>
+        <button onClick={() => onNavigate('Brain Record')} className="text-sm font-black text-[#0F6977] hover:text-[#B74D46]">How good is the brain? →</button>
       </div>
       <div className="flex snap-x gap-4 overflow-x-auto pb-2 xl:grid xl:grid-cols-5 xl:overflow-visible">
         {cards.map((card) => (
-          <button key={card.label} onClick={() => onNavigate(card.route)} className="min-w-[270px] snap-start rounded-[22px] border border-[#25415D] bg-gradient-to-br from-[#12304C] to-[#0A2037] p-4 text-left text-white transition hover:-translate-y-0.5 hover:border-sky-400/50 xl:min-w-0">
+          <button key={card.label} onClick={() => onNavigate(card.route)} className={`min-w-[270px] snap-start rounded-[20px] border border-[#E1D4C4] border-t-[5px] bg-white p-4 text-left text-[#173E52] shadow-[0_7px_20px_#173E5210] transition hover:-translate-y-0.5 hover:border-[#173E52] xl:min-w-0 ${cardAccent[card.label] || 'border-t-[#FF7766]'}`}>
             <div className="flex items-center justify-between gap-3">
-              <div className="text-xs font-black uppercase tracking-[0.14em] text-sky-300">{card.label}</div>
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-[#0F6A77]">{card.label}</div>
               <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black ${tone[card.tone]}`}>{card.status}</span>
             </div>
-            <div className="mt-4 text-lg font-black leading-6 text-white">{card.title}</div>
-            <div className="mt-3 text-xs font-semibold leading-5 text-slate-300">{card.detail}</div>
-            <div className="mt-5 text-xs font-black text-sky-300">Open {card.label} →</div>
+            <div className="mt-4 text-lg font-black leading-6 text-[#173E52]">{card.title}</div>
+            <div className="mt-3 text-xs font-semibold leading-5 text-[#536B73]">{card.detail}</div>
+            <div className="mt-5 text-xs font-black text-[#B75048]">Open {card.label} →</div>
           </button>
         ))}
       </div>
@@ -1704,35 +1711,35 @@ function HomeSnapshots({ onNavigate }) {
 
   return (
     <section aria-label="Home Fantasy Survivor and Brain Record" className="grid gap-3 lg:grid-cols-3">
-      <button onClick={() => onNavigate('Survivor')} className="rounded-[22px] border border-[#25415D] bg-gradient-to-br from-[#12304C] to-[#0B2339] p-5 text-left text-white transition hover:border-emerald-400/40">
-        <div className="text-xs font-black uppercase tracking-[0.14em] text-emerald-300">{hasPersonalSurvivor ? 'My Survivor' : 'Survivor'}</div>
-        <div className="mt-3 text-2xl font-black text-white">
+      <button onClick={() => onNavigate('Survivor')} className="rounded-[22px] border-2 border-[#E6B8A5] bg-[#FFEBDC] p-5 text-left text-[#173E52] transition hover:border-[#D7755A]">
+        <div className="text-xs font-black uppercase tracking-[0.14em] text-[#AF4D43]">{hasPersonalSurvivor ? 'My Survivor' : 'Survivor'}</div>
+        <div className="mt-3 text-2xl font-black text-[#173E52]">
           {hasPersonalSurvivor
             ? privateSurvivor.active_entry
             : user
               ? 'No pool linked'
               : `Week ${survivor.pool_current_week ?? '—'} research`}
         </div>
-        <div className="mt-2 text-sm font-semibold text-slate-300">
+        <div className="mt-2 text-sm font-semibold text-[#536B73]">
           {hasPersonalSurvivor
             ? `Week ${privateSurvivor.pool_current_week ?? survivor.pool_current_week ?? '—'} · ${(privateSurvivor.used_teams || []).length} teams used`
             : user
               ? 'Account ready for a private Survivor entry'
               : 'Sign in for private entries, used teams and pool rules'}
         </div>
-        <div className="mt-5 text-xs font-black text-emerald-300">Open Survivor →</div>
+        <div className="mt-5 text-xs font-black text-[#A94F3C]">Open Survivor →</div>
       </button>
-      <button onClick={() => onNavigate('Fantasy')} className="rounded-[22px] border border-[#25415D] bg-gradient-to-br from-[#12304C] to-[#0B2339] p-5 text-left text-white transition hover:border-sky-400/40">
-        <div className="text-xs font-black uppercase tracking-[0.14em] text-sky-300">Fantasy + DFS</div>
-        <div className="mt-3 text-2xl font-black text-white">{laneCount} forward-tested lanes</div>
-        <div className="mt-2 text-sm font-semibold text-slate-300">Start/Sit · FAAB · IR stash · Defense · IDP · DFS</div>
-        <div className="mt-5 text-xs font-black text-sky-300">Open Fantasy →</div>
+      <button onClick={() => onNavigate('Fantasy')} className="rounded-[22px] border-2 border-[#B1D6D2] bg-[#D9F4EE] p-5 text-left text-[#173E52] transition hover:border-[#0F8B95]">
+        <div className="text-xs font-black uppercase tracking-[0.14em] text-[#0D6772]">Fantasy + DFS</div>
+        <div className="mt-3 text-2xl font-black text-[#173E52]">{laneCount} forward-tested lanes</div>
+        <div className="mt-2 text-sm font-semibold text-[#536B73]">Start/Sit · FAAB · IR stash · Defense · IDP · DFS</div>
+        <div className="mt-5 text-xs font-black text-[#0E7380]">Open Fantasy →</div>
       </button>
-      <button onClick={() => onNavigate('Brain Record')} className="rounded-[22px] border border-sky-400/25 bg-gradient-to-br from-[#134267] to-[#0A223A] p-5 text-left text-white transition hover:-translate-y-0.5 hover:border-sky-400/50">
-        <div className="text-xs font-black uppercase tracking-[0.14em] text-sky-300">Brain Record</div>
+      <button onClick={() => onNavigate('Brain Record')} className="rounded-[22px] border-2 border-[#173E52] bg-[#173E52] p-5 text-left text-white shadow-[4px_4px_0_#FFD36A] transition hover:-translate-y-0.5 hover:border-[#FFD36A]">
+        <div className="text-xs font-black uppercase tracking-[0.14em] text-[#FFD36A]">Brain Record</div>
         <div className="mt-3 text-3xl font-black">{official.wins ?? 0}-{official.losses ?? 0}-{official.pushes ?? 0}</div>
         <div className="mt-2 text-sm font-semibold text-slate-300">{official.published ?? 0} published · {official.pending ?? 0} pending · {official.roi_pct == null ? 'ROI waiting for settled priced picks' : `${official.units >= 0 ? '+' : ''}${Number(official.units || 0).toFixed(2)}u · ${Number(official.roi_pct).toFixed(1)}% ROI`}</div>
-        <div className="mt-5 text-xs font-black text-sky-300">See the proof →</div>
+        <div className="mt-5 text-xs font-black text-[#FFD36A]">See the proof →</div>
       </button>
     </section>
   )
@@ -3314,12 +3321,12 @@ function MobileBottomNav({ active, onNavigate }) {
   ]
 
   return (
-    <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#06182B]/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_28px_rgba(2,18,36,.17)] backdrop-blur lg:hidden">
+    <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-[#173E52] bg-[#FFF5E4]/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_28px_rgba(2,18,36,.13)] backdrop-blur lg:hidden">
       <div className="grid grid-cols-5 gap-1">
         {items.map(([label, route, Icon]) => {
           const selected = route === 'Best Bets' ? bettingNavItems.includes(active) : active === route
           return (
-            <button key={label} aria-current={selected ? 'page' : undefined} onClick={() => onNavigate(route)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-black ${selected ? 'bg-sky-400 text-[#061729]' : 'text-slate-300'}`}>
+            <button key={label} aria-current={selected ? 'page' : undefined} onClick={() => onNavigate(route)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-black ${selected ? 'bg-[#46CDD2] text-[#173E52] ring-1 ring-[#173E52]' : 'text-[#476572]'}`}>
               <Icon size={18} /><span>{label}</span>
             </button>
           )
@@ -3392,7 +3399,7 @@ export default function App() {
       : `${active} | ${PUBLIC_BRAND}`
     // Safari overscroll should match the page being viewed. Do not apply
     // the dark Home background to the site's detailed research pages.
-    document.documentElement.style.backgroundColor = active === 'Home' ? '#061525' : '#f8fafc'
+    document.documentElement.style.backgroundColor = active === 'Home' ? '#FFF8ED' : '#f8fafc'
   }, [active])
 
   useEffect(() => {
@@ -3441,45 +3448,45 @@ export default function App() {
   const navSelected = (item) => item === 'Betting' ? isBetting : active === item
 
   return (
-    <div className={`min-h-screen pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-0 ${active === 'Home' ? 'bg-[#061525] text-slate-100' : 'bg-[#F1F5FA] text-slate-900'}`}>
+    <div className={`min-h-screen pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-0 ${active === 'Home' ? 'bg-[#FFF8ED] text-[#173E52]' : 'bg-[#F1F5FA] text-slate-900'}`}>
       <a href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus() }} className="skip-link">Skip to main content</a>
-      <header className="sticky top-0 z-30 border-b border-sky-900/40 bg-[#06182B]/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b-2 border-[#173E52] bg-[#FFF5E4]/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-5 md:py-4">
           <button type="button" aria-label="Sports Zenith home" onClick={() => navigate('Home')} className="text-left"><Brand /></button>
 
           <div className="hidden items-center gap-3 lg:flex">
-            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-extrabold text-slate-600">
+            <div className="flex items-center gap-2 rounded-full border border-[#B3DAD5] bg-[#DBF6ED] px-3 py-2 text-xs font-extrabold text-[#173E52]">
               <Activity size={15} className="text-sky-500" />
               {backendLabel}
             </div>
             <AccountButton />
-            <button onClick={() => setAssistantOpen(true)} className="inline-flex items-center gap-2 rounded-2xl bg-sky-400 px-4 py-2.5 text-sm font-black text-[#061729] shadow-lg shadow-sky-500/10 transition hover:-translate-y-0.5">
+            <button onClick={() => setAssistantOpen(true)} className="inline-flex items-center gap-2 rounded-xl border border-[#173E52] bg-[#FF7766] px-4 py-2.5 text-sm font-black text-[#173E52] shadow-[2px_2px_0_#173E52] transition hover:-translate-y-0.5">
               <Sparkles size={16} /> The Ref
             </button>
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
             <AccountButton compact />
-            <button onClick={() => navigate('Ask')} aria-label="Ask" className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-400 text-[#061729]"><Sparkles size={17} /></button>
-            <button aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="min-h-11 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-black text-white">More</button>
+            <button onClick={() => navigate('Ask')} aria-label="Ask" className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#173E52] bg-[#FF7766] text-[#173E52]"><Sparkles size={17} /></button>
+            <button aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="min-h-11 rounded-xl border border-[#173E52] bg-white px-3 py-2 text-xs font-black text-[#173E52]">More</button>
           </div>
         </div>
       </header>
 
-      <nav aria-label="Primary navigation" className="hidden border-b border-white/10 bg-[#071A30] lg:block">
+      <nav aria-label="Primary navigation" className="hidden border-b-[3px] border-[#46CDD2] bg-[#173E52] lg:block">
         <div className="relative mx-auto flex max-w-[1500px] items-center gap-1 px-5 py-2.5">
           {navItems.map((item) => (
             <button
               key={item}
               onClick={() => navigate(item)}
               aria-current={navSelected(item) ? 'page' : undefined}
-              className={`whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-extrabold transition ${navSelected(item) ? 'bg-sky-400 text-[#061729]' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}
+              className={`whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-extrabold transition ${navSelected(item) ? 'bg-[#FFD36A] text-[#173E52]' : 'text-[#E0EEF0] hover:bg-white/10 hover:text-white'}`}
             >
               {item}
             </button>
           ))}
           <div className="relative ml-auto">
-            <button aria-haspopup="menu" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className={`rounded-xl px-3.5 py-2.5 text-sm font-extrabold ${active === 'Research' ? 'bg-sky-400 text-[#061729]' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}>More</button>
+            <button aria-haspopup="menu" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className={`rounded-xl px-3.5 py-2.5 text-sm font-extrabold ${active === 'Research' ? 'bg-[#FFD36A] text-[#173E52]' : 'text-[#E0EEF0] hover:bg-white/10 hover:text-white'}`}>More</button>
             {moreOpen && (
               <div className="absolute right-0 top-12 z-40 w-64 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-2xl">
                 <MoreMenu onNavigate={navigate} onClose={() => setMoreOpen(false)} />
@@ -3489,7 +3496,7 @@ export default function App() {
         </div>
       </nav>
 
-      <main id="main-content" tabIndex="-1" className={`mx-auto max-w-[1500px] px-4 md:px-5 md:py-8 ${active === 'Home' ? 'zenith-home space-y-6 py-5' : 'space-y-8 py-6'}`} >
+      <main id="main-content" tabIndex="-1" className={`mx-auto max-w-[1500px] px-4 md:px-5 md:py-8 ${active === 'Home' ? 'zenith-home space-y-5 py-5' : 'space-y-8 py-6'}`} >
         {isAsk ? (
           <Suspense fallback={<LoadingSurface label="Loading analyst" />}><AskSportsHulkPage /></Suspense>
         ) : (
@@ -3581,8 +3588,8 @@ export default function App() {
 
       <MobileBottomNav active={active} onNavigate={navigate} />
 
-      <footer className={active === 'Home' ? 'border-t border-[#25415D] bg-[#071B2F]' : 'border-t border-slate-200 bg-white'}>
-        <div className="mx-auto flex max-w-[1500px] flex-col gap-2 px-5 py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+      <footer className={active === 'Home' ? 'border-t-2 border-[#173E52] bg-[#FFF1DB]' : 'border-t border-slate-200 bg-white'}>
+        <div className="mx-auto flex max-w-[1500px] flex-col gap-2 px-5 py-6 text-sm font-semibold text-[#506B75] sm:flex-row sm:items-center sm:justify-between">
           <span>{PUBLIC_BRAND} · {PUBLIC_TAGLINE}</span>
           <span>Real data · Unknown stays UNKNOWN · Stale stays STALE</span>
         </div>

@@ -11,30 +11,26 @@ Primary jobs:
 - Distinguish live recommendations from research/shadow/accountability data.
 
 ## Existing information architecture
-Top-level views: Home, Ask Sports HULK, NFL, MLB, NBA, CFB, Props, Parlays, Survivor, Fantasy, Practice, Brain Record, Research.
-The current UI uses a sticky brand row plus a second horizontal tab row. Home includes a large command-center hero, health status cards, live scores, decision cards, Survivor strategy and a learning-loop section. Brain Record contains many stacked accountability sections and large data tables. Ask Sports HULK uses its own dark visual language.
+Current primary views: Home, Scores, Betting, Fantasy, Survivor, News & Insights, Brain Record and Ask. Betting destinations are Best Bets, Props, PrizePicks and Parlays; DFS lives under Fantasy. Keep the existing sticky brand row, desktop task navigation and compact iPhone bottom navigation. Home shows a compact editorial hero, live source-fed score cards, decision shortcuts, top news (maximum four), Survivor/Fantasy/Brain quick links and a collapsed technical status section. Ask Sports HULK keeps its own dark assistant language.
 
-## Visual foundation
-- Font: Inter only.
-- Main app background: #f8fafc.
-- Primary surfaces: white cards with #e2e8f0-like slate borders.
-- Main text: slate-950/slate-900.
-- Secondary text: slate-500/slate-400.
-- Brand emphasis: strong blue-700.
-- Success: emerald.
-- Warning: amber.
-- Error: rose.
-- Radius: rounded-2xl/rounded-3xl; hero around 30px.
-- Shadows: subtle, soft; no heavy glossy effects.
-- Layout: centered max-width about 1500px, generous horizontal space on desktop.
-- Motion: restrained hover lift and color transitions.
-- Iconography: Lucide line icons.
+## Visual foundation — October 10, 2026 user-updated 1980s sports-broadcast edition
+- **New approved direction:** premium, brighter 1980s-inspired sports magazine/editorial identity, not an all-dark navy app; this supersedes the former navy-only homepage and the old slate/blue-only constraint.
+- Font: Inter for navigation, scorecards and readable body text. Bold, tight-tracked sports-magazine headlines are welcome; avoid novelty cartoon fonts.
+- Main Home background: warm cream `#FFF8ED`; hero and masthead: `#FFF5E4`; main text and contrast: deep ink `#173E52`.
+- Accent palette: bright aqua `#46CDD2`, coral `#FF7766`, sunshine gold `#FFD36A` plus dark ink and soft warm ivory. Use these as category/navigation and sports-masthead accents, not for fabricated betting confidence.
+- Score-rail panel: pale mint `#DAF4EE`, real game tiles white with strong readable ink labels and thin coral sports-strip top. Other interior evidence pages stay white/slate and readable until intentionally adapted.
+- Editorial Top News is light with small source-attributed story cards, original category icon signs, visible injury/recap/fantasy distinctions. No more than four Home headlines; the News page houses the full organized six-sport news collection.
+- Deep ink navy is **one contrasting supporting surface** (for The Ref, selected learning cards, and verified proof), not a full-screen background blanket.
+- Radius: controlled 12–24px; occasional squared magazine-like edges, restrained 2px editorial borders, subtle offset stripe shadows. No casino lights, faux VHS glitch, or kitsch.
+- Layout: centered max-width around 1500px, compact first-screen score rail on phones, five mobile primary tabs and large touch targets.
+- Motion: restrained hover lift and color transitions, honoring `prefers-reduced-motion`.
+- Icons: Lucide line icons and existing original Zenith Ref avatar. Do not imply an injury is officially confirmed because a news article is tagged Injury.
 
 ## Assistant visual language
 Ask Sports HULK uses a deep green-black surface with subtle grid/radial lighting, cyan/emerald accents, white type, and dark cards. It should remain distinctive but still clearly belong to the same Sports HULK brand.
 
 ## Product personality
-Confident, intelligent, calm, transparent. Avoid casino aesthetics, neon betting clichés, sports-broadcast clutter, fake certainty, or overuse of gradients.
+Premium retro sports broadcast and magazine editorial, confident, intelligent and human-readable. Aqua/coral/gold evoke a 1980s sports cover without casinos, obnoxious neon, dense sports-broadcast clutter, fake certainty, sports-ad clutter or overuse of gradients. Public copy should say what a bet means (for example “Take Arizona +3.5”), not rely on opaque betting jargon or confuse model research with approval.
 
 ## UX principles for the review
 1. Simple answer first; proof second.
@@ -51,7 +47,12 @@ Confident, intelligent, calm, transparent. Avoid casino aesthetics, neon betting
 12. Assistant access should remain persistent and prominent.
 
 ## Current component style constraints
-Use only Inter, slate/white/blue/emerald/amber/rose colors, soft borders, subtle shadows and Lucide-style icons. Do not introduce purple/pink branding, decorative serif fonts, glassmorphism-heavy effects, or casino/neon visual language.
+Use the **new cream/aqua/coral/gold/ink palette** above for the public frame, Home, scores, category signs and navigation, with white/slate readable research interiors and normal semantic emerald/amber/rose statuses. Keep the existing Sports Zenith identity, pages, user accounts, Book/Survivor proof gates, frozen model ledgers, assistant avatar and real sports-data sources. No generic dark-app regression, slot-machine/gambling imagery, excessive gradients, purple/pink brand rework or misleading decorative green PLAY badges. Retain original `styles.css` route safety and accessibility. New user-visible terminology must be written in plain English.
+
+## Verified implementation and regression
+- October 10 initial live 80s release: `commercial_web/src/CommandCenterHero.jsx`, `HomeGameDayDeck.jsx`, `HomeTopNews.jsx`, `App.jsx`, `styles.css` and updated original Home browser tests.
+- Existing live account/private Survivor/scorecards/model pipelines unchanged. Scored game outcomes and timestamps may not be visually reinvented. The full next visual step is bringing this editorial brand system into each interior task page while preserving the compact answer-first hierarchy.
+- Never claim site-wide visual rollout is complete from a Home-only pass. Verify on iPhone-width and desktop real HTTPS, zero horizontal overflow and no private identity leaks.
 
 ## Review target
 The review should preserve the Sports HULK identity while identifying what should be kept, simplified, regrouped, moved, collapsed, promoted, or removed. Any recommended redesign should feel like an evolution of the current product rather than an unrelated app.

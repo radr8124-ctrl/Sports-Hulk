@@ -12,7 +12,7 @@ async function home(p,width=390,freeze=true){
   await expect(score(p).getByRole('heading',{name:'Scores & matchups'})).toBeVisible()
 }
 
-test('dark game-day command center shows real scores in first viewport on iPhone',async({page})=>{
+test('retro sports-broadcast command center shows real scores in first viewport on iPhone',async({page})=>{
  await home(page)
  const hero=page.getByRole('region',{name:'Sports Zenith game-day command center'})
  await expect(hero.getByRole('heading',{name:/The game.*The smarter call/s})).toBeVisible()
@@ -35,7 +35,7 @@ test('dark game-day command center shows real scores in first viewport on iPhone
 test('All sport cards represent multiple distinct leagues, not 5 repeat NHL games',async({page})=>{
  await home(page)
  await expect(gameCards(page)).toHaveCount(5)
- const sports=await gameCards(page).locator('span.text-sky-300').allTextContents()
+ const sports=await gameCards(page).evaluateAll(cards=>cards.map(card=>card.getAttribute('data-sport')))
  expect(new Set(sports).size).toBe(5)
  for(const sport of ['NFL','NHL','NBA','MLB','CFB']){
    expect(sports).toContain(sport)
@@ -89,7 +89,7 @@ test('Stale feeds explicitly mark SOURCE STALE and cannot pretend games are live
  await expect(gameCards(page)).toHaveCount(0)
 })
 
-test('Dark navigation and homepage links continue to open original services',async({page})=>{
+test('Bright sports-broadcast navigation and homepage links open original services',async({page})=>{
  await home(page,1280)
  await expect(page.getByRole('navigation',{name:'Primary navigation'})).toBeVisible()
  await page.getByRole('region',{name:'Sports Zenith game-day command center'}).getByRole('button',{name:/Explore Bets/}).click()

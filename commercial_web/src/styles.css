@@ -119,9 +119,12 @@ button { font: inherit; }
   }
 }
 
-/* Home-only dark command-center continuity. Other detailed betting, fantasy,
-   Survivor and performance pages intentionally retain light reading surfaces. */
+/* Sports Zenith 1980s broadcast-editorial edition.
+   Cream + aqua + coral + gold are presentation only: never change odds,
+   source freshness, model decisions or existing sports account data. */
 @layer components {
-  .zenith-home .section-heading h2 { @apply text-white; }
-  .zenith-home .section-heading .eyebrow { @apply text-sky-300; }
+  .zenith-home .section-heading h2 { color: #173e52; }
+  .zenith-home .section-heading .eyebrow { color: #b75048; }
+  .zenith-home .section-heading { border-bottom: 1px solid #e5d7c4; padding-bottom: .7rem; }
+  .zenith-home :is(button, a):focus-visible { outline-color: #af433e; outline-offset: 3px; }
 }
