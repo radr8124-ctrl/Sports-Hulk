@@ -66,3 +66,7 @@ The user approved a distinctive premium sports-magazine identity: clean, memorab
 - Light News article cards use matching category-specific editorial paper, not generic bright white, while retaining exact original attributed link, injury/recap/fantasy category icon truth and published time.
 - Continue to show proof and data freshness in plain English. Do not create synthetic statistics or claim predictive advantages from decorative badges.
 - A user-specific visual request to make a mascot more visible does not authorize automatic audio, microphone permissions, gambling actions or manipulation of actual results.
+
+
+## October 10 — The Ref spontaneous sideline performances
+The user specifically wants The Ref to be a playful full-body animated companion who can throw flags, make umpire strike-three motions, and show whistle gestures **automatically while visitors browse**, not just when tapped. On Home and News the original SVG Ref now stages occasional decorative silent calls, choosing motions by current section; he stays quiet when a tab is hidden, reduced motion is requested, controls are open, he is minimized or hovered, and after manual interaction. A saved **Surprise Ref calls** switch lets each visitor turn the feature off without accounts or telemetry. Whistle AUDIO always requires a real human tap. On mobile hide only the automatic speech bubble, not the full-body character; preserve nav clearance and accepted character size. Do not mistake theatrical gestures for verified game events or approved betting selections.

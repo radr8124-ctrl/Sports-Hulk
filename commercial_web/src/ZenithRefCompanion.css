@@ -45,6 +45,8 @@
 @media (max-width:767px) {
  .zenith-ref-companion{bottom:calc(6.3rem + env(safe-area-inset-bottom))}
  .zenith-ref-companion[data-expanded="false"][data-signal="idle"] .zenith-ref-speech{display:none}
+ /* Let the full-body Ref perform without throwing a large dialogue over scorecards. */
+ .zenith-ref-companion[data-origin="auto"][data-expanded="false"] .zenith-ref-speech{display:none}
  .zenith-ref-control-panel{max-height:min(330px,calc(100dvh - 290px))}
 }
 @keyframes zenith-premium-ref-hover{

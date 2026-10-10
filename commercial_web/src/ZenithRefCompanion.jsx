@@ -1,11 +1,16 @@
 import React,{useEffect,useRef,useState} from 'react'
 import {ArrowLeftRight,BarChart3,Flag,Hand,MessageCircle,Volume2,X,Minimize2,Maximize2} from 'lucide-react'
 import ZenithRefAvatar from './ZenithRefAvatar.jsx'
+import {canAutoPerform,nextRefCall,nextRefDelay,REF_MANUAL_PAUSE_MS} from '../ref_motion_presentation.js'
 import './ZenithRefCompanion.css'
 
 // The Ref is an original site mascot. These theatrical calls are never
 // official game events, injury reports or betting-model recommendations.
 const callText={idle:'ASK THE REF',flag:'FLAG ON THE PLAY!',strike:'STRIKE THREE!',whistle:'FWEET! WHISTLE!'}
+const REF_AUTO_STORAGE_KEY='zenith-ref-surprise-calls-v1'
+function savedAutoPreference(){
+ try{return window.localStorage.getItem(REF_AUTO_STORAGE_KEY)!=='off'}catch{return true}
+}
 const sideline=[
  {key:'welcome',name:'GAME DAY',selector:'[aria-label="Sports Zenith game-day command center"]',bottom:25},
  {key:'scores',name:'SCOREBOARD',selector:'[aria-label="Game Day scores and schedule"]',bottom:34},
@@ -86,15 +91,58 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
  const [expanded,setExpanded]=useState(false)
  const [minimized,setMinimized]=useState(false)
  const [left,setLeft]=useState(false)
- const [signal,setSignal]=useState({kind:'idle',id:0})
+ const [signal,setSignal]=useState({kind:'idle',id:0,origin:'none'})
  const [section,setSection]=useState(page==='News & Insights'?'news':'welcome')
+ const [autoEnabled,setAutoEnabled]=useState(savedAutoPreference)
+ const [reducedMotion,setReducedMotion]=useState(()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false)
+ const [visible,setVisible]=useState(()=>!document.hidden)
+ const [hovered,setHovered]=useState(false)
+ const [autoCalls,setAutoCalls]=useState(0)
+ const lastAutoKind=useRef('idle')
+ const activeSection=useRef(section)
+ const pauseAutoUntil=useRef(0)
  const seq=useRef(0)
  useEffect(()=>{
   if(signal.kind==='idle')return undefined
   const timer=window.setTimeout(()=>setSignal(current=>
-   current.id===signal.id?{kind:'idle',id:current.id}:current),2100)
+   current.id===signal.id?{...current,kind:'idle'}:current),2100)
   return()=>window.clearTimeout(timer)
  },[signal])
+ useEffect(()=>{
+  const motion=window.matchMedia?.('(prefers-reduced-motion: reduce)')
+  const syncMotion=()=>setReducedMotion(Boolean(motion?.matches))
+  const syncVisibility=()=>setVisible(!document.hidden)
+  syncMotion()
+  syncVisibility()
+  motion?.addEventListener?.('change',syncMotion)
+  document.addEventListener('visibilitychange',syncVisibility)
+  return()=>{
+   motion?.removeEventListener?.('change',syncMotion)
+   document.removeEventListener('visibilitychange',syncVisibility)
+  }
+ },[])
+ useEffect(()=>{
+  try{window.localStorage.setItem(REF_AUTO_STORAGE_KEY,autoEnabled?'on':'off')}catch{}
+ },[autoEnabled])
+ useEffect(()=>{activeSection.current=section},[section])
+ useEffect(()=>{
+  if(!canAutoPerform({enabled:autoEnabled,reducedMotion,visible,minimized,expanded,hovered}))return undefined
+  if(signal.kind!=='idle')return undefined
+  const delay=nextRefDelay({
+   hasPerformed:autoCalls>0,manualPauseUntil:pauseAutoUntil.current,now:Date.now(),
+  })
+  const timer=window.setTimeout(()=>{
+   // Visibility and motion can change between timer scheduling and delivery.
+   if(document.hidden||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return
+   const kind=nextRefCall(activeSection.current,lastAutoKind.current)
+   lastAutoKind.current=kind
+   seq.current+=1
+   setSignal({kind,id:seq.current,origin:'auto'})
+   setAutoCalls(n=>n+1)
+   // No sound. Theatrical whistle cues are visual unless the user clicks.
+  },delay)
+  return()=>window.clearTimeout(timer)
+ },[autoEnabled,reducedMotion,visible,minimized,expanded,hovered,signal.kind,autoCalls])
  useEffect(()=>{
   if(page==='News & Insights'){setSection('news');return undefined}
   let raf=null
@@ -125,8 +173,9 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
   }
  },[page])
  const perform=kind=>{
+  pauseAutoUntil.current=Date.now()+REF_MANUAL_PAUSE_MS
   seq.current+=1
-  setSignal({kind,id:seq.current})
+  setSignal({kind,id:seq.current,origin:'manual'})
   if(kind==='whistle')shortWhistle()
  }
  const current=sideline.find(x=>x.key===section)||sideline[0]
@@ -134,6 +183,8 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
   aria-label="The Ref sports companion"
   data-ref-companion
   data-signal={signal.kind}
+  data-origin={signal.origin}
+  data-auto-enabled={autoEnabled&&!reducedMotion?'true':'false'}
   data-side={left?'left':'right'}
   data-section={section}
   data-minimized={minimized?'true':'false'}
@@ -151,6 +202,13 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
    <p className="mt-1 text-[11px] font-semibold leading-5 text-[#526A73]">
     A sports companion who moves through the site. The signals below are just for fun.
    </p>
+   <button type="button" role="switch" aria-label="Surprise Ref calls" aria-checked={autoEnabled}
+    onClick={()=>{pauseAutoUntil.current=Date.now()+REF_MANUAL_PAUSE_MS;setAutoEnabled(enabled=>!enabled)}}
+    className="mt-2 flex min-h-10 w-full items-center justify-between gap-2 rounded-lg border border-[#B3D5D0] bg-white px-3 text-xs font-black text-[#173E52]">
+    <span>Surprise calls</span>
+    <span className={`rounded-full px-2 py-1 ${autoEnabled?'bg-[#DBF4F0] text-[#276273]':'bg-slate-100 text-slate-600'}`}>{autoEnabled?'ON':'OFF'}</span>
+   </button>
+   <p className="mt-1 text-[10px] font-semibold text-[#526A73]">Visual fun only · No automatic sound{reducedMotion?' · Paused for reduced motion':''}.</p>
    <div className="mt-2 grid grid-cols-3 gap-1.5">
     <button type="button" aria-label="The Ref throws a flag" onClick={()=>perform('flag')}
      className="min-h-12 rounded-lg border border-[#E2BB75] bg-[#FFF0C6] px-1 text-[11px] font-black"><Flag size={17} className="mx-auto mb-0.5"/>Flag</button>
@@ -180,11 +238,13 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
   ):(
    <div className="pointer-events-auto flex items-end gap-2">
     <div className="zenith-ref-speech max-w-[118px] rounded-xl border-2 border-[#173E52] bg-[#FFF5E4] px-2.5 py-2 text-center text-[11px] font-black leading-4 text-[#173E52] shadow-[2px_3px_0_#173E5220]">
-     <span aria-live="polite">{callText[signal.kind]}</span>
+     <span aria-live={signal.origin==='auto'?'off':'polite'}>{callText[signal.kind]}</span>
      <span className="mt-1 block border-t border-[#E2CDB0] pt-1 text-[9px] font-extrabold tracking-wider text-[#AB5343]">{current.name}</span>
     </div>
     <button type="button" aria-label="Open The Ref animated sports companion" aria-expanded={expanded}
-     onClick={()=>setExpanded(x=>!x)}
+     onClick={()=>{pauseAutoUntil.current=Date.now()+REF_MANUAL_PAUSE_MS;setExpanded(x=>!x)}}
+     onPointerEnter={event=>{if(event.pointerType==='mouse')setHovered(true)}}
+     onPointerLeave={event=>{if(event.pointerType==='mouse')setHovered(false)}}
      className={`zenith-ref-mascot zenith-ref--${signal.kind} relative block h-[142px] w-[113px] shrink-0 cursor-pointer transition-transform hover:scale-[1.035] md:h-[190px] md:w-[150px] 2xl:h-[213px] 2xl:w-[170px]`}>
      <RefFigure/>
     </button>
