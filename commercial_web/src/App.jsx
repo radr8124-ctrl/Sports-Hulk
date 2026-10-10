@@ -15,6 +15,8 @@ import { explainBetProof, organizeBetResearch } from '../betting_proof_presentat
 import { survivorHomeSummary } from '../survivor_home_summary.js'
 import CommandCenterHero from './CommandCenterHero.jsx'
 import HomeGameDayDeck from './HomeGameDayDeck.jsx'
+import HomeTopNews from './HomeTopNews.jsx'
+import SportsNewsHub from './SportsNewsHub.jsx'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
 const AssistantDrawer = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AssistantDrawer })))
@@ -1665,76 +1667,6 @@ function HomeDecisionPanel({ onNavigate }) {
   )
 }
 
-function HomeImpactNews({ onNavigate }) {
-  const graph = useJsonEndpoint('/ask_retrieval.json', { news_events: [] })
-
-  const impactTypes = new Set(['INJURY', 'TRANSACTION', 'LINEUP_ROLE', 'FANTASY', 'RECAP'])
-  const promoPattern = /promo code|bonus bets?|sportsbook|deposit|free bet|betting promo/i
-  const seen = new Set()
-  const rows = (graph.news_events || [])
-    .filter((row) => row.event_source_type === 'NEWS' && impactTypes.has(row.event_type) && row.title)
-    .filter((row) => !promoPattern.test(String(row.title || '')))
-    .sort((a, b) => String(b.published_or_effective_at || '').localeCompare(String(a.published_or_effective_at || '')))
-    .filter((row) => {
-      const key = String(row.title || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
-      if (!key || seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
-    .slice(0, 4)
-
-  const why = (row) => {
-    const type = String(row.event_type || '').toUpperCase()
-    if (type === 'INJURY') return 'Availability can change fantasy roles, props and game expectations.'
-    if (type === 'TRANSACTION') return 'Roster movement can change depth charts, usage and opportunity.'
-    if (type === 'LINEUP_ROLE') return 'Role changes can alter volume, fantasy value and matchup assumptions.'
-    if (type === 'FANTASY') return 'Fantasy context can affect waiver, Start/Sit and roster decisions.'
-    if (type === 'RECAP') return 'Final results feed the learning loop and next-game context.'
-    return 'This development may affect a current sports decision.'
-  }
-
-  const tone = (type) => {
-    const value = String(type || '').toUpperCase()
-    if (value === 'INJURY') return 'border border-rose-400/20 bg-rose-400/10 text-rose-200'
-    if (value === 'TRANSACTION') return 'border border-violet-400/20 bg-violet-400/10 text-violet-200'
-    if (value === 'LINEUP_ROLE' || value === 'FANTASY') return 'border border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-    return 'border border-sky-400/20 bg-sky-400/10 text-sky-200'
-  }
-
-  return (
-    <section aria-label="Home sports news">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">News & insights</p>
-          <h2>What changed that could matter</h2>
-        </div>
-        <button onClick={() => onNavigate('News & Insights')} className="text-sm font-black text-sky-300 hover:text-sky-200">Open News & Insights →</button>
-      </div>
-
-      {rows.length ? (
-        <div className="flex snap-x gap-4 overflow-x-auto pb-2 xl:grid xl:grid-cols-4 xl:overflow-visible">
-          {rows.map((row) => (
-            <button key={row.event_node_id} onClick={() => onNavigate('News & Insights')} className="min-w-[285px] snap-start rounded-[22px] border border-[#25415D] bg-gradient-to-br from-[#122D49] to-[#0B2239] p-4 text-left text-white transition hover:-translate-y-0.5 hover:border-sky-400/50 xl:min-w-0">
-              <div className="flex items-center justify-between gap-3">
-                <span className="rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-black text-white">{row.sport}</span>
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${tone(row.event_type)}`}>{humanize(row.event_type)}</span>
-              </div>
-              <div className="mt-4 line-clamp-3 text-base font-black leading-6 text-white">{row.title}</div>
-              <div className="mt-3 text-xs font-semibold leading-5 text-slate-300">{why(row)}</div>
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-[10px] font-bold text-slate-400">
-                <span>{row.source}</span>
-                <span>{row.published_or_effective_at ? new Date(row.published_or_effective_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-[22px] border border-[#25415D] bg-[#0E2740] p-5 text-sm font-semibold text-slate-300">Impact news is quiet. New verified injury, transaction and fantasy-impact reporting will appear here when available.</div>
-      )}
-    </section>
-  )
-}
-
 function HomeSnapshots({ onNavigate }) {
   const { user } = useAuth()
   const survivor = useJsonEndpoint('/survivor_v2_current.json', {})
@@ -2103,29 +2035,12 @@ function ScoresHub() {
   )
 }
 
-function NewsInsightsPanel() {
-  const graph = useJsonEndpoint('/ask_retrieval.json', { news_events: [], counts: {}, truth_rules: {} })
+function NewsEditorialWorkbench() {
+  const graph = useJsonEndpoint('/ask_retrieval.json', { news_events: [], counts: {} })
   const survivor = useJsonEndpoint('/survivor_v2_current.json', {})
   const props = useJsonEndpoint('/prop_v2_current.json', { picks: [] })
   const editorial = useJsonEndpoint('/insight_drafts.json', { drafts: [], editorial_policy: {} })
-  const [sport, setSport] = useState('ALL')
-  const [view, setView] = useState('Impact')
-
-  const news = (graph.news_events || []).filter((row) => row.event_source_type === 'NEWS' && row.title)
-  const sports = ['ALL', ...Array.from(new Set(news.map((row) => row.sport).filter(Boolean))).sort()]
-  const impactTypes = new Set(['INJURY', 'TRANSACTION', 'LINEUP_ROLE', 'FANTASY', 'RECAP'])
-
-  const filtered = news
-    .filter((row) => sport === 'ALL' || row.sport === sport)
-    .filter((row) => {
-      if (view === 'Latest') return true
-      if (view === 'Injuries') return row.event_type === 'INJURY'
-      if (view === 'Fantasy') return ['FANTASY', 'INJURY', 'LINEUP_ROLE', 'TRANSACTION'].includes(row.event_type)
-      return impactTypes.has(row.event_type)
-    })
-    .sort((a, b) => String(b.published_or_effective_at || '').localeCompare(String(a.published_or_effective_at || '')))
-    .slice(0, 18)
-
+  const news = (graph.news_events || []).filter(row => row.event_source_type === 'NEWS' && row.title)
   const monitors = (props.picks || []).filter((row) => row.lane === 'PRIZEPICKS' && row.shadow_decision === 'SHADOW_MONITOR')
   const topInjury = news.find((row) => row.event_type === 'INJURY')
   const insightIdeas = [
@@ -2153,72 +2068,9 @@ function NewsInsightsPanel() {
   ].filter(Boolean)
   const editorialDrafts = (editorial.drafts || []).slice(0, 6)
 
-  const eventTone = (type) => {
-    if (type === 'INJURY') return 'bg-rose-50 text-rose-700'
-    if (type === 'TRANSACTION') return 'bg-violet-50 text-violet-700'
-    if (type === 'RECAP') return 'bg-blue-50 text-blue-700'
-    if (type === 'FANTASY' || type === 'LINEUP_ROLE') return 'bg-emerald-50 text-emerald-700'
-    return 'bg-slate-100 text-slate-600'
-  }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-soft md:p-8">
-        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-          <div>
-            <p className="eyebrow">News & Insights</p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Know what changed — and why it matters</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">Cross-sport reporting is linked to the same structured facts used by the rest of the application. Source links stay visible, and reporting never silently becomes a model fact.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="health-pill emerald">{graph.counts?.news_events ?? news.length} EVENTS</span>
-            <span className="health-pill">{graph.counts?.facts ?? 0} STRUCTURED FACTS</span>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div className="section-heading">
-          <div><p className="eyebrow">Live reporting</p><h2>{view === 'Impact' ? 'What matters now' : view}</h2></div>
-          <span className="health-pill emerald">SOURCE LINKS PRESERVED</span>
-        </div>
-
-        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-soft lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex gap-2 overflow-x-auto">
-            {['Impact', 'Latest', 'Injuries', 'Fantasy'].map((item) => (
-              <button key={item} onClick={() => setView(item)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-black ${view === item ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-50'}`}>{item}</button>
-            ))}
-          </div>
-          <div className="flex gap-2 overflow-x-auto">
-            {sports.map((item) => (
-              <button key={item} onClick={() => setSport(item)} className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-black ${sport === item ? 'bg-blue-700 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>{item === 'ALL' ? 'All sports' : item}</button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((item) => (
-            <a key={item.event_node_id} href={item.source_url || undefined} target={item.source_url ? '_blank' : undefined} rel="noreferrer" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-blue-200">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-black text-white">{item.sport}</span>
-                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${eventTone(item.event_type)}`}>{humanize(item.event_type)}</span>
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-wide text-slate-400">{item.source}</span>
-              </div>
-              <div className="mt-4 text-lg font-black leading-6 text-slate-950">{item.title}</div>
-              {item.detail && item.detail !== item.title && <div className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">{item.detail}</div>}
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] font-semibold text-slate-400">
-                <span>{item.source_tier === 'EXTERNAL_NEWS' ? 'Attributed reporting' : humanize(item.source_tier)}</span>
-                <span>{item.published_or_effective_at ? new Date(item.published_or_effective_at).toLocaleString() : ''}</span>
-              </div>
-            </a>
-          ))}
-        </div>
-
-        {!filtered.length && <EmptyPanel icon={Radio} title="No matching news" text="There are no current reporting events for this filter. The feed will update automatically when new source events arrive." />}
-      </section>
-
+    <div>
       <section>
         <div className="section-heading">
           <div>
@@ -2335,6 +2187,22 @@ function NewsInsightsPanel() {
           </div>
         </div>
       </section>
+    </div>
+  )
+}
+
+function NewsInsightsPanel() {
+  const [showEditorial, setShowEditorial] = useState(false)
+  return (
+    <div className="min-w-0 space-y-6">
+      <SportsNewsHub />
+      <details aria-label="Sports Zenith editorial research drafts" onToggle={(event) => setShowEditorial(event.currentTarget.open)}
+        className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-soft md:p-5">
+        <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 text-xs font-black text-blue-700">
+          Editorial research lab · drafts only, no automatic publishing <ChevronRight size={16} className="transition-transform group-open:rotate-90" />
+        </summary>
+        {showEditorial && <div className="mt-4 border-t border-slate-100 pt-4"><NewsEditorialWorkbench /></div>}
+      </details>
     </div>
   )
 }
@@ -3606,7 +3474,7 @@ export default function App() {
                 <CommandCenterHero onNavigate={navigate} />
                 <HomeGameDayDeck onNavigate={navigate} />
                 <HomeDecisionPanel onNavigate={navigate} />
-                <HomeImpactNews onNavigate={navigate} />
+                <HomeTopNews onNavigate={navigate} />
                 <HomeSnapshots onNavigate={navigate} />
                 <LearningPanel />
                 <details className="group rounded-2xl border border-[#25415D] bg-[#0A2036] p-3 text-slate-100">
@@ -3658,7 +3526,7 @@ export default function App() {
         )}
       </main>
 
-      {!assistantOpen && !isAsk && active !== 'Home' && (
+      {!assistantOpen && !isAsk && active !== 'Home' && active !== 'News & Insights' && (
         <Suspense fallback={null}>
           <AssistantLauncher onClick={() => setAssistantOpen(true)} />
         </Suspense>

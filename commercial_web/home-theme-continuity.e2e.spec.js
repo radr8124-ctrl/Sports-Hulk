@@ -22,9 +22,9 @@ test('entire Home uses navy surfaces: decisions, news, Fantasy, Survivor, Brain 
    html:computed('html'),
    firstDecision:computed('section[aria-label="Home decision overview"] button.min-w-\\[270px\\]'),
    heading:computed('section[aria-label="Home decision overview"] h2'),
-   news:computed(document.querySelector('section[aria-label="Home sports news"] > div:nth-child(2) button')
-    ?'section[aria-label="Home sports news"] > div:nth-child(2) button'
-    :'section[aria-label="Home sports news"] > div:nth-child(2)'),
+   news:computed(document.querySelector('section[aria-label="Home sports news"] [data-news-card]')
+    ?'section[aria-label="Home sports news"] [data-news-card]'
+    :'section[aria-label="Home sports news"] [role="status"]'),
    newsHeading:computed('section[aria-label="Home sports news"] h2'),
    survivor:computed('section[aria-label="Home Fantasy Survivor and Brain Record"] button:first-child'),
    fantasy:computed('section[aria-label="Home Fantasy Survivor and Brain Record"] button:nth-child(2)'),
@@ -55,12 +55,12 @@ test('all Home decision cards and news remain functional and visibly dark on des
  await expect(actions).toHaveCount(5)
  await expect(actions.filter({hasText:'Best Bets'})).toBeVisible()
  const news=page.getByRole('region',{name:'Home sports news'})
- await expect(news.getByRole('heading',{name:'What changed that could matter'})).toBeVisible()
- const cards=news.locator('button.min-w-\\[285px\\]')
+ await expect(news.getByRole('heading',{name:'Top sports news'})).toBeVisible()
+ const cards=news.locator('[data-news-card]')
  if(await cards.count()>0){
   const textColors=await cards.first().evaluate(e=>({
    background:getComputedStyle(e).backgroundImage,
-   color:getComputedStyle(e.querySelector('.line-clamp-3')).color,
+   color:getComputedStyle(e.querySelector('h3')).color,
   }))
   expect(textColors.background).toContain('gradient(')
   expect(textColors.color).toBe('rgb(255, 255, 255)')
