@@ -1863,11 +1863,11 @@ function BestBetsV2Panel() {
     const proof = explainBetProof(row, byProofLane)
     const isPlay = proof.isPlay
     return (
-      <article key={`${row.game_key}-${row.market}-${row.selection_key}-${i}`} className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+      <article data-premium-research-card={isPlay?'shadow':'research'} key={`${row.game_key}-${row.market}-${row.selection_key}-${i}`} className="min-w-0 rounded-[23px] border border-[#DCC9AF] border-t-[4px] border-t-[#FF7766] bg-[#FFF8ED] p-4 text-[#173E52] shadow-[0_5px_0_#173E5215] sm:p-5">
         <div className="flex min-w-0 items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">{row.sport} · {humanize(row.market)}</div>
-            <div className="mt-2 break-words text-xl font-black tracking-tight text-slate-950 sm:text-2xl">{betDisplayLabel(row)}</div>
+            <div className="text-[11px] font-black uppercase tracking-[0.13em] text-[#0B7180]">{row.sport} · {humanize(row.market)}</div>
+            <div className="mt-2 break-words text-xl font-black tracking-tight text-[#173E52] sm:text-2xl">{betDisplayLabel(row)}</div>
           </div>
           <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black ${isPlay ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
             {isPlay ? 'SHADOW PLAY' : 'RESEARCH'}
@@ -1878,11 +1878,11 @@ function BestBetsV2Panel() {
           {row.book_count != null && <span>· {row.book_count} books</span>}
           <span>· Paper research, not an approved bet</span>
         </div>
-        <div className={`mt-3 rounded-xl border px-3 py-2 ${isPlay ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'}`}>
+        <div className={`mt-3 rounded-xl border px-3 py-2 ${isPlay ? 'border-[#9ACFC7] bg-[#E5F8F2]' : 'border-[#E8C9A4] bg-[#FFF1DF]'}`}>
           <div className={`text-sm font-black ${isPlay ? 'text-emerald-800' : 'text-slate-800'}`}>{proof.label}</div>
           <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-4 text-slate-600">{proof.description}</p>
         </div>
-        <details className="group mt-4 rounded-2xl border border-slate-200 bg-white">
+        <details className="group mt-4 rounded-2xl border border-[#D4C9B7] bg-white">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-black text-slate-700">
             <span>View evidence</span>
             <ChevronRight size={16} className="shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
@@ -1905,20 +1905,39 @@ function BestBetsV2Panel() {
 
   return (
     <section className="space-y-5">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">Betting intelligence</p>
-          <h2>Best Bets</h2>
-          <p className="mt-1 max-w-3xl text-sm leading-5 text-slate-500">Compare sportsbook odds and price quality first. See Zenith's model evidence below.</p>
+      <section data-bestbets-premium-brief aria-label="Best Bets premium evidence brief"
+        className="relative overflow-hidden rounded-[24px] border-2 border-[#173E52] bg-[#173E52] p-3 text-[#FFF5E4] shadow-[4px_5px_0_#46CDD255] sm:p-5">
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[5px] bg-[linear-gradient(90deg,#FF7766_0%,#FF7766_35%,#FFD36A_35%,#FFD36A_65%,#46CDD2_65%,#46CDD2_100%)]" />
+        <div className="relative grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(260px,0.9fr)] sm:items-center">
+          <div className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[.18em] text-[#7DE4E1]">THE PRICE DESK</p>
+            <h2 className="mt-1 text-[clamp(1.65rem,4vw,2.5rem)] font-black leading-[1.05] tracking-[-.04em] text-[#FFF5E4]">Best Bets<span aria-hidden="true" className="text-[#FF7766]">.</span></h2>
+            <p className="mt-1 max-w-md text-[11px] font-semibold leading-[1.45] text-[#DCE9E8] sm:text-xs">
+              Saved model research, not an approved bet. Compare observed prices first; independent proof decides what qualifies.
+            </p>
+          </div>
+          <div data-bestbets-proof-stats className="grid grid-cols-3 gap-1.5 rounded-xl border border-[#7CB8BE]/50 bg-[#FFF8ED] p-2 text-[#173E52] sm:gap-2">
+            {[
+              ['reviewed','Reviewed',summary.candidates],
+              ['shadow','Shadow',summary.shadow_plays],
+              ['passed','PASS / HOLD',summary.passes],
+            ].map(([id,label,count])=>
+              <div data-proof-metric={id} key={id} className="min-w-0 rounded-lg bg-white px-1.5 py-2 text-center sm:px-2">
+                <div className="text-[23px] font-black leading-none tabular-nums text-[#173E52]">{count ?? '—'}</div>
+                <div className="mt-1 text-[9px] font-black uppercase leading-[1.2] tracking-wide text-[#526D76]">{label}</div>
+              </div>)}
+          </div>
         </div>
-        <span className="health-pill">{summary.candidates ?? 0} EVALUATED</span>
-      </div>
+        <div data-bestbets-filter-context className="relative mt-2 border-t border-[#78ADB6]/35 pt-2 text-[10px] font-bold text-[#CFE5E8]">
+          Viewing {sport==='ALL'?'All sports':sport} · {BET_MARKET_FILTERS.find(item=>item.id===market)?.label || 'All markets'} · {grouped.research.length} research rows
+        </div>
+      </section>
 
       <SportFilter sports={sports} active={sport} onChange={next => {setSport(next); setShowAllResearch(false)}} />
       <div role="group" aria-label="Betting market filter" className="flex gap-2 overflow-x-auto pb-1">
         {BET_MARKET_FILTERS.map(item => (
           <button type="button" key={item.id} onClick={() => {setMarket(item.id); setShowAllResearch(false)}}
-            className={`min-h-10 whitespace-nowrap rounded-full px-3 py-2 text-xs font-black ${market === item.id ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600'}`}>
+            className={`min-h-10 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-black ${market === item.id ? 'border-[#173E52] bg-[#46CDD2] text-[#173E52]' : 'border-[#D7D7D0] bg-white text-[#516B75] hover:border-[#46CDD2]'}`}>
             {item.label}
           </button>
         ))}
