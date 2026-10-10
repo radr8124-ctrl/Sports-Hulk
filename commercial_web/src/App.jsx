@@ -44,6 +44,7 @@ const FantasyPlatformConnections = lazy(() => import('./FantasyPlatformConnectio
 const FantasyRosterLocalImport = lazy(() => import('./FantasyRosterLocalImport'))
 const FantasyTradeResearch = lazy(() => import('./FantasyTradeResearch'))
 const ResearchLab = lazy(() => import('./ResearchLab'))
+import SurvivorCommandCover from './SurvivorCommandCover'
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorMarketReview = lazy(() => import('./SurvivorMarketReview'))
 const SurvivorRiskLens = lazy(() => import('./SurvivorRiskLens'))
@@ -1027,33 +1028,19 @@ function SurvivorCommercialPanel() {
 
   return (
     <div className="space-y-5 md:space-y-7">
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft md:p-6">
-        <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
-          <div className="w-full min-w-0 sm:w-auto sm:flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="eyebrow">Survivor · Week {saved.pool_current_week ?? survivor.pool_current_week ?? '—'}</p>
-              <span className={`rounded-full px-2 py-1 text-[10px] font-bold ${hasEntry && entryStatus === 'ALIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{entryStatus}</span>
-            </div>
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-              {hasEntry ? saved.active_entry : isSignedIn ? 'Connect your pool entry' : 'Survivor'}
-            </h1>
-            <p className="mt-1 text-xs font-medium leading-5 text-slate-500 md:text-sm">
-              {hasEntry
-                ? `${usedTeams.length} teams already used · Current pick: ${currentPicks.length ? currentPicks.join(', ') : 'not saved'}`
-                : isSignedIn
-                  ? 'Link an entry to view your picks, used teams, and pool rules privately.'
-                  : 'Week 5 market research. Sign in for your picks and used-team history.'}
-            </p>
-          </div>
-          <div className="flex w-full flex-wrap items-center gap-2 text-[11px] font-bold text-slate-700 sm:w-auto sm:max-w-xs sm:justify-end">
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">
-              {hasEntry ? `${requiredPicks} required pick${requiredPicks === 1 ? '' : 's'}` : 'Research only'}
-            </span>
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">{candidates.length} teams reviewed</span>
-            {hasEntry && <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">{currentPicks.length} saved</span>}
-          </div>
-        </div>
-      </section>
+      <SurvivorCommandCover
+        signedIn={isSignedIn}
+        hasEntry={hasEntry}
+        entryStatus={entryStatus}
+        poolWeek={saved.pool_current_week ?? survivor.pool_current_week ?? null}
+        usedTeams={usedTeams}
+        currentPicks={currentPicks}
+        requiredPicks={Number.isInteger(saved.required_picks) ? saved.required_picks : null}
+        ruleConfirmed={ruleConfirmed}
+        officialPoolWeek={saved.ownership?.official_pool_week ?? null}
+        recommendationStatus={saved.recommendation_status || ''}
+        shadowRecommendation={saved.shadow_recommendation || []}
+      />
 
       <section aria-label="Survivor entry deadline" className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold leading-5 text-amber-950">
         <div>
