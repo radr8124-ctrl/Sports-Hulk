@@ -1,0 +1,11 @@
+[Unit]
+Description=Observe verified 2026 NFL Finals once hourly; no betting or Survivor pick actions
+
+[Timer]
+OnCalendar=*-*-* *:37:00 UTC
+Persistent=true
+AccuracySec=90s
+Unit=sports-zenith-nfl-final-observer.service
+
+[Install]
+WantedBy=timers.target

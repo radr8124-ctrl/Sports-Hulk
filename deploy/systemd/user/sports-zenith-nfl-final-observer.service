@@ -1,0 +1,15 @@
+[Unit]
+Description=Sports Zenith independently verified NFL Final research scoring
+After=network-online.target
+ConditionPathExists=/home/ubuntu/sports-hulk/intelligence_warehouse/nfl_advanced_pregame/NFL_FIRST_PREKICKOFF_NINE_FEATURE_SCORE_FORM_SHADOW.jsonl
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ubuntu/sports-hulk
+Environment=PYTHONUNBUFFERED=1
+UMask=0077
+NoNewPrivileges=yes
+ExecStart=/usr/bin/flock -n /tmp/zenith_nfl_final_observer.lock /usr/bin/timeout --signal=TERM --kill-after=8s 85s /home/ubuntu/sports-hulk/.venv/bin/python /home/ubuntu/sports-hulk/scripts/zenith_nfl_final_observer.py --run
+TimeoutStartSec=95s
+StandardOutput=journal
+StandardError=journal
