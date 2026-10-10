@@ -1051,10 +1051,20 @@ function SurvivorCommercialPanel() {
         shadowRecommendation={saved.shadow_recommendation || []}
       />
 
-      <section aria-label="Survivor entry deadline" className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold leading-5 text-amber-950">
+      <section aria-label="Survivor entry deadline" data-survivor-cutoff-status={hasEntry ? saved.pick_window?.status || 'UNVERIFIED' : 'PRIVATE_SIGN_IN_REQUIRED'}
+        className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold leading-5 text-amber-950">
         <div>
-          <b className="block text-sm font-black">Week {saved.pool_current_week ?? survivor.pool_current_week ?? '—'} · Pool deadline: Saturday 6 PM Eastern</b>
-          <span>Earlier games must be picked at least two hours before the first kickoff that day. {hasEntry ? `${currentPicks.length} privately saved.` : 'Sign in to see your linked entry.'}</span>
+          <b className="block text-sm font-black">
+            Week {saved.pool_current_week ?? survivor.pool_current_week ?? '—'} · {hasEntry && saved.pick_window?.status==='WINDOW_CLOSED'
+              ? 'Pool pick deadline passed' : 'Pool deadline: Saturday 6 PM Eastern'}
+          </b>
+          <span>
+            {hasEntry && saved.pick_window?.status==='WINDOW_CLOSED'
+              ? `${currentPicks.length} pick(s) saved in Zenith at cutoff. Your saved pool status is ${entryStatus}, but the organizer's current-week result and external submission are not verified.`
+              : hasEntry && saved.pick_window?.status!=='WINDOW_OPEN'
+                ? 'Pick entry is locked until the verified schedule, deadline and pool rules agree. No existing picks have changed.'
+                : `Earlier games are due two hours before that day's first kickoff. ${hasEntry ? `${currentPicks.length} privately saved in Zenith.` : 'Sign in to view the exact private pick window.'}`}
+          </span>
         </div>
         <span className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-[10px] font-black text-amber-900">SPORTS ZENITH DOES NOT SUBMIT TO YOUR EXTERNAL POOL</span>
       </section>
@@ -1131,6 +1141,7 @@ function SurvivorCommercialPanel() {
             entryStatus={entryStatus}
             requiredPicks={Number.isInteger(saved.required_picks) ? saved.required_picks : null}
             ruleConfirmed={ruleConfirmed}
+            pickWindow={saved.pick_window}
             getAccessToken={getAccessToken}
             onSaved={() => setLinkRefresh(value => value + 1)}
           />

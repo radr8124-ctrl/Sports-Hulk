@@ -12,11 +12,17 @@ const NFL_TEAMS = [
 ]
 
 export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = [],
-  currentPicks = [], entryStatus, requiredPicks, ruleConfirmed, getAccessToken, onSaved }) {
+  currentPicks = [], entryStatus, requiredPicks, ruleConfirmed, pickWindow,
+  getAccessToken, onSaved }) {
   const [picks, setPicks] = useState([])
   const [newTeam, setNewTeam] = useState('')
   const [message, setMessage] = useState('')
   const [working, setWorking] = useState(false)
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = window.setInterval(() => setNowMs(Date.now()), 10_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const savedKey = JSON.stringify(currentPicks)
   useEffect(() => {
@@ -25,16 +31,33 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
     setMessage('')
   }, [entryName, poolWeek, savedKey])
 
+  // Never rely on the ALIVE label to imply a still-open deadline. The server
+  // derives verified week/team deadlines from original rules + ESPN identities.
+  const sourceOpen = pickWindow?.status === 'WINDOW_OPEN'
+  const saturdayMs = Date.parse(pickWindow?.week_saturday_deadline || '')
+  const saturdayClosed = Number.isFinite(saturdayMs) && nowMs >= saturdayMs
+  const allowedTeams = Array.isArray(pickWindow?.editable_teams) ? pickWindow.editable_teams : []
+  const teamIsEditable = team => {
+    const time = Date.parse(pickWindow?.editable_team_cutoffs?.[team] || '')
+    return sourceOpen && !saturdayClosed && allowedTeams.includes(team) &&
+      Number.isFinite(time) && nowMs < time
+  }
+  const lockedSavedPick = currentPicks.some(team => !teamIsEditable(team))
+  const blocked = String(entryStatus || '').toUpperCase() !== 'ALIVE' ||
+    !ruleConfirmed || !sourceOpen || saturdayClosed || lockedSavedPick
   const available = useMemo(() => NFL_TEAMS.filter(
-    team => !usedTeams.includes(team) && !picks.includes(team)
-  ), [usedTeams, picks])
+    team => !usedTeams.includes(team) && !picks.includes(team) &&
+      allowedTeams.includes(team) &&
+      Number.isFinite(Date.parse(pickWindow?.editable_team_cutoffs?.[team] || '')) &&
+      nowMs < Date.parse(pickWindow?.editable_team_cutoffs?.[team])
+  ), [usedTeams, picks, pickWindow, allowedTeams, nowMs])
   const maxPicks = Number.isInteger(requiredPicks) && requiredPicks > 0
     ? Math.min(requiredPicks, 4) : 4
-  const blocked = String(entryStatus || '').toUpperCase() !== 'ALIVE'
   const unchanged = JSON.stringify(picks) === savedKey
 
   const save = async () => {
-    if (working || blocked || unchanged || !entryName || !poolWeek) return
+    if (working || blocked || unchanged || !entryName || !poolWeek ||
+      picks.some(team => !teamIsEditable(team))) return
     setWorking(true)
     setMessage('')
     try {
@@ -66,13 +89,19 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
             {entryName} · {ruleConfirmed ? 'Pool pick count confirmed' : 'Pool pick-count rule not yet confirmed'}
           </p>
         </div>
-        <span className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-800">
-          {picks.length} / {Number.isInteger(requiredPicks) && requiredPicks > 0 ? requiredPicks : '?'} pick(s)
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-black text-slate-800">
+            {picks.length} / {Number.isInteger(requiredPicks) && requiredPicks > 0 ? requiredPicks : '?'} pick(s)
+          </span>
+          {pickWindow?.status==='WINDOW_CLOSED'&&(
+            <span className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-[10px] font-black text-amber-900">DEADLINE PASSED</span>
+          )}
+        </div>
       </div>
       <p className="mt-3 text-xs leading-5 text-slate-600">
-        Select your current-week teams. Used teams are excluded. Picks are saved privately in Sports Zenith—not submitted to your pool.
-        Pool deadline: Saturday 6 PM Eastern, or two hours before the day's first game for an earlier kickoff. Saving here does not submit to the pool.
+        {pickWindow?.status === 'WINDOW_CLOSED'
+          ? 'The verified Week 5 selection window is closed. Past picks remain available above; no new team can be added here.'
+          : 'Select unused teams while the original pool window is open. Saturday 6 PM Eastern, or two hours before an earlier game. Sports Zenith saves privately but does not submit to the external pool.'}
       </p>
       {picks.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -103,7 +132,17 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
           </button>
         </div>
       )}
-      {blocked && <p className="mt-3 text-xs font-bold text-amber-800">Only an active Survivor entry may save picks. Reentry must be verified first.</p>}
+      {blocked && (
+        <p data-survivor-pick-lock role="status" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-semibold leading-5 text-amber-900">
+          {entryStatus!=='ALIVE'
+            ? 'Only an active Survivor entry may save picks. Reentry must be verified first.'
+            : pickWindow?.status==='WINDOW_CLOSED'||saturdayClosed
+              ? 'The pool deadline has passed. This entry is read-only. Recorded ALIVE status does not confirm an organizer submission or Week 5 result.'
+              : lockedSavedPick
+                ? 'A previously saved game is locked by its verified kickoff or pool deadline. No pick changes can be made here.'
+                : 'Verified NFL fixtures, original rules or source times are unavailable. New picks are locked until the source can be checked.'}
+        </p>
+      )}
       {message && <p role="status" className="mt-3 text-xs font-bold text-blue-900">{message}</p>}
     </section>
   )

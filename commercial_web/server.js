@@ -34,6 +34,7 @@ import { saveSleeperFantasyTeam } from './sleeper_account_store.js'
 import { canManageSurvivorPool } from './survivor_pool_permissions.js'
 import { survivorPersonalScoreCards } from './survivor_pick_scores.js'
 import { buildSurvivorPastPickHistory } from './survivor_past_picks.js'
+import { survivorVerifiedPickWindow } from './survivor_pick_window.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
 import { askClaimCoverage } from './ask_claim_coverage.js'
 import { reportingConsensus } from './reporting_consensus.js'
@@ -5592,6 +5593,12 @@ const server=http.createServer(async(req,res)=>{
     const governedEntry=governed?.active_entry===linkedName && Number(governed?.pool_current_week)===poolWeek ? governed : null
     const weekState=poolWeek ? entry?.[`week_${poolWeek}`]||{} : {}
     const rule=resolveWeekPickRule(poolWeek,weekState)
+    const pickWindow=survivorVerifiedPickWindow({
+      scheduleCsv:await readFile(SURVIVOR_WEEK6_SCHEDULE_CSV,'utf8').catch(()=>null),
+      scoreboard:data.nflScores,poolWeek,entryStatus:entry?.status,
+      usedTeams:entry?.used_teams||[],currentPicks:entry?.current_picks||[],
+      ruleConfirmed:rule.rule_confirmed,nowMs:Date.now(),
+    })
     const entryRuleConfirmed=rule.rule_confirmed
     const entryRuleStatus=rule.rule_status
     const entryRequiredPicks=rule.required_picks
@@ -5629,6 +5636,7 @@ const server=http.createServer(async(req,res)=>{
       state_week_matches_pool:governedEntry?.state_week_matches_pool??null,
       used_teams:Array.isArray(entry?.used_teams)?entry.used_teams:[],
       current_picks:Array.isArray(entry?.current_picks)?entry.current_picks:[],
+      pick_window:pickWindow,
       past_picks:buildSurvivorPastPickHistory(entry,poolWeek),
       pick_scores:survivorPersonalScoreCards(entry,poolWeek,data.nflScores),
       required_picks:entryRequiredPicks,
