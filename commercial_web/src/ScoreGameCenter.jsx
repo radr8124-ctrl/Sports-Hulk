@@ -8,6 +8,7 @@ const GameOddsPanel = React.lazy(() => import('./GameOddsPanel'))
 const GamePropsPanel = React.lazy(() => import('./GamePropsPanel'))
 const GameZenithPanel = React.lazy(() => import('./GameZenithPanel'))
 const GameNewsPanel = React.lazy(() => import('./GameNewsPanel'))
+const PlayerBoxScoreTables = React.lazy(() => import('./PlayerBoxScoreTables'))
 
 const TABS = [
   ['Overview', Trophy],
@@ -119,32 +120,54 @@ function GameOverview({ game, league }) {
   )
 }
 
-function BoxScoreContent({ league, eventId, available }) {
-  const [state, setState] = useState({ loading: Boolean(available), error: '', data: null })
+function BoxScoreContent({ league, eventId, available, live = false }) {
+  const [state, setState] = useState({ loading: Boolean(available), refreshing: false, error: '', data: null })
 
   useEffect(() => {
     let cancelled = false
+    let inFlight = false
 
     if (!available || !eventId) {
-      setState({ loading: false, error: '', data: null })
+      setState({ loading: false, refreshing: false, error: '', data: null })
       return () => { cancelled = true }
     }
 
-    const load = async () => {
-      setState({ loading: true, error: '', data: null })
+    const load = async (initial = false) => {
+      if (cancelled || inFlight || (!initial && document.visibilityState === 'hidden')) return
+      inFlight = true
+      if (initial) setState({ loading: true, refreshing: false, error: '', data: null })
+      else setState(previous => ({ ...previous, refreshing: true }))
       try {
         const response = await fetch(`/api/boxscore?league=${encodeURIComponent(league)}&event=${encodeURIComponent(eventId)}`, { cache: 'no-store' })
         const payload = await response.json()
         if (!response.ok) throw new Error(payload.error || 'Box score unavailable')
-        if (!cancelled) setState({ loading: false, error: '', data: payload })
-      } catch (error) {
-        if (!cancelled) setState({ loading: false, error: error?.message || 'Box score unavailable', data: null })
+        if (!cancelled) setState({ loading: false, refreshing: false, error: '', data: payload })
+      } catch {
+        if (!cancelled) setState(previous => ({
+          ...previous,
+          loading: false,
+          refreshing: false,
+          error: previous.data ? 'Latest live update unavailable. Last verified snapshot shown below.' : 'Official box score unavailable.',
+        }))
+      } finally {
+        inFlight = false
       }
     }
 
-    load()
-    return () => { cancelled = true }
-  }, [league, eventId, available])
+    void load(true)
+    // Only an open, currently live Game Center polls. A hidden browser tab
+    // cannot repeatedly call ESPN, and the source-proven timestamp is retained.
+    const interval = live ? setInterval(() => { void load(false) }, 60 * 1000) : null
+    const resume = () => {
+      if (live && document.visibilityState === 'visible') void load(false)
+    }
+    if (live) document.addEventListener('visibilitychange', resume)
+    return () => {
+      cancelled = true
+      if (interval) clearInterval(interval)
+      if (live) document.removeEventListener('visibilitychange', resume)
+    }
+  }, [league, eventId, available, live])
 
   if (!available) {
     return (
@@ -162,7 +185,7 @@ function BoxScoreContent({ league, eventId, available }) {
     )
   }
 
-  if (state.error) {
+  if (state.error && !state.data) {
     return (
       <div className="flex gap-3 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm font-semibold text-amber-900">
         <AlertTriangle size={18} className="mt-0.5 shrink-0" /> {state.error}
@@ -178,7 +201,21 @@ function BoxScoreContent({ league, eventId, available }) {
   const byTeam = team => Object.fromEntries((team.stats || []).map(stat => [stat.label, stat.value]))
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
+      {live && (
+        <p role="status" className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs font-semibold leading-5 text-blue-800">
+          {state.refreshing ? 'Checking the latest official player stats…' : 'Live game · player stats refresh every 60 seconds while this tab is open.'}
+          {data.generated_at && ` Last source check: ${new Date(data.generated_at).toLocaleTimeString()}.`}
+        </p>
+      )}
+      {state.error && state.data && (
+        <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+          <AlertTriangle size={15} className="mr-1 inline" /> {state.error}
+        </p>
+      )}
+      <React.Suspense fallback={<div role="status" className="rounded-2xl bg-white p-4 text-xs font-semibold text-slate-600">Loading verified player stats…</div>}>
+        <PlayerBoxScoreTables data={data} />
+      </React.Suspense>
       {!!statLabels.length && (
         <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-soft">
           <table className="w-full min-w-[620px] text-xs">
@@ -299,7 +336,7 @@ export default function ScoreGameCenter({ game, league, onClose, boxScoreOverrid
       <div className="mt-5" role="tabpanel">
         {tab === 'Overview' && <GameOverview game={game} league={league} />}
         {tab === 'Box Score' && (
-          boxScoreOverride || <BoxScoreContent league={league} eventId={game.event_id} available={game.boxscore_available} />
+          boxScoreOverride || <BoxScoreContent league={league} eventId={game.event_id} available={game.boxscore_available} live={Boolean(game.live)} />
         )}
         {tab === 'Odds' && (
           <React.Suspense fallback={

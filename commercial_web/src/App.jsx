@@ -42,6 +42,7 @@ const FantasyTradeResearch = lazy(() => import('./FantasyTradeResearch'))
 const ResearchLab = lazy(() => import('./ResearchLab'))
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorMarketReview = lazy(() => import('./SurvivorMarketReview'))
+const SurvivorRiskLens = lazy(() => import('./SurvivorRiskLens'))
 const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
 import { rankSurvivorCandidates } from '../survivor_week5_rank'
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
@@ -1040,6 +1041,21 @@ function SurvivorCommercialPanel() {
             ruleConfirmed={ruleConfirmed}
             getAccessToken={getAccessToken}
             onSaved={() => setLinkRefresh(value => value + 1)}
+          />
+        </Suspense>
+      )}
+
+      {hasEntry && entryStatus === 'ALIVE' && (
+        <Suspense fallback={<LoadingSurface label="Loading risk-first Survivor comparison" />}>
+          <SurvivorRiskLens
+            key={`${saved.active_entry}-${saved.pool_current_week}`}
+            week={saved.pool_current_week}
+            boardWeek={survivor.pool_current_week}
+            ruleConfirmed={ruleConfirmed}
+            candidates={survivor.candidates || []}
+            usedTeams={usedTeams}
+            historical={saved.historical_pool_availability || {}}
+            currentPicks={currentPicks}
           />
         </Suspense>
       )}

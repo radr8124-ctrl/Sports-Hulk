@@ -1,0 +1,15 @@
+{
+  "season": 2026,
+  "source": "2026 KNOCKOUT POOL RULES  (1).pdf",
+  "source_type": "USER_SUPPLIED_ORIGINAL_2026_POOL_RULES",
+  "verified_date": "2026-10-08",
+  "regular_season_weeks": 18,
+  "default_required_picks": 1,
+  "double_pick_weeks": [3, 6, 9, 12],
+  "no_team_reuse": true,
+  "ties_count_as_losses": true,
+  "buyback_only_after_week": 1,
+  "pool_ends_with_five_or_fewer_remaining": true,
+  "weekly_deadline": "Saturday 6:00 PM (pool local time)",
+  "early_game_deadline": "Two hours before first game that day"
+}

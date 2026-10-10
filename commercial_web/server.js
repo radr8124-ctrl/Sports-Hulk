@@ -6,7 +6,9 @@ import { createHash, timingSafeEqual, randomBytes } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createAdminClient, createClient } from '@insforge/sdk'
-import { buildPersonalizedSurvivorSource } from './survivor_personalization.js'
+import { buildPersonalizedSurvivorSource, mergeGovernedSurvivorSource } from './survivor_personalization.js'
+import { resolveWeekPickRule } from './survivor_rules.js'
+import { selectSurvivorAskChoice } from './survivor_week5_rank.js'
 import { sanitizeAccountPreferences } from './account_preferences.js'
 import { preferencePresentation, watchlistNewsHits } from './preference_presentation.js'
 import { faabBudgetLines } from './faab_presentation.js'
@@ -17,6 +19,9 @@ import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
+import { survivorHistoricalAvailability } from './survivor_pool_leverage.js'
+import { verifiedEspnPlayerTables } from './verified_player_boxscore.js'
+import { createBoxscoreSourceCache } from './boxscore_source_cache.js'
 import { fantasyProviderStatus, lookupSleeperLeagues, fetchSleeperRosterByLeague } from './sleeper_fantasy.js'
 import { saveSleeperFantasyTeam } from './sleeper_account_store.js'
 import { canManageSurvivorPool } from './survivor_pool_permissions.js'
@@ -47,6 +52,8 @@ const FORMAT_CONTEXT_BRIDGE = path.join(__dirname, 'format_context_bridge.py')
 const SPORTS_PYTHON = path.join(SPORTS_ROOT, '.venv', 'bin', 'python')
 const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVOR_ENTRIES.json'
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
+const SURVIVOR_POOL_HISTORY_CSV = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/SURVIVOR_POOL_CURRENT.csv')
+const SURVIVOR_POOL_HISTORY_META = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/LATEST_OFFICIAL_POOL.json')
 const DATASET_FRESHNESS_PATH = path.join(SPORTS_ROOT, 'intelligence_warehouse', 'freshness', 'DATASET_FRESHNESS_CURRENT.csv')
 const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FAILED_QUESTION_QUEUE.jsonl')
 const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_EVALUATION_LEDGER.jsonl')
@@ -984,13 +991,7 @@ function propsAnswer(question, data) {
 
 function survivorAnswer(data) {
   const source = data.survivorV2 || {}
-  const candidates = [...(source.candidates || [])]
-    .filter(row => !(source.used_teams || []).includes(row.team))
-    .sort((a,b) => num(b.strategy_index,0)-num(a.strategy_index,0))
-  const shadowRec = source.shadow_recommendation && !Array.isArray(source.shadow_recommendation) && source.shadow_recommendation.team
-    ? source.shadow_recommendation
-    : null
-  const top = shadowRec || candidates[0] || null
+  const { candidates, shadowRec, top, modelReady } = selectSurvivorAskChoice(source)
   const week = source.pool_current_week || null
   const entry = source.active_entry || 'Active entry'
   const used = source.used_teams || []
@@ -1035,8 +1036,8 @@ function survivorAnswer(data) {
   if (!source.rule_confirmed) {
     return response({
       intent:'survivor',
-      take:`Week ${week || 'current'} recommendation is locked until the official pool sheet confirms the required pick count and current-week ownership.`,
-      confidence:'WAITING FOR POOL RULE',
+      take:`Week ${week || 'current'} personal recommendation is on hold because verified season rules are missing or conflict with a saved pool-sheet count.`,
+      confidence:'RULE REVIEW REQUIRED',
       status:source.rule_status || 'AWAITING_OFFICIAL_POOL_SHEET',
       why:[
         `${entry} is ${source.active_entry_status || 'active'} with ${used.length} team${used.length===1?'':'s'} already used.`,
@@ -1045,8 +1046,8 @@ function survivorAnswer(data) {
         `Ownership state: ${nice(source.ownership?.status || 'WAITING')}.`,
       ].filter(Boolean),
       risk:[
-        `Latest official pool sheet is Week ${source.ownership?.official_pool_week ?? '—'} while the active pool week is ${week ?? '—'}.`,
-        'The research leader is not a final pick recommendation until the rule gate clears.',
+        `Current-week ownership statistics are available through official pool sheet Week ${source.ownership?.official_pool_week ?? '—'} only; pick count and ownership are separate checks.`,
+        'A conflicting season rule must be checked before the research leader can become a governed selection.',
       ],
       cards,
       sources:updatedSources(data,['survivorV2']),
@@ -1058,15 +1059,22 @@ function survivorAnswer(data) {
   const rec = shadowRec || top
   return response({
     intent:'survivor',
-    take:`${rec.team} is the current Week ${week || 'current'} governed Survivor recommendation.`,
-    confidence:nice(rec.decision_tier || 'RESEARCH'),
-    status:source.recommendation_status || 'READY',
+    take:modelReady
+      ? `${rec.team} is the Week ${week || 'current'} governed Survivor shadow research selection (not submitted to your pool).`
+      : `${rec.team} leads the available Week ${week || 'current'} Survivor research, but a governed shadow pick is not yet ready.`,
+    confidence:modelReady ? 'GOVERNED SHADOW RESEARCH' : 'RESEARCH ONLY',
+    status:source.recommendation_status || 'RESEARCH_ONLY',
     why:[
       `Market survival ${rec.market_prob_pct ?? '—'}%.`,
       `Strategy index ${rec.strategy_index ?? '—'} · ${nice(rec.future_value_label || 'UNKNOWN FUTURE VALUE')}.`,
       rec.positive_signals ? `Positive: ${nice(String(rec.positive_signals).replaceAll('|',' '))}.` : null,
     ].filter(Boolean),
-    risk:[rec.risk_signals ? nice(String(rec.risk_signals).replaceAll('|',' ')) : 'No explicit risk signal listed.'],
+    risk:[
+      rec.risk_signals ? nice(String(rec.risk_signals).replaceAll('|',' ')) : 'No explicit risk signal listed.',
+      'This is a shadow research choice, not a pool submission, a guaranteed winner or a verified live sportsbook price.',
+      source.ownership?.official_pool_week !== week
+        ? `Pool field-size/ownership data is only verified through Week ${source.ownership?.official_pool_week ?? '—'}; that does not change the season-wide required-pick rule.` : null,
+    ].filter(Boolean),
     cards,
     sources:updatedSources(data,['survivorV2']),
     updated_at:source.generated_at,
@@ -2541,6 +2549,7 @@ async function fetchEspnBoxscore(league, eventId) {
   })
   if (!resp.ok) throw new Error(`ESPN summary returned ${resp.status}`)
   const payload = await resp.json()
+  const verifiedPlayers = verifiedEspnPlayerTables(payload,league,eventId)
   const box = payload.boxscore || {}
 
   const preferred = {
@@ -2592,6 +2601,7 @@ async function fetchEspnBoxscore(league, eventId) {
     event_id: String(eventId),
     teams,
     leaders: leaders.slice(0, 12),
+    ...verifiedPlayers,
     venue: payload.gameInfo?.venue?.fullName || null,
     attendance: payload.gameInfo?.attendance || null,
     weather: payload.gameInfo?.weather || null,
@@ -2600,6 +2610,7 @@ async function fetchEspnBoxscore(league, eventId) {
   }
 }
 
+const BOX_SCORE_CACHE = createBoxscoreSourceCache(fetchEspnBoxscore)
 const RATE_LIMIT_BUCKETS = new Map()
 
 function clientIp(req) {
@@ -3546,7 +3557,11 @@ async function personalizedSurvivorAsk(req, question, data) {
   const entry=(survivorState?.entries||{})[entryName]
   if(!entry) return null
 
-  const personalizedSource=buildPersonalizedSurvivorSource(entryName,entry,survivorState,data.survivorV2||{})
+  const privateModel=await loadExternalJson(SURVIVOR_V2_PRIVATE_PATH)
+  const personalizedSource=mergeGovernedSurvivorSource(
+    buildPersonalizedSurvivorSource(entryName,entry,survivorState,data.survivorV2||{}),
+    privateModel || {},
+  )
   const usedTeams=personalizedSource.used_teams||[]
 
   const answer=wantsBuyback
@@ -3629,10 +3644,12 @@ const server=http.createServer(async(req,res)=>{
     const data=await loadAll(); return json(res,200,{status:'ok',generated_at:new Date().toISOString(),sources:{nfl_scores:Boolean(data.nflScores),mlb_scores:Boolean(data.mlbScores),nba_scores:Boolean(data.nbaScores),nhl_scores:Boolean(data.nhlScores),cfb_scores:Boolean(data.cfbScores),cbb_scores:Boolean(data.cbbScores),best_bets_v2:Boolean(data.bettingV2),props_v2:Boolean(data.propV2),parlays_v2:Boolean(data.parlayV2),survivor_v2:Boolean(data.survivorV2),fantasy_news:Boolean(data.fantasyNews),ask_context:Boolean(data.askContext),ask_retrieval:Boolean(data.askRetrieval)}})
   }
   if(req.method==='GET'&&url.pathname==='/api/boxscore'){
+    const limit=consumeRateLimit('official-boxscore:'+clientIp(req),80,60*1000)
+    if(!limit.ok) return json(res,429,{status:'RATE_LIMITED',message:'Wait briefly before checking more box scores.'})
     try{
       const league=String(url.searchParams.get('league')||'').toUpperCase()
       const event=String(url.searchParams.get('event')||'')
-      const result=await fetchEspnBoxscore(league,event)
+      const result=await BOX_SCORE_CACHE.get(league,event)
       return json(res,200,result)
     }catch(err){
       return json(res,400,{status:'ERROR',error:err instanceof Error?err.message:String(err)})
@@ -5169,11 +5186,29 @@ const server=http.createServer(async(req,res)=>{
     })
 
     const governed=await loadExternalJson(SURVIVOR_V2_PRIVATE_PATH)
-    const governedEntry=governed?.active_entry===linkedName ? governed : null
+    const governedEntry=governed?.active_entry===linkedName && Number(governed?.pool_current_week)===poolWeek ? governed : null
     const weekState=poolWeek ? entry?.[`week_${poolWeek}`]||{} : {}
-    const entryRuleConfirmed=governedEntry?.rule_confirmed ?? Boolean(weekState?.official_pool_sheet_confirmed)
-    const entryRuleStatus=governedEntry?.rule_status || weekState?.rule_status || (entryRuleConfirmed?'CONFIRMED_FROM_LINKED_ENTRY':'AWAITING_OFFICIAL_POOL_SHEET')
-    const entryRequiredPicks=governedEntry?.required_picks ?? weekState?.required_picks ?? null
+    const rule=resolveWeekPickRule(poolWeek,weekState)
+    const entryRuleConfirmed=rule.rule_confirmed
+    const entryRuleStatus=rule.rule_status
+    const entryRequiredPicks=rule.required_picks
+    // Do not display old recommendations if the model was built before verified rules loaded.
+    const modelRuleReady=Boolean(governedEntry && governedEntry.rule_confirmed===entryRuleConfirmed
+      && governedEntry.required_picks===entryRequiredPicks)
+    // Authenticated, aggregate-only previous-week pool usage. Never return
+    // individual competitors or mistake historical usage for Week 5 ownership.
+    const poolHistory=await (async()=>{
+      try{
+        const [csvText,meta]=await Promise.all([
+          readFile(SURVIVOR_POOL_HISTORY_CSV,'utf8'),
+          loadExternalJson(SURVIVOR_POOL_HISTORY_META),
+        ])
+        return survivorHistoricalAvailability({
+          csvText,meta,currentWeek:poolWeek,
+          teamNames:(data.survivorV2?.candidates||[]).map(row=>row.team),
+        })
+      }catch{return {status:'SOURCE_UNAVAILABLE',source_week:null,sample_size:null,teams:[]}}
+    })()
 
     return json(res,200,{
       status:'READY',
@@ -5183,6 +5218,7 @@ const server=http.createServer(async(req,res)=>{
       diversified_allocations:diversifiedAllocations,
       diversification_concentration:diversificationConcentration,
       pool_dynamics:poolDynamics,
+      historical_pool_availability:poolHistory,
       active_entry:linkedName,
       entry_status:entry?.status||null,
       pool_current_week:poolWeek,
@@ -5193,10 +5229,12 @@ const server=http.createServer(async(req,res)=>{
       pick_scores:survivorPersonalScoreCards(entry,poolWeek,data.nflScores),
       required_picks:entryRequiredPicks,
       rule_status:entryRuleStatus,
+      rule_source:rule.rule_source,
       rule_confirmed:Boolean(entryRuleConfirmed),
-      ownership:governedEntry?.ownership||{status:entryRuleConfirmed?'LINKED_ENTRY_RULE_CONFIRMED':'PERSONAL_CONTEXT_WAITING'},
-      recommendation_status:governedEntry?.recommendation_status||(entryRuleConfirmed?'PERSONALIZED_READY':'PERSONAL_CONTEXT_WAITING'),
-      shadow_recommendation:governedEntry?.shadow_recommendation||[],
+      ownership:governedEntry?.ownership||{status:rule.official_pool_sheet_confirmed?'CURRENT_WEEK_SHEET_AVAILABLE':'WAITING_CURRENT_WEEK_OFFICIAL_SHEET',official_pool_week:null},
+      recommendation_status:modelRuleReady ? governedEntry.recommendation_status :
+        (entryRuleConfirmed?'RULE_VERIFIED_MODEL_REFRESH_PENDING':'PERSONAL_CONTEXT_WAITING'),
+      shadow_recommendation:modelRuleReady ? (governedEntry.shadow_recommendation||[]) : [],
       updated_at:state.manual_state_updated_at||state.last_result_refresh_at||null,
       source:'PRIVATE_MEMBER_STATE'
     })

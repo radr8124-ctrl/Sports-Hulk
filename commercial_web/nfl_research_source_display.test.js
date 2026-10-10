@@ -75,7 +75,13 @@ test('source timestamp after observation time and games already started fail clo
 })
 test('archived real source fixture readback at historical 2026 observation clock', async () => {
   const { readFileSync } = await import('node:fs')
-  const source = JSON.parse(readFileSync('./public/nfl_research_book_refs.json', 'utf8'))
+  const stored = JSON.parse(readFileSync('./public/nfl_research_book_refs.json', 'utf8'))
+  const archive = stored.archived_snapshot
+  assert.equal(archive?.status, 'ARCHIVED_SOURCE_ONLY_NOT_CURRENT')
+  assert.equal(archive?.original_archive_sha256, stored.original_archive?.sha256)
+  // The live Saturday feed must keep fixtures empty. Only explicitly replay
+  // the hashed original Friday archive under its genuine historical clock.
+  const source = {...stored, fixtures: archive.fixtures}
   const scores = JSON.parse(readFileSync('./public/nfl_scores.json', 'utf8'))
   const checkTime = Date.parse('2026-10-09T20:55:00Z')
   const records = scores.next_games.map(g => sourceResearchForGame(source, g, checkTime)).filter(Boolean)

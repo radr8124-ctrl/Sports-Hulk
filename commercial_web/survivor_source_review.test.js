@@ -4,7 +4,12 @@ import { readFileSync } from 'node:fs'
 import { survivorSourceReview } from './survivor_source_review.js'
 
 const scores = JSON.parse(readFileSync('./public/nfl_scores.json','utf8'))
-const refs = JSON.parse(readFileSync('./public/nfl_research_book_refs.json','utf8'))
+const storedRefs = JSON.parse(readFileSync('./public/nfl_research_book_refs.json','utf8'))
+const archived = storedRefs.archived_snapshot
+assert.equal(archived?.status,'ARCHIVED_SOURCE_ONLY_NOT_CURRENT')
+assert.equal(archived?.original_archive_sha256,storedRefs.original_archive?.sha256)
+// Frozen Friday replay only: current Saturday quotes remain expired.
+const refs = {...storedRefs,fixtures:archived.fixtures}
 const survivor = JSON.parse(readFileSync('./public/survivor_v2_current.json','utf8'))
 const friday = Date.parse('2026-10-09T21:00:00Z')
 const burned = ['Los Angeles Chargers', 'San Francisco 49ers', 'Kansas City Chiefs', 'Buffalo Bills', 'Minnesota Vikings']
