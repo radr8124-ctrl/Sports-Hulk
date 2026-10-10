@@ -1,6 +1,6 @@
 // Anonymous history of previously used teams from the most recent official
 // pool import. NEVER infer current-week pick popularity from older sheets.
-function parseCsv(text) {
+export function parseCsv(text) {
   if (typeof text !== 'string' || text.length > 5_000_000) throw Error('CSV unavailable')
   const rows = []
   let cells = [], cell = '', quoted = false, closedQuote = false

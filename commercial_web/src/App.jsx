@@ -49,6 +49,7 @@ const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorMarketReview = lazy(() => import('./SurvivorMarketReview'))
 const SurvivorRiskLens = lazy(() => import('./SurvivorRiskLens'))
 const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
+const SurvivorThursdayTracker = lazy(() => import('./SurvivorThursdayTracker'))
 import { rankSurvivorCandidates } from '../survivor_week5_rank'
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
 
@@ -1078,6 +1079,12 @@ function SurvivorCommercialPanel() {
             historical={saved.historical_pool_availability || {}}
             currentPicks={currentPicks}
           />
+        </Suspense>
+      )}
+
+      {isSignedIn && (
+        <Suspense fallback={null}>
+          <SurvivorThursdayTracker getAccessToken={getAccessToken} />
         </Suspense>
       )}
 

@@ -20,6 +20,8 @@ import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
 import { survivorHistoricalAvailability } from './survivor_pool_leverage.js'
+import { reconcileDallasReport, summariseDallasReport, DALLAS_CLAIM } from './survivor_thursday_tracker.js'
+import { loadDallasSnapshot, saveDallasSnapshot } from './survivor_thursday_store.js'
 import { verifiedEspnPlayerTables } from './verified_player_boxscore.js'
 import { createBoxscoreSourceCache } from './boxscore_source_cache.js'
 import { fantasyProviderStatus, lookupSleeperLeagues, fetchSleeperRosterByLeague } from './sleeper_fantasy.js'
@@ -300,6 +302,8 @@ function poolManagerPermitted(user) {
 
 // One-time, account-bound preview tokens never hold the pool's raw file bytes.
 const SURVIVOR_POOL_PREVIEWS = new Map()
+const SURVIVOR_DALLAS_PREVIEWS = new Map()
+let SURVIVOR_DALLAS_COMMIT_BUSY = false
 let SURVIVOR_POOL_COMMIT_BUSY = false
 
 async function linkedSurvivorEntries(req, userId) {
@@ -5070,6 +5074,121 @@ const server=http.createServer(async(req,res)=>{
     if(!user) return json(res,401,{status:'AUTH_REQUIRED',can_manage:false})
     return json(res,200,{status:'READY',can_manage:poolManagerPermitted(user)})
   }
+  // Separate Thursday reported evidence. Never mutate official pool imports or private picks.
+  if(req.method==='GET'&&url.pathname==='/api/survivor/thursday/summary'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED'})
+    const manager=poolManagerPermitted(user)
+    if(!manager && !(await linkedSurvivorEntries(req,user.id)).length){
+      return json(res,403,{status:'LINKED_ENTRY_REQUIRED'})
+    }
+    try{
+      const [snapshot,meta]=await Promise.all([
+        loadDallasSnapshot(),loadExternalJson(SURVIVOR_POOL_HISTORY_META),
+      ])
+      return json(res,200,{
+        ...summariseDallasReport({snapshot,officialMeta:meta}),
+        ...(!manager?{source_name:null}:{}),
+        can_manage:manager,
+      })
+    }catch{
+      return json(res,503,{status:'REPORTED_EVIDENCE_REVIEW_REQUIRED',can_manage:manager,
+        message:'The reported-list evidence could not be verified. The original pool and personal picks were not changed.'})
+    }
+  }
+  if(req.method==='POST'&&url.pathname==='/api/survivor/thursday/preview'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED'})
+    if(!poolManagerPermitted(user))return json(res,403,{status:'MANAGER_REQUIRED'})
+    const limit=consumeRateLimit('survivor-dallas-preview:'+user.id,6,15*60*1000)
+    if(!limit.ok)return json(res,429,{status:'RATE_LIMITED',message:'Try again shortly.'})
+    try{
+      const body=await readBody(req)
+      const source_name=String(body?.source_name||'').trim()
+      const report_text=body?.reported_text
+      if(!body || body.attested_dallas_only!==true ||
+        !source_name || source_name.length>140 || /[\r\n]/.test(source_name) ||
+        typeof report_text!=='string' || report_text.length>160000){
+        return json(res,422,{status:'INVALID_REPORT',message:'Name the source, paste the numbered Dallas entries, and confirm these are Dallas picks.'})
+      }
+      const [csvText,meta,privateState]=await Promise.all([
+        readFile(SURVIVOR_POOL_HISTORY_CSV,'utf8'),
+        loadExternalJson(SURVIVOR_POOL_HISTORY_META),
+        loadExternalJson(SURVIVOR_ENTRIES_PATH),
+      ])
+      const snapshot=reconcileDallasReport({
+        reportedText:report_text,csvText,meta,currentWeek:Number(privateState?.pool_current_week),
+      })
+      snapshot.source_name=source_name
+      snapshot.source_text=report_text
+      const preview_token=randomBytes(24).toString('base64url')
+      for(const [key,ticket] of SURVIVOR_DALLAS_PREVIEWS){
+        if(ticket.expires<Date.now() || ticket.user_id===user.id)SURVIVOR_DALLAS_PREVIEWS.delete(key)
+      }
+      SURVIVOR_DALLAS_PREVIEWS.set(preview_token,{
+        user_id:user.id,snapshot,expires:Date.now()+10*60*1000,
+      })
+      return json(res,200,{
+        status:'REPORTED_PREVIEW_ONLY',preview_token,counts:snapshot.counts,
+        reported_count_claim:DALLAS_CLAIM.reported_count,
+        source_name,previous_official_week:snapshot.official_week,
+        source_sha256:snapshot.report_sha256,
+        count_matches_claim:snapshot.counts.uploaded===DALLAS_CLAIM.reported_count,
+        review_rows:snapshot.rows.filter(row=>row.match_status!=='MATCHED_PREVIOUS_ACTIVE')
+          .slice(0,25).map(row=>({entry_name:row.entry_name,match_status:row.match_status,
+            possible_prior_name:row.official_candidate})),
+        message:'Preview only. Name mismatches are not silently merged; no entries are certified eliminated.',
+      })
+    }catch(error){
+      return json(res,422,{status:'REPORT_PREVIEW_BLOCKED',
+        message:error instanceof Error?error.message:'Could not reconcile the reported list.'})
+    }
+  }
+  if(req.method==='POST'&&url.pathname==='/api/survivor/thursday/confirm'){
+    const user=await authenticatedUser(req)
+    if(!user) return json(res,401,{status:'AUTH_REQUIRED'})
+    if(!poolManagerPermitted(user))return json(res,403,{status:'MANAGER_REQUIRED'})
+    const limit=consumeRateLimit('survivor-dallas-confirm:'+user.id,4,15*60*1000)
+    if(!limit.ok)return json(res,429,{status:'RATE_LIMITED',message:'Try again shortly.'})
+    if(SURVIVOR_DALLAS_COMMIT_BUSY)return json(res,409,{status:'REPORT_SAVE_IN_PROGRESS'})
+    try{
+      const body=await readBody(req)
+      const token=String(body?.preview_token||'')
+      const ticket=SURVIVOR_DALLAS_PREVIEWS.get(token)
+      if(!ticket || ticket.user_id!==user.id || ticket.expires<Date.now() ||
+        body?.attested_reported_only!==true){
+        return json(res,409,{status:'PREVIEW_EXPIRED',message:'Preview again and acknowledge this is not the official Week 5 pool sheet.'})
+      }
+      SURVIVOR_DALLAS_PREVIEWS.delete(token)
+      SURVIVOR_DALLAS_COMMIT_BUSY=true
+      const [csvText,meta,privateState]=await Promise.all([
+        readFile(SURVIVOR_POOL_HISTORY_CSV,'utf8'),
+        loadExternalJson(SURVIVOR_POOL_HISTORY_META),
+        loadExternalJson(SURVIVOR_ENTRIES_PATH),
+      ])
+      const refreshed=reconcileDallasReport({reportedText:ticket.snapshot.source_text,
+        csvText,meta,currentWeek:Number(privateState?.pool_current_week)})
+      if(refreshed.prior_csv_sha256!==ticket.snapshot.prior_csv_sha256 ||
+        refreshed.prior_official_pdf_sha256!==ticket.snapshot.prior_official_pdf_sha256 ||
+        refreshed.report_sha256!==ticket.snapshot.report_sha256 ||
+        JSON.stringify(refreshed.counts)!==JSON.stringify(ticket.snapshot.counts)){
+        return json(res,409,{status:'OFFICIAL_BASELINE_CHANGED',message:'The prior official snapshot changed. Preview again.'})
+      }
+      const saved=await saveDallasSnapshot({
+        ...ticket.snapshot, saved_at:new Date().toISOString(),
+        saved_by_user_id:user.id,
+      })
+      return json(res,200,{
+        status:saved.status,
+        report:summariseDallasReport({snapshot:saved.snapshot,officialMeta:meta}),
+        pool_changed:false,pick_changed:false,
+      })
+    }catch{
+      return json(res,503,{status:'REPORTED_SAVE_UNAVAILABLE',
+        message:'Reported evidence was not confirmed saved. Official pool and personal picks were not changed.'})
+    }finally{SURVIVOR_DALLAS_COMMIT_BUSY=false}
+  }
+
   if(req.method==='POST'&&url.pathname==='/api/survivor/pool/preview'){
     const user=await authenticatedUser(req)
     if(!user) return json(res,401,{status:'AUTH_REQUIRED'})
