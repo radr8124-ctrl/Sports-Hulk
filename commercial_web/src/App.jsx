@@ -18,6 +18,7 @@ import CommandCenterHero from './CommandCenterHero.jsx'
 const ZenithRefCompanion = lazy(() => import('./ZenithRefCompanion.jsx'))
 import HomeGameDayDeck from './HomeGameDayDeck.jsx'
 import HomeTopNews from './HomeTopNews.jsx'
+import HomeSignalCard from './HomeSignalCard.jsx'
 import SportsNewsHub from './SportsNewsHub.jsx'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
@@ -1652,35 +1653,43 @@ function HomeDecisionPanel({ onNavigate }) {
     {
       label: 'Best Bets',
       route: 'Best Bets',
-      status: (bets.summary?.shadow_plays || 0) > 0 ? 'PLAY' : 'NO FORCED PLAY',
-      title: bestPlay ? `${bestPlay.selection} · ${bestPlay.market}` : 'Nothing has cleared the play gate',
-      detail: `${bets.summary?.candidates ?? 0} current candidates · ${bets.summary?.passes ?? 0} passed over`,
+      status: (bets.summary?.shadow_plays || 0) > 0 ? 'SHADOW RESEARCH' : 'NO VERIFIED PLAY',
+      title: bestPlay ? `Research watch: ${bestPlay.selection} · ${bestPlay.market}` : 'No selection has cleared the proof check',
+      metric: bets.summary?.candidates ?? '—',
+      metricLabel: 'game-line candidates checked',
+      detail: `${bets.summary?.passes ?? 0} passed over · research is not an approved bet`,
       tone: (bets.summary?.shadow_plays || 0) > 0 ? 'emerald' : 'blue',
     },
     {
       label: 'Props',
       route: 'Props',
       status: 'RESEARCH',
-      title: `${propRows.length} current prop candidates`,
-      detail: 'Independent edge and price proof are required before PLAY.',
+      title: 'Player props worth examining',
+      metric: propRows.length,
+      metricLabel: 'player prop candidates',
+      detail: 'Independent player edge and source-price proof required.',
       tone: 'blue',
     },
     {
       label: 'PrizePicks',
       route: 'PrizePicks',
       status: prizeMonitor ? 'MONITOR' : 'RESEARCH',
-      title: prizeMonitor ? `${prizeMonitor.player} ${prizeMonitor.side} ${prizeMonitor.line}` : `${prizeRows.length} current entries checked`,
+      title: prizeMonitor ? `Research watch: ${prizeMonitor.player} ${prizeMonitor.side} ${prizeMonitor.line}` : 'Every pick-em line deserves proof',
+      metric: prizeRows.length,
+      metricLabel: 'pick-em entries checked',
       detail: prizeMonitor
-        ? `Model ${prizeMonitor.v2_probability_pct}% · market reference ${prizeMonitor.market_reference_probability_pct}%`
-        : 'No entry is being forced without proof.',
+        ? `Experimental model ${prizeMonitor.v2_probability_pct}% · market reference ${prizeMonitor.market_reference_probability_pct}%`
+        : 'No entry forced without source-backed evidence.',
       tone: prizeMonitor ? 'amber' : 'blue',
     },
     {
       label: 'Parlays',
       route: 'Parlays',
       status: 'PROOF GATE',
-      title: 'No parlay has cleared source-leg proof',
-      detail: `${parlays.summary?.candidates ?? 0} combinations checked · ${parlays.summary?.shadow_monitors ?? 0} monitors`,
+      title: 'Combine legs only with evidence',
+      metric: parlays.summary?.candidates ?? '—',
+      metricLabel: 'combinations examined',
+      detail: `${parlays.summary?.shadow_monitors ?? 0} research monitors · source-leg proof required`,
       tone: 'violet',
     },
     {
@@ -1688,42 +1697,22 @@ function HomeDecisionPanel({ onNavigate }) {
       route: 'Survivor',
       status: survivorSummary.status,
       title: survivorSummary.title,
+      metric: survivor.pool_current_week ? `W${survivor.pool_current_week}` : null,
+      metricLabel: 'current pool week',
       detail: survivorSummary.detail,
       tone: survivorSummary.tone,
     },
   ]
 
-  const tone = {
-    blue: 'border-[#A2DAD9] bg-[#D9F5EC] text-[#0E5967]',
-    emerald: 'border-[#B1DCC5] bg-[#E2F6E8] text-[#21604A]',
-    amber: 'border-[#E6C17F] bg-[#FFF0C6] text-[#7B4A13]',
-    violet: 'border-[#D9CCED] bg-[#EFE8FA] text-[#5D4683]',
-  }
-  const cardAccent = {
-    'Best Bets': 'border-t-[#FF7766]',
-    Props: 'border-t-[#46CDD2]',
-    PrizePicks: 'border-t-[#FFD36A]',
-    Parlays: 'border-t-[#C5A6E8]',
-    Survivor: 'border-t-[#80C99D]',
-  }
-
   return (
     <section aria-label="Home decision overview">
       <div className="section-heading">
-        <div><p className="eyebrow">Right now</p><h2>What matters now</h2></div>
+        <div><p className="eyebrow">The signal board · right now</p><h2>What matters now</h2><p className="mt-1 text-xs font-semibold text-[#536B73]">Five areas. Clearer decisions. Evidence before hype.</p></div>
         <button onClick={() => onNavigate('Brain Record')} className="text-sm font-black text-[#0F6977] hover:text-[#B74D46]">How good is the brain? →</button>
       </div>
-      <div className="flex snap-x gap-4 overflow-x-auto pb-2 xl:grid xl:grid-cols-5 xl:overflow-visible">
-        {cards.map((card) => (
-          <button key={card.label} onClick={() => onNavigate(card.route)} className={`min-w-[270px] snap-start rounded-[20px] border border-[#E1D4C4] border-t-[5px] bg-white p-4 text-left text-[#173E52] shadow-[0_7px_20px_#173E5210] transition hover:-translate-y-0.5 hover:border-[#173E52] xl:min-w-0 ${cardAccent[card.label] || 'border-t-[#FF7766]'}`}>
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-xs font-black uppercase tracking-[0.14em] text-[#0F6A77]">{card.label}</div>
-              <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black ${tone[card.tone]}`}>{card.status}</span>
-            </div>
-            <div className="mt-4 text-lg font-black leading-6 text-[#173E52]">{card.title}</div>
-            <div className="mt-3 text-xs font-semibold leading-5 text-[#536B73]">{card.detail}</div>
-            <div className="mt-5 text-xs font-black text-[#B75048]">Open {card.label} →</div>
-          </button>
+      <div className="zenith-signal-rail flex snap-x gap-3 overflow-x-auto pb-3 xl:grid xl:grid-cols-5 xl:overflow-visible">
+        {cards.map((card,index) => (
+          <HomeSignalCard key={card.label} index={index} card={card} onNavigate={onNavigate}/>
         ))}
       </div>
     </section>
@@ -3595,6 +3584,7 @@ export default function App() {
       {(active === 'Home' || active === 'News & Insights') && !assistantOpen && (
         <Suspense fallback={null}>
           <ZenithRefCompanion
+            page={active}
             onOpenAsk={() => setAssistantOpen(true)}
             onOpenBrain={() => navigate('Brain Record')}
           />

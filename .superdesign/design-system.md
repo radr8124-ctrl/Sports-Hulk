@@ -56,3 +56,13 @@ Use the **new cream/aqua/coral/gold/ink palette** above for the public frame, Ho
 
 ## Review target
 The review should preserve the Sports HULK identity while identifying what should be kept, simplified, regrouped, moved, collapsed, promoted, or removed. Any recommended redesign should feel like an evolution of the current product rather than an unrelated app.
+
+## October 10 — Retro Premium Sideline and Signal Board release
+The user approved a distinctive premium sports-magazine identity: clean, memorable, warm cream + aqua + coral + gold + ink, not another black/blue futuristic-AI dashboard. Preserve that direction and the original Sports Zenith branding. Implemented directly in the current website, not as an isolated mockup:
+
+- Full-body original referee mascot in `commercial_web/src/ZenithRefCompanion.jsx` and `ZenithRefCompanion.css`, reusing the existing Zenith referee helmet avatar. Coral field, ink-striped referee jersey, branded chest/ribbon, flag throw, strikeout arm swing, user-initiated low-volume WebAudio whistle, reduced-motion handling, Ask/Brain shortcuts, side-swapping and optional shrink.
+- The referee companion follows the Home page sections in a restrained scroll-responsive fixed sideline: welcome / real scores / signal board / news / Survivor & fantasy / learning lab. No autonomous simulated game penalty or claim of a winning bet. On 768–1879px homepage viewports, reserve a 180px editorial sideline so the mascot **does not cover** the cards. On smaller screens, retain full content width and dock safely above the bottom navigation. Above 1880px, the site's natural external margin supplies sideline space.
+- `commercial_web/src/HomeSignalCard.jsx` gives the five original Home decision shortcuts distinct source-grounded premium editorial treatments: coral Best Bets, aqua Props, gold PrizePicks, restrained lavender Parlays and sage Survivor. Preserve exact underlying live source counts and privacy boundaries; never turn shadow research into an approved or executable play.
+- Light News article cards use matching category-specific editorial paper, not generic bright white, while retaining exact original attributed link, injury/recap/fantasy category icon truth and published time.
+- Continue to show proof and data freshness in plain English. Do not create synthetic statistics or claim predictive advantages from decorative badges.
+- A user-specific visual request to make a mascot more visible does not authorize automatic audio, microphone permissions, gambling actions or manipulation of actual results.

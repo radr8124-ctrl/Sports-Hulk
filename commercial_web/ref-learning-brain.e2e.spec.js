@@ -95,7 +95,7 @@ test('reduced-motion users still get Ref buttons but no automatic hovering',asyn
  await page.emulateMedia({reducedMotion:'reduce'})
  await page.goto(BASE,{waitUntil:'domcontentloaded'})
  const ref=page.getByRole('complementary',{name:'The Ref sports companion'})
- const css=await ref.locator('.zenith-ref-idle').evaluate(el=>getComputedStyle(el).animationName)
+ const css=await ref.locator('.zenith-ref-figure').evaluate(el=>getComputedStyle(el).animationName)
  expect(css).toBe('none')
  await ref.getByRole('button',{name:'Open The Ref animated sports companion'}).click()
  await ref.getByRole('button',{name:'The Ref throws a flag'}).click()

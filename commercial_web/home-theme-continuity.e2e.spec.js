@@ -6,7 +6,9 @@ const rgb = (r,g,b) => `rgb(${r}, ${g}, ${b})`
 async function homepage(page,width=390) {
   await page.setViewportSize({width,height:844})
   await page.goto(URL,{waitUntil:'domcontentloaded'})
-  await expect(page.getByRole('region',{name:'Game Day scores and schedule'})).toBeVisible()
+  const scores=page.getByRole('region',{name:'Game Day scores and schedule'})
+  await expect(scores).toBeVisible()
+  await expect(scores.locator('article').first()).toBeVisible()
   await expect(page.getByRole('region',{name:'Home decision overview'})).toBeVisible()
 }
 
@@ -38,7 +40,7 @@ test('new 1980s sports-broadcast palette appears across the actual Home', async(
   expect(c.hero.background).toBe(rgb(255,245,228))
   expect(c.scores.background).toBe(rgb(218,244,238))
   expect(c.scoreCard.background).toBe(rgb(255,255,255))
-  expect(c.decisionCard.background).toBe(rgb(255,255,255))
+  expect(c.decisionCard.background).toBe(rgb(255,240,232))
   expect(c.heading.foreground).toBe(rgb(23,62,82))
   expect(c.newsHeading.foreground).toBe(rgb(23,62,82))
   expect(c.fantasy.background).toBe(rgb(217,244,238))
@@ -68,19 +70,17 @@ test('home headline cards retain category signs and true attributed links',async
   const section=page.getByRole('region',{name:'Home sports news'})
   await expect(section.getByRole('heading',{name:'Top sports news'})).toBeVisible()
   const articles=section.locator('[data-news-card]')
-  if(await articles.count()){
-    const first=articles.first()
-    const style=await first.evaluate(el=>({
-      background:getComputedStyle(el).backgroundColor,
-      title:getComputedStyle(el.querySelector('h3')).color,
-    }))
-    expect(style.background).toBe(rgb(255,255,255))
-    expect(style.title).toBe(rgb(2,6,23))
-    await expect(first.locator('[data-category-sign]')).toBeVisible()
-    expect(await first.locator('a').getAttribute('href')).toMatch(/^https:\/\//)
-  }else{
-    await expect(section.getByRole('status')).toBeVisible()
-  }
+  // Await finished source-linked article rendering, not the brief LOADING banner.
+  const first=articles.first()
+  await expect(first).toBeVisible({timeout:15000})
+  const style=await first.evaluate(el=>({
+    background:getComputedStyle(el).backgroundColor,
+    title:getComputedStyle(el.querySelector('h3')).color,
+  }))
+  expect([rgb(255,244,238),rgb(255,248,223),rgb(234,248,245),rgb(237,249,241),rgb(243,239,250),rgb(234,244,254),rgb(255,249,239)]).toContain(style.background)
+  expect(style.title).toBe(rgb(2,6,23))
+  await expect(first.locator('[data-category-sign]')).toBeVisible()
+  expect(await first.locator('a').getAttribute('href')).toMatch(/^https:\/\//)
   await section.getByRole('button',{name:/All sports news/}).click()
   await expect(page).toHaveURL(/#news/)
 })

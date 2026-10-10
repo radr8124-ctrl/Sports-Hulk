@@ -129,51 +129,61 @@ button { font: inherit; }
   .zenith-home :is(button, a):focus-visible { outline-color: #af433e; outline-offset: 3px; }
 }
 
-/* The Ref: lightweight sports signals, not animations tied to predicted winners. */
-@keyframes zenithRefHover {
-  0%,100% { transform: translateY(0) rotate(-2deg); }
-  48% { transform: translateY(-4px) rotate(2deg); }
+/* Home Signal Board: 1980s editorial printing, not a casino betting tile. */
+.zenith-home-signal-card{
+  background-color:var(--signal-paper,#FFFCF5);
+  box-shadow:4px 5px 0 rgba(23,62,82,.1),0 12px 24px rgba(36,45,44,.045);
+  isolation:isolate;
+  min-height:254px;
 }
-@keyframes zenithRefSignalArm {
-  0% { transform: rotate(-35deg); opacity: 0; }
-  20% { transform: rotate(-125deg); opacity: 1; }
-  40% { transform: rotate(-45deg); opacity: 1; }
-  61% { transform: rotate(-125deg); opacity: 1; }
-  80% { transform: rotate(-60deg); opacity: 1; }
-  100% { transform: rotate(-35deg); opacity: 0; }
+.zenith-home-signal-card::before{
+  content:"";position:absolute;z-index:-1;pointer-events:none;
+  right:-27px;top:33px;width:116px;height:116px;border-radius:50%;
+  background:radial-gradient(circle,transparent 52%,var(--signal-accent) 54%,transparent 57%);
+  opacity:.24;
 }
-@keyframes zenithRefThrowFlag {
-  0% { opacity: 1; transform: translate(2px,12px) rotate(-40deg) scale(.6); }
-  30% { opacity: 1; transform: translate(-13px,-20px) rotate(20deg) scale(1); }
-  60% { opacity: 1; transform: translate(-43px,-54px) rotate(160deg); }
-  100% { opacity: 0; transform: translate(-68px,-18px) rotate(270deg) scale(.7); }
+.zenith-home-signal-topline{
+  position:absolute;top:0;left:0;right:0;height:6px;
+  background:var(--signal-accent,#FF7766);
 }
-@keyframes zenithRefWhistle {
-  0%,100% { opacity:0; transform: translate(-50%,8px) scale(.65); }
-  25%,80% { opacity:1; transform: translate(-50%,-3px) scale(1.08); }
+.zenith-home-signal-metric{
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.06em;
+  text-shadow:1px 1px 0 #FFFDF8;
 }
-@keyframes zenithRefJump {
-  0%,100% { transform:translateY(0) rotate(0); }
-  35% { transform:translateY(-9px) rotate(-5deg); }
-  75% { transform:translateY(-3px) rotate(4deg); }
+/* News stays editorial with category-specific soft paper and a restrained
+   page-edge mark rather than uniform SaaS white-card rectangles. */
+.zenith-editorial-story{
+  background:var(--story-paper,#FFFDF7)!important;
+  border:1px solid #D8C7B7!important;
+  box-shadow:3px 4px 0 rgba(23,62,82,.09);
+  isolation:isolate;
 }
-.zenith-ref-idle { display:inline-flex; animation:zenithRefHover 3.4s ease-in-out infinite; }
-.zenith-ref-signal-arm,.zenith-ref-flag,.zenith-ref-whistle-burst { opacity:0; pointer-events:none; }
-.zenith-ref--strike .zenith-ref-signal-arm { animation:zenithRefSignalArm 1.35s ease-in-out both; }
-.zenith-ref--strike .zenith-ref-idle { animation:zenithRefJump .8s ease-in-out both; }
-.zenith-ref--flag .zenith-ref-flag { animation:zenithRefThrowFlag 1.45s ease-out both; }
-.zenith-ref--flag .zenith-ref-idle { animation:zenithRefJump 1s ease-in-out both; }
-.zenith-ref--whistle .zenith-ref-whistle-burst { animation:zenithRefWhistle 1.25s ease-out both; }
-.zenith-ref--whistle .zenith-ref-idle { animation:zenithRefJump 1.2s ease-in-out both; }
-@media (prefers-reduced-motion: reduce) {
-  .zenith-ref-idle,
-  .zenith-ref--strike .zenith-ref-idle,
-  .zenith-ref--flag .zenith-ref-idle,
-  .zenith-ref--whistle .zenith-ref-idle,
-  .zenith-ref--strike .zenith-ref-signal-arm,
-  .zenith-ref--flag .zenith-ref-flag,
-  .zenith-ref--whistle .zenith-ref-whistle-burst { animation:none; }
-  .zenith-ref--strike .zenith-ref-signal-arm,
-  .zenith-ref--flag .zenith-ref-flag,
-  .zenith-ref--whistle .zenith-ref-whistle-burst { opacity:1; }
+.zenith-editorial-story::after{
+  content:"";position:absolute;pointer-events:none;z-index:-1;
+  right:-31px;bottom:-51px;width:120px;height:120px;border-radius:50%;
+  border:16px solid var(--story-accent,#46CDD2);
+  opacity:.12;
+}
+.zenith-editorial-story:hover{
+  box-shadow:4px 6px 0 rgba(23,62,82,.17);
+  border-color:#173E52!important;
+}
+
+/* On desktop, The Ref gets an editorial sideline gutter rather than covering
+   the rightmost betting/survivor card. On phones, keep full content width. */
+@media(min-width:768px) and (max-width:1879px){
+  .zenith-home{padding-right:180px!important}
+}
+@media(min-width:768px){
+  .zenith-ref-companion .zenith-ref-speech{
+    position:absolute;
+    right:3px;
+    bottom:calc(100% - 4px);
+    width:132px;
+    max-width:132px;
+    z-index:1;
+    border-color:#173E52;
+    background:#FFF5E4;
+  }
 }

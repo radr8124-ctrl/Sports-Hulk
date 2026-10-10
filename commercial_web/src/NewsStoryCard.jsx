@@ -79,12 +79,15 @@ export function NewsCategorySign({category='NEWS',dark=false,compact=false}){
 export default function NewsStoryCard({story,theme='light',featured=false}){
  const dark=theme==='dark'
  const style=categories[story.category]||categories.NEWS
+ const storyPaper={INJURY:'#FFF4EE',RECAP:'#FFF8DF',FANTASY:'#EAF8F5',LINEUP:'#EDF9F1',TRANSACTION:'#F3EFFA',MARKET:'#EAF4FE',NEWS:'#FFF9EF'}
+ const storyAccent={INJURY:'#FF7766',RECAP:'#EEC65D',FANTASY:'#46CDD2',LINEUP:'#9BD9AF',TRANSACTION:'#BBA1E3',MARKET:'#7EC4EB',NEWS:'#A9BDDB'}
  const snippet=story.summary&&story.summary!==story.title?story.summary:null
  return <article data-news-card={story.id} data-news-sport={story.sport}
   data-news-category={story.category}
-  className={'group relative h-full min-w-0 overflow-hidden rounded-[21px] border transition hover:-translate-y-0.5 '+
+  style={!dark?{'--story-paper':storyPaper[story.category]||'#FFF9EF','--story-accent':storyAccent[story.category]||'#A9BDDB'}:undefined}
+  className={'group relative h-full min-w-0 overflow-hidden rounded-[21px] border transition hover:-translate-y-0.5 '+(dark?'':'zenith-editorial-story ')+
    (dark?'border-[#284967] bg-gradient-to-br from-[#132F4B] to-[#0B2036] text-white hover:border-sky-400/50':
-     'border-slate-200 bg-white text-slate-950 shadow-[0_10px_26px_rgba(21,35,55,.05)] hover:border-sky-300 hover:shadow-lg')}>
+     'border-[#D8C7B7] bg-[#FFFDF7] text-slate-950 hover:border-[#173E52]')}>
   <div aria-hidden="true" className={'absolute inset-x-0 top-0 h-[3px] '+style.accent}/>
   <a href={story.url} target="_blank" rel="noopener noreferrer" title={'Read original '+story.source+' article'}
    aria-label={'Read '+story.title+' at '+story.source}

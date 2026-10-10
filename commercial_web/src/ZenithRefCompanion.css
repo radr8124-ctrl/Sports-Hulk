@@ -1,0 +1,121 @@
+/* Sports Zenith original mascot — premium retro sideline edition.
+   Motion is decorative; it never represents a real penalty or betting event. */
+.zenith-ref-companion{
+  bottom:calc(6.4rem + env(safe-area-inset-bottom));
+  transition:bottom 760ms cubic-bezier(.2,.75,.2,1),left 550ms ease,right 550ms ease;
+}
+@media (min-width:768px) {
+ .zenith-ref-companion{bottom:clamp(120px,var(--ref-desktop-dock,26vh),42vh)}
+}
+.zenith-ref-figure{
+  overflow:visible;
+  filter:drop-shadow(5px 7px 0 rgba(23,62,82,.23));
+  animation:zenith-premium-ref-hover 4.8s ease-in-out infinite;
+}
+.zenith-ref-speech{animation:zenith-premium-ref-reveal .35s ease-out both}
+.zenith-ref-control-panel{max-height:min(335px,calc(100dvh - 300px));overscroll-behavior:contain}
+.zenith-ref-left-arm,.zenith-ref-right-arm{transform-box:view-box}
+.zenith-ref-left-arm{transform-origin:57px 131px}
+.zenith-ref-right-arm{transform-origin:122px 132px}
+.zenith-ref-flag,.zenith-ref-sound-burst{opacity:0}
+.zenith-ref-mascot.zenith-ref--strike .zenith-ref-right-arm{
+  animation:zenith-premium-strike 1.65s cubic-bezier(.3,.05,.5,1) both;
+}
+.zenith-ref-mascot.zenith-ref--strike .zenith-ref-left-arm{
+  animation:zenith-premium-umpire-left 1.25s ease-out both;
+}
+.zenith-ref-mascot.zenith-ref--flag .zenith-ref-flag{
+  animation:zenith-premium-flag-toss 1.75s cubic-bezier(.19,.76,.35,1) both;
+}
+.zenith-ref-mascot.zenith-ref--flag .zenith-ref-right-arm{
+  animation:zenith-premium-flag-arm 1.7s ease-out both;
+}
+.zenith-ref-mascot.zenith-ref--whistle .zenith-ref-sound-burst{
+  animation:zenith-premium-whistle-burst 1.6s ease-out both;
+}
+.zenith-ref-mascot.zenith-ref--whistle .zenith-ref-figure{
+  animation:zenith-premium-whistle-bob .55s ease-in-out 3;
+}
+/* He shifts position as the reader moves between evidence sections. */
+.zenith-ref-companion[data-section="news"] .zenith-ref-left-arm,
+.zenith-ref-companion[data-section="learning"] .zenith-ref-left-arm{
+  animation:zenith-premium-sideline-wave 1.2s ease-out 1;
+}
+/* Keep the small-screen scoreboard visible until the viewer opens controls. */
+@media (max-width:767px) {
+ .zenith-ref-companion{bottom:calc(6.3rem + env(safe-area-inset-bottom))}
+ .zenith-ref-companion[data-expanded="false"][data-signal="idle"] .zenith-ref-speech{display:none}
+ .zenith-ref-control-panel{max-height:min(330px,calc(100dvh - 290px))}
+}
+@keyframes zenith-premium-ref-hover{
+  0%,100%{transform:translateY(0) rotate(-1.5deg)}
+  50%{transform:translateY(-6px) rotate(1.5deg)}
+}
+@keyframes zenith-premium-ref-reveal{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes zenith-premium-sideline-wave{
+  0%,100%{transform:rotate(0)}
+  25%{transform:rotate(22deg)}
+  55%{transform:rotate(-13deg)}
+  80%{transform:rotate(12deg)}
+}
+@keyframes zenith-premium-strike{
+  0%{transform:rotate(0)}
+  24%{transform:rotate(-92deg)}
+  45%{transform:rotate(-21deg)}
+  68%{transform:rotate(-106deg)}
+  84%{transform:rotate(-19deg)}
+  100%{transform:rotate(0)}
+}
+@keyframes zenith-premium-umpire-left{
+  0%,100%{transform:rotate(0)}
+  36%,64%{transform:rotate(35deg)}
+}
+@keyframes zenith-premium-flag-arm{
+  0%,100%{transform:rotate(0)}
+  30%,50%{transform:rotate(-85deg)}
+}
+@keyframes zenith-premium-flag-toss{
+  0%{transform:translate(0,0) rotate(-28deg) scale(.5);opacity:0}
+  16%{opacity:1}
+  43%{transform:translate(-15px,-58px) rotate(16deg) scale(1.2);opacity:1}
+  72%{transform:translate(-54px,-90px) rotate(220deg) scale(1);opacity:1}
+  100%{transform:translate(-78px,-40px) rotate(295deg) scale(.75);opacity:0}
+}
+@keyframes zenith-premium-whistle-burst{
+  0%,100%{opacity:0;transform:translateY(8px) scale(.7)}
+  22%,76%{opacity:1;transform:translateY(-9px) scale(1.08)}
+}
+@keyframes zenith-premium-whistle-bob{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-4px)}
+}
+@media(prefers-reduced-motion:reduce){
+ .zenith-ref-companion{transition:none!important}
+ .zenith-ref-figure,.zenith-ref-speech,
+ .zenith-ref-companion .zenith-ref-left-arm,
+ .zenith-ref-companion .zenith-ref-right-arm,
+ .zenith-ref-mascot.zenith-ref--flag .zenith-ref-flag,
+ .zenith-ref-mascot.zenith-ref--whistle .zenith-ref-sound-burst{
+  animation:none!important;
+ }
+ .zenith-ref-mascot.zenith-ref--flag .zenith-ref-flag,
+ .zenith-ref-mascot.zenith-ref--whistle .zenith-ref-sound-burst{opacity:1}
+}
+
+/* Let the mascot travel farther between desktop sections while its open menu
+   remains entirely usable on short windows. Phone movement stays restrained. */
+@media(min-width:768px){
+ .zenith-ref-companion[data-expanded="true"]{bottom:clamp(125px,21vh,24vh)}
+}
+@media(max-width:767px){
+ .zenith-ref-companion[data-section="news"],
+ .zenith-ref-companion[data-section="learning"]{
+  bottom:calc(7.7rem + env(safe-area-inset-bottom));
+ }
+ .zenith-ref-companion[data-expanded="true"]{
+  bottom:calc(6.3rem + env(safe-area-inset-bottom));
+ }
+}
