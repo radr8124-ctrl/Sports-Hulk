@@ -48,6 +48,7 @@ import SurvivorCommandCover from './SurvivorCommandCover'
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorMarketReview = lazy(() => import('./SurvivorMarketReview'))
 const SurvivorRiskLens = lazy(() => import('./SurvivorRiskLens'))
+const SurvivorWeek6Planner = lazy(() => import('./SurvivorWeek6Planner'))
 const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
 const SurvivorThursdayTracker = lazy(() => import('./SurvivorThursdayTracker'))
 import { rankSurvivorCandidates } from '../survivor_week5_rank'
@@ -1078,6 +1079,16 @@ function SurvivorCommercialPanel() {
             usedTeams={usedTeams}
             historical={saved.historical_pool_availability || {}}
             currentPicks={currentPicks}
+          />
+        </Suspense>
+      )}
+
+      {hasEntry && entryStatus === 'ALIVE' && saved.pool_current_week === 5 && (
+        <Suspense fallback={<LoadingSurface label="Loading Week 6 two-pick planning" />}>
+          <SurvivorWeek6Planner
+            key={`${saved.active_entry}-${saved.pool_current_week}`}
+            entryName={saved.active_entry}
+            getAccessToken={getAccessToken}
           />
         </Suspense>
       )}

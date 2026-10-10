@@ -20,6 +20,7 @@ import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
 import { survivorHistoricalAvailability } from './survivor_pool_leverage.js'
+import {buildSurvivorWeek6Plan} from './survivor_week6_planner.js'
 import { reconcileDallasReport, summariseDallasReport, DALLAS_CLAIM } from './survivor_thursday_tracker.js'
 import { loadDallasSnapshot, saveDallasSnapshot } from './survivor_thursday_store.js'
 import { verifiedEspnPlayerTables } from './verified_player_boxscore.js'
@@ -56,6 +57,7 @@ const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVO
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
 const SURVIVOR_POOL_HISTORY_CSV = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/SURVIVOR_POOL_CURRENT.csv')
 const SURVIVOR_POOL_HISTORY_META = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/LATEST_OFFICIAL_POOL.json')
+const SURVIVOR_WEEK6_SCHEDULE_CSV = path.join(SPORTS_ROOT,'nfl_live/derived/NFLVERSE_2026_SCHEDULE.csv')
 const DATASET_FRESHNESS_PATH = path.join(SPORTS_ROOT, 'intelligence_warehouse', 'freshness', 'DATASET_FRESHNESS_CURRENT.csv')
 const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FAILED_QUESTION_QUEUE.jsonl')
 const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_EVALUATION_LEDGER.jsonl')
@@ -5269,6 +5271,44 @@ const server=http.createServer(async(req,res)=>{
       return json(res,200,saved)
     } catch(err) {
       return json(res,503,{status:'SAVE_UNAVAILABLE',message:'Survivor pick saving is temporarily unavailable.'})
+    }
+  }
+
+  if(req.method==='GET'&&url.pathname==='/api/survivor/week6-plan'){
+    const user=await authenticatedUser(req)
+    if(!user)return json(res,401,{status:'AUTH_REQUIRED'})
+    const rate=consumeRateLimit('survivor-week6-plan:'+user.id,30,60*1000)
+    if(!rate.ok)return json(res,429,{status:'RATE_LIMITED'})
+    const linked=await linkedSurvivorEntries(req,user.id)
+    const requested=String(url.searchParams.get('entry')||'').trim()
+    if(requested && !linked.includes(requested)){
+      return json(res,403,{status:'NOT_ENTRY_OWNER'})
+    }
+    const entryName=selectLinkedSurvivorEntry(linked,requested)
+    if(!entryName)return json(res,403,{status:'LINKED_ENTRY_REQUIRED'})
+    res.setHeader('Cache-Control','private, no-store')
+    try{
+      const [state,source]=await Promise.all([
+        loadExternalJson(SURVIVOR_ENTRIES_PATH),
+        readFile(SURVIVOR_WEEK6_SCHEDULE_CSV,'utf8'),
+      ])
+      const entry=(state?.entries||{})[entryName]
+      if(!entry)return json(res,404,{status:'PRIVATE_ENTRY_NOT_FOUND'})
+      const plan=buildSurvivorWeek6Plan(source,{
+        poolWeek:Number(state?.pool_current_week),entryStatus:entry.status,
+        usedTeams:entry.used_teams||[],currentPicks:entry.current_picks||[],
+        nowMs:Date.now(),
+      })
+      if(plan.status!=='SCHEDULE_ONLY_UNRANKED'){
+        return json(res,409,{status:plan.status,message:'Week 6 scenario planning is waiting on a valid schedule and private entry state.'})
+      }
+      return json(res,200,{
+        ...plan,source_type:'NFLVERSE_2026_VERIFIED_SCHEDULE',
+        entry_linked:true,personal_only:true,
+        qualified_week6_recommendations:0,
+      })
+    }catch{
+      return json(res,503,{status:'SCHEDULE_READ_UNAVAILABLE',message:'Week 6 schedule could not be verified. Your picks were not changed.'})
     }
   }
 
