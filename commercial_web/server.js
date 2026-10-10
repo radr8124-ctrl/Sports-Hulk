@@ -33,6 +33,7 @@ import { fantasyProviderStatus, lookupSleeperLeagues, fetchSleeperRosterByLeague
 import { saveSleeperFantasyTeam } from './sleeper_account_store.js'
 import { canManageSurvivorPool } from './survivor_pool_permissions.js'
 import { survivorPersonalScoreCards } from './survivor_pick_scores.js'
+import { buildSurvivorPastPickHistory } from './survivor_past_picks.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
 import { askClaimCoverage } from './ask_claim_coverage.js'
 import { reportingConsensus } from './reporting_consensus.js'
@@ -5628,6 +5629,7 @@ const server=http.createServer(async(req,res)=>{
       state_week_matches_pool:governedEntry?.state_week_matches_pool??null,
       used_teams:Array.isArray(entry?.used_teams)?entry.used_teams:[],
       current_picks:Array.isArray(entry?.current_picks)?entry.current_picks:[],
+      past_picks:buildSurvivorPastPickHistory(entry,poolWeek),
       pick_scores:survivorPersonalScoreCards(entry,poolWeek,data.nflScores),
       required_picks:entryRequiredPicks,
       rule_status:entryRuleStatus,

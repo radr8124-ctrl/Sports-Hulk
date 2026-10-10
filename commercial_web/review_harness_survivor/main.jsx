@@ -5,10 +5,33 @@ import ReactDOM from 'react-dom/client'
 import SurvivorPickEditor from '../src/SurvivorPickEditor.jsx'
 import SurvivorPoolImport from '../src/SurvivorPoolImport.jsx'
 import SurvivorScoreCards from '../src/SurvivorScoreCards.jsx'
+import SurvivorPastPicks from '../src/SurvivorPastPicks.jsx'
+import {buildSurvivorPastPickHistory} from '../survivor_past_picks.js'
 import SurvivorCommandCover from '../src/SurvivorCommandCover.jsx'
 import '../src/styles.css'
 const burned=['Los Angeles Chargers','San Francisco 49ers','Kansas City Chiefs','Buffalo Bills','Minnesota Vikings']
 const getAccessToken=async()=>'LOCAL_SYNTHETIC_REVIEW_TOKEN_NEVER_PRODUCTION'
+// Synthetic linked-entry test history only. Original real member state is
+// NEVER loaded in this public local browser QA harness.
+const syntheticPast=buildSurvivorPastPickHistory({
+ status:'ALIVE',current_week:5,current_picks:[],used_teams:burned,
+ history:[
+  {week:1,team:'Los Angeles Chargers',result:'SURVIVED',source:'SYNTHETIC_WEEK2_OFFICIAL.pdf'},
+  {week:2,team:'San Francisco 49ers',result:'SURVIVED',source:'SYNTHETIC_WEEK2_OFFICIAL.pdf'},
+  {week:3,team:'Kansas City Chiefs',result:'SURVIVED',source:'SYNTHETIC_SCHEDULE.csv'},
+  {week:3,team:'Buffalo Bills',result:'SURVIVED',source:'SYNTHETIC_SCHEDULE.csv'},
+  {week:4,team:'Minnesota Vikings',result:'SURVIVED',source:'SYNTHETIC_SCHEDULE.csv'},
+ ],
+ week_3:{required_picks:2,picks:[
+  {team:'Kansas City Chiefs',result:'WIN',game_status:'FINAL: Kansas City Chiefs 24 - Miami Dolphins 10'},
+  {team:'Buffalo Bills',result:'WIN',game_status:'FINAL: Los Angeles Chargers 16 - Buffalo Bills 24'},
+ ],submitted:true,official_pool_sheet_confirmed:true},
+ week_4:{required_picks:1,picks:[
+  {team:'Minnesota Vikings',result:'WIN',game_status:'FINAL: Miami Dolphins 10 - Minnesota Vikings 15'},
+ ],submitted:false,official_pool_sheet_confirmed:true},
+ week_5:{picks:[],entry_result:'OPEN',submitted:false},
+},5)
+
 const cards=[{
  week:4,pick_number:1,team:'Minnesota Vikings',opponent:'Miami Dolphins',
  score_line:'Miami Dolphins 10 - Minnesota Vikings 15',game_clock:'FINAL',
@@ -26,6 +49,7 @@ function ReviewHarness(){
      <button type="button" aria-label="Switch test entry activity" onClick={()=>setEntryStatus(s=>s==='ALIVE'?'ELIMINATED':'ALIVE')} className="rounded bg-slate-100 p-2">Toggle synthetic entry status</button>
      <span className="ml-3">Synthetic session refreshes: {refresh}</span>
    </section>
+   <SurvivorPastPicks history={syntheticPast} entryName="SYNTHETIC QA 01" />
    <SurvivorPickEditor entryName="SYNTHETIC QA 01" poolWeek={5} entryStatus={entryStatus}
      usedTeams={burned} currentPicks={[]} requiredPicks={1} ruleConfirmed={true}
      getAccessToken={getAccessToken} onSaved={()=>setRefresh(v=>v+1)} />
