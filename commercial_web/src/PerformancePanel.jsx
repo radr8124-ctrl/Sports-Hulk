@@ -7,6 +7,7 @@ import { allMarketsProofRows } from './allMarketsProofRows.js'
 import { mlbPendingProgress } from './mlbPendingProgress.js'
 import ForwardProofPanel from './ForwardProofPanel.jsx'
 import BrainLearningPanel from './BrainLearningPanel.jsx'
+import NflModelValidationPanel from './NflModelValidationPanel.jsx'
 
 const SPORTS = ['ALL', 'NFL', 'CFB', 'MLB', 'NBA', 'NHL']
 
@@ -1861,6 +1862,7 @@ export default function PerformancePanel() {
   return (
     <div className="space-y-8">
       <OfficialRecord data={data} />
+      <NflModelValidationPanel />
       <BrainLearningPanel />
       <ForwardProofPanel />
       <MlbPendingProgress brain={brain} />
