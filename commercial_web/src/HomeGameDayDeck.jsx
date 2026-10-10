@@ -34,7 +34,7 @@ function GameTile({game}){
  const showScore=(game.state==='LIVE'||game.state==='FINAL') &&
    game.awayScore!==null&&game.homeScore!==null
  return <article data-testid={'gameday-'+game.key} data-sport={game.sport}
-   className="w-[min(77vw,286px)] shrink-0 snap-start rounded-2xl border border-[#B2D0CF] border-t-[4px] border-t-[#FF7766] bg-white p-3.5 text-[#173E52] shadow-[0_5px_0_#173E5210] lg:w-auto">
+   className="w-[calc(100vw-153px)] shrink-0 snap-start rounded-2xl border border-[#B2D0CF] border-t-[4px] border-t-[#FF7766] bg-white p-3.5 text-[#173E52] shadow-[0_5px_0_#173E5210] md:w-[min(77vw,286px)] lg:w-auto">
    <div className="flex flex-wrap items-center justify-between gap-2">
      <span className="text-[11px] font-black tracking-widest text-[#0D6B76]">{game.sport}</span>
      <span className={'rounded-lg border px-2 py-1 text-[9px] font-black tracking-wider '+(pillStyles[game.state]||pillStyles.STATUS_NOT_VERIFIED)}>{label}</span>
@@ -50,6 +50,15 @@ function GameTile({game}){
      <span className="shrink-0 text-[9px] font-bold text-[#647985]">{game.sourceName}</span>
    </div>
  </article>
+}
+
+function RefMobileSideline(){
+ return <div data-ref-mobile-sideline aria-hidden="true"
+  className="pointer-events-none absolute inset-y-0 right-0 flex w-[87px] flex-col items-center justify-between overflow-hidden rounded-xl border border-[#B3D8CF] bg-[#E8F7F1] py-3 text-[#326970] md:hidden">
+  <span className="text-[8px] font-black uppercase tracking-[.1em]">SIDELINE</span>
+  <span className="h-0.5 w-9 bg-[#FF7766]"/>
+  <span className="text-[8px] font-black uppercase tracking-[.22em]">ZENITH</span>
+ </div>
 }
 
 export default function HomeGameDayDeck({onNavigate}){
@@ -104,22 +113,29 @@ export default function HomeGameDayDeck({onNavigate}){
   {data.loading?<div className="mt-3 flex min-h-36 items-center justify-center gap-2 text-sm font-semibold text-[#44626E]">
     <Radio size={15} className="animate-pulse text-[#0E7380]"/> Checking league feeds…
    </div>:deck.games.length?
-   <div className="mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 lg:grid lg:grid-cols-3 xl:grid-cols-5 lg:overflow-visible">
-    {deck.games.map(game=><GameTile key={game.key} game={game}/>)}
-   </div>:
-   <div className="mt-3 flex min-h-28 items-center gap-3 rounded-xl border border-[#B1CECB] bg-white p-4">
-    <AlertTriangle size={17} className="shrink-0 text-[#B77316]"/>
-    <div>
-     <p className="text-xs font-black text-[#173E52]">
-      {deck.state==='DATA_SOURCE_FAILURE'?'DATA SOURCE FAILURE':
-       deck.state==='SOURCE_STALE'?'SOURCE STALE':'No games in the display window'}
-     </p>
-     <p className="mt-1 text-[11px] leading-4 text-[#4E6773]">
-      {deck.state==='DATA_SOURCE_FAILURE'?'The selected sport feed failed verification. This is NOT a betting-model NO BET.':
-       deck.state==='SOURCE_STALE'?'The latest score feed is too old. Games will not be presented as live.':
-        'A valid schedule was checked; no relevant game is currently in this time window.'}
-     </p>
+   <div data-ref-score-stage className="relative mt-3 min-w-0">
+    <div data-scorecard-scroll role="group" aria-label="Swipe game scores"
+     className="flex w-[calc(100vw-153px)] min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto pb-1 md:w-full lg:grid lg:grid-cols-3 xl:grid-cols-5 lg:overflow-visible">
+     {deck.games.map(game=><GameTile key={game.key} game={game}/>)}
     </div>
+    <RefMobileSideline/>
+   </div>:
+   <div data-ref-score-stage className="relative mt-3 min-w-0">
+    <div data-score-empty className="flex min-h-28 w-[calc(100vw-153px)] items-center gap-3 rounded-xl border border-[#B1CECB] bg-white p-3 md:w-full md:p-4">
+     <AlertTriangle size={17} className="shrink-0 text-[#B77316]"/>
+     <div className="min-w-0">
+      <p className="text-xs font-black text-[#173E52]">
+       {deck.state==='DATA_SOURCE_FAILURE'?'DATA SOURCE FAILURE':
+        deck.state==='SOURCE_STALE'?'SOURCE STALE':'No games in the display window'}
+      </p>
+      <p className="mt-1 text-[11px] leading-4 text-[#4E6773]">
+       {deck.state==='DATA_SOURCE_FAILURE'?'The selected sport feed failed verification. This is NOT a betting-model NO BET.':
+        deck.state==='SOURCE_STALE'?'The latest score feed is too old. Games will not be presented as live.':
+         'A valid schedule was checked; no relevant game is currently in this time window.'}
+      </p>
+     </div>
+    </div>
+    <RefMobileSideline/>
    </div>}
   {!data.loading&&(deck.sourceFailureCount>0||deck.sourceStaleCount>0)&&
    <p className="mt-2 text-[11px] font-semibold text-[#894916]" role="status">
