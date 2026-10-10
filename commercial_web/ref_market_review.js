@@ -121,7 +121,7 @@ export function refereeQuickPrompts(page='Ask',game=null) {
     ['Best research','Show the best NFL prop research opportunities and their risks.'],
     ['Why no PLAY?','Why are player props still research and not verified positive EV bets?'],
   ]
-  if(['Best Bets','Parlays','Bet Lab'].includes(page))return [
+  if(['Best Bets','Parlays','Bet Lab','Tools'].includes(page))return [
     ['Review prices','What is the best NFL bet right now and why?'],
     ['Why no PLAY?','Why have NFL bets not cleared independent model proof?'],
     ['Spread vs winner','Explain why an NFL moneyline favorite might not cover a spread.'],

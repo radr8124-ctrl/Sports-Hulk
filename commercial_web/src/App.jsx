@@ -23,6 +23,7 @@ const PracticeBetting = lazy(() => import('./PracticeBetting'))
 const ParlaysV2Panel = lazy(() => import('./ParlaysV2Panel'))
 const PropsV2Panel = lazy(() => import('./PropsV2Panel'))
 const BettingOddsBoard = lazy(() => import('./BettingOddsBoard'))
+const BetToolsPanel = lazy(() => import('./BetToolsPanel'))
 const NFLPlayerPropResearchPanel = lazy(() => import('./NFLPlayerPropResearchPanel'))
 const ScoreGameCenter = lazy(() => import('./ScoreGameCenter'))
 const PersonalIdpPanel = lazy(() => import('./PersonalIdpPanel'))
@@ -3544,6 +3545,7 @@ const ROUTE_HASH = {
   'Best Bets': 'best-bets',
   Props: 'props',
   PrizePicks: 'prizepicks',
+  Tools: 'tools',
   Parlays: 'parlays',
   'Bet Lab': 'bet-lab',
   Fantasy: 'fantasy',
@@ -3720,6 +3722,7 @@ export default function App() {
                     </div>
                   </details>
                 )}
+                {active === 'Tools' && <Suspense fallback={<LoadingSurface label="Loading pricing tools" />}><BetToolsPanel /></Suspense>}
                 {active === 'Parlays' && <Suspense fallback={<LoadingSurface label="Loading Parlays" />}><ParlaysV2Panel /></Suspense>}
                 {active === 'Bet Lab' && <Suspense fallback={<LoadingSurface label="Loading Bet Lab" />}><PracticeBetting /></Suspense>}
               </>
