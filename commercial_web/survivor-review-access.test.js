@@ -15,15 +15,19 @@ test('public Survivor sign in/access is immediately after deadline, before resea
  assert.match(panel.slice(b,c),/!isSignedIn/)
  assert.match(panel.slice(b,c),/AccountButton/)
  assert.match(panel.slice(a,b),/!hasEntry/)
- assert.match(panel.slice(b,c),/Link my Survivor entry/)
+ assert.match(panel.slice(b,c),/Refresh my entries/)
+ assert.match(panel.slice(b,c),/appear automatically without a name or claim code/)
+ assert.doesNotMatch(panel.slice(b,c),/Link my Survivor entry/)
+ assert.doesNotMatch(panel.slice(b,c),/scrollIntoView/)
 })
 
-test('link entry shortcut points to existing, still server-secure one-time claim form, not a bypass',()=>{
+test('preassigned returning owners automatically load their entry; optional manual claim remains collapsed and protected',()=>{
  assert.match(panel,/id="survivor-link-entry"/)
- assert.match(panel,/scrollIntoView/)
+ assert.match(panel,/Need to connect another entry\? Optional pool-manager claim/)
+ assert.match(panel,/Manual entry connection \(optional\)/)
  assert.equal((panel.match(/<SurvivorPickEditor/g)||[]).length,1)
  assert.match(panel,/getAccessToken=\{getAccessToken\}/)
  assert.match(panel,/onClick=\{linkExistingEntry\}/)
- assert.match(panel,/Connect another Survivor entry/)
  assert.match(panel,/single-use/)
+ assert.match(panel,/saved.status==='PRIVATE_STATE_UNAVAILABLE'/)
 })

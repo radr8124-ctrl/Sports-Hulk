@@ -1059,22 +1059,21 @@ function SurvivorCommercialPanel() {
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-black uppercase tracking-[.12em] text-[#176773]">YOUR PRIVATE SURVIVOR REVIEW</p>
               <h2 className="mt-1 text-sm font-black text-[#173E52]">
-                {!isSignedIn ? 'Sign in to see your entry' : 'Connect your existing pool entry'}
+                {!isSignedIn ? 'Sign in to see your entry' : saved.status==='PRIVATE_STATE_UNAVAILABLE' ? 'Your private entry is temporarily unavailable' : 'No entry assigned to this sign-in yet'}
               </h2>
               <p className="mt-1 text-[11px] font-semibold leading-[1.5] text-[#516E77]">
                 {!isSignedIn
                   ? 'Only your signed-in account can display used teams, saved picks and personal scores.'
-                  : 'Your account is signed in, but no private entry is linked. Use your exact entry name and one-time claim code; no pick will be made.'}
+                  : saved.status==='PRIVATE_STATE_UNAVAILABLE'
+                    ? 'We could not verify your assigned pool record right now. Refresh to try again; no picks have been changed.'
+                    : 'Your pool organizer can preassign your entry to your verified email. When it is assigned, your entries, used teams and scores will appear automatically without a name or claim code.'}
               </p>
             </div>
             <div className="shrink-0">
               {!isSignedIn ? <AccountButton /> : (
-                <button type="button" onClick={() => {
-                  const form = document.getElementById('survivor-link-entry')
-                  form?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  form?.querySelector('input')?.focus({ preventScroll: true })
-                }} className="rounded-lg bg-[#173E52] px-4 py-2.5 text-[11px] font-black text-white hover:bg-[#26556B]">
-                  Link my Survivor entry <ChevronRight size={14} className="ml-1 inline" />
+                <button type="button" onClick={() => setLinkRefresh(value => value + 1)}
+                  className="rounded-lg bg-[#173E52] px-4 py-2.5 text-[11px] font-black text-white hover:bg-[#26556B]">
+                  Refresh my entries <ChevronRight size={14} className="ml-1 inline" />
                 </button>
               )}
             </div>
@@ -1346,12 +1345,13 @@ function SurvivorCommercialPanel() {
       )}
 
       {isSignedIn && saved.status !== 'LOADING' && (
-        <section id="survivor-link-entry" className="rounded-3xl border border-blue-200 bg-blue-50 p-5 md:p-6">
-          <div className="flex gap-4">
+        <details id="survivor-link-entry" className="group rounded-2xl border border-[#D8E2E5] bg-white p-4">
+          <summary className="cursor-pointer text-xs font-black text-[#527280]">Need to connect another entry? Optional pool-manager claim</summary>
+          <div className="mt-4 flex gap-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-700"><CheckCircle2 size={20} /></div>
             <div className="min-w-0 flex-1">
-              <div className="text-lg font-black text-slate-950">{hasEntry ? 'Connect another Survivor entry' : 'Connect your existing Survivor entry'}</div>
-              <p className="mt-2 text-sm leading-6 text-blue-950">{hasEntry ? 'Add another private entry to this same account. Each entry keeps its own used-team history and can be diversified separately.' : 'Your passwordless account is authenticated. Use the exact entry name and one-time claim code to attach the private pool record to this account.'}</p>
+              <div className="text-lg font-black text-slate-950">Manual entry connection (optional)</div>
+              <p className="mt-2 text-sm leading-6 text-blue-950">Assigned entries appear automatically after secure email sign-in. Only use this optional manager-issued claim form when connecting a separate entry that has not been preassigned to your verified account.</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
                 <input
                   value={claimEntry}
@@ -1384,7 +1384,7 @@ function SurvivorCommercialPanel() {
               <div className="mt-3 text-[11px] font-semibold leading-5 text-blue-800">The claim code is single-use. Once linked, the entry cannot be claimed by another account.</div>
             </div>
           </div>
-        </section>
+        </details>
       )}
 
 
@@ -1639,6 +1639,9 @@ function usePrivateSurvivorState(refreshKey = 0, selectedEntry = '') {
       return () => {}
     }
 
+    // Keep the private panel in its loading state while secure account
+    // entitlement is verified; never flash a misleading manual claim prompt.
+    setData({status:'LOADING',entry_linked:false,used_teams:[],current_picks:[]})
     const load = async () => {
       try {
         const token = await getAccessToken()
@@ -1654,7 +1657,7 @@ function usePrivateSurvivorState(refreshKey = 0, selectedEntry = '') {
       } catch {
         if (!cancelled) {
           setData({
-            status: 'AUTH_REQUIRED',
+            status: 'PRIVATE_STATE_UNAVAILABLE',
             entry_linked: false,
             used_teams: [],
             current_picks: [],

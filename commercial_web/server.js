@@ -15,6 +15,7 @@ import { faabBudgetLines } from './faab_presentation.js'
 import { buildLinkedSurvivorSummaries, selectLinkedSurvivorEntry } from './survivor_linked_entries.js'
 import { diversifySurvivorEntries } from './survivor_diversification.js'
 import { addSurvivorLink, survivorEntryOwnedByOther, survivorLinkNames } from './survivor_link_registry.js'
+import { eligibleReservedEntries, isReservedForDifferentAccount, secureAutoLinkReservedEntry, validVerifiedOwnerManifest } from './survivor_verified_owner_autolink.js'
 import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
@@ -248,6 +249,9 @@ async function fantasyResearchFreshness(lane, rosterUpdatedAt = null) {
 }
 
 const MEMBER_LINKS_PATH = path.join(__dirname, 'private_member_links.json')
+// Operator-preassigned owners live outside git, dist, and the public web root.
+const SURVIVOR_VERIFIED_OWNER_MAP = '/home/ubuntu/sports-zenith-private/survivor_owner_entitlements.json'
+const SURVIVOR_OWNER_LINK_IN_FLIGHT = new Map()
 const ACCOUNT_PREFERENCES_PATH = path.join(__dirname, 'private_account_preferences.json')
 
 function readLocalEnv() {
@@ -316,6 +320,98 @@ const SURVIVOR_POOL_PREVIEWS = new Map()
 const SURVIVOR_DALLAS_PREVIEWS = new Map()
 let SURVIVOR_DALLAS_COMMIT_BUSY = false
 let SURVIVOR_POOL_COMMIT_BUSY = false
+
+// Verified passwordless email account automatically receives its administrator-
+// preassigned pool record. Never accept entry or email from a URL or browser.
+async function loadVerifiedSurvivorOwners(){
+  let raw
+  try {
+    const info=await stat(SURVIVOR_VERIFIED_OWNER_MAP)
+    if((info.mode&0o077)!==0 || !info.isFile())throw Error('PRIVATE_OWNER_MAP_FILE_PERMISSIONS_INVALID')
+    raw=await readFile(SURVIVOR_VERIFIED_OWNER_MAP,'utf8')
+  }catch(error){
+    if(error?.code==='ENOENT')return null
+    throw error
+  }
+  const manifest=JSON.parse(raw)
+  if(!validVerifiedOwnerManifest(manifest))throw Error('PRIVATE_OWNER_MAP_SOURCE_INVALID')
+  return manifest
+}
+
+function survivorOwnerAdminStore(){
+  if(!INSFORGE_ADMIN)throw Error('PRIVATE_ACCOUNT_STORAGE_UNAVAILABLE')
+  return {
+    async findOwners(name){
+      const {data,error}=await INSFORGE_ADMIN.database.from('survivor_entries')
+        .select('id,owner_id,entry_name,is_active').eq('entry_name',name).limit(10)
+      if(error||!Array.isArray(data))throw Error('PRIVATE_OWNER_READ_UNAVAILABLE')
+      return data
+    },
+    async getClaim(name){
+      const {data,error}=await INSFORGE_ADMIN.database.from('survivor_claims')
+        .select('entry_name,code_sha256,claimed_by,expires_at').eq('entry_name',name).limit(2)
+      if(error||!Array.isArray(data)||data.length>1)throw Error('PRIVATE_CLAIM_SOURCE_CONFLICT')
+      return data[0]||null
+    },
+    async claimIfUnclaimed(name,id,at){
+      const {data,error}=await INSFORGE_ADMIN.database.from('survivor_claims')
+        .update({claimed_by:id,claimed_at:at}).eq('entry_name',name).is('claimed_by',null)
+        .select('entry_name,claimed_by')
+      if(error)throw Error('PRIVATE_CLAIM_UPDATE_UNAVAILABLE')
+      return Array.isArray(data)&&data.length===1&&data[0].claimed_by===id
+    },
+    async insertOwner(value){
+      const {data,error}=await INSFORGE_ADMIN.database.from('survivor_entries')
+        .insert(value).select('id,owner_id,entry_name,is_active')
+      if(error||!Array.isArray(data)||data.length!==1||
+        data[0].owner_id!==value.owner_id||data[0].entry_name!==value.entry_name){
+        throw Error('PRIVATE_OWNER_INSERT_NOT_VERIFIED')
+      }
+    },
+  }
+}
+
+async function ensureVerifiedSurvivorOwner(user){
+  if(!user?.id||user.emailVerified!==true)return {status:'NO_PREVERIFIED_ENTRY',entry_names:[]}
+  const manifest=await loadVerifiedSurvivorOwners()
+  if(!manifest)return {status:'NO_PREVERIFIED_ENTRY',entry_names:[]}
+  const ownerEntries=eligibleReservedEntries(user,manifest)
+  if(!ownerEntries.length)return {status:'NO_PREVERIFIED_ENTRY',entry_names:[]}
+  // The two concurrent initial requests (account summary + Survivor) must not
+  // double-claim the record. DB compare-and-swap enforces the same protection.
+  const key=String(user.id)
+  if(SURVIVOR_OWNER_LINK_IN_FLIGHT.has(key))return SURVIVOR_OWNER_LINK_IN_FLIGHT.get(key)
+  const run=(async()=>{
+    const [pool,localLinks]=await Promise.all([
+      loadExternalJson(SURVIVOR_ENTRIES_PATH),loadExternalJson(MEMBER_LINKS_PATH),
+    ])
+    if(ownerEntries.some(name=>survivorEntryOwnedByOther(localLinks?.survivor_entries||{},user.id,name))){
+      throw Error('RESERVED_ENTRY_OWNERSHIP_CONFLICT')
+    }
+    const linked=await secureAutoLinkReservedEntry({
+      user,manifest,pool,db:survivorOwnerAdminStore(),nowISO:new Date().toISOString(),
+    })
+    if(['AUTO_LINKED','ALREADY_LINKED'].includes(linked.status)&&linked.entry_names.length){
+      // Local fallback is only written AFTER authenticated database readback.
+      const latest=await loadExternalJson(MEMBER_LINKS_PATH)||{survivor_entries:{},survivor_claims:{}}
+      if(survivorEntryOwnedByOther(latest.survivor_entries||{},user.id,linked.entry_names[0])){
+        throw Error('RESERVED_ENTRY_LOCAL_LINK_CONFLICT')
+      }
+      const entries=survivorLinkNames(latest.survivor_entries?.[key])
+      if(!entries.includes(linked.entry_names[0])){
+        latest.survivor_entries=addSurvivorLink(latest.survivor_entries||{},key,linked.entry_names[0])
+        if(latest.survivor_claims?.[linked.entry_names[0]]){
+          latest.survivor_claims[linked.entry_names[0]].claimed_by=key
+          latest.survivor_claims[linked.entry_names[0]].claimed_at=new Date().toISOString()
+        }
+        await saveMemberLinks(latest)
+      }
+    }
+    return linked
+  })()
+  SURVIVOR_OWNER_LINK_IN_FLIGHT.set(key,run)
+  try{return await run}finally{SURVIVOR_OWNER_LINK_IN_FLIGHT.delete(key)}
+}
 
 async function linkedSurvivorEntries(req, userId) {
   if (!userId) return []
@@ -3753,6 +3849,11 @@ const server=http.createServer(async(req,res)=>{
     const user=await authenticatedUser(req)
     if(!user) return json(res,401,{status:'AUTH_REQUIRED',message:'Sign in to load your account.'})
 
+    try{await ensureVerifiedSurvivorOwner(user)}catch{
+      return json(res,503,{status:'PRIVATE_OWNER_CONNECTION_PENDING',
+        message:'Your verified Survivor owner record could not be linked yet. Please retry; no pick or pool data was changed.'})
+    }
+
     const client=scopedInsForgeClient(req)
     if(!client) return json(res,503,{status:'ACCOUNT_STORAGE_UNAVAILABLE',message:'Private account storage is temporarily unavailable.'})
 
@@ -4975,6 +5076,13 @@ const server=http.createServer(async(req,res)=>{
       const claimCode=String(body.claim_code||'').trim().toUpperCase()
       if(!entryName || !claimCode) return json(res,400,{status:'MISSING_FIELDS',message:'Entry name and claim code are required.'})
       if(entryName.length>160 || claimCode.length>128) return json(res,400,{status:'INVALID_FIELDS',message:'Entry name or claim code is too long.'})
+      // Reservations are operator-attested to a verified email. Even a leaked
+      // old claim code cannot transfer one to a different account.
+      const ownerMap=await loadVerifiedSurvivorOwners()
+      if(ownerMap && isReservedForDifferentAccount(entryName,user,ownerMap)){
+        return json(res,409,{status:'ENTRY_PREASSIGNED_TO_VERIFIED_OWNER',
+          message:'This pool record is already assigned to a verified account.'})
+      }
 
       const state=await loadExternalJson(SURVIVOR_ENTRIES_PATH)
       const entry=(state?.entries||{})[entryName]
@@ -5440,6 +5548,11 @@ const server=http.createServer(async(req,res)=>{
       entry_linked:false,
       message:'Sign in to load private Survivor entries.'
     })
+
+    try{await ensureVerifiedSurvivorOwner(user)}catch{
+      return json(res,503,{status:'PRIVATE_OWNER_CONNECTION_PENDING',entry_linked:false,
+        message:'Your verified Survivor owner record could not be connected yet. Refresh and try again; no pick was changed.'})
+    }
 
     const data=await loadAll()
     const state=data.survivorUser||{}
