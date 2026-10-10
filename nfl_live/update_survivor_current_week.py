@@ -3,7 +3,14 @@ from datetime import datetime, timezone
 import json
 import pandas as pd
 
+import sys
+
 ROOT = Path("/home/ubuntu/sports-hulk")
+# Absolute-path invocation from another working directory (as in production)
+# must still resolve the verified season-wide original rules module.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0,str(ROOT))
+from nfl_live.survivor_pool_rules import resolve_week_rule
 ENTRIES = ROOT / "nfl_live/derived/SURVIVOR_ENTRIES.json"
 SCHEDULE = ROOT / "nfl_live/derived/NFLVERSE_2026_SCHEDULE.csv"
 STRATEGY = ROOT / "nfl_live/derived/NFL_SURVIVOR_HULK_STRATEGY.csv"
@@ -160,16 +167,70 @@ def settle_week(entry, week, schedule, now):
     entry[key] = state
     return changed
 
+def can_advance(*, entry, from_week: int, to_week: int) -> bool:
+    """A research-only winner is NOT organizer-confirmed Survivor eligibility.
+
+    Only a fully graded, officially imported prior-week ticket can open the
+    next personal round. Pool rule counts and original entry identity must
+    agree. A score source can never substitute for a missing organizer sheet.
+    """
+    if not isinstance(entry, dict) or entry.get("status") != "ALIVE":
+        return False
+    if to_week != from_week + 1 or not 1 <= from_week < 18:
+        return False
+    if int(entry.get("current_week") or 0) != from_week:
+        return False
+    previous = entry.get(f"week_{from_week}")
+    if not isinstance(previous, dict) or previous.get("entry_result") != "WIN":
+        return False
+    original = resolve_week_rule(from_week, previous)
+    if (original.get("rule_confirmed") is not True or
+            original.get("official_pool_sheet_confirmed") is not True or
+            previous.get("official_pool_sheet_confirmed") is not True):
+        return False
+    required = original.get("required_picks")
+    legs = previous.get("picks")
+    if not isinstance(legs, list) or len(legs) != required:
+        return False
+    names = [str(leg.get("team") or "").strip() if isinstance(leg, dict) else ""
+             for leg in legs]
+    return bool(all(names) and len(set(names)) == required and
+                all(isinstance(leg, dict) and leg.get("result") == "WIN"
+                    for leg in legs))
+
+
+def can_advance_pool(data: dict, target_week: int) -> bool:
+    """Hold global pool rollover until EVERY active member is source-certified.
+
+    Zero active members is not proof the organizer authorized a new round.
+    Eliminated entries cannot veto an otherwise verified active survivor.
+    """
+    source_week = int(data.get("pool_current_week") or 0)
+    if target_week == source_week:
+        return True
+    if target_week != source_week + 1:
+        return False
+    entries = data.get("entries") or {}
+    active = [entry for entry in entries.values()
+              if isinstance(entry, dict) and entry.get("status") == "ALIVE"]
+    return bool(active) and all(can_advance(entry=entry,
+                                           from_week=source_week,
+                                           to_week=target_week)
+                                for entry in active)
+
+
 def open_current_week(entry, week, now):
     if entry.get("status") != "ALIVE":
         return
 
-    prior_week = week - 1
-    prior = entry.get(f"week_{prior_week}", {})
-    if prior and prior.get("entry_result") not in {"WIN", "OPEN", None}:
-        return
-
     previous_week = int(entry.get("current_week") or 0)
+    if previous_week != week and not (
+        (previous_week == 0 and week == 1) or
+        can_advance(entry=entry, from_week=previous_week, to_week=week)
+    ):
+        # Do not clear prior picks or create an OPEN new week merely because
+        # a model/schedule advanced; the organizer must certify survival.
+        return
 
     if previous_week != week:
         entry["current_week"] = week
@@ -210,6 +271,14 @@ def main():
     strategy = pd.read_csv(STRATEGY, low_memory=False) if STRATEGY.exists() else pd.DataFrame()
     week = current_week(strategy, schedule)
     now = datetime.now(timezone.utc).isoformat()
+    original_week = int(data.get("pool_current_week") or 0)
+    if original_week and not can_advance_pool(data, week):
+        # Completely leave original private JSON untouched. This includes
+        # past picks, current_week, LIVE/ALIVE labels, and all timestamps.
+        print("CURRENT WEEK:", original_week)
+        print("CANDIDATE WEEK:", week)
+        print("RESULT: ROLLOVER_HELD_AWAITING_ORGANIZER_WEEK_RESULT")
+        return
 
     entries = data.get("entries") or {}
     for name, entry in entries.items():

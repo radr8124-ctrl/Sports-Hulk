@@ -6,6 +6,7 @@ import SurvivorPickEditor from '../src/SurvivorPickEditor.jsx'
 import SurvivorPoolImport from '../src/SurvivorPoolImport.jsx'
 import SurvivorScoreCards from '../src/SurvivorScoreCards.jsx'
 import SurvivorPastPicks from '../src/SurvivorPastPicks.jsx'
+import SurvivorNextRoundStatus from '../src/SurvivorNextRoundStatus.jsx'
 import {buildSurvivorPastPickHistory} from '../survivor_past_picks.js'
 import SurvivorCommandCover from '../src/SurvivorCommandCover.jsx'
 import '../src/styles.css'
@@ -24,8 +25,18 @@ const syntheticOpenWindow={
 const syntheticClosedWindow={...syntheticOpenWindow,status:'WINDOW_CLOSED',
  reason:'SATURDAY_POOL_DEADLINE_PASSED',editable_teams:[],editable_team_cutoffs:{},
  week_saturday_deadline:'2026-10-10T22:00:00.000Z'}
-// Synthetic linked-entry test history only. Original real member state is
-// NEVER loaded in this public local browser QA harness.
+const syntheticNextReadiness={
+ status:'AWAITING_OFFICIAL_WEEK5_SHEET',pool_week:5,owner_entry_week:5,
+ official_source_week:4,latest_source_kind:'ORGANIZER_PDF_PRIOR_WEEK_ONLY',
+ required_current_week_picks:1,required_next_week_picks:2,
+ saved_week5_picks:0,verified_week5_picks:0,used_team_count:5,
+ verified_week5_result:false,ready_for_week6:false,
+ automatic_rollover_permitted:false,external_pool_submission_verified:false,
+ personal_only:true,
+}
+// Browser fixture is a synthetic data-only response. Server-side readiness
+// proof depends on original Node-only rules and is tested separately.
+
 const syntheticPast=buildSurvivorPastPickHistory({
  status:'ALIVE',current_week:5,current_picks:[],used_teams:burned,
  history:[
@@ -65,6 +76,7 @@ function ReviewHarness(){
      <span className="ml-3">Synthetic session refreshes: {refresh}</span>
    </section>
    <SurvivorPastPicks history={syntheticPast} entryName="SYNTHETIC QA 01" />
+   <SurvivorNextRoundStatus proof={syntheticNextReadiness} />
    <SurvivorPickEditor entryName="SYNTHETIC QA 01" poolWeek={5} entryStatus={entryStatus}
      usedTeams={burned} currentPicks={[]} requiredPicks={1} ruleConfirmed={true}
      pickWindow={deadlineClosed?syntheticClosedWindow:syntheticOpenWindow}

@@ -55,6 +55,7 @@ const SurvivorThursdayTracker = lazy(() => import('./SurvivorThursdayTracker'))
 import { rankSurvivorCandidates } from '../survivor_week5_rank'
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
 const SurvivorPastPicks = lazy(() => import('./SurvivorPastPicks'))
+const SurvivorNextRoundStatus = lazy(() => import('./SurvivorNextRoundStatus'))
 
 function LoadingSurface({ label = 'Loading' }) {
   return (
@@ -1128,6 +1129,12 @@ function SurvivorCommercialPanel() {
       {hasEntry && (
         <Suspense fallback={<LoadingSurface label="Loading your past Survivor picks" />}>
           <SurvivorPastPicks history={saved.past_picks} entryName={saved.active_entry} />
+        </Suspense>
+      )}
+
+      {hasEntry && (
+        <Suspense fallback={<LoadingSurface label="Loading next-round source checks" />}>
+          <SurvivorNextRoundStatus proof={saved.next_round_readiness}/>
         </Suspense>
       )}
 
