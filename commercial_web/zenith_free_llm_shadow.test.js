@@ -77,6 +77,7 @@ test('Groq request is small and contains only publicly sealed synthetic facts',(
  assert.equal(call.body.tool_choice,'none')
  assert.equal(call.body.max_completion_tokens,450)
  assert.equal(call.body.response_format.type,'json_object')
+ assert.equal(call.body.reasoning_format,'hidden')
  const messages=JSON.stringify(call.body)
  assert.ok(messages.includes('Synthetic Receiver A'))
  assert.ok(!messages.includes('expected_status'))

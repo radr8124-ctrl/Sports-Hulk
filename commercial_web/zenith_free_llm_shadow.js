@@ -110,6 +110,7 @@ export function buildFreeShadowRequest({
     temperature:0,
     max_completion_tokens:MAX_OUTPUT_TOKENS,
     response_format:{type:'json_object'},
+    reasoning_format:'hidden',
    }
   }
  }
