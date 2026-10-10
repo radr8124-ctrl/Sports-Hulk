@@ -40,24 +40,24 @@ function PropCard({ row, isPrize, form }) {
     : humanize(row.side)
 
   return (
-    <article className="min-w-0 rounded-[28px] border border-slate-200 bg-white p-5 shadow-soft">
+    <article data-premium-player-card={isPrize?'prizepicks':'props'} className={`min-w-0 rounded-[24px] border border-[#E2D4C0] border-t-[5px] bg-[#FFF8ED] p-4 text-[#173E52] shadow-[0_5px_0_#173E5215] sm:p-5 ${isPrize?'border-t-[#FF7766]':'border-t-[#46CDD2]'}`}>
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-700">
+          <div className="text-[10px] font-black uppercase tracking-[0.14em] text-[#0E7280]">
             {row.sport}{row.sport === 'NBA' ? ` · ${row.competition_regime === 'UNKNOWN' ? 'Unverified season' : humanize(row.competition_regime || 'UNKNOWN')}` : ''} · {humanize(row.market_subtype)}
           </div>
-          <div className="mt-2 truncate text-xl font-black tracking-tight text-slate-950">{row.player}</div>
-          <div className="mt-1 text-2xl font-black text-slate-950">{displayedSide} {row.line}</div>
+          <div className="mt-2 truncate text-xl font-black tracking-tight text-[#173E52]">{row.player}</div>
+          <div className="mt-1 text-2xl font-black text-[#173E52]">{displayedSide} {row.line}</div>
           {!isPrize && row.american_odds != null && (
             <div className="mt-1 text-sm font-black text-slate-700">
               Bookmaker reference {formatAmericanOdds(row.american_odds)}
             </div>
           )}
         </div>
-        <span className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black ${presentation==='FORM WATCH' ? 'border-blue-200 bg-blue-50 text-blue-800' : status.tone}`}>{presentation}</span>
+        <span className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black ${presentation==='FORM WATCH' ? 'border-[#A5DAD7] bg-[#DFF6F1] text-[#176372]' : status.tone}`}>{presentation}</span>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-xs">
+      <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl border border-[#C9DFD8] bg-[#EAF7F2] p-3 text-xs">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Market fair probability</p>
           <p className="mt-0.5 text-base font-black tabular-nums text-slate-900">{row.market_reference_probability_pct == null ? '—' : row.market_reference_probability_pct+'%'}</p>
@@ -73,7 +73,7 @@ function PropCard({ row, isPrize, form }) {
         </div>
       </div>
       {form && (
-        <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50/50 px-3 py-2.5">
+        <div className="mt-2 rounded-xl border border-[#AED6D1] bg-[#E7F6F1] px-3 py-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-xs font-black text-blue-900">{formReading.label}</span>
             <span className="text-xs font-black tabular-nums text-blue-800">{form.hit_count}/4 prior games</span>
@@ -92,7 +92,7 @@ function PropCard({ row, isPrize, form }) {
           ? new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/New_York',timeZoneName:'short'}).format(Date.parse(row.event_start))
           : 'time unverified'}.
       </p>
-      <div className="mt-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+      <div className="mt-2 rounded-xl border border-[#E2CCA9] bg-[#FFF0D9] px-3 py-2 text-xs">
         <span className="font-black text-slate-800">What {displayedSide} {row.line} means:</span>
         <span className="ml-1 font-medium leading-5 text-slate-600">{explainBet(display).primary}</span>
       </div>
@@ -102,7 +102,7 @@ function PropCard({ row, isPrize, form }) {
         {' '}· {proof.label}. {isPrize?'Full pick-em payout and correlation are not yet validated.':''}
       </p>
 
-      <details className="group mt-4 rounded-2xl border border-slate-200 bg-white">
+      <details className="group mt-4 rounded-2xl border border-[#D8C9B5] bg-white">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-black text-slate-700">
           <span>View evidence</span>
           <ChevronRight size={16} className="shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
@@ -231,24 +231,48 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
 
   return (
     <section aria-label={isPrize ? 'PrizePicks current line research' : 'Player props current line research'} className="space-y-5">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">{isPrize ? 'Pick-em research' : 'Player markets'}</p>
-          <h2>{isPrize ? 'PrizePicks' : 'Props'}</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-            {isPrize
-              ? 'Understand each leg first. Sports Zenith keeps leg quality separate from the payout economics of the full entry.'
-              : 'Understand the player line first. Model, market and conservative probabilities stay underneath as evidence rather than crowding the first view.'}
-          </p>
+      <div data-premium-player-cover
+        className="relative overflow-hidden rounded-[23px] border-2 border-[#173E52] bg-[#173E52] p-3 text-[#FFF5E4] shadow-[4px_4px_0_#46CDD24D] sm:p-5">
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[5px] bg-[linear-gradient(90deg,#FF7766_0%,#FF7766_35%,#FFD36A_35%,#FFD36A_65%,#46CDD2_65%,#46CDD2_100%)]"/>
+        <div className="relative flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#7DE4E1]">
+              {isPrize ? 'THE PICK-EM DESK' : 'THE PLAYER LINEUP'}
+            </p>
+            <h2 className="mt-1 text-[clamp(1.7rem,4vw,2.45rem)] font-black leading-[1.04] tracking-[-.04em] text-[#FFF5E4]">
+              {isPrize ? 'PrizePicks' : 'Props'}<span aria-hidden="true" className="text-[#FF7766]">.</span>
+            </h2>
+            <p className="mt-1 max-w-[650px] text-[11px] font-semibold leading-[1.45] text-[#DCE9E8] sm:text-xs">
+              {isPrize
+                ? 'Research only. Entry payout is not proven; correlation still needs evidence.'
+                : 'Research only. Dated player lines; independent model proof is still required.'}
+            </p>
+          </div>
+          <span className="hidden shrink-0 rounded-lg border border-[#76CAC4]/60 bg-[#234F60] px-2 py-1 text-[9px] font-black uppercase tracking-wider text-[#FFD36A] sm:inline-flex">
+            {isPrize ? 'PICK-EM RESEARCH' : 'PLAYER-LINE RESEARCH'}
+          </span>
         </div>
-        <span className="health-pill">{allRows.length} CURRENT</span>
+        <div data-premium-player-metrics className="relative mt-3 grid grid-cols-3 gap-1.5 rounded-xl bg-[#FFF8ED] p-1.5 text-[#173E52] sm:gap-2 sm:p-2">
+          {[
+            ['lines',allRows.length,'Saved lines'],
+            ['monitors',monitors,'Monitors'],
+            ['plays',plays,'Paper plays'],
+          ].map(([id,count,label])=>
+            <div data-prop-cover-metric={id} key={id} className="min-w-0 rounded-lg bg-white px-1 py-1.5 text-center sm:py-2">
+              <div className="text-xl font-black leading-none tabular-nums text-[#173E52]">{count}</div>
+              <div className="mt-1 text-[9px] font-black uppercase leading-[1.2] tracking-wide text-[#557079]">{label}</div>
+            </div>)}
+        </div>
+        <div data-prop-cover-context className="relative mt-2 border-t border-[#70A1A7]/40 pt-2 text-[10px] font-bold text-[#D9EBEA]">
+          {sport==='ALL'?'All sports':sport}{sport==='NBA'&&nbaPhase!=='ALL'?' · '+humanize(nbaPhase):''} · {isPrize?'No verified entry EV':'Dated quotes, not live offers'}
+        </div>
       </div>
 
       <div className={`rounded-2xl border p-3 text-xs font-semibold leading-5 ${plays ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : monitors ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-blue-200 bg-blue-50 text-blue-900'}`}>
         {plays
           ? `${plays} PLAY${plays === 1 ? '' : 'S'} currently cleared.`
           : monitors
-            ? `${monitors} MONITOR${monitors === 1 ? '' : 'S'} are promising but not proven PLAYs.`
+            ? `${monitors} MONITOR${monitors === 1 ? '' : 'S'} are research only. None has cleared the independent prediction or payout proof required for a qualified bet.`
             : `${recentFormCount} NFL lines have recent 3-of-4 or 4-of-4 form support. None has cleared the independent prediction or payout proof required for a qualified bet.`}
       </div>
 
@@ -259,8 +283,8 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
             ['Entry economics', 'Payout proof required', 'The full entry needs actual payout economics before EV can be claimed.'],
             ['Historical trends', `${recentFormCount} form watches`, 'Four prior results can help research a leg, not prove future accuracy.'],
           ].map(([label, value, detail]) => (
-            <div key={label} className="min-w-[240px] rounded-2xl border border-violet-100 bg-white p-4 shadow-soft md:min-w-0">
-              <div className="text-[10px] font-black uppercase tracking-[0.12em] text-violet-700">{label}</div>
+            <div key={label} className="min-w-[240px] rounded-2xl border border-[#DCCCB6] border-t-[4px] border-t-[#FF7766] bg-[#FFF8ED] p-4 shadow-[0_4px_0_#173E5210] md:min-w-0">
+              <div className="text-[10px] font-black uppercase tracking-[0.12em] text-[#A45140]">{label}</div>
               <div className="mt-2 text-lg font-black text-slate-950">{value}</div>
               <div className="mt-1 text-xs leading-5 text-slate-500">{detail}</div>
             </div>
@@ -274,7 +298,7 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
             key={item}
             type="button"
             onClick={() => setSport(item)}
-            className={`min-h-11 whitespace-nowrap rounded-full px-3 text-xs font-black ${sport === item ? 'bg-blue-700 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}
+            className={`min-h-11 whitespace-nowrap rounded-full border px-3 text-xs font-black ${sport === item ? 'border-[#173E52] bg-[#46CDD2] text-[#173E52]' : 'border-[#D6DCD4] bg-white text-[#526C75] hover:border-[#46CDD2]'}`}
           >
             {item === 'ALL' ? 'All sports' : item}
           </button>
@@ -293,7 +317,7 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
               ['REGULAR', 'Regular season'], ['POSTSEASON', 'Postseason'], ['UNKNOWN', 'Unverified'],
             ].map(([value, label]) => (
               <button key={value} type="button" onClick={() => setNbaPhase(value)}
-                className={`min-h-11 whitespace-nowrap rounded-full px-3 text-xs font-black ${nbaPhase === value ? 'bg-blue-700 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>
+                className={`min-h-11 whitespace-nowrap rounded-full border px-3 text-xs font-black ${nbaPhase === value ? 'border-[#173E52] bg-[#46CDD2] text-[#173E52]' : 'border-[#D6DCD4] bg-white text-[#526C75] hover:border-[#46CDD2]'}`}>
                 {label}
               </button>
             ))}
@@ -310,7 +334,7 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
         </button>
       </div>
       {viewMode==='FORM'&&<p className="text-xs leading-5 text-slate-600">Four-game historical support is a research filter, not model validation or a recommendation. Currently supported for matched NFL player lines only.</p>}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-3">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#C9D8D2] bg-[#FFF8ED] p-3">
         <label className="min-w-[190px] flex-1">
           <span className="sr-only">Search props by player or market</span>
           <input value={query} onChange={event=>setQuery(event.target.value)}
@@ -345,7 +369,7 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
         className="min-h-11 rounded-xl border border-blue-200 bg-white px-5 py-3 text-xs font-black text-blue-700">
         Show 12 more {isPrize?'PrizePicks lines':'player props'} · {rows.length-limit} remaining
       </button>}
-      <div className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
+      <div className="flex gap-3 rounded-2xl border border-[#C6D9D0] bg-[#EBF7F1] p-4 text-sm leading-6 text-[#4C6570]">
         <ShieldCheck size={18} className="mt-0.5 shrink-0 text-blue-700" />
         <div>
           <b>Interpretation first:</b> player requirements stay visible. Probability, quality and edge metrics remain available under View evidence for users who want the deeper research.
