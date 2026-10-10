@@ -23,13 +23,15 @@ function noOverflow(page) {
 test('Home uses one readable hero with actionable navigation, not a wall of metric tiles', async ({ page }) => {
   await mobile(page)
   await page.goto(base + '#home', { waitUntil: 'domcontentloaded' })
-  const hero = page.getByRole('heading', { name: /Sports intelligence.*Evidence behind every call/s })
+  const hero = page.getByRole('heading', { name: /The game.*The smarter call/s })
   await expect(hero).toBeVisible()
   const dimensions = await noOverflow(page)
   expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.viewport + 1)
   expect(await hero.evaluate(el => el.getBoundingClientRect().width)).toBeGreaterThan(255)
-  await expect(page.getByRole('button', { name: "See today's intelligence" })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Ask the brain', exact: true }).first()).toBeVisible()
+  const desk=page.getByRole('region',{name:'Sports Zenith game-day command center'})
+  await expect(desk.getByRole('button',{name:/Explore Bets/})).toBeVisible()
+  await expect(desk.getByRole('button',{name:/Ask The Ref/})).toBeVisible()
+  await expect(page.getByRole('region',{name:'Game Day scores and schedule'}).getByRole('heading',{name:'Scores & matchups'})).toBeVisible()
 })
 
 test('Survivor first look fits title and top market option on an iPhone, full history stays one tap away', async ({ page }) => {

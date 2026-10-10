@@ -13,6 +13,8 @@ import BestBetsMarketCoverage from './BestBetsMarketCoverage'
 import { BET_SPORT_FILTERS, BET_MARKET_FILTERS } from '../best_bets_market_availability.js'
 import { explainBetProof, organizeBetResearch } from '../betting_proof_presentation.js'
 import { survivorHomeSummary } from '../survivor_home_summary.js'
+import CommandCenterHero from './CommandCenterHero.jsx'
+import HomeGameDayDeck from './HomeGameDayDeck.jsx'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
 const AssistantDrawer = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AssistantDrawer })))
@@ -63,10 +65,10 @@ const toneClass = {
 function Brand() {
   return (
     <div>
-      <div className="text-xl font-black tracking-tight text-slate-950">
-        {PUBLIC_BRAND_WORD_1} <span className="text-blue-700">{PUBLIC_BRAND_WORD_2}</span>
+      <div className="text-lg font-black tracking-tight text-white md:text-xl">
+        {PUBLIC_BRAND_WORD_1} <span className="text-sky-300">{PUBLIC_BRAND_WORD_2}</span>
       </div>
-      <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400 md:text-xs">
+      <div className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400 md:text-[10px]">
         {PUBLIC_TAGLINE}
       </div>
     </div>
@@ -1570,41 +1572,6 @@ function humanize(value) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
-function CommercialHero({ onNavigate }) {
-  return (
-    <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-soft">
-      <div className="grid gap-5 p-5 md:gap-8 md:p-10 lg:grid-cols-[1.35fr_.65fr] lg:items-end">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-700">
-            <Activity size={14} /> Live sports intelligence
-          </div>
-          <h1 className="mt-3 max-w-4xl text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
-            Sports intelligence.
-            <span className="block text-blue-700">Evidence behind every call.</span>
-          </h1>
-          <p className="mt-3 max-w-3xl text-sm font-medium leading-6 text-slate-500 md:text-base">
-            Scores, bets, props, PrizePicks, Survivor and fantasy — all in one place.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button onClick={() => onNavigate('Best Bets')} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5">
-              See today's intelligence
-            </button>
-            <button onClick={() => onNavigate('Ask')} className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:border-blue-200 hover:text-blue-700">
-              Ask the brain
-            </button>
-          </div>
-        </div>
-        <div className="hidden grid-cols-2 gap-3 sm:grid">
-          <div className="mini-metric"><Brain size={18} /><b>Learning</b><span>Forward tracked</span></div>
-          <div className="mini-metric"><ShieldCheck size={18} /><b>Proof</b><span>Losses stay visible</span></div>
-          <div className="mini-metric"><Radio size={18} /><b>Live</b><span>Scores + markets</span></div>
-          <div className="mini-metric"><Sparkles size={18} /><b>Ask</b><span>Context aware</span></div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 function HomeDecisionPanel({ onNavigate }) {
   const { user } = useAuth()
   const bets = useJsonEndpoint('/betting_v2_all_markets_current.json', { summary: {}, picks: [] })
@@ -1694,64 +1661,6 @@ function HomeDecisionPanel({ onNavigate }) {
           </button>
         ))}
       </div>
-    </section>
-  )
-}
-
-function HomeScoreRail({ onNavigate }) {
-  const nfl = useJsonEndpoint('/nfl_scores.json', { games: [] })
-  const mlb = useJsonEndpoint('/mlb_scores.json', { today_games: [] })
-  const nba = useJsonEndpoint('/nba_scores.json', { games: [] })
-  const nhl = useJsonEndpoint('/nhl_scores.json', { games: [] })
-  const cfb = useJsonEndpoint('/cfb_scores.json', { games: [] })
-  const cbb = useJsonEndpoint('/cbb_scores.json', { games: [] })
-  const normalize = (game, league) => ({
-    id: game.event_id || game.gamePk || `${league}-${game.away}-${game.home}`,
-    league,
-    away: game.away_abbr || game.away || game.away_team || 'Away',
-    home: game.home_abbr || game.home || game.home_team || 'Home',
-    awayScore: (game.final || game.live) ? (game.away_score ?? game.awayScore ?? '—') : '—',
-    homeScore: (game.final || game.live) ? (game.home_score ?? game.homeScore ?? '—') : '—',
-    status: game.final ? 'FINAL' : game.live ? 'LIVE' : 'UPCOMING',
-  })
-  const games = [
-    ...(nfl.games || []).map((game) => normalize(game, 'NFL')),
-    ...(mlb.today_games || mlb.games || []).map((game) => normalize(game, 'MLB')),
-    ...(nba.games || []).map((game) => normalize(game, 'NBA')),
-    ...(nhl.games || []).map((game) => normalize(game, 'NHL')),
-    ...(cfb.games || []).map((game) => normalize(game, 'CFB')),
-    ...(cbb.games || []).map((game) => normalize(game, 'CBB')),
-  ]
-    .sort((a, b) => {
-      const rank = (game) => game.status === 'LIVE' ? 0 : game.status === 'FINAL' ? 2 : 1
-      return rank(a) - rank(b)
-    })
-    .slice(0, 12)
-
-  return (
-    <section>
-      <div className="section-heading">
-        <div><p className="eyebrow">Scores</p><h2>Across the sports world</h2><p className="mt-2 text-sm text-slate-500">NFL · MLB · NBA · NHL · CFB · CBB in one live rail.</p></div>
-        <button onClick={() => onNavigate('Scores')} className="text-sm font-black text-blue-700">View all scores →</button>
-      </div>
-      {games.length ? (
-        <div className="flex snap-x gap-3 overflow-x-auto pb-2">
-          {games.map((game) => (
-            <div key={game.id} className="min-w-[230px] snap-start rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
-              <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.14em]">
-                <span className="text-blue-700">{game.league}</span>
-                <span className={game.status === 'LIVE' ? 'text-red-600' : 'text-slate-400'}>{game.status}</span>
-              </div>
-              <div className="mt-4 space-y-2 text-sm font-black text-slate-900">
-                <div className="flex items-center justify-between"><span>{game.away}</span><span>{game.awayScore}</span></div>
-                <div className="flex items-center justify-between"><span>{game.home}</span><span>{game.homeScore}</span></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <EmptyPanel icon={Radio} title="Score feeds are connected" text="There are no games in the current display window. Upcoming and live games will appear automatically." />
-      )}
     </section>
   )
 }
@@ -3512,12 +3421,12 @@ function MobileBottomNav({ active, onNavigate }) {
   ]
 
   return (
-    <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
+    <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#06182B]/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_28px_rgba(2,18,36,.17)] backdrop-blur lg:hidden">
       <div className="grid grid-cols-5 gap-1">
         {items.map(([label, route, Icon]) => {
           const selected = route === 'Best Bets' ? bettingNavItems.includes(active) : active === route
           return (
-            <button key={label} aria-current={selected ? 'page' : undefined} onClick={() => onNavigate(route)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-black ${selected ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>
+            <button key={label} aria-current={selected ? 'page' : undefined} onClick={() => onNavigate(route)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-black ${selected ? 'bg-sky-400 text-[#061729]' : 'text-slate-300'}`}>
               <Icon size={18} /><span>{label}</span>
             </button>
           )
@@ -3570,7 +3479,7 @@ export default function App() {
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [gameScoutContext, setGameScoutContext] = useState(null)
   const [moreOpen, setMoreOpen] = useState(false)
-  const backendLabel = useMemo(() => insforgeConfigured ? 'DATA PLATFORM CONNECTED' : 'LIVE DATA CONNECTED', [])
+  const backendLabel = useMemo(() => 'SOURCE STATUS · VERIFY PER GAME', [])
   const isAsk = active === 'Ask'
   const isBetting = bettingNavItems.includes(active)
 
@@ -3636,45 +3545,45 @@ export default function App() {
   const navSelected = (item) => item === 'Betting' ? isBetting : active === item
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-[calc(6.5rem+env(safe-area-inset-bottom))] text-slate-900 lg:pb-0">
+    <div className="min-h-screen bg-[#F1F5FA] pb-[calc(6.5rem+env(safe-area-inset-bottom))] text-slate-900 lg:pb-0">
       <a href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus() }} className="skip-link">Skip to main content</a>
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-sky-900/40 bg-[#06182B]/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-5 md:py-4">
           <button type="button" aria-label="Sports Zenith home" onClick={() => navigate('Home')} className="text-left"><Brand /></button>
 
           <div className="hidden items-center gap-3 lg:flex">
             <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-extrabold text-slate-600">
-              <Activity size={15} className="text-emerald-500" />
+              <Activity size={15} className="text-sky-500" />
               {backendLabel}
             </div>
             <AccountButton />
-            <button onClick={() => setAssistantOpen(true)} className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5">
-              <Sparkles size={16} className="text-emerald-300" /> Ask
+            <button onClick={() => setAssistantOpen(true)} className="inline-flex items-center gap-2 rounded-2xl bg-sky-400 px-4 py-2.5 text-sm font-black text-[#061729] shadow-lg shadow-sky-500/10 transition hover:-translate-y-0.5">
+              <Sparkles size={16} /> The Ref
             </button>
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
             <AccountButton compact />
-            <button onClick={() => navigate('Ask')} aria-label="Ask" className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-white"><Sparkles size={17} /></button>
-            <button aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">More</button>
+            <button onClick={() => navigate('Ask')} aria-label="Ask" className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-400 text-[#061729]"><Sparkles size={17} /></button>
+            <button aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="min-h-11 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-black text-white">More</button>
           </div>
         </div>
       </header>
 
-      <nav aria-label="Primary navigation" className="hidden border-b border-slate-200 bg-white lg:block">
+      <nav aria-label="Primary navigation" className="hidden border-b border-white/10 bg-[#071A30] lg:block">
         <div className="relative mx-auto flex max-w-[1500px] items-center gap-1 px-5 py-2.5">
           {navItems.map((item) => (
             <button
               key={item}
               onClick={() => navigate(item)}
               aria-current={navSelected(item) ? 'page' : undefined}
-              className={`whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-extrabold transition ${navSelected(item) ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
+              className={`whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-extrabold transition ${navSelected(item) ? 'bg-sky-400 text-[#061729]' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}
             >
               {item}
             </button>
           ))}
           <div className="relative ml-auto">
-            <button aria-haspopup="menu" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className={`rounded-xl px-3.5 py-2.5 text-sm font-extrabold ${active === 'Research' ? 'bg-slate-950 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}>More</button>
+            <button aria-haspopup="menu" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className={`rounded-xl px-3.5 py-2.5 text-sm font-extrabold ${active === 'Research' ? 'bg-sky-400 text-[#061729]' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}>More</button>
             {moreOpen && (
               <div className="absolute right-0 top-12 z-40 w-64 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-2xl">
                 <MoreMenu onNavigate={navigate} onClose={() => setMoreOpen(false)} />
@@ -3691,13 +3600,21 @@ export default function App() {
           <>
             {active === 'Home' && (
               <>
-                <CommercialHero onNavigate={navigate} />
-                <StatusStrip />
+                <CommandCenterHero onNavigate={navigate} />
+                <HomeGameDayDeck onNavigate={navigate} />
                 <HomeDecisionPanel onNavigate={navigate} />
-                <HomeScoreRail onNavigate={navigate} />
                 <HomeImpactNews onNavigate={navigate} />
                 <HomeSnapshots onNavigate={navigate} />
                 <LearningPanel />
+                <details className="group rounded-2xl border border-slate-200 bg-white p-3 shadow-soft">
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 px-2 text-xs font-black text-blue-700">
+                    Source connections and system status <ChevronRight size={16} className="transition-transform group-open:rotate-90" />
+                  </summary>
+                  <div className="mt-3 border-t border-slate-100 pt-3">
+                    <p className="mb-3 text-xs font-medium leading-5 text-slate-600">A green collector is not proof its odds, lineup or model data are valid. Game-by-game evidence is checked separately.</p>
+                    <StatusStrip />
+                  </div>
+                </details>
               </>
             )}
 
@@ -3738,7 +3655,7 @@ export default function App() {
         )}
       </main>
 
-      {!assistantOpen && !isAsk && (
+      {!assistantOpen && !isAsk && active !== 'Home' && (
         <Suspense fallback={null}>
           <AssistantLauncher onClick={() => setAssistantOpen(true)} />
         </Suspense>
