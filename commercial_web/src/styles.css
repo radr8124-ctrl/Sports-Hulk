@@ -128,3 +128,52 @@ button { font: inherit; }
   .zenith-home .section-heading { border-bottom: 1px solid #e5d7c4; padding-bottom: .7rem; }
   .zenith-home :is(button, a):focus-visible { outline-color: #af433e; outline-offset: 3px; }
 }
+
+/* The Ref: lightweight sports signals, not animations tied to predicted winners. */
+@keyframes zenithRefHover {
+  0%,100% { transform: translateY(0) rotate(-2deg); }
+  48% { transform: translateY(-4px) rotate(2deg); }
+}
+@keyframes zenithRefSignalArm {
+  0% { transform: rotate(-35deg); opacity: 0; }
+  20% { transform: rotate(-125deg); opacity: 1; }
+  40% { transform: rotate(-45deg); opacity: 1; }
+  61% { transform: rotate(-125deg); opacity: 1; }
+  80% { transform: rotate(-60deg); opacity: 1; }
+  100% { transform: rotate(-35deg); opacity: 0; }
+}
+@keyframes zenithRefThrowFlag {
+  0% { opacity: 1; transform: translate(2px,12px) rotate(-40deg) scale(.6); }
+  30% { opacity: 1; transform: translate(-13px,-20px) rotate(20deg) scale(1); }
+  60% { opacity: 1; transform: translate(-43px,-54px) rotate(160deg); }
+  100% { opacity: 0; transform: translate(-68px,-18px) rotate(270deg) scale(.7); }
+}
+@keyframes zenithRefWhistle {
+  0%,100% { opacity:0; transform: translate(-50%,8px) scale(.65); }
+  25%,80% { opacity:1; transform: translate(-50%,-3px) scale(1.08); }
+}
+@keyframes zenithRefJump {
+  0%,100% { transform:translateY(0) rotate(0); }
+  35% { transform:translateY(-9px) rotate(-5deg); }
+  75% { transform:translateY(-3px) rotate(4deg); }
+}
+.zenith-ref-idle { display:inline-flex; animation:zenithRefHover 3.4s ease-in-out infinite; }
+.zenith-ref-signal-arm,.zenith-ref-flag,.zenith-ref-whistle-burst { opacity:0; pointer-events:none; }
+.zenith-ref--strike .zenith-ref-signal-arm { animation:zenithRefSignalArm 1.35s ease-in-out both; }
+.zenith-ref--strike .zenith-ref-idle { animation:zenithRefJump .8s ease-in-out both; }
+.zenith-ref--flag .zenith-ref-flag { animation:zenithRefThrowFlag 1.45s ease-out both; }
+.zenith-ref--flag .zenith-ref-idle { animation:zenithRefJump 1s ease-in-out both; }
+.zenith-ref--whistle .zenith-ref-whistle-burst { animation:zenithRefWhistle 1.25s ease-out both; }
+.zenith-ref--whistle .zenith-ref-idle { animation:zenithRefJump 1.2s ease-in-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .zenith-ref-idle,
+  .zenith-ref--strike .zenith-ref-idle,
+  .zenith-ref--flag .zenith-ref-idle,
+  .zenith-ref--whistle .zenith-ref-idle,
+  .zenith-ref--strike .zenith-ref-signal-arm,
+  .zenith-ref--flag .zenith-ref-flag,
+  .zenith-ref--whistle .zenith-ref-whistle-burst { animation:none; }
+  .zenith-ref--strike .zenith-ref-signal-arm,
+  .zenith-ref--flag .zenith-ref-flag,
+  .zenith-ref--whistle .zenith-ref-whistle-burst { opacity:1; }
+}

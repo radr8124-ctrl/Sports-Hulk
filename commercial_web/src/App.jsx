@@ -13,7 +13,9 @@ import BestBetsMarketCoverage from './BestBetsMarketCoverage'
 import { BET_SPORT_FILTERS, BET_MARKET_FILTERS } from '../best_bets_market_availability.js'
 import { explainBetProof, organizeBetResearch } from '../betting_proof_presentation.js'
 import { survivorHomeSummary } from '../survivor_home_summary.js'
+import { homeBrainSnapshot } from '../home_brain_presentation.js'
 import CommandCenterHero from './CommandCenterHero.jsx'
+const ZenithRefCompanion = lazy(() => import('./ZenithRefCompanion.jsx'))
 import HomeGameDayDeck from './HomeGameDayDeck.jsx'
 import HomeTopNews from './HomeTopNews.jsx'
 import SportsNewsHub from './SportsNewsHub.jsx'
@@ -378,29 +380,58 @@ function SurvivorPanel() {
   )
 }
 
-function LearningPanel() {
+function LearningPanel({ onNavigate }) {
+  const [step,setStep]=useState(0)
+  const steps=[
+    {
+      name:'Freeze',short:'Before kickoff',icon:'01',
+      detail:'Zenith saves the original game, side, line, model and source time before a result exists. Later odds cannot rewrite that prediction.',
+    },
+    {
+      name:'Grade',short:'After a verified final',icon:'02',
+      detail:'The exact saved pick is compared with the official final score. Missing evidence stays pending, and a loss never disappears.',
+    },
+    {
+      name:'Review',short:'Find why it missed',icon:'03',
+      detail:'We check what the model predicted against the bookmaker baseline and the real result. A possible cause is not called proven without source evidence.',
+    },
+    {
+      name:'Test',short:'Prove a better approach',icon:'04',
+      detail:'Any proposed adjustment stays in a separate shadow trial until new future games show real improvement. A backtest alone cannot claim success.',
+    },
+  ]
   return (
     <section aria-label="Home learning loop">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Learning loop</p>
-          <h2>Prediction → result → review → lesson</h2>
+          <p className="eyebrow">Learning loop · interactive</p>
+          <h2>How does Zenith get smarter?</h2>
+          <p className="mt-1 text-xs font-semibold text-[#526D76]">Tap a step to see what happens. Open Brain Record to inspect the actual results.</p>
         </div>
+        <button type="button" onClick={()=>onNavigate('Brain Record')}
+          className="min-h-10 rounded-xl border border-[#173E52] bg-[#FFD36A] px-3 text-xs font-black text-[#173E52]">
+          Open Brain Record →
+        </button>
       </div>
-      <div className="rounded-[22px] border-2 border-[#173E52] bg-[#173E52] p-4 text-white shadow-[5px_5px_0_#46CDD2] md:p-6">
-        <div className="grid gap-4 md:grid-cols-4">
-          {[
-            ['1', 'Freeze', 'Store exactly what was known before kickoff.'],
-            ['2', 'Grade', 'Join only verified final results.'],
-            ['3', 'Autopsy', 'Explain what changed and what was misread.'],
-            ['4', 'Learn', 'Store validated lessons for future decisions.'],
-          ].map(([n, title, text]) => (
-            <div key={n} className="rounded-2xl border border-[#476C7A] bg-white/[.045] p-4 md:p-5">
-              <div className="text-xs font-black text-[#FFD36A]">STEP {n}</div>
-              <div className="mt-2 text-lg font-black">{title}</div>
-              <div className="mt-2 text-sm leading-6 text-slate-300">{text}</div>
-            </div>
+      <div className="rounded-[22px] border-2 border-[#173E52] bg-[#173E52] p-3 text-white shadow-[5px_5px_0_#46CDD2] md:p-5">
+        <div role="group" aria-label="Choose a learning step" className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          {steps.map((item,index)=>(
+            <button type="button" key={item.icon} aria-pressed={step===index}
+              onClick={()=>setStep(index)}
+              className={`min-h-[86px] rounded-xl border p-3 text-left transition hover:border-[#FFD36A] ${step===index?'border-[#FFD36A] bg-[#FFF5E4] text-[#173E52]':'border-[#476C7A] bg-white/[.045] text-white'}`}>
+              <span className={`block text-[10px] font-black tracking-[.14em] ${step===index?'text-[#A65340]':'text-[#FFD36A]'}`}>STEP {item.icon}</span>
+              <span className="mt-1 block text-lg font-black">{item.name}</span>
+              <span className={`mt-1 block text-[11px] font-medium ${step===index?'text-[#536B73]':'text-[#BBD1DA]'}`}>{item.short}</span>
+            </button>
           ))}
+        </div>
+        <div aria-live="polite" className="mt-3 rounded-xl border border-[#4C7180] bg-[#0E2A3C] p-3 md:p-4">
+          <div className="text-xs font-black uppercase tracking-[.12em] text-[#FFD36A]">{steps[step].name} · What happens here</div>
+          <p className="mt-1 max-w-4xl text-xs font-semibold leading-5 text-[#DFEBEF]">{steps[step].detail}</p>
+          <button type="button" onClick={()=>onNavigate('Brain Record')}
+            className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#46CDD2] px-3 text-xs font-black text-[#173E52]">
+            See actual evidence and mistakes <ChevronRight size={14}/>
+          </button>
         </div>
       </div>
     </section>
@@ -1705,7 +1736,7 @@ function HomeSnapshots({ onNavigate }) {
   const privateSurvivor = usePrivateSurvivorState()
   const fantasy = useJsonEndpoint('/fantasy_v2_current.json', { lanes: {} })
   const performance = useJsonEndpoint('/performance_snapshot.json', { official: {} })
-  const official = performance.official || {}
+  const brainSummary = homeBrainSnapshot(performance)
   const laneCount = Object.values(fantasy.lanes || {}).filter((lane) => lane.forward_grade_available).length
   const hasPersonalSurvivor = Boolean(user && privateSurvivor.entry_linked)
 
@@ -1737,9 +1768,12 @@ function HomeSnapshots({ onNavigate }) {
       </button>
       <button onClick={() => onNavigate('Brain Record')} className="rounded-[22px] border-2 border-[#173E52] bg-[#173E52] p-5 text-left text-white shadow-[4px_4px_0_#FFD36A] transition hover:-translate-y-0.5 hover:border-[#FFD36A]">
         <div className="text-xs font-black uppercase tracking-[0.14em] text-[#FFD36A]">Brain Record</div>
-        <div className="mt-3 text-3xl font-black">{official.wins ?? 0}-{official.losses ?? 0}-{official.pushes ?? 0}</div>
-        <div className="mt-2 text-sm font-semibold text-slate-300">{official.published ?? 0} published · {official.pending ?? 0} pending · {official.roi_pct == null ? 'ROI waiting for settled priced picks' : `${official.units >= 0 ? '+' : ''}${Number(official.units || 0).toFixed(2)}u · ${Number(official.roi_pct).toFixed(1)}% ROI`}</div>
-        <div className="mt-5 text-xs font-black text-[#FFD36A]">See the proof →</div>
+        <div className="mt-3 text-2xl font-black">{brainSummary.headline}</div>
+        <div className="mt-1 text-sm font-black text-[#FFD36A]">{brainSummary.summary}</div>
+        <div className="mt-2 text-xs font-semibold leading-5 text-[#CEDFE5]">{brainSummary.clarity || 'Official result verification still pending.'}</div>
+        {brainSummary.lastResult && <p className="mt-2 text-[11px] font-semibold leading-4 text-[#E0E9E7]">Last graded: {brainSummary.lastResult.pick} — {brainSummary.lastResult.outcome.toLowerCase()}{brainSummary.lastResult.score ? ` · ${brainSummary.lastResult.score}` : ''}</p>}
+        <div className="mt-1 text-[11px] font-medium leading-4 text-[#B8C9D1]">{brainSummary.sampleWarning}</div>
+        <div className="mt-3 text-xs font-black text-[#FFD36A]">Review official record →</div>
       </button>
     </section>
   )
@@ -3508,7 +3542,7 @@ export default function App() {
                 <HomeDecisionPanel onNavigate={navigate} />
                 <HomeTopNews onNavigate={navigate} />
                 <HomeSnapshots onNavigate={navigate} />
-                <LearningPanel />
+                <LearningPanel onNavigate={navigate} />
                 <details className="group rounded-2xl border border-[#25415D] bg-[#0A2036] p-3 text-slate-100">
                   <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 px-2 text-xs font-black text-sky-300">
                     Source connections and system status <ChevronRight size={16} className="transition-transform group-open:rotate-90" />
@@ -3557,6 +3591,15 @@ export default function App() {
           </>
         )}
       </main>
+
+      {(active === 'Home' || active === 'News & Insights') && !assistantOpen && (
+        <Suspense fallback={null}>
+          <ZenithRefCompanion
+            onOpenAsk={() => setAssistantOpen(true)}
+            onOpenBrain={() => navigate('Brain Record')}
+          />
+        </Suspense>
+      )}
 
       {!assistantOpen && !isAsk && active !== 'Home' && active !== 'News & Insights' && (
         <Suspense fallback={null}>

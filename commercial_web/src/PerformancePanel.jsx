@@ -91,6 +91,7 @@ function OfficialRecord({ data }) {
   const policy = data.policy || {}
   const recent = data.official_recent || []
   const pendingPicks = recent.filter(row => String(row.grade || 'PENDING').toUpperCase() === 'PENDING')
+  const settledPicks = recent.filter(row => row?.official === true && row.event_type === 'SETTLED' && ['WIN','LOSS','PUSH'].includes(String(row.grade || '').toUpperCase()))
   const hasSettled = Number(official.settled || 0) > 0
   const unitLabel = official.units == null
     ? 'WAITING'
@@ -158,6 +159,29 @@ function OfficialRecord({ data }) {
             ))}
           </div>
         </div>
+      )}
+
+      {hasSettled && (
+        <section aria-label="Recently graded official picks" className="mt-5 rounded-2xl border border-[#668292] bg-[#112B40] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-black text-[#FFD36A]">What the official record means</h3>
+            <span className="text-[11px] font-bold text-[#DCE6EA]">{official.settled} graded · {official.pending} waiting for results</span>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[#D3E1E5]">
+            These numbers cover only picks published as official and graded against final scores. They are not all Zenith research tests or predictions.
+            {Number(official.settled) < 20 ? ' One or two results cannot establish long-term winning ability or profit.' : ''}
+          </p>
+          {settledPicks.slice(0,3).map(pick => (
+            <div key={pick.pick_id} className="mt-3 rounded-xl border border-white/15 bg-white/5 p-3">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase">
+                <span className={pick.grade==='WIN'?'text-[#80E5B6]':pick.grade==='LOSS'?'text-[#FFB09E]':'text-[#FFD36A]'}>{pick.grade}</span>
+                <span className="text-[#AFC7D3]">{pick.game_key}</span>
+              </div>
+              <p className="mt-1 text-sm font-black text-white">{pick.selection} to win · {Number(pick.american_odds)>0?'+':''}{pick.american_odds}</p>
+              <p className="mt-1 text-xs font-semibold text-[#D3E1E5]">Official Final: {pick.result || 'Score detail unavailable'} · {pick.grade==='LOSS'?'This pick lost.':'This is the recorded result.'}</p>
+            </div>
+          ))}
+        </section>
       )}
 
       {!hasSettled && (

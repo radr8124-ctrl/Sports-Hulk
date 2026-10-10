@@ -1,7 +1,7 @@
 import React, {useEffect,useMemo,useState} from 'react'
 import {ChevronDown, ShieldCheck} from 'lucide-react'
 import {showFrozenNFLResearch} from '../nfl_frozen_forecast_presentation.js'
-import {quotedSideMeaning} from '../odds_selection_display.js'
+import {quotedSideMeaning,fairAmericanFromPercent} from '../odds_selection_display.js'
 
 const MARKET_NAMES={MONEYLINE:'Moneyline',SPREAD:'Spread',TOTAL:'Game total'}
 const MARKETS=['MONEYLINE','SPREAD','TOTAL']
@@ -47,19 +47,22 @@ function BetMarket({game,market,item,recent}){
         if(!q)return null
         const meaning=quotedSideMeaning(game,market,side,item)
         if(!meaning)return null
+        const fairPrice=fairAmericanFromPercent(q.market_consensus_no_vig_probability_pct)
         return <div key={side} className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-2.5">
           <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">{side==='HOME'?'HOME':side==='AWAY'?'AWAY':side}</span>
           <p className="mt-0.5 break-words text-sm font-black leading-5 text-slate-900">{meaning.label}</p>
-          <div className="mt-1 flex flex-wrap items-baseline gap-1.5">
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <span className="rounded-md border border-[#B6DAD5] bg-[#DDF5ED] px-2 py-1 text-[9px] font-black uppercase text-[#0D6472]">Best observed price</span>
             <strong className="text-xl tabular-nums text-slate-950">{american(q.best_american_odds)}</strong>
-            <span className="truncate text-[10px] font-semibold text-slate-600">{bookmaker(q.best_sportsbook)}</span>
+            <span className="text-[10px] font-semibold text-slate-600">{bookmaker(q.best_sportsbook)}</span>
           </div>
           <p className="mt-1 text-[11px] font-medium leading-4 text-slate-600">{meaning.requirement}</p>
-          <div className="mt-2 text-[10px] leading-4 text-slate-500">
-            Typical competing price {american(q.median_book_american_odds)} · No-vig market estimate {q.market_consensus_no_vig_probability_pct}%
-            <span className="mt-0.5 block">Book quote updated {humanTime(q.source_updated_at)}</span>
+          <div className="mt-2 rounded-lg border border-[#E8DCC8] bg-white px-2.5 py-2 text-[10px] leading-4 text-[#536B73]">
+            <b className="text-[#173E52]">Market fair price:</b> {fairPrice===null?'unverified':american(fairPrice)} <span className="text-slate-400">{fairPrice===null?'(fair chance unavailable)':`(${q.market_consensus_no_vig_probability_pct}% bookmaker fair chance)`}</span>
+            <span className="mt-0.5 block">Typical competing price {american(q.median_book_american_odds)}</span>
+            <span className="mt-0.5 block">Book quote last updated {humanTime(q.source_updated_at)}</span>
           </div>
-          <p className={'mt-1 text-[10px] font-black '+(!recent?'text-amber-800':q.price_assessment==='BETTER PRICE THAN PEERS'?'text-emerald-700':q.price_improvement_pct_points>=.4?'text-blue-700':'text-slate-500')}>
+          <p className={'mt-2 text-[10px] font-black '+(!recent?'text-amber-800':q.price_assessment==='BETTER PRICE THAN PEERS'?'text-emerald-700':q.price_improvement_pct_points>=.4?'text-blue-700':'text-slate-500')}>
             {!recent?'Old quote · recheck required':q.price_assessment==='BETTER PRICE THAN PEERS'?'Notably better than peers':q.price_improvement_pct_points>=.4?'Small price improvement':'Near typical price'}
             {recent&&q.price_improvement_pct_points>=.4?' · '+q.price_improvement_pct_points+'pp':''}
           </p>
@@ -84,7 +87,7 @@ function GameCard({game,market,frozenModel=null,now=Date.now()}){
         {recent?'DATED':'STALE'}
       </span>
     </div>
-    <p className="mt-1.5 text-[11px] font-medium leading-4 text-slate-500">Each price is for the named <b>BET ON</b> side below—not for both teams. Book-source capture: {humanTime(game.source_capture_at)}.</p>
+    <p className="mt-1.5 text-[11px] font-medium leading-4 text-slate-600">“Take” means the specific team or total shown—not both sides. These are dated research prices, not live offers. Captured: {humanTime(game.source_capture_at)}.</p>
     {frozenModel && (
       <div className="mt-2 rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2.5">
         <p className="text-[10px] font-black uppercase tracking-wider text-blue-700">Zenith NFL forecast · experimental</p>
@@ -99,6 +102,7 @@ function GameCard({game,market,frozenModel=null,now=Date.now()}){
       </div>
     )}
     <p className="mt-2 text-[11px] font-semibold text-slate-600">
+      <span className="mr-1 inline-flex rounded-md border border-[#E6C894] bg-[#FFF0D0] px-2 py-0.5 text-[10px] font-black text-[#795321]">RESEARCH · NOT PROVEN</span>
       Zenith price read: <span className={notable?'font-black text-emerald-700':'font-bold text-slate-700'}>{notable?'Notably better price on at least one line':maxGap>=.4?'Small price variations':'Typical market prices'}</span> · No proven betting edge
     </p>
     <div className="mt-2">{markets.map(m=><BetMarket key={m} game={game} market={m} item={game.markets[m]} recent={recent}/>)}</div>
