@@ -1,0 +1,72 @@
+import {test,expect} from '@playwright/test'
+import {startSyntheticAuthHttps} from './test_support/firstparty_auth_https_qa.mjs'
+let PREVIEW,runner
+test.beforeAll(async()=>{runner=await startSyntheticAuthHttps();PREVIEW=runner.origin})
+test.afterAll(async()=>{await runner?.close()})
+const EMAIL='qa-returning-member@example.test'
+async function signIn(page){
+ await page.goto(PREVIEW+'#survivor',{waitUntil:'domcontentloaded'})
+ await page.getByRole('button',{name:'Sign in to Sports Zenith'}).first().click()
+ await page.getByLabel('Email address').fill(EMAIL)
+ await page.getByRole('button',{name:/^Continue/}).click()
+ await page.getByLabel('Verification code').fill('123456')
+ await page.getByRole('button',{name:'Verify & continue'}).click()
+ await expect(page.getByRole('button',{name:'Open account'}).first()).toBeVisible({timeout:12000})
+}
+const getStats=async context=>(await (await context.request.get(PREVIEW+'qa-stats')).json())
+const resetStats=async context=>context.request.post(PREVIEW+'qa-stats/reset')
+
+test('real same-origin HTTPS proxy cookie survives reload, cleared old hint, and another Safari tab',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},ignoreHTTPSErrors:true})
+ await resetStats(context)
+ const page=await context.newPage(),errors=[]
+ page.on('pageerror',e=>errors.push(e.message))
+ await signIn(page)
+ const cookie=(await context.cookies(new URL('/api/auth/refresh',PREVIEW).href)).find(item=>item.name==='insforge_refresh_token')
+ expect(cookie).toBeDefined()
+ expect(cookie).toMatchObject({httpOnly:true,secure:true,sameSite:'Lax',path:'/api/auth'})
+ expect(cookie.domain).toBe('127.0.0.1')
+ await page.evaluate(()=>localStorage.removeItem('sports-zenith-auth-session'))
+ await page.reload({waitUntil:'domcontentloaded'})
+ await expect(page.getByRole('button',{name:'Open account'}).first()).toBeVisible({timeout:12000})
+ const tab=await context.newPage()
+ await tab.goto(PREVIEW+'#survivor',{waitUntil:'domcontentloaded'})
+ await expect(tab.getByRole('button',{name:'Open account'}).first()).toBeVisible({timeout:12000})
+ const stats=await getStats(context)
+ expect(stats.signins).toBe(1)
+ expect(stats.recovered).toBeGreaterThanOrEqual(2)
+ expect(stats.calls.filter(x=>x.route==='/api/auth/refresh'&&x.had_refresh_cookie).length).toBeGreaterThanOrEqual(2)
+ expect(errors).toEqual([])
+ await context.close()
+})
+
+test('real first-party proxy clears secure refresh cookie on explicit sign out',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},ignoreHTTPSErrors:true})
+ await resetStats(context)
+ const page=await context.newPage()
+ await signIn(page)
+ await page.getByRole('button',{name:'Open account'}).first().click()
+ await page.getByRole('button',{name:'Sign out'}).click()
+ await expect(page.getByRole('button',{name:'Sign in to Sports Zenith'}).first()).toBeVisible()
+ await page.reload({waitUntil:'domcontentloaded'})
+ await expect(page.getByRole('button',{name:'Sign in to Sports Zenith'}).first()).toBeVisible()
+ const stats=await getStats(context)
+ expect(stats.signins).toBe(1)
+ expect(stats.signouts).toBe(1)
+ expect((await context.cookies(new URL('/api/auth/refresh',PREVIEW).href)).find(c=>c.name==='insforge_refresh_token')).toBeUndefined()
+ await context.close()
+})
+
+test('no auth cookie and a forged old localStorage hint remain signed out',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},ignoreHTTPSErrors:true})
+ await resetStats(context)
+ const page=await context.newPage()
+ await page.goto(PREVIEW+'#survivor',{waitUntil:'domcontentloaded'})
+ await page.evaluate(()=>localStorage.setItem('sports-zenith-auth-session','1'))
+ await page.reload({waitUntil:'domcontentloaded'})
+ await expect(page.getByRole('button',{name:'Sign in to Sports Zenith'}).first()).toBeVisible()
+ const stats=await getStats(context)
+ expect(stats.signins).toBe(0)
+ expect(stats.recovered).toBe(0)
+ await context.close()
+})

@@ -6,6 +6,7 @@ import { createHash, timingSafeEqual, randomBytes } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createAdminClient, createClient } from '@insforge/sdk'
+import { handleFirstPartyAuthProxy } from './first_party_auth_proxy.js'
 import { buildPersonalizedSurvivorSource, mergeGovernedSurvivorSource } from './survivor_personalization.js'
 import { resolveWeekPickRule } from './survivor_rules.js'
 import { selectSurvivorAskChoice } from './survivor_week5_rank.js'
@@ -3763,6 +3764,16 @@ async function serveStatic(req,res,pathname) {
 
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host||'localhost'}`)
+  // Safari cannot reliably retain third-party InsForge refresh cookies.
+  // Relay a narrow whitelist through this first-party HTTPS origin so the
+  // provider's refresh credential remains secure, HttpOnly and SameSite=Lax.
+  if(url.pathname.startsWith('/api/auth')){
+    await handleFirstPartyAuthProxy(req,res,{
+      providerUrl:INSFORGE_URL,
+      anonKey:process.env.VITE_INSFORGE_ANON_KEY||LOCAL_ENV.VITE_INSFORGE_ANON_KEY,
+    })
+    return
+  }
   // Public, aggregate-only. Independent game Final scores vs ORIGINAL frozen
   // paired bookmaker markets; never include private member or Survivor picks.
   // Aggregate public NFL source authority. Never exposes private accounts, prices,

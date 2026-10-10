@@ -1,9 +1,7 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ArrowLeft, ArrowRight, CheckCircle2, LogOut, Mail, ShieldCheck, UserRound, X } from 'lucide-react'
 import { insforge, insforgeConfigured } from './insforge'
-
-const AUTH_HINT = 'sports-zenith-auth-session'
 
 const AuthContext = createContext({
   configured: false,
@@ -21,6 +19,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [authConfig, setAuthConfig] = useState(null)
   const [loading, setLoading] = useState(true)
+  // SDK access tokens stay in memory; the refresh cookie is HttpOnly/SameSite
+  // on Sports Zenith's first-party origin. Browser localStorage is NOT proof
+  // of an authenticated session and must never block recovery (Safari ITP).
+  const refreshInFlight = useRef(null)
+  const sessionGeneration = useRef(0)
 
   const refreshUser = useCallback(async () => {
     if (!insforgeConfigured || !insforge) {
@@ -28,58 +31,83 @@ export function AuthProvider({ children }) {
       setLoading(false)
       return null
     }
-    try {
-      const { data, error } = await insforge.auth.getCurrentUser()
-      if (error) {
-        setUser(null)
-        window.localStorage.removeItem(AUTH_HINT)
+    if (refreshInFlight.current) return refreshInFlight.current
+    const version = sessionGeneration.current
+    const attempt = (async () => {
+      try {
+        // Always ask the actual provider to restore its verified session.
+        // The SDK has no persistent JS token store by design: getCurrentUser()
+        // uses the first-party, HttpOnly refresh cookie on a new document.
+        const { data, error } = await insforge.auth.getCurrentUser()
+        if (version !== sessionGeneration.current) return null
+        if (error) {
+          // Transient network/auth-provider errors aren't a sign-out request.
+          // Never clear a valid in-memory user merely due to temporary 5xx.
+          if ([401,403].includes(Number(error.statusCode))) setUser(null)
+          return null
+        }
+        const restored = data?.user || null
+        setUser(restored)
+        return restored
+      } catch {
+        // Safari offline, captive portal or brief network loss: keep a
+        // previously verified in-memory user; private APIs still demand JWT.
         return null
+      } finally {
+        setLoading(false)
       }
-      const next = data?.user || null
-      setUser(next)
-      if (next) window.localStorage.setItem(AUTH_HINT, '1')
-      else window.localStorage.removeItem(AUTH_HINT)
-      return next
-    } catch {
-      setUser(null)
-      return null
-    } finally {
-      setLoading(false)
-    }
+    })()
+    refreshInFlight.current = attempt
+    try { return await attempt }
+    finally { if (refreshInFlight.current === attempt) refreshInFlight.current = null }
   }, [])
 
   useEffect(() => {
     let active = true
-
     const load = async () => {
       if (!insforgeConfigured || !insforge) {
         if (active) setLoading(false)
         return
       }
-      try {
-        const { data: config } = await insforge.auth.getPublicAuthConfig()
-        if (!active) return
-        setAuthConfig(config || null)
-        if (window.localStorage.getItem(AUTH_HINT) === '1') {
-          await refreshUser()
-        } else {
-          setUser(null)
-        }
-      } catch {
-        if (active) setUser(null)
-      } finally {
-        if (active) setLoading(false)
+      // Restore on EVERY page load. The old sports-zenith-auth-session flag
+      // could be absent or purged by Safari while the secure cookie was valid.
+      const [config] = await Promise.allSettled([
+        insforge.auth.getPublicAuthConfig(),
+        refreshUser(),
+      ])
+      if (active && config.status === 'fulfilled' && !config.value?.error) {
+        setAuthConfig(config.value?.data || null)
       }
+      if (active) setLoading(false)
     }
 
     load()
     const unsubscribe = insforgeConfigured && insforge
-      ? insforge.auth.onAuthStateChange(() => { refreshUser() })
+      ? insforge.auth.onAuthStateChange((event) => {
+          if (event === 'SIGNED_OUT') {
+            sessionGeneration.current += 1
+            setUser(null)
+            setLoading(false)
+          } else {
+            void refreshUser()
+          }
+        })
       : null
-
+    // iPhone Safari often restores a suspended tab from the back/forward
+    // cache; check the verified first-party session again when it resumes.
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refreshUser()
+    }
+    const onPageShow = event => {
+      if (event.persisted) void refreshUser()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('pageshow', onPageShow)
     return () => {
       active = false
       if (typeof unsubscribe === 'function') unsubscribe()
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('pageshow', onPageShow)
     }
   }, [refreshUser])
 
@@ -97,7 +125,7 @@ export function AuthProvider({ children }) {
       if (!insforge) return { data: null, error: new Error('Account service is unavailable') }
       const result = await insforge.auth.verifyOtp({ email, otp, ...(name ? { name } : {}) })
       if (!result.error) {
-        window.localStorage.setItem(AUTH_HINT, '1')
+        if (result.data?.user) setUser(result.data.user)
         await refreshUser()
       }
       return result
@@ -105,7 +133,7 @@ export function AuthProvider({ children }) {
     signOut: async () => {
       if (!insforge) return { error: null }
       const result = await insforge.auth.signOut()
-      window.localStorage.removeItem(AUTH_HINT)
+      sessionGeneration.current += 1
       setUser(null)
       return result
     },
