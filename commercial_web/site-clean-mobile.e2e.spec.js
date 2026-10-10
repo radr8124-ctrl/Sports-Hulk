@@ -4,7 +4,12 @@ import { readFileSync } from 'node:fs'
 const fixture = file => JSON.parse(readFileSync(new URL('./public/' + file, import.meta.url), 'utf8'))
 const survivor = fixture('survivor_v2_current.json')
 const scores = fixture('nfl_scores.json')
-const reference = fixture('nfl_research_book_refs.json')
+// Test-only historical replay: source archive has original Oct 9 capture,
+// current Saturday collector correctly has zero fresh fixtures. Replay those
+// actual dated archive prices ONLY with a frozen Friday clock; live UI never
+// rewrites archived quotes as current offers.
+const storedReference = fixture('nfl_research_book_refs.json')
+const reference = {...storedReference, fixtures:storedReference.archived_snapshot.fixtures}
 const friday = Date.parse('2026-10-09T21:50:00Z')
 const base = 'http://127.0.0.1:8510/'
 
@@ -54,7 +59,10 @@ test('Survivor first look fits title and top market option on an iPhone, full hi
   expect(await header.evaluate(el => el.getBoundingClientRect().width)).toBeGreaterThan(250)
   const first = review.locator('article').first()
   await expect(first.getByText('Jacksonville Jaguars', { exact: true })).toBeVisible()
-  expect(await first.evaluate(el => el.getBoundingClientRect().top + window.scrollY)).toBeLessThan(900)
+  // The newly visible Saturday 6 PM pool-deadline/externally-submit warning
+  // deliberately sits before market research. Keep the first real game within
+  // a short phone scroll, but never hide the submission instruction.
+  expect(await first.evaluate(el => el.getBoundingClientRect().top + window.scrollY)).toBeLessThan(1010)
   const expanded = page.locator('details').filter({
     has: page.getByText('Full Survivor research board', { exact: true }),
   }).first()

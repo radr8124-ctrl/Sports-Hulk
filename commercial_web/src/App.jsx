@@ -1020,6 +1020,30 @@ function SurvivorCommercialPanel() {
         </div>
       </section>
 
+      <section aria-label="Survivor entry deadline" className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold leading-5 text-amber-950">
+        <div>
+          <b className="block text-sm font-black">Week {saved.pool_current_week ?? survivor.pool_current_week ?? '—'} · Pool deadline: Saturday 6 PM Eastern</b>
+          <span>Earlier games must be picked at least two hours before the first kickoff that day. {hasEntry ? `${currentPicks.length} privately saved.` : 'Sign in to see your linked entry.'}</span>
+        </div>
+        <span className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-[10px] font-black text-amber-900">SPORTS ZENITH DOES NOT SUBMIT TO YOUR EXTERNAL POOL</span>
+      </section>
+
+      {hasEntry && (
+        <Suspense fallback={<LoadingSurface label="Loading pick editor" />}>
+          <SurvivorPickEditor
+            entryName={saved.active_entry}
+            poolWeek={saved.pool_current_week}
+            usedTeams={usedTeams}
+            currentPicks={currentPicks}
+            entryStatus={entryStatus}
+            requiredPicks={Number.isInteger(saved.required_picks) ? saved.required_picks : null}
+            ruleConfirmed={ruleConfirmed}
+            getAccessToken={getAccessToken}
+            onSaved={() => setLinkRefresh(value => value + 1)}
+          />
+        </Suspense>
+      )}
+
       {hasEntry && entryStatus === 'ALIVE' && (
         <section aria-label="Personal Survivor pick research" className="rounded-3xl border border-blue-200 bg-white p-5 shadow-soft md:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1266,21 +1290,6 @@ function SurvivorCommercialPanel() {
         </section>
       )}
 
-      {hasEntry && (
-        <Suspense fallback={<LoadingSurface label="Loading pick editor" />}>
-          <SurvivorPickEditor
-            entryName={saved.active_entry}
-            poolWeek={saved.pool_current_week}
-            usedTeams={usedTeams}
-            currentPicks={currentPicks}
-            entryStatus={entryStatus}
-            requiredPicks={Number.isInteger(saved.required_picks) ? saved.required_picks : null}
-            ruleConfirmed={ruleConfirmed}
-            getAccessToken={getAccessToken}
-            onSaved={() => setLinkRefresh(value => value + 1)}
-          />
-        </Suspense>
-      )}
 
       {hasEntry && Array.isArray(saved.pick_scores) && saved.pick_scores.length > 0 && (
         <Suspense fallback={<LoadingSurface label="Loading My Pick Score" />}>

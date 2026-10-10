@@ -4,7 +4,12 @@ import { readFileSync } from 'node:fs'
 const base = file => JSON.parse(readFileSync(new URL('./public/'+file,import.meta.url),'utf8'))
 const survivor = base('survivor_v2_current.json')
 const score = base('nfl_scores.json')
-const reference = base('nfl_research_book_refs.json')
+// Test-only historical replay: source archive has original Oct 9 capture,
+// current Saturday collector correctly has zero fresh fixtures. Replay those
+// actual dated archive prices ONLY with a frozen Friday clock; live UI never
+// rewrites archived quotes as current offers.
+const storedReference = base('nfl_research_book_refs.json')
+const reference = {...storedReference, fixtures:storedReference.archived_snapshot.fixtures}
 
 async function openReview(page, instant, mobile=false, refsData=reference) {
   if (mobile) await page.setViewportSize({width:390,height:844})
