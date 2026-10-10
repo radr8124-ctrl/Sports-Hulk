@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const URL = 'http://127.0.0.1:8510/'
+const URL = process.env.ZENITH_NEWS_DESK_URL || 'http://127.0.0.1:8510/'
 const rgb = (r,g,b) => `rgb(${r}, ${g}, ${b})`
 
 async function homepage(page,width=390) {
@@ -42,7 +42,8 @@ test('new 1980s sports-broadcast palette appears across the actual Home', async(
   expect(c.scoreCard.background).toBe(rgb(255,255,255))
   expect(c.decisionCard.background).toBe(rgb(255,240,232))
   expect(c.heading.foreground).toBe(rgb(23,62,82))
-  expect(c.newsHeading.foreground).toBe(rgb(23,62,82))
+  // News Desk now uses warm ivory lettering on a contrasting ink masthead.
+  expect(c.newsHeading.foreground).toBe(rgb(255,245,228))
   expect(c.fantasy.background).toBe(rgb(217,244,238))
   expect(c.footer.background).toBe(rgb(255,241,219))
   expect(c.overflow).toBeLessThanOrEqual(1)

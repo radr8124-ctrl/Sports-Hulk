@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs'
 import {gunzipSync} from 'node:zlib'
 import {curateSportsNews,NEWS_SPORTS,selectHomeTopStories} from './news_curation.js'
 
-const BASE='http://127.0.0.1:8510/'
+const BASE=process.env.ZENITH_NEWS_DESK_URL||'http://127.0.0.1:8510/'
 const source=JSON.parse(gunzipSync(readFileSync(new URL('../reports/SPORTS_ZENITH_NEWS_SOURCE_FIXTURE_20261010.json.gz',import.meta.url))).toString('utf8'))
 const CLOCK=Date.parse(source.generated_at)+4*60_000
 const expected=curateSportsNews(source,CLOCK)
