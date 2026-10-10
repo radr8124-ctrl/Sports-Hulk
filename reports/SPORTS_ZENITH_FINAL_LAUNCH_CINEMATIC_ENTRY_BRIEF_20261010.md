@@ -4,8 +4,14 @@ Status: APPROVED AS A FUTURE FEATURE REQUEST, NOT YET DESIGNED OR DEPLOYED
 Request date: October 10, 2026
 Source: Owner wants a really cool sign-in page that feels like a premium opening page for the website, AFTER core Sports Zenith features are complete.
 
-## Creative direction to prototype for owner approval
-A premium, cinematic **Enter Sports Zenith** welcome experience: the feeling of entering a stadium or sports broadcast command center, not a generic login form or a gaudy gambling ad. Brand-forward SPORTS ZENITH wordmark, dramatic but clean stadium-light glow or scoreboard/grid accents, deep ink navy with aqua and tasteful coral/gold details matching the existing premium site. A headline with the idea of sports intelligence, a very short explanation of Scores / Survivor / Fantasy / Bets, and one exceptionally clear entrance action. Offer a clearly distinct **Sign In / Join** action. On larger displays, cinematic arena imagery/animation can surround the main message; on iPhone, the page must feel like a beautiful single-screen entry, with concise text and accessible targets.
+## Creative direction to prototype for owner approval — corrected from owner feedback
+**REQUIRED MATCH: existing Sports Zenith premium retro-modern broadcast/dashboard identity.** The owner liked dramatic cinematic stadium/command-center inspiration but correctly said it looks futuristic and does NOT match the live site's retro dashboard style. Do NOT copy the futuristic arena imagery as a new visual language, and do NOT redesign the rest of the website around an unrelated welcome screen.
+
+Create a **premium retro sports-broadcast opening**: a confident broadcast title sequence integrated with the existing editorial command desk. Use the same deep navy/ink `#173E52`, warm cream `#FFF8ED`, aqua `#46CDD2`, coral `#FF7766`, and gold `#FFD36A`, the existing slightly playful oversized sports-editorial headlines, angular score-ticker motifs, familiar heavy navy card borders, gold/teal accent bars, rounded dashboard cards and clear button language. Think *classic scoreboard meets modern sports television*, not sci-fi holograms, generic Las Vegas betting ads, or full-photo neon tunnels.
+
+Proposed experience: rapid understated scoreboard-light sweep / animated broadcast line, the **SPORTS ZENITH** wordmark appears, a concise line such as **YOUR FRONT ROW TO THE GAME**, then clearly separated **Enter Sports Zenith** and **Sign In / Join** actions in the EXISTING visual system. Present optional authentic source-verified Scores / Survivor / Fantasy / Bets category motifs using the same dashboard cards (no invented games, lines or wins). Welcome must feel like a polished entrance to the app users actually see next. Prototype both 390px iPhone and desktop views with the LIVE home/Survivor page shown alongside for direct visual match review; compare type, exact palette, card edges and navigation transitions before approval.
+
+Creative guardrail: elevate the existing design without losing its retro broadcast charm; animation is optional, extremely quick, and nonblocking. Keep user choice and secure sign-in existing integration unchanged during current Survivor review.
 
 ## Product safeguards
 - **Build after** the pending Survivor owner review and core source-proof work; do not interrupt current production sign-in during Week 5 review.
