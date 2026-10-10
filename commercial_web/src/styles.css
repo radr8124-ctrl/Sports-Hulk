@@ -118,3 +118,10 @@ button { font: inherit; }
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Home-only dark command-center continuity. Other detailed betting, fantasy,
+   Survivor and performance pages intentionally retain light reading surfaces. */
+@layer components {
+  .zenith-home .section-heading h2 { @apply text-white; }
+  .zenith-home .section-heading .eyebrow { @apply text-sky-300; }
+}

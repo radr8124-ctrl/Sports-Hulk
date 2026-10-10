@@ -56,10 +56,10 @@ function LoadingSurface({ label = 'Loading' }) {
 }
 
 const toneClass = {
-  blue: 'bg-blue-50 text-blue-700 border-blue-100',
-  amber: 'bg-amber-50 text-amber-700 border-amber-100',
-  emerald: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  violet: 'bg-violet-50 text-violet-700 border-violet-100',
+  blue: 'bg-sky-400/10 text-sky-200 border-sky-400/25',
+  amber: 'bg-amber-400/10 text-amber-200 border-amber-400/25',
+  emerald: 'bg-emerald-400/10 text-emerald-200 border-emerald-400/25',
+  violet: 'bg-violet-400/10 text-violet-200 border-violet-400/25',
 }
 
 function Brand() {
@@ -120,12 +120,12 @@ function StatusStrip() {
   return (
     <div className="flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-4 md:overflow-visible">
       {cards.map((item) => (
-        <div key={item.label} className="min-w-[185px] rounded-2xl border border-slate-200 bg-white p-3 shadow-soft md:min-w-0 md:p-4">
+        <div key={item.label} className="min-w-[185px] rounded-2xl border border-[#25415D] bg-[#102840] p-3 text-white md:min-w-0 md:p-4">
           <div className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{item.label}</div>
           <div className={`mt-3 inline-flex rounded-full border px-3 py-1 text-xs font-extrabold ${toneClass[item.tone]}`}>
             {item.value}
           </div>
-          <div className="mt-2 text-[11px] font-semibold text-slate-400">{item.detail}</div>
+          <div className="mt-2 text-[11px] font-semibold text-slate-300">{item.detail}</div>
         </div>
       ))}
     </div>
@@ -377,14 +377,14 @@ function SurvivorPanel() {
 
 function LearningPanel() {
   return (
-    <section>
+    <section aria-label="Home learning loop">
       <div className="section-heading">
         <div>
           <p className="eyebrow">Learning loop</p>
           <h2>Prediction → result → review → lesson</h2>
         </div>
       </div>
-      <div className="rounded-3xl border border-slate-200 bg-slate-950 p-6 text-white shadow-soft">
+      <div className="rounded-[24px] border border-[#25415D] bg-gradient-to-br from-[#0E2A46] to-[#081D32] p-4 text-white md:p-6">
         <div className="grid gap-4 md:grid-cols-4">
           {[
             ['1', 'Freeze', 'Store exactly what was known before kickoff.'],
@@ -392,8 +392,8 @@ function LearningPanel() {
             ['3', 'Autopsy', 'Explain what changed and what was misread.'],
             ['4', 'Learn', 'Store validated lessons for future decisions.'],
           ].map(([n, title, text]) => (
-            <div key={n} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-xs font-black text-emerald-400">STEP {n}</div>
+            <div key={n} className="rounded-2xl border border-sky-400/15 bg-white/[.04] p-4 md:p-5">
+              <div className="text-xs font-black text-sky-300">STEP {n}</div>
               <div className="mt-2 text-lg font-black">{title}</div>
               <div className="mt-2 text-sm leading-6 text-slate-300">{text}</div>
             </div>
@@ -1636,28 +1636,28 @@ function HomeDecisionPanel({ onNavigate }) {
   ]
 
   const tone = {
-    blue: 'border-blue-100 bg-blue-50 text-blue-700',
-    emerald: 'border-emerald-100 bg-emerald-50 text-emerald-700',
-    amber: 'border-amber-100 bg-amber-50 text-amber-700',
-    violet: 'border-violet-100 bg-violet-50 text-violet-700',
+    blue: 'border-sky-400/25 bg-sky-400/10 text-sky-200',
+    emerald: 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200',
+    amber: 'border-amber-400/25 bg-amber-400/10 text-amber-200',
+    violet: 'border-violet-400/25 bg-violet-400/10 text-violet-200',
   }
 
   return (
-    <section>
+    <section aria-label="Home decision overview">
       <div className="section-heading">
         <div><p className="eyebrow">Right now</p><h2>What matters now</h2></div>
-        <button onClick={() => onNavigate('Brain Record')} className="text-sm font-black text-blue-700">How good is the brain? →</button>
+        <button onClick={() => onNavigate('Brain Record')} className="text-sm font-black text-sky-300 hover:text-sky-200">How good is the brain? →</button>
       </div>
       <div className="flex snap-x gap-4 overflow-x-auto pb-2 xl:grid xl:grid-cols-5 xl:overflow-visible">
         {cards.map((card) => (
-          <button key={card.label} onClick={() => onNavigate(card.route)} className="min-w-[270px] snap-start rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-soft transition hover:-translate-y-0.5 hover:border-blue-200 xl:min-w-0">
+          <button key={card.label} onClick={() => onNavigate(card.route)} className="min-w-[270px] snap-start rounded-[22px] border border-[#25415D] bg-gradient-to-br from-[#12304C] to-[#0A2037] p-4 text-left text-white transition hover:-translate-y-0.5 hover:border-sky-400/50 xl:min-w-0">
             <div className="flex items-center justify-between gap-3">
-              <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">{card.label}</div>
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-sky-300">{card.label}</div>
               <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black ${tone[card.tone]}`}>{card.status}</span>
             </div>
-            <div className="mt-4 text-lg font-black leading-6 text-slate-950">{card.title}</div>
-            <div className="mt-3 text-xs font-semibold leading-5 text-slate-500">{card.detail}</div>
-            <div className="mt-5 text-xs font-black text-blue-700">Open {card.label} →</div>
+            <div className="mt-4 text-lg font-black leading-6 text-white">{card.title}</div>
+            <div className="mt-3 text-xs font-semibold leading-5 text-slate-300">{card.detail}</div>
+            <div className="mt-5 text-xs font-black text-sky-300">Open {card.label} →</div>
           </button>
         ))}
       </div>
@@ -1695,33 +1695,33 @@ function HomeImpactNews({ onNavigate }) {
 
   const tone = (type) => {
     const value = String(type || '').toUpperCase()
-    if (value === 'INJURY') return 'bg-rose-50 text-rose-700'
-    if (value === 'TRANSACTION') return 'bg-violet-50 text-violet-700'
-    if (value === 'LINEUP_ROLE' || value === 'FANTASY') return 'bg-emerald-50 text-emerald-700'
-    return 'bg-blue-50 text-blue-700'
+    if (value === 'INJURY') return 'border border-rose-400/20 bg-rose-400/10 text-rose-200'
+    if (value === 'TRANSACTION') return 'border border-violet-400/20 bg-violet-400/10 text-violet-200'
+    if (value === 'LINEUP_ROLE' || value === 'FANTASY') return 'border border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
+    return 'border border-sky-400/20 bg-sky-400/10 text-sky-200'
   }
 
   return (
-    <section>
+    <section aria-label="Home sports news">
       <div className="section-heading">
         <div>
           <p className="eyebrow">News & insights</p>
           <h2>What changed that could matter</h2>
         </div>
-        <button onClick={() => onNavigate('News & Insights')} className="text-sm font-black text-blue-700">Open News & Insights →</button>
+        <button onClick={() => onNavigate('News & Insights')} className="text-sm font-black text-sky-300 hover:text-sky-200">Open News & Insights →</button>
       </div>
 
       {rows.length ? (
         <div className="flex snap-x gap-4 overflow-x-auto pb-2 xl:grid xl:grid-cols-4 xl:overflow-visible">
           {rows.map((row) => (
-            <button key={row.event_node_id} onClick={() => onNavigate('News & Insights')} className="min-w-[285px] snap-start rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-soft transition hover:-translate-y-0.5 hover:border-blue-200 xl:min-w-0">
+            <button key={row.event_node_id} onClick={() => onNavigate('News & Insights')} className="min-w-[285px] snap-start rounded-[22px] border border-[#25415D] bg-gradient-to-br from-[#122D49] to-[#0B2239] p-4 text-left text-white transition hover:-translate-y-0.5 hover:border-sky-400/50 xl:min-w-0">
               <div className="flex items-center justify-between gap-3">
                 <span className="rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-black text-white">{row.sport}</span>
                 <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${tone(row.event_type)}`}>{humanize(row.event_type)}</span>
               </div>
-              <div className="mt-4 line-clamp-3 text-base font-black leading-6 text-slate-950">{row.title}</div>
-              <div className="mt-3 text-xs font-semibold leading-5 text-slate-500">{why(row)}</div>
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-400">
+              <div className="mt-4 line-clamp-3 text-base font-black leading-6 text-white">{row.title}</div>
+              <div className="mt-3 text-xs font-semibold leading-5 text-slate-300">{why(row)}</div>
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-[10px] font-bold text-slate-400">
                 <span>{row.source}</span>
                 <span>{row.published_or_effective_at ? new Date(row.published_or_effective_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}</span>
               </div>
@@ -1729,7 +1729,7 @@ function HomeImpactNews({ onNavigate }) {
           ))}
         </div>
       ) : (
-        <EmptyPanel icon={Radio} title="Impact news is quiet" text="The reporting graph is connected. New injury, transaction, role and fantasy-impact events will appear here automatically." />
+        <div className="rounded-[22px] border border-[#25415D] bg-[#0E2740] p-5 text-sm font-semibold text-slate-300">Impact news is quiet. New verified injury, transaction and fantasy-impact reporting will appear here when available.</div>
       )}
     </section>
   )
@@ -1746,36 +1746,36 @@ function HomeSnapshots({ onNavigate }) {
   const hasPersonalSurvivor = Boolean(user && privateSurvivor.entry_linked)
 
   return (
-    <section className="grid gap-4 lg:grid-cols-3">
-      <button onClick={() => onNavigate('Survivor')} className="rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-soft transition hover:border-emerald-200">
-        <div className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">{hasPersonalSurvivor ? 'My Survivor' : 'Survivor'}</div>
-        <div className="mt-3 text-2xl font-black text-slate-950">
+    <section aria-label="Home Fantasy Survivor and Brain Record" className="grid gap-3 lg:grid-cols-3">
+      <button onClick={() => onNavigate('Survivor')} className="rounded-[22px] border border-[#25415D] bg-gradient-to-br from-[#12304C] to-[#0B2339] p-5 text-left text-white transition hover:border-emerald-400/40">
+        <div className="text-xs font-black uppercase tracking-[0.14em] text-emerald-300">{hasPersonalSurvivor ? 'My Survivor' : 'Survivor'}</div>
+        <div className="mt-3 text-2xl font-black text-white">
           {hasPersonalSurvivor
             ? privateSurvivor.active_entry
             : user
               ? 'No pool linked'
               : `Week ${survivor.pool_current_week ?? '—'} research`}
         </div>
-        <div className="mt-2 text-sm font-semibold text-slate-500">
+        <div className="mt-2 text-sm font-semibold text-slate-300">
           {hasPersonalSurvivor
             ? `Week ${privateSurvivor.pool_current_week ?? survivor.pool_current_week ?? '—'} · ${(privateSurvivor.used_teams || []).length} teams used`
             : user
               ? 'Account ready for a private Survivor entry'
               : 'Sign in for private entries, used teams and pool rules'}
         </div>
-        <div className="mt-5 text-xs font-black text-emerald-700">Open Survivor →</div>
+        <div className="mt-5 text-xs font-black text-emerald-300">Open Survivor →</div>
       </button>
-      <button onClick={() => onNavigate('Fantasy')} className="rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-soft transition hover:border-blue-200">
-        <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Fantasy + DFS</div>
-        <div className="mt-3 text-2xl font-black text-slate-950">{laneCount} forward-tested lanes</div>
-        <div className="mt-2 text-sm font-semibold text-slate-500">Start/Sit · FAAB · IR stash · Defense · IDP · DFS</div>
-        <div className="mt-5 text-xs font-black text-blue-700">Open Fantasy →</div>
+      <button onClick={() => onNavigate('Fantasy')} className="rounded-[22px] border border-[#25415D] bg-gradient-to-br from-[#12304C] to-[#0B2339] p-5 text-left text-white transition hover:border-sky-400/40">
+        <div className="text-xs font-black uppercase tracking-[0.14em] text-sky-300">Fantasy + DFS</div>
+        <div className="mt-3 text-2xl font-black text-white">{laneCount} forward-tested lanes</div>
+        <div className="mt-2 text-sm font-semibold text-slate-300">Start/Sit · FAAB · IR stash · Defense · IDP · DFS</div>
+        <div className="mt-5 text-xs font-black text-sky-300">Open Fantasy →</div>
       </button>
-      <button onClick={() => onNavigate('Brain Record')} className="rounded-3xl border border-slate-200 bg-slate-950 p-6 text-left text-white shadow-soft transition hover:-translate-y-0.5">
-        <div className="text-xs font-black uppercase tracking-[0.14em] text-emerald-400">Brain Record</div>
+      <button onClick={() => onNavigate('Brain Record')} className="rounded-[22px] border border-sky-400/25 bg-gradient-to-br from-[#134267] to-[#0A223A] p-5 text-left text-white transition hover:-translate-y-0.5 hover:border-sky-400/50">
+        <div className="text-xs font-black uppercase tracking-[0.14em] text-sky-300">Brain Record</div>
         <div className="mt-3 text-3xl font-black">{official.wins ?? 0}-{official.losses ?? 0}-{official.pushes ?? 0}</div>
         <div className="mt-2 text-sm font-semibold text-slate-300">{official.published ?? 0} published · {official.pending ?? 0} pending · {official.roi_pct == null ? 'ROI waiting for settled priced picks' : `${official.units >= 0 ? '+' : ''}${Number(official.units || 0).toFixed(2)}u · ${Number(official.roi_pct).toFixed(1)}% ROI`}</div>
-        <div className="mt-5 text-xs font-black text-emerald-300">See the proof →</div>
+        <div className="mt-5 text-xs font-black text-sky-300">See the proof →</div>
       </button>
     </section>
   )
@@ -3497,6 +3497,9 @@ export default function App() {
     document.title = active === 'Home'
       ? `${PUBLIC_BRAND} | ${PUBLIC_TAGLINE}`
       : `${active} | ${PUBLIC_BRAND}`
+    // Safari overscroll should match the page being viewed. Do not apply
+    // the dark Home background to the site's detailed research pages.
+    document.documentElement.style.backgroundColor = active === 'Home' ? '#061525' : '#f8fafc'
   }, [active])
 
   useEffect(() => {
@@ -3545,7 +3548,7 @@ export default function App() {
   const navSelected = (item) => item === 'Betting' ? isBetting : active === item
 
   return (
-    <div className="min-h-screen bg-[#F1F5FA] pb-[calc(6.5rem+env(safe-area-inset-bottom))] text-slate-900 lg:pb-0">
+    <div className={`min-h-screen pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-0 ${active === 'Home' ? 'bg-[#061525] text-slate-100' : 'bg-[#F1F5FA] text-slate-900'}`}>
       <a href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus() }} className="skip-link">Skip to main content</a>
       <header className="sticky top-0 z-30 border-b border-sky-900/40 bg-[#06182B]/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-5 md:py-4">
@@ -3593,7 +3596,7 @@ export default function App() {
         </div>
       </nav>
 
-      <main id="main-content" tabIndex="-1" className="mx-auto max-w-[1500px] space-y-8 px-4 py-6 md:px-5 md:py-8">
+      <main id="main-content" tabIndex="-1" className={`mx-auto max-w-[1500px] px-4 md:px-5 md:py-8 ${active === 'Home' ? 'zenith-home space-y-6 py-5' : 'space-y-8 py-6'}`} >
         {isAsk ? (
           <Suspense fallback={<LoadingSurface label="Loading analyst" />}><AskSportsHulkPage /></Suspense>
         ) : (
@@ -3606,12 +3609,12 @@ export default function App() {
                 <HomeImpactNews onNavigate={navigate} />
                 <HomeSnapshots onNavigate={navigate} />
                 <LearningPanel />
-                <details className="group rounded-2xl border border-slate-200 bg-white p-3 shadow-soft">
-                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 px-2 text-xs font-black text-blue-700">
+                <details className="group rounded-2xl border border-[#25415D] bg-[#0A2036] p-3 text-slate-100">
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 px-2 text-xs font-black text-sky-300">
                     Source connections and system status <ChevronRight size={16} className="transition-transform group-open:rotate-90" />
                   </summary>
-                  <div className="mt-3 border-t border-slate-100 pt-3">
-                    <p className="mb-3 text-xs font-medium leading-5 text-slate-600">A green collector is not proof its odds, lineup or model data are valid. Game-by-game evidence is checked separately.</p>
+                  <div className="mt-3 border-t border-white/10 pt-3">
+                    <p className="mb-3 text-xs font-medium leading-5 text-slate-300">A green collector is not proof its odds, lineup or model data are valid. Game-by-game evidence is checked separately.</p>
                     <StatusStrip />
                   </div>
                 </details>
@@ -3685,7 +3688,7 @@ export default function App() {
 
       <MobileBottomNav active={active} onNavigate={navigate} />
 
-      <footer className="border-t border-slate-200 bg-white">
+      <footer className={active === 'Home' ? 'border-t border-[#25415D] bg-[#071B2F]' : 'border-t border-slate-200 bg-white'}>
         <div className="mx-auto flex max-w-[1500px] flex-col gap-2 px-5 py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <span>{PUBLIC_BRAND} · {PUBLIC_TAGLINE}</span>
           <span>Real data · Unknown stays UNKNOWN · Stale stays STALE</span>
