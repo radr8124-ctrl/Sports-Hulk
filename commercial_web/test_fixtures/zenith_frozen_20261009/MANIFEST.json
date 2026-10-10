@@ -1,0 +1,17 @@
+{
+  "kind": "IMMUTABLE_FRIDAY_SOURCE_REPLAY_FIXTURE",
+  "source": "SHA_VERIFIED_VPS_PRECHANGE_PUBLIC_BACKUP",
+  "original_backup_dir": ".deploy_backups/zenith_premium_player_desks_before_20261010/dist",
+  "historical_observation_utc": "2026-10-09T05:41:32Z",
+  "research_archive_original_sha256": "3eec3ca0b8c0df79bc52923fdffb7f88516e36722f42cf10a03f160008ff77bb",
+  "source_captured_at": "2026-10-09T05:41:32+00:00",
+  "files": {
+    "betting_odds_board.json": "96c891cd63ba2dfdad0ae27a3cd6a74374f1a878a38f2aef9a39f2ec9d0e5710",
+    "nfl_frozen_game_intelligence.json": "e44e8d4564162561b0c528750a5613af135623c2b3690344458d052f711adf50",
+    "nfl_research_book_refs.json": "e73e32d1c426ed90b31fb80e7e5ea87772f5bc613a3c91a403aff559e54a4ee1",
+    "nfl_scores.json": "3f5d458121e6ba8298f56e9e407b3aac1ec4a4389ff3647f9ff379842d24e68b",
+    "survivor_v2_current.json": "cd5277ea3eca4f0a33ba0ec0a6d9dfd5adaadacad5d7dc55a05a981434226ce1"
+  },
+  "private_member_data": false,
+  "production_feed_unchanged": true
+}

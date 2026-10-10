@@ -21,6 +21,7 @@ import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
 import { survivorHistoricalAvailability } from './survivor_pool_leverage.js'
 import {buildSurvivorWeek6Plan} from './survivor_week6_planner.js'
+import {buildSurvivorPreflightEvidence} from './survivor_preflight_evidence.js'
 import { reconcileDallasReport, summariseDallasReport, DALLAS_CLAIM } from './survivor_thursday_tracker.js'
 import { loadDallasSnapshot, saveDallasSnapshot } from './survivor_thursday_store.js'
 import { verifiedEspnPlayerTables } from './verified_player_boxscore.js'
@@ -58,6 +59,9 @@ const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehous
 const SURVIVOR_POOL_HISTORY_CSV = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/SURVIVOR_POOL_CURRENT.csv')
 const SURVIVOR_POOL_HISTORY_META = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/LATEST_OFFICIAL_POOL.json')
 const SURVIVOR_WEEK6_SCHEDULE_CSV = path.join(SPORTS_ROOT,'nfl_live/derived/NFLVERSE_2026_SCHEDULE.csv')
+const SURVIVOR_ESPN_INJURIES_CSV = path.join(SPORTS_ROOT,'nfl_live/decision/NFL_ESPN_INJURIES.csv')
+const SURVIVOR_BOOK_RESEARCH_JSON = path.join(DIST,'..','public','nfl_research_book_refs.json')
+const SURVIVOR_OFFICIAL_SCORES_JSON = path.join(DIST,'..','public','nfl_scores.json')
 const DATASET_FRESHNESS_PATH = path.join(SPORTS_ROOT, 'intelligence_warehouse', 'freshness', 'DATASET_FRESHNESS_CURRENT.csv')
 const ASK_FAILED_QUEUE_PATH = process.env.ASK_FAILED_QUEUE_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_FAILED_QUESTION_QUEUE.jsonl')
 const ASK_EVAL_LEDGER_PATH = process.env.ASK_EVAL_LEDGER_PATH || path.join(SPORTS_ROOT, 'intelligence_warehouse', 'experiment_registry', 'ASK_EVALUATION_LEDGER.jsonl')
@@ -5271,6 +5275,65 @@ const server=http.createServer(async(req,res)=>{
       return json(res,200,saved)
     } catch(err) {
       return json(res,503,{status:'SAVE_UNAVAILABLE',message:'Survivor pick saving is temporarily unavailable.'})
+    }
+  }
+
+  // Private source-only NFL Survivor preflight. Read-only; no bookmaker PLAY
+  // or medically cleared players are ever inferred from dated research feeds.
+  if(req.method==='GET'&&url.pathname==='/api/survivor/preflight'){
+    const user=await authenticatedUser(req)
+    if(!user)return json(res,401,{status:'AUTH_REQUIRED'})
+    const limit=consumeRateLimit('survivor-preflight:'+user.id,36,60*1000)
+    if(!limit.ok)return json(res,429,{status:'RATE_LIMITED'})
+    const linked=await linkedSurvivorEntries(req,user.id)
+    const requestedEntry=String(url.searchParams.get('entry')||'').trim()
+    if(requestedEntry&&!linked.includes(requestedEntry)){
+      return json(res,403,{status:'NOT_ENTRY_OWNER'})
+    }
+    const entryName=selectLinkedSurvivorEntry(linked,requestedEntry)
+    if(!entryName)return json(res,403,{status:'LINKED_ENTRY_REQUIRED'})
+    res.setHeader('Cache-Control','private, no-store')
+    try{
+      const team=String(url.searchParams.get('team')||'').trim()
+      if(!team||team.length>100){
+        return json(res,422,{status:'CHOOSE_CURRENT_TEAM'})
+      }
+      const data=await loadAll()
+      const state=data.survivorUser||{}
+      const entry=(state?.entries||{})[entryName]
+      if(!entry || entry.status!=='ALIVE' || Number(state.pool_current_week)!==5){
+        return json(res,409,{status:'PRIVATE_WEEK5_ENTRY_UNAVAILABLE'})
+      }
+      const candidate=(data.survivorV2?.candidates||[]).find(row=>row?.team===team)
+      if(!candidate?.opponent || (entry.used_teams||[]).includes(team)){
+        return json(res,422,{status:'TEAM_NOT_ELIGIBLE_FOR_WEEK5_EVIDENCE'})
+      }
+      const [injuryCsv,bookRef,scoreboard]=await Promise.all([
+        readFile(SURVIVOR_ESPN_INJURIES_CSV,'utf8').catch(()=>null),
+        loadExternalJson(SURVIVOR_BOOK_RESEARCH_JSON),
+        loadExternalJson(SURVIVOR_OFFICIAL_SCORES_JSON),
+      ])
+      let archiveBytes=null
+      const source=bookRef?.original_archive?.archive
+      // Path MUST be an exact versioned existing match in the private sports vault.
+      if(typeof source==='string'&&
+         /^nfl_live\/game_fusion\/history\/NFL_GAME_SPORTWIZZARD_\d{8}T\d{6}Z\.csv$/.test(source)){
+        archiveBytes=await readFile(path.join(SPORTS_ROOT,source)).catch(()=>null)
+      }
+      const evidence=buildSurvivorPreflightEvidence({
+        team,opponent:candidate.opponent,usedTeams:entry.used_teams||[],
+        scoreboard,bookRef,archiveBytes,injuryCsv,nowMs:Date.now(),
+      })
+      if(evidence.status!=='SOURCE_EVIDENCE_ONLY'){
+        return json(res,409,{status:evidence.status,message:'The official game or pregame evidence could not be verified. No pick changed.'})
+      }
+      return json(res,200,{...evidence,
+        personal_only:true,entry_linked:true,
+        source_classification:'RESEARCH_ONLY_NOT_APPROVED_SELECTION',
+      })
+    }catch{
+      return json(res,503,{status:'PREFLIGHT_EVIDENCE_UNAVAILABLE',
+        message:'The independent source documents could not be checked. Your picks have not changed.'})
     }
   }
 

@@ -1,7 +1,9 @@
 import {test,expect} from '@playwright/test'
 import {readFileSync} from 'node:fs'
 
-const read=f=>JSON.parse(readFileSync(new URL('./public/'+f,import.meta.url),'utf8'))
+// Old price-shopping scenarios replay versioned source-time evidence, not moving public odds.
+const FIXED=new Set(['betting_odds_board.json','nfl_frozen_game_intelligence.json'])
+const read=f=>JSON.parse(readFileSync(new URL('./'+(FIXED.has(f)?'test_fixtures/zenith_frozen_20261009/':'public/')+f,import.meta.url),'utf8'))
 const all=read('betting_odds_board.json')
 const frozen=read('nfl_frozen_game_intelligence.json')
 const props=read('prop_v2_current.json')

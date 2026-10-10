@@ -5,7 +5,8 @@ import {refMarketReview,refereeQuickPrompts} from './ref_market_review.js'
 import {refereeOddsAnswer} from './ref_odds_answer.js'
 import {validateAskOutput} from './ask_output_validation.js'
 
-const read=name=>JSON.parse(readFileSync(new URL('./public/'+name,import.meta.url),'utf8'))
+// Pin frozen Friday public sources; live feeds regenerate on every hour.
+const read=name=>JSON.parse(readFileSync(new URL('./test_fixtures/zenith_frozen_20261009/'+name,import.meta.url),'utf8'))
 const odds=read('betting_odds_board.json')
 const frozen=read('nfl_frozen_game_intelligence.json')
 const now=Date.parse('2026-10-10T01:50:00Z')

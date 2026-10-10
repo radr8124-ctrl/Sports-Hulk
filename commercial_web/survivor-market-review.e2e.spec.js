@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 
-const base = file => JSON.parse(readFileSync(new URL('./public/'+file,import.meta.url),'utf8'))
+// Original source-time Friday replay is immutable; never read live hourly files.
+const base = file => JSON.parse(readFileSync(new URL('./test_fixtures/zenith_frozen_20261009/'+file,import.meta.url),'utf8'))
 const survivor = base('survivor_v2_current.json')
 const score = base('nfl_scores.json')
 // Test-only historical replay: source archive has original Oct 9 capture,

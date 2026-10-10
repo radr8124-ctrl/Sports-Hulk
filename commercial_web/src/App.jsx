@@ -48,6 +48,7 @@ import SurvivorCommandCover from './SurvivorCommandCover'
 const SurvivorPickEditor = lazy(() => import('./SurvivorPickEditor'))
 const SurvivorMarketReview = lazy(() => import('./SurvivorMarketReview'))
 const SurvivorRiskLens = lazy(() => import('./SurvivorRiskLens'))
+const SurvivorPreflightEvidence = lazy(() => import('./SurvivorPreflightEvidence'))
 const SurvivorWeek6Planner = lazy(() => import('./SurvivorWeek6Planner'))
 const SurvivorPoolImport = lazy(() => import('./SurvivorPoolImport'))
 const SurvivorThursdayTracker = lazy(() => import('./SurvivorThursdayTracker'))
@@ -1079,6 +1080,18 @@ function SurvivorCommercialPanel() {
             usedTeams={usedTeams}
             historical={saved.historical_pool_availability || {}}
             currentPicks={currentPicks}
+          />
+        </Suspense>
+      )}
+
+      {hasEntry && entryStatus === 'ALIVE' && saved.pool_current_week === 5 && (
+        <Suspense fallback={<LoadingSurface label="Loading NFL source evidence" />}>
+          <SurvivorPreflightEvidence
+            key={`${saved.active_entry}-${saved.pool_current_week}`}
+            entryName={saved.active_entry}
+            candidates={survivor.candidates||[]}
+            usedTeams={usedTeams}
+            getAccessToken={getAccessToken}
           />
         </Suspense>
       )}
