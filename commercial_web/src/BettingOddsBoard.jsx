@@ -2,6 +2,7 @@ import React, {useEffect,useMemo,useState} from 'react'
 import {ChevronDown, ShieldCheck} from 'lucide-react'
 import {showFrozenNFLResearch} from '../nfl_frozen_forecast_presentation.js'
 import {quotedSideMeaning,fairAmericanFromPercent} from '../odds_selection_display.js'
+import NflBookSourceHealth from './NflBookSourceHealth.jsx'
 
 const MARKET_NAMES={MONEYLINE:'Moneyline',SPREAD:'Spread',TOTAL:'Game total'}
 const MARKETS=['MONEYLINE','SPREAD','TOTAL']
@@ -176,6 +177,7 @@ export default function BettingOddsBoard({sport='ALL',market='ALL'}){
       </div>
       <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold text-slate-700">{report.total} priced games</span>
     </div>
+    {(sport==='ALL'||sport==='NFL')&&<NflBookSourceHealth />}
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div role="group" aria-label="Sort sportsbook odds" className="flex flex-wrap gap-2">
         <button type="button" onClick={()=>setSort('UPCOMING')} className={'min-h-10 rounded-xl px-3 py-2 text-xs font-black '+(sort==='UPCOMING'?'bg-slate-950 text-white':'border border-slate-200 bg-white text-slate-600')}>Upcoming games</button>

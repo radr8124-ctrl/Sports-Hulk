@@ -23,6 +23,7 @@ import { survivorHistoricalAvailability } from './survivor_pool_leverage.js'
 import {buildSurvivorWeek6Plan} from './survivor_week6_planner.js'
 import {buildSurvivorPreflightEvidence} from './survivor_preflight_evidence.js'
 import {assessNflForwardModelProof} from './nfl_model_validation.js'
+import {auditNflBookSourceAuthority} from './nfl_source_authority.js'
 import { reconcileDallasReport, summariseDallasReport, DALLAS_CLAIM } from './survivor_thursday_tracker.js'
 import { loadDallasSnapshot, saveDallasSnapshot } from './survivor_thursday_store.js'
 import { verifiedEspnPlayerTables } from './verified_player_boxscore.js'
@@ -61,6 +62,8 @@ const SURVIVOR_POOL_HISTORY_CSV = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool
 const SURVIVOR_POOL_HISTORY_META = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/LATEST_OFFICIAL_POOL.json')
 const SURVIVOR_WEEK6_SCHEDULE_CSV = path.join(SPORTS_ROOT,'nfl_live/derived/NFLVERSE_2026_SCHEDULE.csv')
 const NFL_FORWARD_PROOF_DIR = path.join(SPORTS_ROOT,'intelligence_warehouse/nfl_advanced_pregame')
+const NFL_ORIGINAL_PRIMARY_CSV = path.join(SPORTS_ROOT,'nfl_live/derived/NFL_LIVE_MARKET.csv')
+const NFL_FUSION_RECEIPT_JSON = path.join(SPORTS_ROOT,'nfl_live/game_fusion/NFL_GAME_BETTING_FUSION_RECEIPT.json')
 const SURVIVOR_ESPN_INJURIES_CSV = path.join(SPORTS_ROOT,'nfl_live/decision/NFL_ESPN_INJURIES.csv')
 const SURVIVOR_BOOK_RESEARCH_JSON = path.join(DIST,'..','public','nfl_research_book_refs.json')
 const SURVIVOR_OFFICIAL_SCORES_JSON = path.join(DIST,'..','public','nfl_scores.json')
@@ -3663,6 +3666,37 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host||'localhost'}`)
   // Public, aggregate-only. Independent game Final scores vs ORIGINAL frozen
   // paired bookmaker markets; never include private member or Survivor picks.
+  // Aggregate public NFL source authority. Never exposes private accounts, prices,
+  // provider secrets or an approved wager: original LIVE text is NOT source time.
+  if(req.method==='GET'&&url.pathname==='/api/nfl/book-source-health'){
+    res.setHeader('Cache-Control','no-store')
+    try{
+      const [primaryCsv,scoreboard,research,fusion]=await Promise.all([
+        readFile(NFL_ORIGINAL_PRIMARY_CSV,'utf8'),
+        loadExternalJson(SURVIVOR_OFFICIAL_SCORES_JSON),
+        loadExternalJson(SURVIVOR_BOOK_RESEARCH_JSON),
+        loadExternalJson(NFL_FUSION_RECEIPT_JSON),
+      ])
+      let archiveBytes=null
+      const archive=research?.original_archive?.archive
+      if(typeof archive==='string' &&
+         /^nfl_live\/game_fusion\/history\/NFL_GAME_SPORTWIZZARD_\d{8}T\d{6}Z\.csv$/.test(archive)){
+        archiveBytes=await readFile(path.join(SPORTS_ROOT,archive)).catch(()=>null)
+      }
+      const result=auditNflBookSourceAuthority({
+        primaryCsv,scoreboard,research,archiveBytes,fusion,nowMs:Date.now(),
+      })
+      const sourceHealthy=result.status==='PRIMARY_STALE_RESEARCH_ONLY' ||
+        result.status==='PRIMARY_TIME_FRESH_EXECUTION_UNVERIFIED' ||
+        result.status==='SOURCES_STALE_OR_UNVERIFIED'
+      return json(res,sourceHealthy?200:503,result)
+    }catch{
+      return json(res,503,{status:'ORIGINAL_NFL_SOURCE_READ_UNAVAILABLE',
+        executability_verified:false,independent_model_edge_verified:false,
+        qualified_selection_count:0,no_approved_bet_or_survivor_pick_created:true,
+        message:'Original source receipt unavailable; betting readiness cannot be verified.'})
+    }
+  }
   if(req.method==='GET'&&url.pathname==='/api/nfl/model-validation'){
     res.setHeader('Cache-Control','no-store')
     try{

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CalendarClock, Database, ShieldCheck } from 'lucide-react'
 import { survivorSourceReview } from '../survivor_source_review.js'
+import NflBookSourceHealth from './NflBookSourceHealth.jsx'
 
 const dateET = iso => {
   const dt = Date.parse(iso || '')
@@ -132,6 +133,7 @@ export default function SurvivorMarketReview({ week, candidates=[], usedTeams=[]
           {isArchived ? `0 current · ${archivePreview.length} archived comparisons` : `${research.length} source-matched options`}
         </span>
       </div>
+      <div className="mt-3"><NflBookSourceHealth /></div>
       {primaryWait && (
         <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-semibold text-amber-900">
           The primary sportsbook feed remains stale. No model-backed Survivor selection is approved; the comparisons below use separately verified, dated research snapshots.
