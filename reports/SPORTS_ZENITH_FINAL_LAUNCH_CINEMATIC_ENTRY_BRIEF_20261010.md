@@ -13,6 +13,11 @@ Proposed experience: rapid understated scoreboard-light sweep / animated broadca
 
 Creative guardrail: elevate the existing design without losing its retro broadcast charm; animation is optional, extremely quick, and nonblocking. Keep user choice and secure sign-in existing integration unchanged during current Survivor review.
 
+## Non-cheesy design acceptance — owner requirement (October 10)
+**Critical: must feel expensive, confident, and mature, never cheesy.** The "retro-modern sports" character comes from typography, discipline, precision, and the existing dashboard's navy/cream/aqua/coral palette—not nostalgic sports clip art, casino marketing, video-game splash screens, fake scoreboards, or elaborate arena graphics. Avoid giant stadium spotlights, smoke, fireworks, mascot imagery, spinning logos, 3D chrome effects, artificial winning streaks, neon overload, inspirational slogans, and loud "ENTER THE ARENA" style copy. Treat the earlier sample slogan **YOUR FRONT ROW TO THE GAME** as a discarded option, not the approved headline.
+
+Prefer a minimal SPORTS ZENITH wordmark and brief positioning text (e.g. "Sports intelligence, in focus."), refined editorial type, one quiet hero arrangement that carries through to the real dashboard, a tasteful single accent line or small real-data-inspired grid, and clear **Enter** / **Sign In** controls. Motion may be one subtle, fast reveal, with no autoplay audio and an instant skip or reduced-motion experience. No unnecessary mandatory splash page or sign-in wall on public routes. The decisive owner acceptance test is: side-by-side with the actual homepage, the welcome feels like one seamless premium product, not a different aesthetic or a flashy template. First prototype must favor restrained sophistication over spectacle; get owner approval before deployment.
+
 ## Product safeguards
 - **Build after** the pending Survivor owner review and core source-proof work; do not interrupt current production sign-in during Week 5 review.
 - **Reuse** the existing secure email one-time-code authentication and member-linked Survivor/DFS/fantasy storage. No separate login database, no password storage and no hidden account-claim bypass.
