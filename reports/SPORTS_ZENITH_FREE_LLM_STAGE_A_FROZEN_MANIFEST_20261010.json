@@ -1,0 +1,29 @@
+{
+  "status": "OFFLINE_GUARDS_ONLY",
+  "schema_version": "zenith_synthetic_research_v1",
+  "cases": 18,
+  "frozen_sha256": "c23540369860727d16d35639ff753e037f901c5f4cb98ff17a600abd4145954b",
+  "provider_calls": 0,
+  "billing_dollars": 0,
+  "private_case_count": 0,
+  "candidate_models_tested": 0,
+  "publishable_model_advantage": false,
+  "benchmark": "FREE_LLM_STAGE_A_SYNTHETIC_ONLY",
+  "sports": {
+    "NFL": 11,
+    "NBA": 3,
+    "NHL": 1,
+    "MLB": 1,
+    "CFB": 1,
+    "CBB": 1
+  },
+  "expected_statuses": {
+    "SUPPORTED": 5,
+    "STALE": 2,
+    "CONFLICT": 2,
+    "INSUFFICIENT_EVIDENCE": 9
+  },
+  "synthetic_only": true,
+  "connected_to_live_ask": false,
+  "external_model_inference_enabled": false
+}
