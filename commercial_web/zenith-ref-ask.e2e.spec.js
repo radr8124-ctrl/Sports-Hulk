@@ -1,0 +1,85 @@
+import {test,expect} from '@playwright/test'
+
+const BASE='http://127.0.0.1:8510/'
+const region=p=>p.getByRole('region',{name:'The Ref source-backed matchup preview'})
+const log=p=>p.getByRole('log',{name:'Referee conversation'})
+
+test('The Ref opens at top on iPhone, with mascot and actual priced game previews',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ await page.goto(BASE+'#ask',{waitUntil:'domcontentloaded'})
+ await expect(page.getByRole('heading',{name:/Ask the Brain/})).toBeVisible()
+ await expect(page.getByRole('img',{name:'Zenith AI referee avatar'})).toBeVisible()
+ await expect(region(page).getByText('13 matchups checked')).toBeVisible()
+ await expect(region(page).getByText('Observed ML price').first()).toBeVisible()
+ await expect(region(page).getByText('Zenith research').first()).toBeVisible()
+ const metrics=await page.evaluate(()=>({
+   y:window.scrollY,
+   overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+ }))
+ expect(metrics.y).toBeLessThanOrEqual(2)
+ expect(metrics.overflow).toBeLessThanOrEqual(1)
+})
+
+test('Question about betting returns quoted game markets rather than false no-data PASS',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ await page.goto(BASE+'#ask',{waitUntil:'domcontentloaded'})
+ await page.getByRole('button',{name:'Review odds',exact:true}).click()
+ await expect(log(page).getByText(/13 verified-game-identity NFL moneyline research matchups/)).toBeVisible({timeout:20000})
+ await expect(log(page).getByText('New England Patriots',{exact:true}).first()).toBeVisible()
+ await expect(log(page).getByText(/No current V2 game-market candidate matches/)).toHaveCount(0)
+ await expect(log(page).getByText(/no proven betting edge/i).first()).toBeVisible()
+ const all=await log(page).innerText()
+ expect(all).toContain('Pinnacle')
+ expect(all).toContain('BETTING')
+})
+
+test('Tapping Raiders-Patriots game keeps exact bookmaker, spread, total and honest model estimate',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ await page.goto(BASE+'#ask',{waitUntil:'domcontentloaded'})
+ const card=region(page).locator('article').filter({hasText:'Las Vegas Raiders @ New England Patriots'})
+ await expect(card).toHaveCount(1)
+ await card.getByRole('button',{name:/Ask the Ref about this game/}).click()
+ const panel=log(page)
+ await expect(panel.getByText(/Market favorite: New England Patriots.*-194.*Pinnacle/)).toBeVisible({timeout:20000})
+ const body=await panel.innerText()
+ expect(body).toContain('Las Vegas Raiders ML +169')
+ expect(body).toContain('Patriots -3.5')
+ expect(body).toContain('game total')
+ expect(body).toContain('65.7%')
+ expect(body).toContain('65.99%')
+ expect(body).toContain('PASS / 0 units')
+ await expect(page.getByText('Reviewing: Las Vegas Raiders @ New England Patriots')).toBeVisible()
+ await panel.getByRole('button',{name:'Why is this moneyline not positive EV?'}).click()
+ await expect(panel.getByText(/Market favorite: New England Patriots.*-194.*Pinnacle/)).toHaveCount(2,{timeout:20000})
+ await expect(panel.getByText(/unproven model illustratively produces/).last()).toBeVisible()
+})
+
+test('Ref launcher appears on a separate tab on mobile, asks page-aware questions and closes cleanly',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ await page.goto(BASE+'#best-bets',{waitUntil:'domcontentloaded'})
+ await page.getByRole('button',{name:'Open the Ref sports assistant'}).click()
+ const dialog=page.getByRole('dialog',{name:'Ask the Ref on this page'})
+ await expect(dialog).toBeVisible()
+ await expect(dialog.getByText('The Ref')).toBeVisible()
+ await expect(dialog.getByText('Reviewing: Best Bets')).toBeVisible()
+ await expect(dialog.getByRole('button',{name:'Review prices'})).toBeVisible()
+ await dialog.getByRole('button',{name:'Review prices'}).click()
+ await expect(dialog.getByText(/13 verified-game-identity NFL moneyline research matchups/)).toBeVisible({timeout:20000})
+ await dialog.getByRole('button',{name:'Close the Ref chat'}).click()
+ await expect(dialog).toHaveCount(0)
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)
+ expect(overflow).toBeLessThanOrEqual(1)
+})
+
+test('Specialized fantasy and Survivor quick prompts remain available',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ await page.goto(BASE+'#survivor',{waitUntil:'domcontentloaded'})
+ await page.getByRole('button',{name:'Open the Ref sports assistant'}).click()
+ const dialog=page.getByRole('dialog',{name:'Ask the Ref on this page'})
+ await expect(dialog.getByRole('button',{name:'Available team'})).toBeVisible()
+ await expect(dialog.getByRole('button',{name:'Save for later'})).toBeVisible()
+ await dialog.getByRole('button',{name:'Close the Ref chat'}).click()
+ await page.getByRole('button',{name:'Fantasy',exact:true}).last().click()
+ await page.getByRole('button',{name:'Open the Ref sports assistant'}).click()
+ await expect(page.getByRole('dialog',{name:'Ask the Ref on this page'}).getByRole('button',{name:'Fantasy',exact:true})).toBeVisible()
+})

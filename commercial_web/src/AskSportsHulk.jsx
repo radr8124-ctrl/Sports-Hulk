@@ -5,15 +5,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from './AuthShell'
 import { claimEvidenceRows } from './claimEvidence'
-
-const quickPrompts = [
-  ['Start / Sit', 'Who should I start this week?'],
-  ['Survivor Pick', 'What Survivor team should I use?'],
-  ['Live Scores', 'What are the live NFL scores?'],
-  ['Waiver Adds', 'Who are the top waiver adds?'],
-  ['Best Bet', 'What is the best NFL bet right now?'],
-  ['Player News', 'What player news matters today?'],
-]
+import ZenithRefAvatar from './ZenithRefAvatar'
+import RefSignalDesk from './RefSignalDesk'
+import {refereeQuickPrompts} from '../ref_market_review.js'
 
 function tone(confidence = '') {
   const value = String(confidence).toUpperCase()
@@ -46,7 +40,7 @@ function safeSourceUrl(value) {
   }
 }
 
-function AskCard({ answer, compact = false }) {
+function AskCard({ answer, compact = false, onFollowUp = null }) {
   const [feedback, setFeedback] = useState('')
   const [feedbackBusy, setFeedbackBusy] = useState(false)
   if (!answer) return null
@@ -99,7 +93,7 @@ function AskCard({ answer, compact = false }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-300">
-            <Sparkles size={15} /> ANALYST TAKE
+            <Sparkles size={15} /> ANALYST TAKE <span className="text-sky-300">· THE REF</span>
           </div>
           <div className={`mt-2 font-black tracking-tight text-white ${compact ? 'text-lg' : 'text-2xl'}`}>
             {answer.take || 'No current take.'}
@@ -225,8 +219,37 @@ function AskCard({ answer, compact = false }) {
                  card.projection != null ? `${card.projection} proj · $${card.salary ?? '—'}` :
                  card.source || ''}
               </div>
+              {card.type==='ref_market_research' && (
+                <div className="mt-2 grid grid-cols-2 gap-2 rounded-xl border border-sky-400/15 bg-sky-400/[.06] p-2">
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400">Book no-vig</span>
+                    <span className="text-sm font-black text-white">{card.market_probability ?? '—'}%</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400">Zenith research</span>
+                    <span className="text-sm font-black text-sky-200">{card.model_probability==null?'Unproven':card.model_probability+'%'}</span>
+                  </div>
+                  <p className="col-span-2 text-[10px] font-semibold leading-4 text-slate-400">
+                    Observed {card.line} · {card.book} · no proven betting edge
+                  </p>
+                </div>
+              )}
             </div>
           ))}
+        </div>
+      )}
+
+      {!!answer.followups?.length && typeof onFollowUp==='function' && (
+        <div className="mt-4 border-t border-white/10 pt-3">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-sky-300">Ask a follow-up</p>
+          <div className="flex flex-wrap gap-2">
+            {answer.followups.slice(0,compact?2:3).map((question,i)=>(
+              <button key={i} type="button" onClick={()=>onFollowUp(question)}
+                className="min-h-9 rounded-xl border border-sky-400/25 bg-sky-400/10 px-2.5 py-1.5 text-left text-xs font-bold text-sky-100 hover:border-sky-300/50 hover:bg-sky-400/20">
+                {question}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -432,100 +455,138 @@ async function askQuestion(question, context = {}, accessToken = null) {
 }
 
 export function AskSportsHulkPage() {
-  const { user, getAccessToken } = useAuth()
-  const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const bottomRef = useRef(null)
+  const {user,getAccessToken}=useAuth()
+  const [messages,setMessages]=useState([])
+  const [input,setInput]=useState('')
+  const [activeGame,setActiveGame]=useState(null)
+  const [loading,setLoading]=useState(false)
+  const conversationRef=useRef(null)
+  const jumpToAnswerRef=useRef(false)
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
+  useEffect(()=>{
+    if(!messages.length)return
+    const transcript=conversationRef.current
+    if(transcript)transcript.scrollTop=transcript.scrollHeight
+    // This movement is only after the person explicitly taps "Ask the Ref"
+    // on a game card; never jump the page while mounting the Ask route.
+    if(jumpToAnswerRef.current && transcript){
+      transcript.scrollIntoView({behavior:'auto',block:'start'})
+      jumpToAnswerRef.current=false
+    }
+  },[messages,loading])
 
-  const send = async (question) => {
-    const q = String(question || '').trim()
-    if (!q || loading) return
-    setMessages(prev => [...prev, { role: 'user', text: q }])
+  const send=async(question,gameContext=null)=>{
+    const q=String(question||'').trim()
+    if(!q||loading)return
+    const scoped=gameContext||activeGame
+    if(gameContext){
+      setActiveGame(gameContext)
+      jumpToAnswerRef.current=true
+    }
+    setMessages(prev=>[...prev,{role:'user',text:q}])
     setInput('')
     setLoading(true)
-    try {
-      const token = user ? await getAccessToken() : null
-      const answer = await askQuestion(q, { page: 'Ask', session_history: compactSessionHistory(messages) }, token)
-      setMessages(prev => [...prev, { role: 'assistant', answer }])
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', answer: {
-        take: 'The sports analyst is temporarily unavailable.',
-        confidence: 'WAITING',
-        risk: [error.message],
-        sources: [],
+    try{
+      const token=user?await getAccessToken():null
+      const answer=await askQuestion(q,{
+        page:'Ask',
+        game_context:scoped||undefined,
+        session_history:compactSessionHistory(messages),
+      },token)
+      setMessages(prev=>[...prev,{role:'assistant',answer}])
+    }catch(error){
+      setMessages(prev=>[...prev,{role:'assistant',answer:{
+        take:'The Ref cannot complete this review from the connected sources right now.',
+        confidence:'WAITING',status:'SOURCE_UNAVAILABLE',
+        risk:[error.message],sources:[],
       }}])
-    } finally {
+    }finally{
       setLoading(false)
     }
   }
 
-  return (
-    <div className="rounded-[30px] border border-slate-800 bg-[#061017] p-4 text-white shadow-2xl md:p-6">
-      <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-        <div className="min-w-0">
-          <div className="rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-slate-950 via-[#071821] to-[#071510] p-5 md:p-7">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10 text-emerald-300 shadow-lg shadow-emerald-950/30">
-                <Brain size={25} />
-              </div>
-              <div>
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-emerald-300">Sports Intelligence Analyst</div>
-                <h1 className="mt-1 text-3xl font-black tracking-tight md:text-4xl">Ask <span className="text-emerald-400">the Brain</span></h1>
-                <p className="mt-1 text-sm text-slate-400">Live scores, fantasy, Survivor, props and betting intelligence.</p>
-              </div>
-            </div>
+  const selectedLabel=activeGame
+    ?[activeGame.away||'Away',activeGame.home||'Home'].join(' @ ')
+    :null
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              {quickPrompts.map(([label, prompt]) => (
-                <button key={label} onClick={() => send(prompt)} className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-extrabold text-slate-200 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-white">
-                  {label}
-                </button>
-              ))}
+  return <div className="rounded-[26px] border border-slate-800 bg-[#061222] p-3.5 text-white shadow-2xl md:p-6">
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_305px]">
+      <div className="min-w-0">
+        <header className="relative overflow-hidden rounded-2xl border border-sky-400/20 bg-gradient-to-br from-[#0C2742] via-[#071629] to-[#06101F] p-4 md:p-6">
+          <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-16 h-44 w-44 rounded-full bg-sky-400/10 blur-3xl"/>
+          <div className="relative flex items-center gap-3.5">
+            <div className="relative shrink-0">
+              <ZenithRefAvatar size={76}/>
+              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#081B30] bg-sky-400 text-slate-950">
+                <ShieldCheck size={12}/>
+              </span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.17em] text-sky-300">Meet The Ref · Zenith AI</p>
+              <h1 className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                Ask <span className="text-sky-300">the Brain</span>
+              </h1>
+              <p className="mt-1 text-xs leading-5 text-slate-300">
+                Get the call, then see the evidence. Odds, matchups, props and Survivor.
+              </p>
             </div>
           </div>
-
-          <div className="mt-4 max-h-[620px] space-y-4 overflow-y-auto pr-1">
-            {!messages.length && (
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                <div className="text-sm font-black text-white">Ask about scores, players, bets, Survivor, fantasy, DFS or news.</div>
-                <div className="mt-2 text-sm leading-6 text-slate-400">Try a score, a player decision, a Survivor pick, the best current bet, a prop, a waiver add, a defense stream or a DFS question. UNKNOWN stays UNKNOWN.</div>
-              </div>
-            )}
-
-            {messages.map((message, i) => message.role === 'user' ? (
-              <div key={i} className="ml-auto max-w-[85%] rounded-3xl rounded-br-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/20">
-                {message.text}
-              </div>
-            ) : (
-              <AskCard key={i} answer={message.answer} />
-            ))}
-
-            {loading && (
-              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-slate-400">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Checking the current data…
-              </div>
-            )}
-            <div ref={bottomRef} />
+          <div className="relative mt-3 flex flex-wrap gap-2 text-[10px] font-black">
+            <span className="rounded-full border border-sky-300/20 bg-sky-400/10 px-2.5 py-1.5 text-sky-200">GAME INTELLIGENCE</span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-slate-300">REAL SOURCES · NO FAKE PICKS</span>
           </div>
+          <div aria-label="Ask the Ref quick questions" className="relative mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            {refereeQuickPrompts('Ask',activeGame).map(([label,prompt])=>
+              <button key={label} type="button" disabled={loading}
+                onClick={()=>send(prompt)}
+                className="min-h-10 rounded-xl border border-white/10 bg-white/[.07] px-3 py-2 text-left text-[11px] font-black leading-4 text-slate-200 transition hover:border-sky-400/40 hover:bg-sky-400/15 disabled:opacity-40">
+                {label}
+              </button>
+            )}
+          </div>
+        </header>
 
-          <form onSubmit={(e) => { e.preventDefault(); send(input) }} className="mt-4 flex gap-2 rounded-2xl border border-white/10 bg-slate-950/90 p-2">
-            <input value={input} onChange={e => setInput(e.target.value)} placeholder="Ask anything about sports…" className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm font-semibold text-white outline-none placeholder:text-slate-600" />
-            <button disabled={loading || !input.trim()} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-400 text-slate-950 transition hover:bg-emerald-300 disabled:opacity-40">
-              <Send size={18} />
-            </button>
-          </form>
+        <form aria-label="Ask the Ref question" onSubmit={event=>{event.preventDefault();send(input)}}
+          className="mt-3 flex gap-2 rounded-2xl border border-sky-400/20 bg-slate-950/95 p-2 shadow-lg">
+          <input value={input} onChange={event=>setInput(event.target.value)}
+            aria-label="Ask the Ref"
+            placeholder="Ask about a game, odds, prop or Survivor…"
+            className="min-h-11 min-w-0 flex-1 bg-transparent px-2.5 text-sm font-semibold text-white outline-none placeholder:text-slate-500"/>
+          <button type="submit" disabled={loading||!input.trim()} aria-label="Send referee question"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-400 text-slate-950 transition hover:bg-sky-300 disabled:opacity-40">
+            <Send size={18}/>
+          </button>
+        </form>
+
+        {selectedLabel&&<div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-sky-400/20 bg-sky-400/5 px-3 py-2 text-[11px]">
+          <span className="min-w-0 truncate font-bold text-sky-200">Reviewing: {selectedLabel}</span>
+          <button type="button" className="shrink-0 font-black text-slate-300 underline underline-offset-2"
+            onClick={()=>setActiveGame(null)}>Clear matchup</button>
+        </div>}
+
+        <div ref={conversationRef} role="log" aria-label="Referee conversation"
+          aria-live="polite"
+          className={messages.length?'mt-3 max-h-[620px] space-y-3 overflow-y-auto rounded-2xl border border-white/10 bg-slate-950/60 p-3':'hidden'}>
+          {messages.map((message,i)=>message.role==='user'
+            ?<div key={i} className="ml-auto w-fit max-w-[91%] break-words rounded-2xl rounded-br-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white">
+              {message.text}
+            </div>
+            :<AskCard key={i} answer={message.answer} onFollowUp={send}/>
+          )}
+          {loading&&<div className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2 text-xs font-bold text-slate-300">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-sky-400"/> The Ref is checking saved market evidence…
+          </div>}
         </div>
 
-        <LiveRail />
+        <div className="mt-3">
+          <RefSignalDesk disabled={loading} onReview={(question,game)=>send(question,game)}/>
+        </div>
       </div>
+      <aside className="hidden xl:block"><LiveRail/></aside>
     </div>
-  )
+  </div>
 }
+
 
 export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home', gameContext = null }) {
   const { user, getAccessToken } = useAuth()
@@ -558,24 +619,25 @@ export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home', ga
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/35 backdrop-blur-[2px]" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="absolute bottom-4 right-4 top-4 flex w-[min(430px,calc(100vw-2rem))] flex-col rounded-[28px] border border-emerald-400/20 bg-[#071017] p-4 text-white shadow-2xl shadow-slate-950/50">
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Ask the Ref on this page" className="absolute bottom-3 right-3 top-3 flex w-[min(430px,calc(100vw-1.5rem))] flex-col rounded-2xl border border-sky-400/20 bg-[#071526] p-3 text-white shadow-2xl shadow-slate-950/50 md:bottom-4 md:right-4 md:top-4 md:rounded-[28px] md:p-4">
         <div className="flex items-center justify-between">
-          <button onClick={onOpenFull} className="flex items-center gap-2 text-left">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300"><Brain size={20} /></div>
+          <button onClick={onOpenFull} className="flex items-center gap-2 text-left" title="Open full analyst">
+            <ZenithRefAvatar size={44}/>
             <div>
-              <div className="font-black">Game Scout</div>
+              <div className="font-black text-sky-100">The Ref <span className="ml-1 text-[10px] font-bold text-sky-300">AI</span></div>
               <div className="text-[11px] font-semibold text-slate-500">
                 {gameContext?.surface === 'GAME_CENTER'
                   ? `${gameContext.league} · ${gameContext.away || gameContext.away_abbr} @ ${gameContext.home || gameContext.home_abbr}`
-                  : `Context: ${page}`}
+                  : `Reviewing: ${page}`}
               </div>
             </div>
+            <span className="mt-0.5 block text-[10px] font-bold text-sky-300">Open full analyst</span>
           </button>
-          <button onClick={onClose} className="rounded-xl p-2 text-slate-400 hover:bg-white/5 hover:text-white"><X size={18} /></button>
+          <button onClick={onClose} aria-label="Close the Ref chat" className="rounded-xl p-2 text-slate-400 hover:bg-white/5 hover:text-white"><X size={18} /></button>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {quickPrompts.slice(0, 4).map(([label, prompt]) => (
+          {refereeQuickPrompts(page,gameContext).slice(0, 6).map(([label, prompt]) => (
             <button key={label} onClick={() => send(prompt)} className="rounded-full border border-white/10 px-2.5 py-1.5 text-[11px] font-black text-slate-300 hover:border-emerald-400/40">{label}</button>
           ))}
         </div>
@@ -584,13 +646,13 @@ export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home', ga
           {!messages.length && <div className="rounded-2xl bg-white/5 p-4 text-sm leading-6 text-slate-400">Ask about the current page, a player, a bet, Survivor, waivers or a score.</div>}
           {messages.map((m, i) => m.role === 'user'
             ? <div key={i} className="ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-blue-600 px-3 py-2 text-sm font-semibold">{m.text}</div>
-            : <AskCard key={i} answer={m.answer} compact />
+            : <AskCard key={i} answer={m.answer} compact onFollowUp={send} />
           )}
           {loading && <div className="text-xs font-bold text-emerald-300">Checking current data…</div>}
         </div>
 
         <form onSubmit={(e) => { e.preventDefault(); send(input) }} className="mt-3 flex gap-2 rounded-2xl border border-white/10 bg-slate-950 p-2">
-          <input value={input} onChange={e => setInput(e.target.value)} placeholder="Ask anything…" className="min-w-0 flex-1 bg-transparent px-2 py-2 text-sm outline-none placeholder:text-slate-600" />
+          <input value={input} onChange={e => setInput(e.target.value)} placeholder="Ask the Ref about this page…" aria-label="Ask the Ref from this page" className="min-w-0 flex-1 bg-transparent px-2 py-2 text-sm outline-none placeholder:text-slate-600" />
           <button disabled={loading || !input.trim()} className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-400 text-slate-950 disabled:opacity-40"><Send size={16} /></button>
         </form>
       </div>
@@ -603,20 +665,17 @@ export function AssistantLauncher({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      aria-label="Open Game Scout"
-      title="Game Scout"
-      className="fixed bottom-5 right-5 z-40 hidden items-center md:flex gap-3 rounded-[22px] border border-emerald-300/30 bg-slate-950 p-2.5 pr-3 text-white shadow-2xl shadow-emerald-950/30 transition hover:-translate-y-1 hover:border-emerald-300/60"
+      aria-label="Open the Ref sports assistant"
+      title="The Ref — Zenith sports intelligence"
+      className="fixed bottom-[calc(5.7rem+env(safe-area-inset-bottom))] right-3 z-40 flex items-center gap-3 rounded-2xl border border-sky-300/30 bg-slate-950 p-1.5 text-white shadow-xl shadow-slate-950/40 transition hover:border-sky-300/60 md:bottom-5 md:right-5 md:rounded-[22px] md:p-2 md:pr-3"
     >
-      <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/30 bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-violet-400/20">
-        <Bot size={26} className="text-emerald-300" />
-        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-950 bg-emerald-400 text-slate-950">
-          <Sparkles size={11} />
-        </span>
-        <span className="absolute -bottom-0.5 left-1/2 h-1.5 w-5 -translate-x-1/2 rounded-full bg-emerald-300/70" />
+      <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0C2036] md:h-12 md:w-12">
+        <ZenithRefAvatar size={48} compact/>
+        <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-slate-950 bg-sky-400"/>
       </span>
       <span className="hidden text-left sm:block">
-        <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-emerald-300">Sports Zenith</span>
-        <span className="mt-0.5 block text-sm font-black">Game Scout</span>
+        <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-sky-300">Sports Zenith AI</span>
+        <span className="mt-0.5 block text-sm font-black">The Ref</span>
       </span>
     </button>
   )

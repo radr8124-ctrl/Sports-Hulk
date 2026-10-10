@@ -27,6 +27,7 @@ import { reportingConsensus } from './reporting_consensus.js'
 import { validateAskOutput, outputValidationFallback } from './ask_output_validation.js'
 import { newAskTraceId, buildAskTraceRecord, appendAskTrace, askTraceSummary } from './ask_trace.js'
 import { resilientFetch } from './resilient_fetch.js'
+import { refereeOddsAnswer } from './ref_odds_answer.js'
 import { missingStaticResourceKind, pathIsInsideDir } from './staticRoutePolicy.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -70,6 +71,8 @@ const JSON_FILES = {
   askContext: 'ask_context.json',
   askRetrieval: 'ask_retrieval.json',
   bettingV2: 'betting_v2_all_markets_current.json',
+  oddsBoard: 'betting_odds_board.json',
+  nflFrozenForecast: 'nfl_frozen_game_intelligence.json',
   propV2: 'prop_v2_current.json',
   parlayV2: 'parlay_v2_current.json',
   survivorV2: 'survivor_v2_current.json',
@@ -406,6 +409,8 @@ function updatedSources(data, labels) {
     askRetrieval: ['Reporting graph', data.askRetrieval?.generated_at, data.askRetrieval?.source || 'Structured news/event graph'],
     survivorUser: ['My Survivor entry', data.survivorUser?.manual_state_updated_at || data.survivorUser?.last_result_refresh_at, 'Saved Survivor state'],
     bettingV2: ['Best Bets V2', data.bettingV2?.generated_at, data.bettingV2?.model_version || 'Proof-gated game markets'],
+    oddsBoard: ['Source-matched bookmaker odds', data.oddsBoard?.generated_at, 'Archived paired-book price feed'],
+    nflFrozenForecast: ['Frozen experimental NFL forecast', data.nflFrozenForecast?.generated_at, 'Original independent NFL forward research'],
     propV2: ['Props V2', data.propV2?.generated_at, data.propV2?.model_version || 'Proof-gated player markets'],
     parlayV2: ['Parlays V2', data.parlayV2?.generated_at, data.parlayV2?.model_version || 'Source-proof parlay model'],
     survivorV2: ['Survivor V2', data.survivorV2?.generated_at, data.survivorV2?.model_version || 'Governed Survivor model'],
@@ -2409,6 +2414,8 @@ function routeAsk(question, data, context = {}) {
   const q=qtext(question)
   const page=String(context?.page||'').trim()
   if(!q) return response({intent:'help',take:'Ask about live scores, betting research, props, Survivor, fantasy, waivers, DFS or player news.',confidence:'READY',followups:['What are the best NFL bets?','Best props today','Who should I start?','Top waiver adds','Survivor pick','Live scores'],sources:updatedSources(data,['nflScores','bettingV2','propV2','survivorV2','askContext','fantasyNews'])})
+  const refereeMarketAnswer=refereeOddsAnswer(question,data,context,Number.isFinite(ASK_NOW_MS_OVERRIDE)?ASK_NOW_MS_OVERRIDE:Date.now())
+  if(refereeMarketAnswer)return refereeMarketAnswer
   const scopedGameAnswer=gameScopedAnswer(question,data,context)
   if(scopedGameAnswer) return scopedGameAnswer
   if(/\b(score|scores|live score|who is winning|box score|game score)\b/.test(q)) return scoreAnswer(question,data)
