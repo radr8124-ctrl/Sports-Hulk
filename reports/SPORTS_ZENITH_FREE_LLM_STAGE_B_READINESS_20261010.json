@@ -1,0 +1,26 @@
+{
+  "status": "WAITING_FOR_USER_VERIFIED_FREE_ACCOUNT",
+  "synthetic_cases": 18,
+  "frozen_sha256": "c23540369860727d16d35639ff753e037f901c5f4cb98ff17a600abd4145954b",
+  "provider_calls": 0,
+  "billing_dollars": 0,
+  "candidate_models_tested": 0,
+  "providers": [
+    {
+      "provider": "groq",
+      "model": "openai/gpt-oss-120b",
+      "readiness": "REQUIRES_USER_VERIFIED_FREE_UNBILLED_ACCOUNT",
+      "permitted_data": "PUBLIC_SYNTHETIC_ONLY",
+      "automatic_calls": false
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-lite",
+      "readiness": "REQUIRES_USER_VERIFIED_FREE_UNBILLED_ACCOUNT",
+      "permitted_data": "PUBLIC_SYNTHETIC_ONLY",
+      "automatic_calls": false
+    }
+  ],
+  "production_the_ref_changed": false,
+  "existing_scores_or_picks_changed": false
+}
