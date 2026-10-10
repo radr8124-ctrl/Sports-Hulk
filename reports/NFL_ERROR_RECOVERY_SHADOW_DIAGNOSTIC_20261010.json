@@ -1,0 +1,631 @@
+{
+  "candidate_live_model_deployed": false,
+  "causal_attribution_not_proven_from_prediction_contribution": true,
+  "decision": "KEEP_EXISTING_MODEL_NO_AUTOMATIC_PROMOTION",
+  "design_based_on_inspected_2025_errors": true,
+  "fixed_hypotheses": [
+    "With fewer than 3 prior same-season games for either team, use no-vig market.",
+    "If model winner disagrees with bookmaker favorite, use no-vig market.",
+    "Apply both fixed gates."
+  ],
+  "folds": [
+    {
+      "disagreement_model_right_book_wrong": 8,
+      "disagreement_model_wrong_book_right": 1,
+      "missing_prior3_games": 47,
+      "model_disagreed_with_market_winner_games": 9,
+      "no_same_game_or_same_season_train_test_overlap": true,
+      "results": {
+        "both_guards_market_fallback": {
+          "brier": 0.209749395,
+          "log_loss": 0.605789443,
+          "winner_accuracy_pct": 65.603
+        },
+        "low_form_market_fallback": {
+          "brier": 0.209277027,
+          "log_loss": 0.604844037,
+          "winner_accuracy_pct": 67.021
+        },
+        "market_original": {
+          "brier": 0.20928694,
+          "log_loss": 0.604962809,
+          "winner_accuracy_pct": 65.603
+        },
+        "original_model": {
+          "brier": 0.208808955,
+          "log_loss": 0.603859095,
+          "winner_accuracy_pct": 68.085
+        },
+        "winner_disagreement_market_fallback": {
+          "brier": 0.209672759,
+          "log_loss": 0.605588395,
+          "winner_accuracy_pct": 65.603
+        }
+      },
+      "season": 2022,
+      "test_independent_games": 282,
+      "train_independent_games": 1613,
+      "train_seasons": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021
+      ],
+      "week_block_bootstrap95_market_minus_candidate_brier": {
+        "both_guards_market_fallback": [
+          -0.00186057,
+          0.0008109
+        ],
+        "low_form_market_fallback": [
+          -0.00173197,
+          0.00178318
+        ],
+        "original_model": [
+          -0.00144215,
+          0.00226882
+        ],
+        "winner_disagreement_market_fallback": [
+          -0.00193332,
+          0.00106419
+        ]
+      }
+    },
+    {
+      "disagreement_model_right_book_wrong": 6,
+      "disagreement_model_wrong_book_right": 3,
+      "missing_prior3_games": 48,
+      "model_disagreed_with_market_winner_games": 9,
+      "no_same_game_or_same_season_train_test_overlap": true,
+      "results": {
+        "both_guards_market_fallback": {
+          "brier": 0.220133017,
+          "log_loss": 0.630194221,
+          "winner_accuracy_pct": 67.018
+        },
+        "low_form_market_fallback": {
+          "brier": 0.220075476,
+          "log_loss": 0.63007886,
+          "winner_accuracy_pct": 67.368
+        },
+        "market_original": {
+          "brier": 0.218638336,
+          "log_loss": 0.626970344,
+          "winner_accuracy_pct": 67.018
+        },
+        "original_model": {
+          "brier": 0.219108085,
+          "log_loss": 0.627887888,
+          "winner_accuracy_pct": 68.07
+        },
+        "winner_disagreement_market_fallback": {
+          "brier": 0.219197693,
+          "log_loss": 0.628066428,
+          "winner_accuracy_pct": 67.018
+        }
+      },
+      "season": 2023,
+      "test_independent_games": 285,
+      "train_independent_games": 1895,
+      "train_seasons": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022
+      ],
+      "week_block_bootstrap95_market_minus_candidate_brier": {
+        "both_guards_market_fallback": [
+          -0.0036292,
+          -8.57e-05
+        ],
+        "low_form_market_fallback": [
+          -0.00357802,
+          0.00017081
+        ],
+        "original_model": [
+          -0.00272946,
+          0.00162668
+        ],
+        "winner_disagreement_market_fallback": [
+          -0.00308331,
+          0.0015397
+        ]
+      }
+    },
+    {
+      "disagreement_model_right_book_wrong": 3,
+      "disagreement_model_wrong_book_right": 5,
+      "missing_prior3_games": 48,
+      "model_disagreed_with_market_winner_games": 8,
+      "no_same_game_or_same_season_train_test_overlap": true,
+      "results": {
+        "both_guards_market_fallback": {
+          "brier": 0.201221831,
+          "log_loss": 0.589376978,
+          "winner_accuracy_pct": 70.877
+        },
+        "low_form_market_fallback": {
+          "brier": 0.201523833,
+          "log_loss": 0.589982655,
+          "winner_accuracy_pct": 70.175
+        },
+        "market_original": {
+          "brier": 0.200974786,
+          "log_loss": 0.589214046,
+          "winner_accuracy_pct": 70.877
+        },
+        "original_model": {
+          "brier": 0.201512507,
+          "log_loss": 0.590031463,
+          "winner_accuracy_pct": 70.175
+        },
+        "winner_disagreement_market_fallback": {
+          "brier": 0.201274633,
+          "log_loss": 0.589556379,
+          "winner_accuracy_pct": 70.877
+        }
+      },
+      "season": 2024,
+      "test_independent_games": 285,
+      "train_independent_games": 2180,
+      "train_seasons": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023
+      ],
+      "week_block_bootstrap95_market_minus_candidate_brier": {
+        "both_guards_market_fallback": [
+          -0.00203635,
+          0.00128124
+        ],
+        "low_form_market_fallback": [
+          -0.0023941,
+          0.00114034
+        ],
+        "original_model": [
+          -0.0028062,
+          0.00196185
+        ],
+        "winner_disagreement_market_fallback": [
+          -0.00228756,
+          0.00134613
+        ]
+      }
+    },
+    {
+      "disagreement_model_right_book_wrong": 2,
+      "disagreement_model_wrong_book_right": 4,
+      "missing_prior3_games": 48,
+      "model_disagreed_with_market_winner_games": 6,
+      "no_same_game_or_same_season_train_test_overlap": true,
+      "results": {
+        "both_guards_market_fallback": {
+          "brier": 0.212644313,
+          "log_loss": 0.610977015,
+          "winner_accuracy_pct": 65.845
+        },
+        "low_form_market_fallback": {
+          "brier": 0.212728902,
+          "log_loss": 0.611146349,
+          "winner_accuracy_pct": 65.845
+        },
+        "market_original": {
+          "brier": 0.210906373,
+          "log_loss": 0.606988938,
+          "winner_accuracy_pct": 65.845
+        },
+        "original_model": {
+          "brier": 0.212617338,
+          "log_loss": 0.610849042,
+          "winner_accuracy_pct": 65.141
+        },
+        "winner_disagreement_market_fallback": {
+          "brier": 0.212179879,
+          "log_loss": 0.609972735,
+          "winner_accuracy_pct": 65.845
+        }
+      },
+      "season": 2025,
+      "test_independent_games": 284,
+      "train_independent_games": 2465,
+      "train_seasons": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "week_block_bootstrap95_market_minus_candidate_brier": {
+        "both_guards_market_fallback": [
+          -0.00388828,
+          0.00017506
+        ],
+        "low_form_market_fallback": [
+          -0.0040968,
+          0.00011921
+        ],
+        "original_model": [
+          -0.0042429,
+          0.00069372
+        ],
+        "winner_disagreement_market_fallback": [
+          -0.00360903,
+          0.00092893
+        ]
+      }
+    }
+  ],
+  "generated_at_utc": "2026-10-10T02:53:15.571276+00:00",
+  "historical_error_examples_2025": [
+    {
+      "actual_winner": "MIN",
+      "away_prior_games": 3,
+      "away_team": "DET",
+      "book_home_probability_pct": 24.92,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_17_DET_MIN",
+      "home_prior_games": 3,
+      "home_team": "MIN",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "min_three_prior_completed_games_for_both_teams_divided3",
+          "logit_contribution": 0.1631
+        },
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": -0.0592
+        },
+        {
+          "feature": "prior_same_season_away_minus_home_points_allowed_scaled12",
+          "logit_contribution": -0.0544
+        }
+      ],
+      "market_favorite": "DET",
+      "missing_reliable_prior3": false,
+      "model_favorite": "DET",
+      "model_flipped_market_favorite": false,
+      "model_home_probability_pct": 19.58,
+      "model_minus_book_brier": 0.082995
+    },
+    {
+      "actual_winner": "IND",
+      "away_prior_games": 1,
+      "away_team": "DEN",
+      "book_home_probability_pct": 45.73,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_02_DEN_IND",
+      "home_prior_games": 1,
+      "home_team": "IND",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": -0.0755
+        },
+        {
+          "feature": "min_three_prior_completed_games_for_both_teams_divided3",
+          "logit_contribution": 0.0544
+        },
+        {
+          "feature": "prior_same_season_home_minus_away_points_scored_scaled12",
+          "logit_contribution": -0.0238
+        }
+      ],
+      "market_favorite": "DEN",
+      "missing_reliable_prior3": true,
+      "model_favorite": "DEN",
+      "model_flipped_market_favorite": false,
+      "model_home_probability_pct": 39.06,
+      "model_minus_book_brier": 0.076794
+    },
+    {
+      "actual_winner": "LAC",
+      "away_prior_games": 0,
+      "away_team": "KC",
+      "book_home_probability_pct": 39.08,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_01_KC_LAC",
+      "home_prior_games": 0,
+      "home_team": "LAC",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "original_scheduled_neutral_venue_indicator",
+          "logit_contribution": 0.0405
+        },
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": -0.0
+        },
+        {
+          "feature": "prior_same_season_score_vs_opp_defense_matchup_scaled20",
+          "logit_contribution": 0.0
+        }
+      ],
+      "market_favorite": "KC",
+      "missing_reliable_prior3": true,
+      "model_favorite": "KC",
+      "model_flipped_market_favorite": false,
+      "model_home_probability_pct": 33.96,
+      "model_minus_book_brier": 0.064929
+    },
+    {
+      "actual_winner": "BUF",
+      "away_prior_games": 0,
+      "away_team": "BAL",
+      "book_home_probability_pct": 45.73,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_01_BAL_BUF",
+      "home_prior_games": 0,
+      "home_team": "BUF",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": -0.0
+        },
+        {
+          "feature": "prior_same_season_score_vs_opp_defense_matchup_scaled20",
+          "logit_contribution": 0.0
+        },
+        {
+          "feature": "prior_same_season_home_minus_away_points_scored_scaled12",
+          "logit_contribution": -0.0
+        }
+      ],
+      "market_favorite": "BAL",
+      "missing_reliable_prior3": true,
+      "model_favorite": "BAL",
+      "model_flipped_market_favorite": false,
+      "model_home_probability_pct": 40.2,
+      "model_minus_book_brier": 0.062984
+    },
+    {
+      "actual_winner": "JAX",
+      "away_prior_games": 3,
+      "away_team": "IND",
+      "book_home_probability_pct": 44.86,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_14_IND_JAX",
+      "home_prior_games": 3,
+      "home_team": "JAX",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "min_three_prior_completed_games_for_both_teams_divided3",
+          "logit_contribution": 0.1631
+        },
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": -0.0815
+        },
+        {
+          "feature": "prior_same_season_away_minus_home_points_allowed_scaled12",
+          "logit_contribution": -0.0312
+        }
+      ],
+      "market_favorite": "IND",
+      "missing_reliable_prior3": false,
+      "model_favorite": "IND",
+      "model_flipped_market_favorite": false,
+      "model_home_probability_pct": 40.06,
+      "model_minus_book_brier": 0.05517
+    },
+    {
+      "actual_winner": "NO",
+      "away_prior_games": 3,
+      "away_team": "NO",
+      "book_home_probability_pct": 77.68,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_14_NO_TB",
+      "home_prior_games": 3,
+      "home_team": "TB",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "min_three_prior_completed_games_for_both_teams_divided3",
+          "logit_contribution": 0.1631
+        },
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": 0.0415
+        },
+        {
+          "feature": "prior_same_season_away_minus_home_points_allowed_scaled12",
+          "logit_contribution": 0.0384
+        }
+      ],
+      "market_favorite": "TB",
+      "missing_reliable_prior3": false,
+      "model_favorite": "TB",
+      "model_flipped_market_favorite": false,
+      "model_home_probability_pct": 81.14,
+      "model_minus_book_brier": 0.054834
+    },
+    {
+      "actual_winner": "NYG",
+      "away_prior_games": 3,
+      "away_team": "DAL",
+      "book_home_probability_pct": 40.04,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_18_DAL_NYG",
+      "home_prior_games": 3,
+      "home_team": "NYG",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "min_three_prior_completed_games_for_both_teams_divided3",
+          "logit_contribution": 0.1631
+        },
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": -0.0459
+        },
+        {
+          "feature": "prior_same_season_away_minus_home_points_allowed_scaled12",
+          "logit_contribution": -0.0321
+        }
+      ],
+      "market_favorite": "DAL",
+      "missing_reliable_prior3": false,
+      "model_favorite": "DAL",
+      "model_flipped_market_favorite": false,
+      "model_home_probability_pct": 35.66,
+      "model_minus_book_brier": 0.054344
+    },
+    {
+      "actual_winner": "IND",
+      "away_prior_games": 0,
+      "away_team": "MIA",
+      "book_home_probability_pct": 50.43,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_01_MIA_IND",
+      "home_prior_games": 0,
+      "home_team": "IND",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": -0.0
+        },
+        {
+          "feature": "prior_same_season_score_vs_opp_defense_matchup_scaled20",
+          "logit_contribution": 0.0
+        },
+        {
+          "feature": "prior_same_season_home_minus_away_points_scored_scaled12",
+          "logit_contribution": -0.0
+        }
+      ],
+      "market_favorite": "IND",
+      "missing_reliable_prior3": true,
+      "model_favorite": "MIA",
+      "model_flipped_market_favorite": true,
+      "model_home_probability_pct": 45.43,
+      "model_minus_book_brier": 0.052138
+    },
+    {
+      "actual_winner": "HOU",
+      "away_prior_games": 3,
+      "away_team": "BUF",
+      "book_home_probability_pct": 30.92,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_12_BUF_HOU",
+      "home_prior_games": 3,
+      "home_team": "HOU",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "min_three_prior_completed_games_for_both_teams_divided3",
+          "logit_contribution": 0.1631
+        },
+        {
+          "feature": "prior_same_season_away_minus_home_points_allowed_scaled12",
+          "logit_contribution": -0.0205
+        },
+        {
+          "feature": "prior_same_season_score_vs_opp_defense_matchup_scaled20",
+          "logit_contribution": -0.012
+        }
+      ],
+      "market_favorite": "BUF",
+      "missing_reliable_prior3": false,
+      "model_favorite": "BUF",
+      "model_flipped_market_favorite": false,
+      "model_home_probability_pct": 27.32,
+      "model_minus_book_brier": 0.051014
+    },
+    {
+      "actual_winner": "GB",
+      "away_prior_games": 0,
+      "away_team": "DET",
+      "book_home_probability_pct": 52.17,
+      "feature_terms_are_logit_arithmetic_not_causal_explanations": true,
+      "game_id": "2025_01_DET_GB",
+      "home_prior_games": 0,
+      "home_team": "GB",
+      "injury_weather_or_coaching_cause_verified": false,
+      "largest_score_form_terms": [
+        {
+          "feature": "prior_same_season_last3_home_away_point_margin_difference_scaled14",
+          "logit_contribution": -0.0
+        },
+        {
+          "feature": "prior_same_season_score_vs_opp_defense_matchup_scaled20",
+          "logit_contribution": 0.0
+        },
+        {
+          "feature": "prior_same_season_home_minus_away_points_scored_scaled12",
+          "logit_contribution": -0.0
+        }
+      ],
+      "market_favorite": "GB",
+      "missing_reliable_prior3": true,
+      "model_favorite": "DET",
+      "model_flipped_market_favorite": true,
+      "model_home_probability_pct": 47.39,
+      "model_minus_book_brier": 0.048077
+    }
+  ],
+  "historical_source_sha256": "35a23b30de0b91666f2a452d7f36df1b8fc3959a27989492e10965794c655190",
+  "independent_positive_EV_proven": false,
+  "independent_test_games": 1136,
+  "new_future_frozen_predictions_required": true,
+  "original_frozen_2026_predictions_modified": false,
+  "original_frozen_model_sha256": "7871fa9047146a81a557c3ba339840eb6dc703dd1bd97410ce6d93526a3b5ffd",
+  "pooled": {
+    "both_guards_market_fallback": {
+      "brier": 0.2109388,
+      "log_loss": 0.6090914,
+      "market_minus_candidate_brier": -0.0009863,
+      "winner_accuracy_pct": 67.3416382
+    },
+    "low_form_market_fallback": {
+      "brier": 0.210904,
+      "log_loss": 0.6090221,
+      "market_minus_candidate_brier": -0.0009515,
+      "winner_accuracy_pct": 67.6053319
+    },
+    "market_original": {
+      "brier": 0.2099525,
+      "log_loss": 0.6070395,
+      "winner_accuracy_pct": 67.3416382
+    },
+    "original_model": {
+      "brier": 0.2105144,
+      "log_loss": 0.6081659,
+      "market_minus_candidate_brier": -0.0005619,
+      "winner_accuracy_pct": 67.8695766
+    },
+    "winner_disagreement_market_fallback": {
+      "brier": 0.2105822,
+      "log_loss": 0.6083017,
+      "market_minus_candidate_brier": -0.0006297,
+      "winner_accuracy_pct": 67.3416382
+    }
+  },
+  "schema": "ZENITH_NFL_ERROR_RECOVERY_SHADOW_V1",
+  "source_quotes_originally_timestamped": false,
+  "source_unique_games": 2749,
+  "study_status": "EXPLORATORY_RETROSPECTIVE_ALREADY_INSPECTED_NOT_PROSPECTIVE",
+  "years": [
+    2022,
+    2023,
+    2024,
+    2025
+  ]
+}

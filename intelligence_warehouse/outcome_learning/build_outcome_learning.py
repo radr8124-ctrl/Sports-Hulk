@@ -17,6 +17,8 @@ from .learning_core import (
     scored_grade, shadow_calibration, shadow_metrics, when,
 )
 
+from .error_trial_registry import read_registry
+
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "intelligence_warehouse/outcome_learning"
 ORIGINAL = ROOT / "intelligence_warehouse/betting_v2/BETTING_V2_ALL_MARKETS_FORWARD_LEDGER.jsonl"
@@ -301,6 +303,24 @@ def generate(root=ROOT, now=None):
     original_case, case_sha=read_verified(root/GRADED_NFL.relative_to(ROOT))
     shadows_raw, shadow_sha=read_verified(root/SHADOW_LOG.relative_to(ROOT))
     shadows=events_from_raw(shadows_raw)
+    try:
+        trial_registry=read_registry(
+            source_path=root/"reports/NFL_ERROR_RECOVERY_SHADOW_DIAGNOSTIC_20261010.json",
+            original_path=root/"data_vault/derived/NFL_GAME_MASTER.csv",
+            model_path=root/"reports/NFL_2016_2024_PRIOR_SCORE_FORM_9COL_FROZEN_MODEL_20261009.json",
+        )
+    except (FileNotFoundError,ValueError,RuntimeError,json.JSONDecodeError):
+        # Do not interrupt other sports' result-learning, but never publish
+        # unverified candidate scores or claim a correction was successful.
+        trial_registry={
+            "schema":"ZENITH_MODEL_CORRECTION_REGISTRY_V1",
+            "status":"BLOCKED_HISTORICAL_CORRECTION_EVIDENCE_NOT_VERIFIED",
+            "tested_hypotheses_count":0,
+            "rejected_against_market_count":0,
+            "candidate_models":[],
+            "model_weights_changed":False,
+            "promotion_allowed_without_independent_future_evidence":False,
+        }
     report={
         "schema":"ZENITH_POSTGAME_ERROR_REVIEW_V1",
         "generated_at_utc":now.astimezone(timezone.utc).isoformat(),
@@ -334,6 +354,7 @@ def generate(root=ROOT, now=None):
         "previous_game_case":score_week4_case(original_case),
         "first_frozen_nfl_model_postgame_review":first13_postgame,
         "hypotheses_for_shadow_tests":learning_ideas(lanes),
+        "error_correction_trial_registry":trial_registry,
         "pre_registered_calibration_shadow":{
             "model_version":VERSION,
             "ready_asof_future_predictions":len(queued),

@@ -44,6 +44,51 @@ function Oct4Example({data}) {
   </div>
 }
 
+function CorrectionTrialRecord({register}) {
+  const truthful=register?.schema==='ZENITH_MODEL_CORRECTION_REGISTRY_V1'
+    &&register?.status==='POSTGAME_CORRECTIONS_REVIEWED_NOT_PROMOTED'
+    &&register?.model_weights_changed===false
+    &&register?.promotion_allowed_without_independent_future_evidence===false
+    &&register?.fresh_unseen_2026_outcomes_required===true
+    &&Array.isArray(register?.candidate_models)
+    &&register?.tested_hypotheses_count===register?.candidate_models?.length
+    &&register?.proposed_correction_count===3
+    &&register?.rejected_proposed_corrections_count<=register?.proposed_correction_count
+    &&register?.candidate_models?.every(x=>x.live_model_update_approved===false)
+  if(!truthful)return <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs font-semibold leading-5 text-slate-600">
+    Historical correction evidence is not verified yet; no past results will be described as a successful upgrade.
+  </p>
+  const rejected=register.rejected_proposed_corrections_count
+  const total=register.proposed_correction_count
+  return <details className="group rounded-xl border border-slate-200 bg-white p-3">
+    <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3">
+      <span className="min-w-0 text-left">
+        <span className="block text-sm font-black text-slate-900">Corrections tested: {total} · rejected: {rejected}</span>
+        <span className="mt-0.5 block text-[11px] font-medium leading-4 text-slate-600">Historical fixes must beat the sportsbook, not just explain a past loss</span>
+      </span>
+      <ChevronDown size={17} className="shrink-0 text-blue-700 transition-transform group-open:rotate-180"/>
+    </summary>
+    <div className="mt-2 space-y-2 border-t border-slate-100 pt-3">
+      <p className="text-[11px] leading-5 text-slate-600">
+        {register.original_game_cohort_count} previously inspected NFL games, 2022–2025. Lower Brier score is better.
+        The benchmark uses retrospectively compiled book prices, not a verified executable sportsbook offer.
+      </p>
+      {register.candidate_models.map(model=><div key={model.hypothesis_id} className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[11px] font-black text-slate-900">{model.hypothesis_id==='original_model'?'Original NFL model':model.description}</span>
+          <span className="text-[10px] font-bold text-rose-700">{model.status==='REJECTED_NOT_BETTER_THAN_BOOKMAKER'?'REJECTED':'NOT PROVEN'}</span>
+        </div>
+        <p className="mt-1 text-[11px] tabular-nums text-slate-600">
+          Book Brier {model.retrospective_market_brier.toFixed(5)} · Trial {model.retrospective_candidate_brier.toFixed(5)} · Better in {model.better_than_book_in_historical_test_years}/4 seasons
+        </p>
+      </div>)}
+      <p className="text-[11px] font-semibold leading-5 text-slate-600">
+        No live weights changed. Rejecting a failed correction is progress; any future improvement must survive a newly frozen, independent forward cohort.
+      </p>
+    </div>
+  </details>
+}
+
 function CurrentProgress({review}) {
   const snap=review.snapshot
   const lanes=review.by_lane
@@ -65,7 +110,7 @@ function CurrentProgress({review}) {
       </div>)}
     </div>
     <p className="text-xs leading-5 text-slate-600">
-      So far, <b>{fmt(snap.market_based_predictions_same_as_market)} of {fmt(snap.valid_settled_market_research)}</b> settled game-market research probabilities were identical to the sportsbook baseline. Winning 64% of these observations is not proof of independent model skill; a single game can appear on multiple lines.
+      So far, <b>{fmt(snap.market_based_predictions_same_as_market)} of {fmt(snap.valid_settled_market_research)}</b> settled game-market research probabilities were identical to the sportsbook baseline. A positive win count for these research records is not proof of independent model skill; a single game can appear on multiple lines.
     </p>
     <p className="text-xs leading-5 text-slate-600">
       {largest&&<>Largest lane: <b>{largest.lane.replaceAll('_',' ')}</b> — {largest.graded_rows} graded lines from only {largest.independent_game_blocks} distinct games. </>}
@@ -128,6 +173,7 @@ export default function BrainLearningPanel() {
     </div> : <div className="mt-4 space-y-4">
       <Oct4Example data={data.previous_game_case}/>
       <CurrentProgress review={data}/>
+      <CorrectionTrialRecord register={data.error_correction_trial_registry}/>
       <details className="group rounded-xl border border-slate-200 bg-white p-3">
         <summary className="flex min-h-10 cursor-pointer items-center justify-between gap-2 text-xs font-black text-blue-700">
           Show error categories, original source quality and learning gates

@@ -31,9 +31,10 @@ test('Brain Record shows saved Oct4 original game losing spread, not just a hit 
 
 test('Frozen future model stays ungraded, loser category and shadow proof are distinct',async({page})=>{
  const section=await open(page)
- await expect(section.getByText(/197 of 197/)).toBeVisible()
- await expect(section.getByText(/13 frozen, 0 independently settled/)).toBeVisible()
- await expect(section.getByText(/0 prospective calibration challengers/)).toBeVisible()
+ const snapshot=actual.snapshot
+ await expect(section.getByText(new RegExp(`${snapshot.market_based_predictions_same_as_market} of ${snapshot.valid_settled_market_research}`))).toBeVisible()
+ await expect(section.getByText(new RegExp(`${snapshot.frozen_nfl_nine_feature_games} frozen, ${snapshot.frozen_nfl_nine_feature_games_officially_settled} independently settled`))).toBeVisible()
+ await expect(section.getByText(new RegExp(`${actual.pre_registered_calibration_shadow.ready_asof_future_predictions} prospective calibration challengers`))).toBeVisible()
  await expect(section.getByText(/no validated improvement yet/)).toBeVisible()
  const details=section.getByText('Show error categories, original source quality and learning gates')
  await details.click()
