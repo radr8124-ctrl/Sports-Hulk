@@ -1,4 +1,5 @@
 import React,{useEffect,useRef,useState} from 'react'
+import {createPortal} from 'react-dom'
 import {ArrowLeftRight,BarChart3,Flag,Hand,MessageCircle,Volume2,X,Minimize2,Maximize2} from 'lucide-react'
 import ZenithRefAvatar from './ZenithRefAvatar.jsx'
 import {canAutoPerform,nextRefCall,nextRefDelay,REF_MANUAL_PAUSE_MS} from '../ref_motion_presentation.js'
@@ -94,6 +95,7 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
  const [signal,setSignal]=useState({kind:'idle',id:0,origin:'none'})
  const [section,setSection]=useState(page==='News & Insights'?'news':'welcome')
  const [autoEnabled,setAutoEnabled]=useState(savedAutoPreference)
+ const [mobileScreen,setMobileScreen]=useState(()=>window.matchMedia?.('(max-width: 767px)').matches||false)
  const [reducedMotion,setReducedMotion]=useState(()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false)
  const [visible,setVisible]=useState(()=>!document.hidden)
  const [hovered,setHovered]=useState(false)
@@ -108,6 +110,13 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
    current.id===signal.id?{...current,kind:'idle'}:current),2100)
   return()=>window.clearTimeout(timer)
  },[signal])
+ useEffect(()=>{
+  const screen=window.matchMedia?.('(max-width: 767px)')
+  const syncScreen=()=>setMobileScreen(Boolean(screen?.matches))
+  syncScreen()
+  screen?.addEventListener?.('change',syncScreen)
+  return()=>screen?.removeEventListener?.('change',syncScreen)
+ },[])
  useEffect(()=>{
   const motion=window.matchMedia?.('(prefers-reduced-motion: reduce)')
   const syncMotion=()=>setReducedMotion(Boolean(motion?.matches))
@@ -179,9 +188,15 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
   if(kind==='whistle')shortWhistle()
  }
  const current=sideline.find(x=>x.key===section)||sideline[0]
- return <aside
+ // On small phones the mascot belongs to a real editorial sideline, not on
+ // top of a news link or betting card. Opening controls restores its fixed
+ // placement so the menu remains usable; other routes keep the original Ref.
+ const dockTarget=mobileScreen&&page==='Home'&&!expanded&&(section==='signals'||section==='news')
+   ?document.querySelector('[data-ref-safe-stage="'+section+'"]'):null
+ const refElement=<aside
   aria-label="The Ref sports companion"
   data-ref-companion
+  data-mobile-docked={dockTarget?'true':'false'}
   data-signal={signal.kind}
   data-origin={signal.origin}
   data-auto-enabled={autoEnabled&&!reducedMotion?'true':'false'}
@@ -251,4 +266,5 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
    </div>
   )}
  </aside>
+ return dockTarget?createPortal(refElement,dockTarget):refElement
 }

@@ -18,6 +18,7 @@ import CommandCenterHero from './CommandCenterHero.jsx'
 const ZenithRefCompanion = lazy(() => import('./ZenithRefCompanion.jsx'))
 import HomeGameDayDeck from './HomeGameDayDeck.jsx'
 import HomeTopNews from './HomeTopNews.jsx'
+import HomeRefStage from './HomeRefStage.jsx'
 import HomeSignalCard from './HomeSignalCard.jsx'
 import SportsNewsHub from './SportsNewsHub.jsx'
 
@@ -1710,6 +1711,7 @@ function HomeDecisionPanel({ onNavigate }) {
         <div><p className="eyebrow">The signal board · right now</p><h2>What matters now</h2><p className="mt-1 text-xs font-semibold text-[#536B73]">Five areas. Clearer decisions. Evidence before hype.</p></div>
         <button onClick={() => onNavigate('Brain Record')} className="text-sm font-black text-[#0F6977] hover:text-[#B74D46]">How good is the brain? →</button>
       </div>
+      <HomeRefStage zone="signals"/>
       <div className="zenith-signal-rail flex snap-x gap-3 overflow-x-auto pb-3 xl:grid xl:grid-cols-5 xl:overflow-visible">
         {cards.map((card,index) => (
           <HomeSignalCard key={card.label} index={index} card={card} onNavigate={onNavigate}/>

@@ -47,6 +47,20 @@
  .zenith-ref-companion[data-expanded="false"][data-signal="idle"] .zenith-ref-speech{display:none}
  /* Let the full-body Ref perform without throwing a large dialogue over scorecards. */
  .zenith-ref-companion[data-origin="auto"][data-expanded="false"] .zenith-ref-speech{display:none}
+ /* During signal/news reading, dock the ORIGINAL full-body character inside
+    an in-flow editorial booth rather than obscuring stories and actions. */
+ .zenith-ref-companion[data-mobile-docked="true"]{
+  position:absolute!important;
+  top:6px!important;
+  right:6px!important;
+  bottom:auto!important;
+  left:auto!important;
+  z-index:10;
+  width:auto;
+  max-width:120px;
+  transition:none!important;
+ }
+ .zenith-ref-companion[data-mobile-docked="true"] .zenith-ref-speech{display:none!important}
  .zenith-ref-control-panel{max-height:min(330px,calc(100dvh - 290px))}
 }
 @keyframes zenith-premium-ref-hover{

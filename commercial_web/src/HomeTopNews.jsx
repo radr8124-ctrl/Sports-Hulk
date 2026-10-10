@@ -2,6 +2,7 @@ import React,{useMemo} from 'react'
 import {ArrowRight,Newspaper} from 'lucide-react'
 import useSportsNews from './useSportsNews.js'
 import NewsStoryCard from './NewsStoryCard.jsx'
+import HomeRefStage from './HomeRefStage.jsx'
 import {selectHomeTopStories} from '../news_curation.js'
 
 // One featured, source-attributed article and three compact briefs.
@@ -41,6 +42,7 @@ export default function HomeTopNews({onNavigate}){
      <span className="text-[#FFD36A]">Source-attributed reporting · Six sports</span>
     </div>
    </div>
+   <div className="mx-3 sm:mx-4 md:mx-0"><HomeRefStage zone="news"/></div>
    {top.length>0?
      <div data-news-desk-grid className="grid min-w-0 gap-3 p-3 sm:p-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:gap-4">
       <div data-news-desk-lead className="flex min-w-0 flex-col rounded-[22px] border border-[#E4BC78] bg-[#FFF0CE] p-2 sm:p-3">
