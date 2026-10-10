@@ -14,7 +14,11 @@ test('real public scorecard is valid, research-only, and accurately labeled', ()
   assert.equal(result.game_lines.settled,
     result.game_lines.wins + result.game_lines.losses + result.game_lines.pushes)
   assert.ok(result.game_lines.settled >= 186)
-  assert.equal(result.props_and_pickem.settled, 2843)
+  // The official proof collector continuously adds results. Verify its
+  // internal outcome accounting rather than freezing yesterday's count.
+  assert.equal(result.props_and_pickem.settled,
+    result.props_and_pickem.wins + result.props_and_pickem.losses + result.props_and_pickem.pushes)
+  assert.ok(result.props_and_pickem.settled >= 2843)
   assert.equal(result.mlb_full16.completed_independent_game_blocks, 1)
   assert.ok(result.mlb_price_movement.frozen_source_observations >= 29)
   assert.ok(result.mlb_price_movement.graded_official_player_results <= result.mlb_price_movement.frozen_source_observations)

@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from 'react'
 import {Brain,ChevronDown,Clock3,ShieldCheck,Target} from 'lucide-react'
+import SportLearningReview from './SportLearningReview.jsx'
 
 const fmt=n=>Number.isInteger(n)?n.toLocaleString():'—'
 const valid=j=>j?.schema==='ZENITH_POSTGAME_ERROR_REVIEW_V1'
@@ -172,6 +173,7 @@ export default function BrainLearningPanel() {
       {loaded?'Learning evidence could not be validated. No unverified learning metrics will be displayed.':'Loading frozen outcome evidence…'}
     </div> : <div className="mt-4 space-y-4">
       <Oct4Example data={data.previous_game_case}/>
+      <SportLearningReview/>
       <CurrentProgress review={data}/>
       <CorrectionTrialRecord register={data.error_correction_trial_registry}/>
       <details className="group rounded-xl border border-slate-200 bg-white p-3">

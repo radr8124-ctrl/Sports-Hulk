@@ -403,6 +403,26 @@ def main(root=ROOT):
         if added:
             report,_,_=generate(root=root)
         report["shadow_entries_newly_frozen"]=added
+        # Existing once-per-hour source-only learning run now also audits
+        # each league's ORIGINAL official fixture/final and stage. Errors in
+        # a single sport cannot replace old data with an invented success.
+        try:
+            from intelligence_warehouse.sport_cohorts.build_sport_cohort_readiness import publish as publish_four_sport_cohorts
+            cohort=publish_four_sport_cohorts(root=root)
+            report["cross_sport_official_replay"]={
+                "status":cohort["status"],
+                "official_final_verified_research_selections":cohort["source_verified_final_research_selections"],
+                "independent_verified_final_games":cohort["source_verified_distinct_final_games"],
+                "separate_unsettled_postgame_shadow_grades":cohort["derived_pending_from_official_final_research_rows"],
+                "original_prediction_records_unchanged":True,
+                "automatic_model_or_wager_change":False,
+            }
+        except (FileNotFoundError,ValueError,KeyError,RuntimeError,json.JSONDecodeError) as error:
+            report["cross_sport_official_replay"]={
+                "status":"OFFICIAL_COHORT_SOURCE_VALIDATION_BLOCKED",
+                "reason":str(error)[:180],
+                "automatic_model_or_wager_change":False,
+            }
         for target in [CURRENT, PUBLIC, DIST]:
             if target==DIST and not DIST.parent.exists():
                 continue
