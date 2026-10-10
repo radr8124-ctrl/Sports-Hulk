@@ -8,6 +8,8 @@ const clock=Date.parse(fixture.generated_at)+4*60_000
 const areas=[
  {name:'signals',selector:'[aria-label="Home decision overview"]'},
  {name:'news',selector:'[aria-label="Home sports news"]'},
+ {name:'picks',selector:'[aria-label="Home Fantasy Survivor and Brain Record"]'},
+ {name:'learning',selector:'[aria-label="Home learning loop"]'},
 ]
 
 async function setup(page,width=390) {
@@ -110,4 +112,41 @@ test('News route without Home stages keeps its original companion and accessible
  const ref=page.getByRole('complementary',{name:'The Ref sports companion'})
  await expect(ref).toHaveAttribute('data-mobile-docked','false')
  await expect(ref.getByRole('button',{name:'Open The Ref animated sports companion'})).toBeVisible()
+})
+
+test('premium Home quicklinks remain swipeable, source-truthful and shorter than tall stacked mobile cards',async({page})=>{
+ await setup(page,390)
+ const section=page.getByRole('region',{name:'Home Fantasy Survivor and Brain Record'})
+ const rail=section.locator('[data-home-snapshots-rail]')
+ await expect(rail).toBeVisible()
+ const cards=section.locator('[data-home-snapshot-card]')
+ await expect(cards).toHaveCount(3)
+ await expect(section.locator('[data-home-snapshot-card="survivor"]')).toBeVisible()
+ const measurements=await page.evaluate(()=>{
+  const section=document.querySelector('[aria-label="Home Fantasy Survivor and Brain Record"]')
+  const rail=section.querySelector('[data-home-snapshots-rail]')
+  return {height:section.getBoundingClientRect().height,swipe:rail.scrollWidth>rail.clientWidth+50,
+   overflow:document.documentElement.scrollWidth-innerWidth}
+ })
+ expect(measurements.swipe).toBe(true)
+ expect(measurements.height).toBeLessThan(565)
+ expect(measurements.overflow).toBeLessThanOrEqual(1)
+ await rail.evaluate(node=>node.scrollLeft=node.scrollWidth)
+ await expect.poll(()=>rail.evaluate(node=>node.scrollLeft)).toBeGreaterThan(200)
+ await expect(section.locator('[data-home-snapshot-card="brain"]')).toBeVisible()
+ const body=await section.innerText()
+ expect(body).not.toContain('ANNIE G 01')
+ expect(body).toMatch(/Official|Brain Record/)
+})
+
+test('Learning Loop stays interactive without the Ref blocking any step or proof button',async({page})=>{
+ await setup(page,390)
+ const section=page.getByRole('region',{name:'Home learning loop'})
+ await review(page,{name:'learning',selector:'[aria-label="Home learning loop"]'})
+ const steps=section.getByRole('group',{name:'Choose a learning step'})
+ await expect(steps.getByRole('button',{name:/Grade/})).toBeVisible()
+ await steps.getByRole('button',{name:/Grade/}).click()
+ await expect(steps.getByRole('button',{name:/Grade/})).toHaveAttribute('aria-pressed','true')
+ await section.getByRole('button',{name:/See actual evidence and mistakes/}).click()
+ await expect(page).toHaveURL(/#brain-record/)
 })

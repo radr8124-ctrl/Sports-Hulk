@@ -30,7 +30,7 @@ test('new 1980s sports-broadcast palette appears across the actual Home', async(
       decisionCard:find('section[aria-label="Home decision overview"] button.min-w-\\[270px\\]'),
       heading:find('section[aria-label="Home decision overview"] h2'),
       newsHeading:find('section[aria-label="Home sports news"] h2'),
-      fantasy:find('section[aria-label="Home Fantasy Survivor and Brain Record"] button:nth-child(2)'),
+      fantasy:find('section[aria-label="Home Fantasy Survivor and Brain Record"] [data-home-snapshot-card="fantasy"]'),
       footer:find('footer'),
       overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
     }

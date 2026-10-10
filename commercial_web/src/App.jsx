@@ -415,6 +415,7 @@ function LearningPanel({ onNavigate }) {
           Open Brain Record →
         </button>
       </div>
+      <HomeRefStage zone="learning" />
       <div className="rounded-[22px] border-2 border-[#173E52] bg-[#173E52] p-3 text-white shadow-[5px_5px_0_#46CDD2] md:p-5">
         <div role="group" aria-label="Choose a learning step" className="grid grid-cols-2 gap-2 md:grid-cols-4">
           {steps.map((item,index)=>(
@@ -1732,8 +1733,12 @@ function HomeSnapshots({ onNavigate }) {
   const hasPersonalSurvivor = Boolean(user && privateSurvivor.entry_linked)
 
   return (
-    <section aria-label="Home Fantasy Survivor and Brain Record" className="grid gap-3 lg:grid-cols-3">
-      <button onClick={() => onNavigate('Survivor')} className="rounded-[22px] border-2 border-[#E6B8A5] bg-[#FFEBDC] p-5 text-left text-[#173E52] transition hover:border-[#D7755A]">
+    <section aria-label="Home Fantasy Survivor and Brain Record" className="min-w-0">
+      <HomeRefStage zone="picks" />
+      <p className="mb-2 text-[10px] font-black uppercase tracking-[.13em] text-[#0C7182] lg:hidden">Your sports, one swipe at a time →</p>
+      <div data-home-snapshots-rail role="group" aria-label="Survivor Fantasy and Brain shortcuts"
+        className="flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-3 lg:overflow-visible">
+      <button data-home-snapshot-card="survivor" onClick={() => onNavigate('Survivor')} className="w-[min(80vw,320px)] shrink-0 snap-start rounded-[22px] border-2 border-[#E6B8A5] bg-[#FFEBDC] p-5 text-left text-[#173E52] transition hover:border-[#D7755A] lg:w-auto">
         <div className="text-xs font-black uppercase tracking-[0.14em] text-[#AF4D43]">{hasPersonalSurvivor ? 'My Survivor' : 'Survivor'}</div>
         <div className="mt-3 text-2xl font-black text-[#173E52]">
           {hasPersonalSurvivor
@@ -1751,13 +1756,13 @@ function HomeSnapshots({ onNavigate }) {
         </div>
         <div className="mt-5 text-xs font-black text-[#A94F3C]">Open Survivor →</div>
       </button>
-      <button onClick={() => onNavigate('Fantasy')} className="rounded-[22px] border-2 border-[#B1D6D2] bg-[#D9F4EE] p-5 text-left text-[#173E52] transition hover:border-[#0F8B95]">
+      <button data-home-snapshot-card="fantasy" onClick={() => onNavigate('Fantasy')} className="w-[min(80vw,320px)] shrink-0 snap-start rounded-[22px] border-2 border-[#B1D6D2] bg-[#D9F4EE] p-5 text-left text-[#173E52] transition hover:border-[#0F8B95] lg:w-auto">
         <div className="text-xs font-black uppercase tracking-[0.14em] text-[#0D6772]">Fantasy + DFS</div>
         <div className="mt-3 text-2xl font-black text-[#173E52]">{laneCount} forward-tested lanes</div>
         <div className="mt-2 text-sm font-semibold text-[#536B73]">Start/Sit · FAAB · IR stash · Defense · IDP · DFS</div>
         <div className="mt-5 text-xs font-black text-[#0E7380]">Open Fantasy →</div>
       </button>
-      <button onClick={() => onNavigate('Brain Record')} className="rounded-[22px] border-2 border-[#173E52] bg-[#173E52] p-5 text-left text-white shadow-[4px_4px_0_#FFD36A] transition hover:-translate-y-0.5 hover:border-[#FFD36A]">
+      <button data-home-snapshot-card="brain" onClick={() => onNavigate('Brain Record')} className="w-[min(80vw,320px)] shrink-0 snap-start rounded-[22px] border-2 border-[#173E52] bg-[#173E52] p-5 text-left text-white shadow-[4px_4px_0_#FFD36A] transition hover:-translate-y-0.5 hover:border-[#FFD36A] lg:w-auto">
         <div className="text-xs font-black uppercase tracking-[0.14em] text-[#FFD36A]">Brain Record</div>
         <div className="mt-3 text-2xl font-black">{brainSummary.headline}</div>
         <div className="mt-1 text-sm font-black text-[#FFD36A]">{brainSummary.summary}</div>
@@ -1766,6 +1771,7 @@ function HomeSnapshots({ onNavigate }) {
         <div className="mt-1 text-[11px] font-medium leading-4 text-[#B8C9D1]">{brainSummary.sampleWarning}</div>
         <div className="mt-3 text-xs font-black text-[#FFD36A]">Review official record →</div>
       </button>
+      </div>
     </section>
   )
 }

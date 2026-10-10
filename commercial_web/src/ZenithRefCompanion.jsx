@@ -191,7 +191,7 @@ export default function ZenithRefCompanion({onOpenAsk,onOpenBrain,page='Home'}){
  // On small phones the mascot belongs to a real editorial sideline, not on
  // top of a news link or betting card. Opening controls restores its fixed
  // placement so the menu remains usable; other routes keep the original Ref.
- const dockTarget=mobileScreen&&page==='Home'&&!expanded&&(section==='signals'||section==='news')
+ const dockTarget=mobileScreen&&page==='Home'&&!expanded&&['signals','news','picks','learning'].includes(section)
    ?document.querySelector('[data-ref-safe-stage="'+section+'"]'):null
  const refElement=<aside
   aria-label="The Ref sports companion"
