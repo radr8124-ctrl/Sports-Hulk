@@ -1,0 +1,12 @@
+[Unit]
+Description=Sports Zenith anonymous Ask observability scan (every 10 minutes)
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=false
+AccuracySec=1min
+RandomizedDelaySec=30s
+Unit=sports-zenith-anonymous-observer.service
+
+[Install]
+WantedBy=timers.target

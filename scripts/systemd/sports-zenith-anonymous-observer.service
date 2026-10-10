@@ -1,0 +1,13 @@
+[Unit]
+Description=Sports Zenith anonymous Ask performance PostHog observer
+Documentation=https://posthog.com/docs/product-analytics/capture-events
+ConditionPathExists=/home/ubuntu/sports-hulk/intelligence_warehouse/experiment_registry/ASK_TRACE_LEDGER.jsonl
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ubuntu/sports-hulk
+EnvironmentFile=/home/ubuntu/sports-hulk/commercial_web/.env.posthog_monitor
+ExecStart=/usr/bin/python3 /home/ubuntu/sports-hulk/scripts/zenith_posthog_monitor.py
+TimeoutStartSec=45
+UMask=0077
+NoNewPrivileges=true
