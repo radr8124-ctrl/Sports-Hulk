@@ -23,9 +23,9 @@ export default function SurvivorPastPicks({history,entryName=''}){
  const total=Number.isInteger(history?.total_picks)?history.total_picks:0
  const currentWeek=Number.isInteger(history?.current_week)?history.current_week:null
  return (
-  <section aria-label="My Survivor past picks" data-survivor-past-picks
+  <section id="my-survivor-past-picks" aria-label="My Survivor past picks" data-survivor-past-picks
     data-past-history-status={history?.status||'HISTORY_UNAVAILABLE'}
-    className="min-w-0 overflow-hidden rounded-[22px] border-2 border-[#B9D2D1] bg-[#FFF8ED] p-3.5 text-[#173E52] shadow-soft sm:p-5">
+    className="scroll-mt-24 min-w-0 overflow-hidden rounded-[22px] border-2 border-[#B9D2D1] bg-[#FFF8ED] p-3.5 text-[#173E52] shadow-soft sm:p-5">
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0">
         <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[.14em] text-[#0E7280]">

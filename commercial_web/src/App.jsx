@@ -1000,6 +1000,11 @@ function SurvivorCommercialPanel() {
 
   const isSignedIn = Boolean(user)
   const hasEntry = saved.status === 'READY' && saved.entry_linked
+  const historyLoadError = saved.status === 'PRIVATE_STATE_UNAVAILABLE'
+  const pastPickCount = hasEntry && Number.isInteger(saved.past_picks?.total_picks)
+    ? saved.past_picks.total_picks : null
+  const pastWeekCount = hasEntry && Number.isInteger(saved.past_picks?.total_weeks)
+    ? saved.past_picks.total_weeks : null
   const linkedEntries = Array.isArray(saved.linked_entries) ? saved.linked_entries : []
   const diversifiedAllocations = Array.isArray(saved.diversified_allocations) ? saved.diversified_allocations : []
   const concentration = saved.diversification_concentration || {}
@@ -1078,6 +1083,34 @@ function SurvivorCommercialPanel() {
                 </button>
               )}
             </div>
+          </div>
+        </section>
+      )}
+
+      {isSignedIn && (
+        <section aria-label="Survivor history status and refresh"
+          className="rounded-xl border border-[#BAD6D3] bg-[#EAF7F4] px-3 py-2.5 text-[#173E52] sm:px-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-black">My Past Picks</p>
+              <p role="status" className="mt-0.5 text-[11px] font-semibold leading-4 text-[#526E78]">
+                {saved.status === 'LOADING' ? 'Refreshing your private Survivor history…'
+                  : historyLoadError ? 'Your past picks could not be loaded. Try refreshing your signed-in session.'
+                    : !hasEntry ? 'No entry connected to this session yet. Refresh to check your verified account.'
+                      : saved.past_picks?.status === 'HISTORY_UNAVAILABLE' ? 'History not found in the source record. Your used teams remain protected.'
+                        : `${pastPickCount ?? '—'} past picks across ${pastWeekCount ?? '—'} recorded weeks. Your current pick is separate.`}
+              </p>
+            </div>
+            {hasEntry && pastPickCount > 0 && (
+              <button type="button" onClick={() => document.getElementById('my-survivor-past-picks')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="rounded-lg bg-[#173E52] px-2.5 py-2 text-[10px] font-black text-white focus-visible:outline-2 focus-visible:outline-[#FF7766]">
+                View all {pastPickCount} <ChevronRight size={13} className="ml-0.5 inline" />
+              </button>
+            )}
+            <button type="button" onClick={() => setLinkRefresh(value => value + 1)}
+              className="rounded-lg border border-[#B6CECA] bg-white px-2.5 py-2 text-[10px] font-black text-[#173E52] focus-visible:outline-2 focus-visible:outline-[#FF7766]">
+              Refresh history
+            </button>
           </div>
         </section>
       )}
@@ -1625,6 +1658,7 @@ function useJsonEndpoint(path, fallback = {}) {
 
 function usePrivateSurvivorState(refreshKey = 0, selectedEntry = '') {
   const { user, getAccessToken } = useAuth()
+  const previousLinkedIdentity = useRef('')
   const [data, setData] = useState({
     status: user ? 'LOADING' : 'AUTH_REQUIRED',
     entry_linked: false,
@@ -1635,8 +1669,10 @@ function usePrivateSurvivorState(refreshKey = 0, selectedEntry = '') {
   useEffect(() => {
     let cancelled = false
     let timer = null
+    let latestRequestId = 0
 
     if (!user) {
+      previousLinkedIdentity.current = ''
       setData({
         status: 'AUTH_REQUIRED',
         entry_linked: false,
@@ -1646,10 +1682,16 @@ function usePrivateSurvivorState(refreshKey = 0, selectedEntry = '') {
       return () => {}
     }
 
-    // Keep the private panel in its loading state while secure account
-    // entitlement is verified; never flash a misleading manual claim prompt.
-    setData({status:'LOADING',entry_linked:false,used_teams:[],current_picks:[]})
+    // Clear the previous owner's data on sign-in change / entry switching.
+    // For an ordinary same-owner refresh, keep proven historical rows on
+    // screen until the newer authorized response arrives.
+    const privateIdentity = `${user.id}:${selectedEntry || ''}`
+    if (previousLinkedIdentity.current !== privateIdentity) {
+      previousLinkedIdentity.current = privateIdentity
+      setData({status:'LOADING',entry_linked:false,used_teams:[],current_picks:[]})
+    }
     const load = async () => {
+      const requestId = ++latestRequestId
       try {
         const token = await getAccessToken()
         if (!token) throw new Error('No authenticated session')
@@ -1660,9 +1702,9 @@ function usePrivateSurvivorState(refreshKey = 0, selectedEntry = '') {
         })
         const payload = await response.json()
         if (!response.ok) throw new Error(payload.message || payload.error || 'Private Survivor state unavailable')
-        if (!cancelled) setData(payload)
+        if (!cancelled && requestId === latestRequestId) setData(payload)
       } catch {
-        if (!cancelled) {
+        if (!cancelled && requestId === latestRequestId) {
           setData({
             status: 'PRIVATE_STATE_UNAVAILABLE',
             entry_linked: false,
@@ -1673,11 +1715,22 @@ function usePrivateSurvivorState(refreshKey = 0, selectedEntry = '') {
       }
     }
 
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') load()
+    }
+    const onPageshow = event => {
+      // Mobile Safari may restore a stale tab from its back/forward cache.
+      if (event.persisted) load()
+    }
     load()
     timer = window.setInterval(load, 30000)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('pageshow', onPageshow)
     return () => {
       cancelled = true
       if (timer) window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      window.removeEventListener('pageshow', onPageshow)
     }
   }, [user?.id, getAccessToken, refreshKey, selectedEntry])
 
