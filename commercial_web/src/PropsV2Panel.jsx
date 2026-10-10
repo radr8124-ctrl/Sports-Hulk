@@ -3,6 +3,7 @@ import { ChevronRight, ShieldCheck } from 'lucide-react'
 import BetMeaning, { formatAmericanOdds, explainBet } from './BetMeaning'
 import { explainPropProof } from '../prop_proof_presentation.js'
 import { validateIndependentForm, matchIndependentForm, recentFormDescription } from '../prop_independent_form_display.js'
+import PropForwardProofLens from './PropForwardProofLens.jsx'
 
 const humanize = value => String(value || '')
   .replaceAll('_', ' ')
@@ -152,6 +153,7 @@ function PropCard({ row, isPrize, form }) {
 export default function PropsV2Panel({ lane = 'PROP' }) {
   const [data, setData] = useState({ summary: {}, picks: [] })
   const [playerResearch,setPlayerResearch] = useState(null)
+  const [forward,setForward] = useState(undefined)
   const [viewMode,setViewMode] = useState('ALL')
   const [sport, setSport] = useState('ALL')
   const [nbaPhase, setNbaPhase] = useState('ALL')
@@ -169,12 +171,14 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
           return response.ok?await response.json():null
         }catch{return null}
       }
-      const [payload,form]=await Promise.all([
-        pull('/prop_v2_current.json'),pull('/nfl_prop_independent_research.json')
+      const [payload,form,forwardPayload]=await Promise.all([
+        pull('/prop_v2_current.json'),pull('/nfl_prop_independent_research.json'),
+        pull('/prop_v2_forward.json'),
       ])
       if(!cancelled){
         setData(payload || {summary:{},picks:[]})
         setPlayerResearch(form)
+        setForward(forwardPayload)
         setClock(Date.now())
       }
     }
@@ -267,6 +271,10 @@ export default function PropsV2Panel({ lane = 'PROP' }) {
           {sport==='ALL'?'All sports':sport}{sport==='NBA'&&nbaPhase!=='ALL'?' · '+humanize(nbaPhase):''} · {isPrize?'No verified entry EV':'Dated quotes, not live offers'}
         </div>
       </div>
+
+      <PropForwardProofLens
+        current={data} forward={forward} lane={lane} sport={sport} clock={clock}
+      />
 
       <div className={`rounded-2xl border p-3 text-xs font-semibold leading-5 ${plays ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : monitors ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-blue-200 bg-blue-50 text-blue-900'}`}>
         {plays

@@ -1,0 +1,23 @@
+{
+  "kind": "SOURCE_SNAPSHOT_FROZEN_FOR_BROWSER_REGRESSION_NOT_CURRENT_QUOTE",
+  "source_file": "zenith_premium_player_desks_before_20261010/dist/prop_v2_current.json",
+  "source_full_original_sha256": "7427e13ef440e36b0e96c885eeebf0f2fb072e190158efccd605353193721f5f",
+  "source_snapshot_at": "2026-10-10T18:23:28.742186+00:00",
+  "row_keys": [
+    {
+      "lane": "PROP",
+      "player": "Jalen Hurts",
+      "event_start": "2026-10-11 13:30:00+00:00",
+      "original_row_sha256": "40814ddb1a1f59fd7453f03cbfb4a9a9df652683811869fa035b08819739d346"
+    },
+    {
+      "lane": "PRIZEPICKS",
+      "player": "Jalen Hurts",
+      "event_start": "2026-10-11 13:30:00+00:00",
+      "original_row_sha256": "defd46be7dd35ffc8d7dade813975410685b767a1200a563bd42aad04de4f029"
+    }
+  ],
+  "fixture_sha256": "4184f3a60689aa3fdfb11bce09fea084d0bbcc953242bdc57fa5d2e100dc8ca0",
+  "private_member_records_included": false,
+  "safe_for_source_time_replay": true
+}

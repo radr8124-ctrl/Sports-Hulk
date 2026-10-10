@@ -6,7 +6,8 @@ const FIXED=new Set(['betting_odds_board.json','nfl_frozen_game_intelligence.jso
 const read=f=>JSON.parse(readFileSync(new URL('./'+(FIXED.has(f)?'test_fixtures/zenith_frozen_20261009/':'public/')+f,import.meta.url),'utf8'))
 const all=read('betting_odds_board.json')
 const frozen=read('nfl_frozen_game_intelligence.json')
-const props=read('prop_v2_current.json')
+// Original Oct 10 public source evidence, immutable for historical replay.
+const props=JSON.parse(readFileSync(new URL('./test_fixtures/zenith_frozen_20261010/PROP_V2_HISTORICAL_NFL_LINE_UI_TEST.json',import.meta.url),'utf8'))
 const early=Date.parse('2026-10-09T22:44:00Z')
 const originals=[
   all.games.find(g=>g.sport==='NFL'&&g.game_key==='PHI@JAX'),
@@ -112,7 +113,7 @@ test('Props has reference odds, market probability, search and more lines',async
  const search=page.getByRole('textbox',{name:'Search props by player or market'})
  await expect(search).toBeVisible()
  await search.fill('Jalen Hurts')
- await expect(page.getByText('Jalen Hurts',{exact:true}).first()).toBeVisible()
+ await expect(page.getByRole('region',{name:'Player props current line research'}).locator('[data-premium-player-card="props"]').getByText('Jalen Hurts',{exact:true}).first()).toBeVisible()
  await expect(page.getByText(/Market fair probability/).first()).toBeVisible()
  await expect(page.getByText(/Bookmaker reference/).first()).toBeVisible()
  await expect(page.getByText(/not a verified live or executable offer/i).first()).toBeVisible()
