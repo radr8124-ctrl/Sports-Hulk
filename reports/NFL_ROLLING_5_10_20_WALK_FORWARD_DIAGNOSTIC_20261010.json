@@ -1,0 +1,201 @@
+{
+  "2025_has_already_been_inspected_during_prior_experiments": true,
+  "automatically_adjusted_production_weights": false,
+  "cross_game_leakage_detected": false,
+  "data_type": "RETROSPECTIVE_COMPILED_ODDS_NOT_LIVE_EXECUTABLE_QUOTES",
+  "folds": [
+    {
+      "all_form_sources_prior_same_season_weeks_only": true,
+      "book_brier_minus_rolling_brier": 0.00193765,
+      "brier_and_log_loss": {
+        "paired_book_no_vig": {
+          "brier": 0.20928694,
+          "log_loss": 0.604962809
+        },
+        "past_train_market_only_ridge": {
+          "brier": 0.209332397,
+          "log_loss": 0.605251955
+        },
+        "rolling_5_10_20_opponent_score_form": {
+          "brier": 0.207349293,
+          "log_loss": 0.601017836
+        }
+      },
+      "paired_week_bootstrap95": [
+        -4.281e-05,
+        0.00369968
+      ],
+      "source_bookmaker_prices_originally_timestamped": false,
+      "test_games": 282,
+      "train_seasons": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021
+      ],
+      "training_and_test_game_ids_disjoint": true,
+      "training_games": 1613,
+      "winner_accuracy_pct": {
+        "paired_book_no_vig": 65.6,
+        "past_train_market_only_ridge": 67.02,
+        "rolling_5_10_20_opponent_score_form": 68.44
+      },
+      "year": 2022
+    },
+    {
+      "all_form_sources_prior_same_season_weeks_only": true,
+      "book_brier_minus_rolling_brier": 0.00190735,
+      "brier_and_log_loss": {
+        "paired_book_no_vig": {
+          "brier": 0.218638336,
+          "log_loss": 0.626970344
+        },
+        "past_train_market_only_ridge": {
+          "brier": 0.219126441,
+          "log_loss": 0.628177864
+        },
+        "rolling_5_10_20_opponent_score_form": {
+          "brier": 0.216730981,
+          "log_loss": 0.623877833
+        }
+      },
+      "paired_week_bootstrap95": [
+        -0.00020768,
+        0.00422016
+      ],
+      "source_bookmaker_prices_originally_timestamped": false,
+      "test_games": 285,
+      "train_seasons": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022
+      ],
+      "training_and_test_game_ids_disjoint": true,
+      "training_games": 1895,
+      "winner_accuracy_pct": {
+        "paired_book_no_vig": 67.02,
+        "past_train_market_only_ridge": 67.72,
+        "rolling_5_10_20_opponent_score_form": 67.72
+      },
+      "year": 2023
+    },
+    {
+      "all_form_sources_prior_same_season_weeks_only": true,
+      "book_brier_minus_rolling_brier": -0.00061286,
+      "brier_and_log_loss": {
+        "paired_book_no_vig": {
+          "brier": 0.200974786,
+          "log_loss": 0.589214046
+        },
+        "past_train_market_only_ridge": {
+          "brier": 0.200361642,
+          "log_loss": 0.587694239
+        },
+        "rolling_5_10_20_opponent_score_form": {
+          "brier": 0.201587648,
+          "log_loss": 0.58987544
+        }
+      },
+      "paired_week_bootstrap95": [
+        -0.00372939,
+        0.0022524
+      ],
+      "source_bookmaker_prices_originally_timestamped": false,
+      "test_games": 285,
+      "train_seasons": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023
+      ],
+      "training_and_test_game_ids_disjoint": true,
+      "training_games": 2180,
+      "winner_accuracy_pct": {
+        "paired_book_no_vig": 70.88,
+        "past_train_market_only_ridge": 70.18,
+        "rolling_5_10_20_opponent_score_form": 70.88
+      },
+      "year": 2024
+    },
+    {
+      "all_form_sources_prior_same_season_weeks_only": true,
+      "book_brier_minus_rolling_brier": -0.00209936,
+      "brier_and_log_loss": {
+        "paired_book_no_vig": {
+          "brier": 0.210906373,
+          "log_loss": 0.606988938
+        },
+        "past_train_market_only_ridge": {
+          "brier": 0.211126044,
+          "log_loss": 0.607164439
+        },
+        "rolling_5_10_20_opponent_score_form": {
+          "brier": 0.213005732,
+          "log_loss": 0.611929198
+        }
+      },
+      "paired_week_bootstrap95": [
+        -0.0046692,
+        0.00080206
+      ],
+      "source_bookmaker_prices_originally_timestamped": false,
+      "test_games": 284,
+      "train_seasons": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "training_and_test_game_ids_disjoint": true,
+      "training_games": 2465,
+      "winner_accuracy_pct": {
+        "paired_book_no_vig": 65.85,
+        "past_train_market_only_ridge": 66.2,
+        "rolling_5_10_20_opponent_score_form": 64.79
+      },
+      "year": 2025
+    }
+  ],
+  "folds_rolling_beats_book": 2,
+  "generated_at_utc": "2026-10-10T02:39:45.845313+00:00",
+  "historical_prices_individual_quote_timestamps_available": false,
+  "live_model_promoted": false,
+  "new_forward_2026_holdout_required": true,
+  "original_game_rows_evaluated": 2749,
+  "original_path": "data_vault/derived/NFL_GAME_MASTER.csv",
+  "original_source_sha256": "35a23b30de0b91666f2a452d7f36df1b8fc3959a27989492e10965794c655190",
+  "pooled_book_brier": 0.20995252,
+  "pooled_book_minus_rolling_brier": 0.00028092,
+  "pooled_rolling_brier": 0.2096716,
+  "positive_EV_or_actual_profit_proven": false,
+  "quarantined_counts": {
+    "invalid_historical_moneyline": 2,
+    "tied_binary_outcome": 10
+  },
+  "real_money_bets_created": false,
+  "schema": "NFL_ASOF_ROLLING_5_10_20_DIAGNOSTIC_V1",
+  "strategy_preregistered_without_fitting_TO_future_season": true,
+  "test_years": [
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "total_heldout_game_observations": 1136,
+  "train_range_first_year": 2016
+}
