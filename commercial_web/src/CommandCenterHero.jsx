@@ -36,6 +36,7 @@ export default function CommandCenterHero({onNavigate}){
     </div>
     <div aria-label="Join Sports Zenith" className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[11px] font-bold text-[#536F76]">
       <AccountButton hero />
+      <button type="button" onClick={()=>onNavigate(user ? 'Dashboards' : 'Welcome')} className="inline-flex min-h-10 items-center gap-1 text-[11px] font-black text-[#276977]">{user ? 'My dashboards' : 'Meet Sports Zenith'} <ArrowRight size={13}/></button>
       <span>{user ? 'Your verified account is ready for private sports features.' : 'Use your email and a secure one-time code. No password.'}</span>
     </div>
     <div className="mt-3 hidden flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] font-bold text-[#536F76] sm:flex">

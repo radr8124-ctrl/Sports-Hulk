@@ -1,3 +1,4 @@
+import MemberEntry, { DashboardHub } from './MemberEntry.jsx'
 import PredictionMarketsPanel from './PredictionMarketsPanel.jsx'
 import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -3559,7 +3560,7 @@ function MobileBottomNav({ active, onNavigate }) {
 function MoreMenu({ onNavigate, onClose }) {
   return (
     <div className="grid gap-2">
-      {['Prediction Markets', 'Scores', 'News & Insights', 'Brain Record', 'Research'].map((item) => (
+      {['Welcome', 'Dashboards', 'Prediction Markets', 'Scores', 'News & Insights', 'Brain Record', 'Research'].map((item) => (
         <button key={item} onClick={() => { onNavigate(item); onClose?.() }} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-black text-slate-800 hover:border-blue-200">
           <span>{item}</span><ChevronRight size={17} className="text-slate-300" />
         </button>
@@ -3569,6 +3570,8 @@ function MoreMenu({ onNavigate, onClose }) {
 }
 
 const ROUTE_HASH = {
+  Welcome: 'signin',
+  Dashboards: 'dashboards',
   Home: '',
   Scores: 'scores',
   'Prediction Markets': 'prediction-markets',
@@ -3591,6 +3594,7 @@ const HASH_ROUTE = Object.fromEntries(Object.entries(ROUTE_HASH).map(([route, ha
 
 function routeFromLocation() {
   const hash = window.location.hash.replace(/^#/, '').trim().toLowerCase()
+  if (hash === 'welcome') return 'Welcome'
   if (hash === 'practice') return 'Bet Lab'
   return HASH_ROUTE[hash] || 'Home'
 }
@@ -3601,6 +3605,7 @@ export default function App() {
   const [gameScoutContext, setGameScoutContext] = useState(null)
   const [moreOpen, setMoreOpen] = useState(false)
   const backendLabel = useMemo(() => 'SOURCE STATUS · VERIFY PER GAME', [])
+  const isEntry = active === 'Welcome' || active === 'Dashboards'
   const isAsk = active === 'Ask'
   const isBetting = bettingNavItems.includes(active)
 
@@ -3620,7 +3625,7 @@ export default function App() {
       : `${active} | ${PUBLIC_BRAND}`
     // Safari overscroll should match the page being viewed. Do not apply
     // the dark Home background to the site's detailed research pages.
-    document.documentElement.style.backgroundColor = active === 'Home' ? '#FFF8ED' : '#f8fafc'
+    document.documentElement.style.backgroundColor = ['Home', 'Welcome', 'Dashboards'].includes(active) ? '#FFF8ED' : '#f8fafc'
   }, [active])
 
   useEffect(() => {
@@ -3669,7 +3674,7 @@ export default function App() {
   const navSelected = (item) => item === 'Betting' ? isBetting : active === item
 
   return (
-    <div className={`min-h-screen pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-0 ${active === 'Home' ? 'bg-[#FFF8ED] text-[#173E52]' : 'bg-[#F1F5FA] text-slate-900'}`}>
+    <div className={`min-h-screen pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-0 ${active === 'Home' || isEntry ? 'bg-[#FFF8ED] text-[#173E52]' : 'bg-[#F1F5FA] text-slate-900'}`}>
       <a href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus() }} className="skip-link">Skip to main content</a>
       <header className="sticky top-0 z-30 border-b-2 border-[#173E52] bg-[#FFF5E4]/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-5 md:py-4">
@@ -3742,6 +3747,8 @@ export default function App() {
               </>
             )}
 
+            {active === 'Welcome' && <MemberEntry onNavigate={navigate} />}
+            {active === 'Dashboards' && <DashboardHub onNavigate={navigate} />}
             {active === 'Prediction Markets' && <PredictionMarketsPanel />}
             {active === 'Scores' && <ScoresHub />}
 
@@ -3790,7 +3797,7 @@ export default function App() {
         </Suspense>
       )}
 
-      {!assistantOpen && !isAsk && active !== 'Home' && active !== 'News & Insights' && (
+      {!assistantOpen && !isAsk && !isEntry && active !== 'Home' && active !== 'News & Insights' && (
         <Suspense fallback={null}>
           <AssistantLauncher onClick={() => setAssistantOpen(true)} />
         </Suspense>
@@ -3818,7 +3825,7 @@ export default function App() {
         </div>
       )}
 
-      <MobileBottomNav active={active} onNavigate={navigate} />
+      {active !== 'Welcome' && <MobileBottomNav active={active} onNavigate={navigate} />}
 
       <footer className={active === 'Home' ? 'border-t-2 border-[#173E52] bg-[#FFF1DB]' : 'border-t border-slate-200 bg-white'}>
         <div className="mx-auto flex max-w-[1500px] flex-col gap-2 px-5 py-6 text-sm font-semibold text-[#506B75] sm:flex-row sm:items-center sm:justify-between">

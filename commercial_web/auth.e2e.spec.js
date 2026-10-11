@@ -10,7 +10,7 @@ test('passwordless auth opens and reaches code step without a real email', async
   });
 
   await page.goto('http://127.0.0.1:8510/', { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: 'Sign in to Sports Zenith' }).click();
+  await page.getByRole('banner').getByRole('button', { name: 'Sign in to Sports Zenith' }).click();
 
   await expect(page.getByRole('heading', { name: 'Sign in to continue' })).toBeVisible();
   await expect(page.getByText('No password to remember')).toBeVisible();
@@ -26,7 +26,7 @@ test('passwordless auth opens and reaches code step without a real email', async
 test('passwordless auth uses the mobile sheet layout', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('http://127.0.0.1:8510/', { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: 'Sign in to Sports Zenith' }).click();
+  await page.getByRole('banner').getByRole('button', { name: 'Sign in to Sports Zenith' }).click();
 
   const dialog = page.getByRole('dialog', { name: /Sign in to continue/i });
   await expect(dialog).toBeVisible();
