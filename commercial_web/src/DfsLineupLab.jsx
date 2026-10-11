@@ -431,7 +431,16 @@ export default function DfsLineupLab() {
               <p className="eyebrow">Optimized result</p>
               <h2>{selectedMode.label} lineup</h2>
             </div>
-            <span className="health-pill emerald">LEGAL BUILD · {platform}</span>
+            <span className="health-pill">PAPER BUILD · {platform}</span>
+          </div>
+
+          <div data-dfs-timing role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs font-semibold leading-5 text-amber-950">
+            {result.timing_evidence?.status === 'SLATE_STARTED'
+              ? 'This slate had already started when the lineup was built. Use this result for paper research; it is not a new pregame selection.'
+              : result.timing_evidence?.status === 'PREGAME_TIMES_OBSERVED'
+                ? 'The supplied game times were pregame at build time. Contest entry availability and late-swap rules are not verified.'
+                : 'Game times are missing or unverified for this slate. This paper result does not establish pregame eligibility.'}
+            {result.timing_evidence?.checked_at && <div className="mt-1 text-[11px]">Timing checked {new Date(result.timing_evidence.checked_at).toLocaleString()} · Slate {result.slate_id || 'unavailable'}</div>}
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-1">

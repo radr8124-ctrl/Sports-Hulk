@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+from dfs_timing_evidence import slate_timing_evidence
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -162,6 +163,8 @@ def main():
         if not counts.empty:
             slate_id = counts.index[0]
 
+    timing_evidence = slate_timing_evidence(platform_rows.to_dict("records"), slate_id)
+
     raw_prepared = prepare_pool(source, platform, slate_id=slate_id)
     verified_ownership_available = bool(verified_ownership_mask(raw_prepared).any())
     modelled_ownership_available = bool(
@@ -189,6 +192,7 @@ def main():
             "verified_ownership_available": False,
             "modelled_ownership_available": modelled_ownership_available,
             "ownership_policy": "VERIFIED_ONLY_FOR_CONTRARIAN",
+            "timing_evidence": timing_evidence,
             "pool_size": int(len(prepared)),
             "generated_at": generated_at,
             "lineups": [],
@@ -283,6 +287,7 @@ def main():
         "verified_ownership_available": ownership_available,
         "modelled_ownership_available": modelled_ownership_available,
         "ownership_policy": "VERIFIED_ONLY_FOR_CONTRARIAN",
+        "timing_evidence": timing_evidence,
         "pool_size": int(len(prepared)),
         "generated_at": generated_at,
         "lineups": lineups,
