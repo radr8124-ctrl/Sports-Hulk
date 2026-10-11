@@ -1,0 +1,27 @@
+{
+  "status": "NO_SETTLED_TRADES",
+  "mode": "PAPER",
+  "net_profit": null,
+  "net_roi": null,
+  "maximum_drawdown": null,
+  "settled_trades": 0,
+  "pending_trades": 0,
+  "submitted_records": 0,
+  "schema": "zenith.prediction.roi_status.v1",
+  "checked_at_utc": "2026-10-11T17:42:53.378133+00:00",
+  "primary_objective": "NET_ROI_AFTER_ALL_COSTS",
+  "scope": "NFL game winners; existing frozen model",
+  "observed_games": 5,
+  "observed_outcomes": 14,
+  "observations_captured_at_utc": "2026-10-11T17:17:25.781323+00:00",
+  "trade_ledger_present": false,
+  "validated_profitable_edge": false,
+  "actual_trades": 0,
+  "approved_picks": 0,
+  "remaining": [
+    "Freeze a selection and sizing rule before outcomes",
+    "Verify contract-specific fees and settlement treatment",
+    "Record forward paper entries and actual execution assumptions",
+    "Grade every selection including losses; assess ROI uncertainty"
+  ]
+}

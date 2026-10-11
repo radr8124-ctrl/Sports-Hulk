@@ -5,6 +5,8 @@ for(const width of [320,390,430]) {
   await page.setViewportSize({width,height:844})
   await page.goto(BASE+'#prediction-markets',{waitUntil:'domcontentloaded'})
   await expect(page.getByRole('heading',{name:'Prediction Markets',exact:true})).toBeVisible()
+  await expect(page.getByText('Net ROI · not measured',{exact:true})).toBeVisible()
+  await expect(page.getByText('Settled paper trades: 0',{exact:false})).toBeVisible()
   await expect(page.getByText('NFL contract evidence · Kalshi')).toBeVisible()
   await expect(page.locator('article').first()).toContainText('RESEARCH ONLY')
   await expect(page.getByText('Current terms reviewed: 48 / 48',{exact:false})).toBeVisible()
