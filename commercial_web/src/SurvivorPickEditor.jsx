@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import {verifySurvivorSavedAgainstPrivateState} from '../survivor_save_client_verification.js'
 
 const NFL_TEAMS = [
   'Arizona Cardinals', 'Atlanta Falcons', 'Baltimore Ravens', 'Buffalo Bills',
@@ -17,6 +18,7 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
   const [picks, setPicks] = useState([])
   const [newTeam, setNewTeam] = useState('')
   const [message, setMessage] = useState('')
+  const [verificationPending, setVerificationPending] = useState(false)
   const [working, setWorking] = useState(false)
   const [nowMs, setNowMs] = useState(() => Date.now())
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
     setPicks(Array.isArray(currentPicks) ? currentPicks : [])
     setNewTeam('')
     setMessage('')
+    setVerificationPending(false)
   }, [entryName, poolWeek, savedKey])
 
   // Never rely on the ALIVE label to imply a still-open deadline. The server
@@ -56,21 +59,48 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
   const unchanged = JSON.stringify(picks) === savedKey
 
   const save = async () => {
-    if (working || blocked || unchanged || !entryName || !poolWeek ||
-      picks.some(team => !teamIsEditable(team))) return
+    if (working || blocked || unchanged || verificationPending || !entryName || !poolWeek ||
+      picks.length===0 || picks.some(team => !teamIsEditable(team))) return
     setWorking(true)
     setMessage('')
+    const requestedTeams=[...picks]
     try {
       const bearer = await getAccessToken()
       if (!bearer) throw new Error('Sign in before saving your Survivor entry.')
       const response = await fetch('/api/survivor/save-picks', {
-        method: 'POST',
+        method: 'POST',cache:'no-store',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + bearer },
-        body: JSON.stringify({ entry_name: entryName, week: poolWeek, teams: picks }),
+        body: JSON.stringify({ entry_name: entryName, week: poolWeek, teams: requestedTeams }),
       })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.message || 'Could not save your Survivor picks.')
-      setMessage('Saved in Sports Zenith. Your external pool has NOT been submitted.')
+      const receipt = await response.json()
+      if (!response.ok) throw new Error(receipt.message || 'Could not save your Survivor picks.')
+      // Server must first reopen the original source file and verify its
+      // persisted ticket. A generic 200 response is NOT a success receipt.
+      if (receipt.status!=='PERSISTED_IN_ZENITH_NOT_EXTERNAL_POOL'||
+        receipt.verified_disk_readback!==true){
+        setVerificationPending(true)
+        throw new Error('Save could not be verified in Zenith. Refresh your entry before trying again. Do not assume external submission.')
+      }
+      setMessage('Checking your private Survivor record…')
+      const query=new URLSearchParams({entry:entryName,save_check:String(Date.now())})
+      let state=null
+      try {
+        const checked=await fetch('/api/survivor/state?'+query.toString(),{
+          headers:{Authorization:'Bearer '+bearer},cache:'no-store',
+        })
+        if(checked.ok)state=await checked.json()
+      } catch { /* Keep the exact requested draft, never claim it saved. */ }
+      const proof=verifySurvivorSavedAgainstPrivateState({
+        receipt,state,entryName,week:poolWeek,teams:requestedTeams,
+      })
+      if(!proof.success){
+        setVerificationPending(true)
+        throw new Error('Zenith reported a disk save but your private dashboard did not confirm it. Refresh before retrying. No external pool submission is verified.')
+      }
+      setVerificationPending(false)
+      setMessage(proof.complete
+        ? 'Saved and verified in Sports Zenith. Your external pool has NOT been submitted.'
+        : `Partial draft saved and verified in Sports Zenith (${requestedTeams.length} of ${proof.required_picks} picks). Your external pool has NOT been submitted.`)
       onSaved?.()
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Pick saving unavailable.')
@@ -103,6 +133,11 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
           ? 'The verified Week 5 selection window is closed. Past picks remain available above; no new team can be added here.'
           : 'Select unused teams while the original pool window is open. Saturday 6 PM Eastern, or two hours before an earlier game. Sports Zenith saves privately but does not submit to the external pool.'}
       </p>
+      {!unchanged && picks.length > 0 && (
+        <p data-survivor-draft-warning role="status" className="mt-2 rounded-lg border border-[#E8C68C] bg-[#FFF8E8] px-2.5 py-2 text-[11px] font-black text-[#855A25]">
+          DRAFT ONLY — selecting or adding a team does not save it.
+        </p>
+      )}
       {picks.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {picks.map(team => (
@@ -126,7 +161,7 @@ export default function SurvivorPickEditor({ entryName, poolWeek, usedTeams = []
             setPicks(items => [...items, newTeam]); setNewTeam('')
           } }} disabled={!newTeam || picks.length >= maxPicks}
             className="rounded-xl border border-blue-200 px-4 py-2.5 text-sm font-black text-blue-700 disabled:opacity-40">Add</button>
-          <button type="button" onClick={save} disabled={working || unchanged}
+          <button type="button" onClick={save} disabled={working || unchanged || verificationPending || !picks.length}
             className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white disabled:opacity-40">
             {working ? 'Saving…' : 'Save picks'}
           </button>

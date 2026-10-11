@@ -19,6 +19,6 @@ test('active customer-facing account and Survivor UI uses Sports Zenith branding
     assert.doesNotMatch(content, /Sports[ -]HULK/i, 'Legacy customer-visible brand in ' + file)
   }
   assert.match(source('brandConfig.js'), /PUBLIC_BRAND = 'Sports Zenith'/)
-  assert.match(source('SurvivorPickEditor.jsx'), /Saved in Sports Zenith/)
+  assert.match(source('SurvivorPickEditor.jsx'), /Saved and verified in Sports Zenith/)
   assert.match(source('SurvivorScoreCards.jsx'), /Saved in Sports Zenith/)
 })

@@ -37,6 +37,7 @@ import { survivorPersonalScoreCards } from './survivor_pick_scores.js'
 import { buildSurvivorPastPickHistory } from './survivor_past_picks.js'
 import { buildSurvivorNextRoundReadiness } from './survivor_next_round_readiness.js'
 import { survivorVerifiedPickWindow } from './survivor_pick_window.js'
+import { verifySurvivorPickPersistence } from './survivor_save_persistence_proof.js'
 import { reportingEvidenceSources, reportingClaimSources } from './reporting_evidence.js'
 import { askClaimCoverage } from './ask_claim_coverage.js'
 import { reportingConsensus } from './reporting_consensus.js'
@@ -5441,7 +5442,7 @@ const server=http.createServer(async(req,res)=>{
       const entry=String(body.entry_name||'').trim()
       const week=body.week
       const teams=body.teams
-      if(!entry || entry.length>160 || !Number.isInteger(week) || week<1 || week>25 || !Array.isArray(teams) || teams.length>4){
+      if(!entry || entry.length>160 || !Number.isInteger(week) || week<1 || week>25 || !Array.isArray(teams) || teams.length===0 || teams.length>4){
         return json(res,400,{status:'INVALID_INPUT',message:'Select a linked entry, the current week and up to four teams.'})
       }
       const linked=await linkedSurvivorEntries(req,user.id)
@@ -5452,7 +5453,18 @@ const server=http.createServer(async(req,res)=>{
       if(saved.status!=='SAVED_NOT_SUBMITTED'){
         return json(res,409,{status:'PICK_SAVE_BLOCKED',message:saved.message||'Could not safely save picks.'})
       }
-      return json(res,200,saved)
+      // Re-open the actual protected entry file after the Python writer. A
+      // successful HTTP response or subprocess exit is not a save receipt.
+      // Do not return 200 until the original source has the exact new ticket.
+      const updated=await loadExternalJson(SURVIVOR_ENTRIES_PATH)
+      const proof=verifySurvivorPickPersistence({
+        state:updated,entryName:entry,poolWeek:week,teams,bridge:saved,nowMs:Date.now(),
+      })
+      if(proof.verified_disk_readback!==true){
+        return json(res,503,{status:'PERSISTENCE_NOT_VERIFIED',
+          message:'We could not verify your pick in the saved private record. It might still have reached storage. Refresh the Survivor page to confirm; do not assume it was submitted to the external pool.'})
+      }
+      return json(res,200,{...saved,...proof})
     } catch(err) {
       return json(res,503,{status:'SAVE_UNAVAILABLE',message:'Survivor pick saving is temporarily unavailable.'})
     }
@@ -5652,6 +5664,7 @@ const server=http.createServer(async(req,res)=>{
       state_week_matches_pool:governedEntry?.state_week_matches_pool??null,
       used_teams:Array.isArray(entry?.used_teams)?entry.used_teams:[],
       current_picks:Array.isArray(entry?.current_picks)?entry.current_picks:[],
+      current_pick_status:entry?.current_pick_status||null,
       next_round_readiness:nextRoundReadiness,
       pick_window:pickWindow,
       past_picks:buildSurvivorPastPickHistory(entry,poolWeek),

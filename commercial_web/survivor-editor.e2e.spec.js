@@ -12,8 +12,9 @@ test.beforeAll(async()=>{
 })
 test.afterAll(async()=>{await vite?.close()})
 
-async function ownerPage(page,{canManage=false}={}){
+async function ownerPage(page,{canManage=false,simulateReadbackMismatch=false,serverAckUnverified=false}={}){
  const writes=[]
+ let persistedPicks=[]
  await page.route('**/api/survivor/**',async route=>{
   const u=new URL(route.request().url())
   // Every request must target the temporary local QA Vite host, NEVER production.
@@ -25,7 +26,19 @@ async function ownerPage(page,{canManage=false}={}){
    const body=route.request().postDataJSON()
    expect(body.entry_name).toBe('SYNTHETIC QA 01')
    writes.push({path:name,method:'POST',body})
-   response={status:200,body:{status:'SAVED_NOT_SUBMITTED',teams:body.teams,pool_submitted:false}}
+   persistedPicks=[...body.teams]
+   response={status:200,body:serverAckUnverified
+     ?{status:'SAVED_NOT_SUBMITTED',teams:body.teams,pool_submitted:false}
+     :{status:'PERSISTED_IN_ZENITH_NOT_EXTERNAL_POOL',verified_disk_readback:true,
+       entry_name:body.entry_name,week:body.week,teams:body.teams,
+       pick_status:'SAVED_NOT_SUBMITTED',required_picks:1,
+       pool_submitted:false,external_organizer_submission_verified:false,
+       saved_at_utc:'2099-10-10T21:30:00.000Z'}}
+  }else if(name==='/api/survivor/state' && route.request().method()==='GET'){
+   response={status:200,body:{status:'READY',entry_linked:true,
+     active_entry:'SYNTHETIC QA 01',entry_status:'ALIVE',pool_current_week:5,
+     current_pick_status:'SAVED_NOT_SUBMITTED',required_picks:1,
+     current_picks:simulateReadbackMismatch?[]:persistedPicks}}
   }else if(name==='/api/survivor/pool/preview' && route.request().method()==='POST'){
    const body=route.request().postDataJSON()
    expect(body.filename).toBe('QA_OFFICIAL.csv')
@@ -62,13 +75,39 @@ test('owner-facing Week 5 editor excludes all five burned teams, saves only to s
  await picker.selectOption('Jacksonville Jaguars')
  await editor.getByRole('button',{name:'Add',exact:true}).click()
  await expect(editor.getByText('1 / 1 pick(s)')).toBeVisible()
+ await expect(editor.getByRole('status').filter({hasText:'DRAFT ONLY'})).toBeVisible()
  await expect(editor.getByRole('button',{name:'Add',exact:true})).toBeDisabled()
  await editor.getByRole('button',{name:'Save picks'}).click()
- await expect(editor.getByRole('status')).toContainText('Your external pool has NOT been submitted')
+ await expect(editor.getByRole('status').filter({hasText:'Saved and verified'})).toContainText('Your external pool has NOT been submitted')
  expect(writes).toHaveLength(1)
  expect(writes[0].body.teams).toEqual(['Jacksonville Jaguars'])
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1)
  await expect(page.getByRole('region',{name:'My Survivor pick score'}).getByText('SURVIVED',{exact:true})).toBeVisible()
+})
+
+test('false 200 from a save cannot claim success without a verified on-disk receipt',async({page})=>{
+ const writes=await ownerPage(page,{serverAckUnverified:true})
+ const editor=page.getByRole('region',{name:'Save this week Survivor picks'})
+ await editor.getByRole('combobox',{name:'Choose an unused NFL team'}).selectOption('Houston Texans')
+ await editor.getByRole('button',{name:'Add',exact:true}).click()
+ await expect(editor.getByText('DRAFT ONLY', {exact:false})).toBeVisible()
+ await editor.getByRole('button',{name:'Save picks'}).click()
+ await expect(editor).toContainText('Save could not be verified in Zenith')
+ await expect(editor).not.toContainText('Saved and verified in Sports Zenith')
+ await expect(editor.getByRole('button',{name:'Save picks'})).toBeDisabled()
+ expect(writes).toHaveLength(1)
+})
+
+test('post receipt with mismatched private GET cannot claim Texans was actually saved',async({page})=>{
+ const writes=await ownerPage(page,{simulateReadbackMismatch:true})
+ const editor=page.getByRole('region',{name:'Save this week Survivor picks'})
+ await editor.getByRole('combobox',{name:'Choose an unused NFL team'}).selectOption('Houston Texans')
+ await editor.getByRole('button',{name:'Add',exact:true}).click()
+ await editor.getByRole('button',{name:'Save picks'}).click()
+ await expect(editor).toContainText('private dashboard did not confirm it')
+ await expect(editor).not.toContainText('Saved and verified in Sports Zenith')
+ await expect(editor.getByRole('button',{name:'Save picks'})).toBeDisabled()
+ expect(writes).toHaveLength(1)
 })
 
 test('an eliminated entry is read-only and zero mocked pick writes occur',async({page})=>{
