@@ -5614,8 +5614,19 @@ const server=http.createServer(async(req,res)=>{
       if(!evaluation){
         for(const market of markets)market.evaluation={decision:'PASS',reason_codes:['EVALUATION_NOT_CURRENT']}
       }
+      let nflContractAudit=null
+      try{
+        const evidence=JSON.parse(await readFile(path.join(SPORTS_ROOT,'nfl_live/prediction_markets/kalshi_nfl_contract_audit_latest.json'),'utf8'))
+        const contracts=Array.isArray(evidence.contracts)?evidence.contracts:[]
+        const mapped=new Set(contracts.filter(c=>c.espn_event_id&&c.rules_primary&&c.rules_secondary&&c.rules_sha256&&c.yes_team_abbr).map(c=>c.ticker))
+        nflContractAudit={source:'KALSHI_NFL_DEDICATED_AUDIT',captured_at_utc:evidence.captured_at_utc||null,
+          event_count:evidence.events_requested||0,contract_count:contracts.length,
+          rules_captured: mapped.size,settlement_review_status:'RULES_CAPTURED_NOT_INDEPENDENTLY_CONFIRMED',
+          fees_verified:false,model_edge_verified:false,approved_picks:0,
+          separate_from_general_market_snapshot:true}
+      }catch{}
       return json(res,200,{status:'RESEARCH_ONLY',captured_at_utc:saved.captured_at_utc||null,
-        market_count:saved.market_count||0,providers:saved.providers||{},markets,evaluation,
+        market_count:saved.market_count||0,providers:saved.providers||{},markets,evaluation,nfl_contract_audit:nflContractAudit,
         picks_approved:false,execution_enabled:false})
     }catch{return json(res,503,{status:'SNAPSHOT_UNAVAILABLE',markets:[]})}
   }
