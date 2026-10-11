@@ -34,7 +34,7 @@ function GameTile({game}){
  const showScore=(game.state==='LIVE'||game.state==='FINAL') &&
    game.awayScore!==null&&game.homeScore!==null
  return <article data-testid={'gameday-'+game.key} data-sport={game.sport}
-   className="w-[calc(100vw-153px)] shrink-0 snap-start rounded-2xl border border-[#B2D0CF] border-t-[4px] border-t-[#FF7766] bg-white p-3.5 text-[#173E52] shadow-[0_5px_0_#173E5210] md:w-[min(77vw,286px)] lg:w-auto">
+   className="w-full shrink-0 snap-start rounded-2xl border border-[#B2D0CF] border-t-[4px] border-t-[#FF7766] bg-white p-3.5 text-[#173E52] shadow-[0_5px_0_#173E5210] md:w-[min(77vw,286px)] lg:w-auto">
    <div className="flex flex-wrap items-center justify-between gap-2">
      <span className="text-[11px] font-black tracking-widest text-[#0D6B76]">{game.sport}</span>
      <span className={'rounded-lg border px-2 py-1 text-[9px] font-black tracking-wider '+(pillStyles[game.state]||pillStyles.STATUS_NOT_VERIFIED)}>{label}</span>
@@ -115,13 +115,13 @@ export default function HomeGameDayDeck({onNavigate}){
    </div>:deck.games.length?
    <div data-ref-score-stage className="relative mt-3 min-w-0">
     <div data-scorecard-scroll role="group" aria-label="Swipe game scores"
-     className="flex w-[calc(100vw-153px)] min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto pb-1 md:w-full lg:grid lg:grid-cols-3 xl:grid-cols-5 lg:overflow-visible">
+     className="flex w-[calc(100%-99px)] max-w-full min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto pb-1 md:w-full lg:grid lg:grid-cols-3 xl:grid-cols-5 lg:overflow-visible">
      {deck.games.map(game=><GameTile key={game.key} game={game}/>)}
     </div>
     <RefMobileSideline/>
    </div>:
    <div data-ref-score-stage className="relative mt-3 min-w-0">
-    <div data-score-empty className="flex min-h-28 w-[calc(100vw-153px)] items-center gap-3 rounded-xl border border-[#B1CECB] bg-white p-3 md:w-full md:p-4">
+    <div data-score-empty className="flex min-h-28 w-[calc(100%-99px)] max-w-full items-center gap-3 rounded-xl border border-[#B1CECB] bg-white p-3 md:w-full md:p-4">
      <AlertTriangle size={17} className="shrink-0 text-[#B77316]"/>
      <div className="min-w-0">
       <p className="text-xs font-black text-[#173E52]">
