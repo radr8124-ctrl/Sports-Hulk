@@ -1,0 +1,21 @@
+{
+  "version": "COMPACT_MARKET_PRIOR_FORM_RIDGE200_RESEARCH_V1",
+  "coefficients": [
+    -0.04165567662159758,
+    1.0634142783005869,
+    -0.04161167765733583,
+    0.006587341898925959,
+    0.005608777267112275
+  ],
+  "features": [
+    0,
+    1,
+    2,
+    6,
+    8
+  ],
+  "training_through": 2024,
+  "training_data_sha256": "2b9ca4adb0de04634b54283a8d86416b212dd5caa8d665c43dd79a439fae3818",
+  "research_only": true,
+  "approved_picks": 0
+}

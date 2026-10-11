@@ -1207,5 +1207,48 @@
     "prospective_finals": 0,
     "minimum_finals": 30,
     "status": "HISTORICAL_ADVANTAGE_NOT_DEMONSTRATED"
+  },
+  "challenger_benchmark": {
+    "checked_at_utc": "2026-10-11T16:11:11.498403+00:00",
+    "candidate": "COMPACT_MARKET_PRIOR_FORM_RIDGE200_RESEARCH_V1",
+    "rolling_summary": {
+      "games": 1669,
+      "market": {
+        "brier": 0.210479194,
+        "log_loss": 0.608548094
+      },
+      "candidate": {
+        "brier": 0.210542975,
+        "log_loss": 0.608799737
+      },
+      "old_nine_feature": {
+        "brier": 0.210516226,
+        "log_loss": 0.608624947
+      }
+    },
+    "rolling_brier_gain": -6.378099999998499e-05,
+    "rolling_logloss_gain": -0.0002516430000000236,
+    "rolling_week_block_95ci": [
+      -0.0004608677648537128,
+      0.0003352623266789051
+    ],
+    "secondary_seen_2025": {
+      "games": 284,
+      "market": {
+        "brier": 0.210906373,
+        "log_loss": 0.606988938
+      },
+      "candidate": {
+        "brier": 0.211331767,
+        "log_loss": 0.607826389
+      },
+      "old_nine_feature": {
+        "brier": 0.212617338,
+        "log_loss": 0.610849042
+      }
+    },
+    "validated_edge": false,
+    "forward_games_scored": 0,
+    "production_model_changed": false
   }
 }

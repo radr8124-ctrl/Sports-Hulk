@@ -1,0 +1,26 @@
+{
+  "schema": "zenith.nfl.pbp_replay_receipt.v1",
+  "captured_at_utc": "2026-10-11T16:13:23.601721+00:00",
+  "season": 2024,
+  "source_url": "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2024.parquet",
+  "asset_id": 512957858,
+  "source_sha256": "3fd2896bc0b911b615142d2f1fabae54a4bbba5ab7b73b28187b118ef8af6a3b",
+  "source_bytes": 20597560,
+  "publisher_digest": "sha256:3fd2896bc0b911b615142d2f1fabae54a4bbba5ab7b73b28187b118ef8af6a3b",
+  "raw_plays": 49492,
+  "eligible_offensive_plays": 35051,
+  "games": 285,
+  "feature_rows": 570,
+  "feature_sha256": "d55e004d89a27270fbdf63ed80b025639e412554b9b635a233c5a3ac7ddb9819",
+  "same_week_or_future_results_in_features": false,
+  "source_replay_complete": true,
+  "model_trained": false,
+  "validated_edge": false,
+  "approved_picks": 0,
+  "limitations": [
+    "Current NFLverse revised data is retrospective, not original as-of play capture",
+    "Offense EPA only; no independent advantage test yet",
+    "One season restored; not the full training history",
+    "Off-server restoration not verified"
+  ]
+}
