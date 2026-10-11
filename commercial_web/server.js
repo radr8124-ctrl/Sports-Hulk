@@ -5578,6 +5578,28 @@ const server=http.createServer(async(req,res)=>{
   // imports, writes, submits picks, or auto-certifies game outcomes.
   // Public *aggregate only*. Never authenticate, select, or return a member
   // ticket, original entry names, source rows, tokens, or private picks here.
+  if(req.method==='GET'&&url.pathname==='/api/prediction-markets/public-snapshot'){
+    const limit=consumeRateLimit('prediction-research:'+String(req.socket.remoteAddress||'unknown'),30,60*1000)
+    if(!limit.ok)return json(res,429,{status:'RATE_LIMITED'})
+    res.setHeader('Cache-Control','public, max-age=60')
+    try{
+      const file=path.join(SPORTS_ROOT,'nfl_live/prediction_markets/latest.json')
+      const saved=JSON.parse(await readFile(file,'utf8'))
+      if(saved.schema!=='zenith.prediction_market.snapshot.v1')throw Error('UNEXPECTED_SCHEMA')
+      const entries=Array.isArray(saved.markets)?saved.markets:[]
+      const markets=entries.filter(row=>['KALSHI','POLYMARKET'].includes(row.provider)).slice(0,1200).map(row=>({
+        provider:row.provider,id:String(row.id||'').slice(0,100),
+        event:String(row.event||'').slice(0,180),question:String(row.question||'').slice(0,180),
+        yes_bid:row.yes_bid??null,yes_ask:row.yes_ask??null,
+        outcomes:Array.isArray(row.outcomes)?row.outcomes.slice(0,5):[],
+        display_prices:Array.isArray(row.display_prices)?row.display_prices.slice(0,5):[],
+        price_basis:String(row.price_basis||'indicative').slice(0,120),
+      }))
+      return json(res,200,{status:'RESEARCH_ONLY',captured_at_utc:saved.captured_at_utc||null,
+        market_count:saved.market_count||0,providers:saved.providers||{},markets,
+        picks_approved:false,execution_enabled:false})
+    }catch{return json(res,503,{status:'SNAPSHOT_UNAVAILABLE',markets:[]})}
+  }
   if(req.method==='GET'&&url.pathname==='/api/survivor/public-field-watch'){
     const limit=consumeRateLimit('survivor-public-field:'+String(req.socket.remoteAddress||'unknown'),40,60*1000)
     if(!limit.ok)return json(res,429,{status:'RATE_LIMITED'})

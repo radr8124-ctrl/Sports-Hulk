@@ -1,3 +1,4 @@
+import PredictionMarketsPanel from './PredictionMarketsPanel.jsx'
 import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Activity, AlertTriangle, BarChart3, Brain, CheckCircle2, ChevronRight, CloudSun,
@@ -3558,7 +3559,7 @@ function MobileBottomNav({ active, onNavigate }) {
 function MoreMenu({ onNavigate, onClose }) {
   return (
     <div className="grid gap-2">
-      {['Scores', 'News & Insights', 'Brain Record', 'Research'].map((item) => (
+      {['Prediction Markets', 'Scores', 'News & Insights', 'Brain Record', 'Research'].map((item) => (
         <button key={item} onClick={() => { onNavigate(item); onClose?.() }} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-black text-slate-800 hover:border-blue-200">
           <span>{item}</span><ChevronRight size={17} className="text-slate-300" />
         </button>
@@ -3570,6 +3571,7 @@ function MoreMenu({ onNavigate, onClose }) {
 const ROUTE_HASH = {
   Home: '',
   Scores: 'scores',
+  'Prediction Markets': 'prediction-markets',
   'Best Bets': 'best-bets',
   Props: 'props',
   PrizePicks: 'prizepicks',
@@ -3740,6 +3742,7 @@ export default function App() {
               </>
             )}
 
+            {active === 'Prediction Markets' && <PredictionMarketsPanel />}
             {active === 'Scores' && <ScoresHub />}
 
             {isBetting && (
