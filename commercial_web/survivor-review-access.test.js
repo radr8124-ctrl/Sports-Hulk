@@ -18,7 +18,7 @@ test('public Survivor sign in/access is immediately after deadline, before resea
  assert.match(panel.slice(b,c),/Refresh my entries/)
  assert.match(panel.slice(b,c),/appear automatically without a name or claim code/)
  assert.doesNotMatch(panel.slice(b,c),/Link my Survivor entry/)
- const accessEnd=panel.indexOf('aria-label="Survivor history status and refresh"',b)
+ const accessEnd=panel.indexOf('aria-label="Knockout Pool PDF quick access"',b)
  assert(accessEnd>b && accessEnd<c)
  assert.doesNotMatch(panel.slice(b,accessEnd),/scrollIntoView/) // History jump is safe; manual claim shortcut must not return.
 })

@@ -60,6 +60,45 @@ class PoolManagerImportTests(unittest.TestCase):
         self.addCleanup(up.stop)
         self.addCleanup(br.stop)
 
+    def test_linked_owner_pdf_preview_finds_exact_ticket_and_week_five_team_only(self):
+        sample={"filename":"WEEK #5 PICKS.pdf","sha256":"a"*64,
+                "entry_count":3,"pick_rows":4,"max_week":5,
+                "duplicate_ticket_instances":1,
+                "meta":{"current_week":5,"format":"PDF"},
+                "entries":[
+                    {"entry_name":"SAMPLE PERSON 01","picks":[
+                        {"week_position":4,"week_pick_number":1,"team":"Minnesota Vikings"},
+                        {"week_position":5,"week_pick_number":1,"team":"Houston Texans"}]},
+                    {"entry_name":"SAMPLE PERSON 01 [ENTRY 2]","source_entry_name":"SAMPLE PERSON 01",
+                     "picks":[{"week_position":5,"week_pick_number":1,"team":"Dallas Cowboys"}]},
+                    {"entry_name":"SAMPLE PERSON 02","picks":[
+                        {"week_position":5,"week_pick_number":1,"team":"Jacksonville Jaguars"}]},
+                ]}
+        result=bridge.describe(sample, focus_entry_names=['SAMPLE PERSON 01'])
+        self.assertEqual(result['status'],'PREVIEW_READY')
+        self.assertEqual(result['source_format'],'PDF')
+        self.assertEqual(result['duplicate_ticket_instances'],1)
+        self.assertEqual(result['linked_entry_preview'][0]['entry_name'],'SAMPLE PERSON 01')
+        self.assertTrue(result['linked_entry_preview'][0]['exact_match'])
+        self.assertEqual(result['linked_entry_preview'][0]['additional_same_name_tickets_review'],1)
+        self.assertEqual(result['linked_entry_preview'][0]['current_week_picks'],['Houston Texans'])
+        self.assertEqual(result['linked_entry_preview'][0]['weekly_picks'][-1],
+                         {"week":5,"pick_number":1,"team":"Houston Texans"})
+        self.assertNotIn('SAMPLE PERSON 02',str(result['linked_entry_preview']))
+        self.assertNotIn('Dallas Cowboys',str(result['linked_entry_preview']))
+
+    def test_pdf_preview_missing_owned_ticket_does_not_invent_entry_or_change_pool(self):
+        sample={"filename":"WEEK #5 PICKS.pdf","sha256":"a"*64,
+                "entry_count":1,"pick_rows":1,"max_week":5,
+                "meta":{"current_week":5,"format":"PDF"},
+                "entries":[{"entry_name":"UNRELATED USER 01","picks":[
+                    {"week_position":5,"week_pick_number":1,"team":"Houston Texans"}]}]}
+        result=bridge.describe(sample,focus_entry_names=['SAMPLE PERSON 01'])
+        self.assertFalse(result['linked_entry_preview'][0]['exact_match'])
+        self.assertEqual(result['linked_entry_preview'][0]['current_week_picks'],[])
+        self.assertFalse(self.base.exists())
+        self.assertEqual(self.personal.read_bytes(),json.dumps(self.initial).encode())
+
     def test_read_only_csv_preview_does_not_create_pool_state(self):
         sample = b"Entry,Week 5\nAlex Smith,KC\nAlex Smith,SF\n"
         previous = self.personal.read_bytes()

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import {FileUp,ChevronDown,ShieldCheck,AlertTriangle} from 'lucide-react'
 
 async function encodeFile(file) {
   if (!file || file.size <= 0 || file.size > 5_000_000) {
@@ -21,6 +22,7 @@ export default function SurvivorPoolImport({ getAccessToken, onImported }) {
   const [working, setWorking] = useState(false)
   const [message, setMessage] = useState('')
   const fileRef = useRef(null)
+  const detailsRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -102,38 +104,49 @@ export default function SurvivorPoolImport({ getAccessToken, onImported }) {
   }
 
   return (
-    <section aria-label="Import full Survivor pool" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft md:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-blue-700">Pool manager</p>
-          <h2 className="mt-1 text-xl font-black text-slate-950">Import full Survivor pool</h2>
-          <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-600">
-            Upload the official PDF, XLSX or CSV sheet. Preview before confirming. Repeated names can represent separate tickets.
-            Only newer or current-week sheets may replace the verified pool snapshot.
+    <section id="knockout-pdf-upload" aria-label="Import full Survivor pool" data-knockout-pdf-manager
+      className="scroll-mt-24 min-w-0 overflow-hidden rounded-[22px] border-2 border-[#B9D2D1] bg-[#FFF8ED] p-3 text-[#173E52] sm:p-4">
+      <details ref={detailsRef} className="group" data-knockout-pdf-disclosure>
+        <summary className="flex min-h-12 cursor-pointer list-none items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-[#FF7766]">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#173E52] text-[#84D8D6]"><FileUp size={21}/></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[10px] font-black uppercase tracking-[.13em] text-[#0E7280]">KNOCKOUT POOL · OFFICIAL FILES</span>
+            <span className="mt-0.5 block text-sm font-black">Upload weekly PDF <span className="text-[10px] font-semibold text-[#55717A]">(also CSV/XLSX)</span></span>
+          </span>
+          <span className="rounded-lg border border-[#D5D9C7] bg-white px-2 py-1 text-[9px] font-black uppercase text-[#5C6F77]">Manager</span>
+          <ChevronDown size={17} className="shrink-0 transition group-open:rotate-180"/>
+        </summary>
+        <div className="mt-3 border-t border-[#DBE4DC] pt-3">
+          <p className="flex items-start gap-1.5 text-[11px] font-semibold leading-5 text-[#526D77]">
+            <ShieldCheck size={15} className="mt-0.5 shrink-0 text-[#0E7280]"/>
+            Choose the organizer’s full weekly knockout-pool PDF from Files. Preview first; nothing is imported or changed until you confirm. Same-name tickets stay separate.
           </p>
-        </div>
-        <span className="rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-black uppercase text-slate-700">
-          Manager only
-        </span>
-      </div>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+          <p className="mt-1 text-[10px] font-medium leading-4 text-[#637984]">Text-searchable PDFs up to 5 MB. Scanned/image-only PDFs may require an original digital copy. A reported loss list is not a complete official pool sheet.</p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <input ref={fileRef} aria-label="Choose official pool file" type="file"
-          accept=".pdf,.xlsx,.csv" className="min-w-0 flex-1 text-xs text-slate-700"
+          accept=".pdf,application/pdf,.xlsx,.csv" className="min-w-0 flex-1 text-xs text-[#173E52]"
           onChange={event => {
-            setFile(event.target.files?.[0] || null)
+            const next=event.target.files?.[0] || null
+            setFile(next)
             setPreview(null)
             setEncoded(null)
             setConfirmed(false)
-            setMessage('')
+            setMessage(next && !/\.(pdf|xlsx|csv)$/i.test(next.name)
+              ? 'Choose an official PDF, XLSX, or CSV file.'
+              : next && next.size > 5_000_000
+                ? 'File exceeds 5 MB. Request the original smaller organizer PDF.' : '')
           }} />
-        <button type="button" disabled={!file || working} onClick={makePreview}
+        <button type="button" disabled={!file || working || file.size>5_000_000 || !/\.(pdf|xlsx|csv)$/i.test(file.name)} onClick={makePreview}
           className="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white disabled:opacity-40">
           {working ? 'Checking…' : 'Preview pool file'}
         </button>
       </div>
 
+      {file && (
+        <p data-knockout-selected-pdf className="mt-2 break-all text-[11px] font-bold text-[#49616D]">Selected: {file.name} · {Math.ceil(file.size/1024).toLocaleString('en-US')} KB</p>
+      )}
       {preview && (
-        <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+        <div data-knockout-preview className="mt-4 rounded-2xl border border-[#C2DED9] bg-[#EFF9F4] p-3 sm:p-4">
           <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-4">
             {[
               ['Entries', preview.entry_count],
@@ -147,6 +160,28 @@ export default function SurvivorPoolImport({ getAccessToken, onImported }) {
               </div>
             ))}
           </div>
+          {Array.isArray(preview.linked_entry_preview) && preview.linked_entry_preview.length>0 && (
+            <div className="mt-3 space-y-2" aria-label="My entries in this uploaded PDF">
+              {preview.linked_entry_preview.map(entry => (
+                <div key={entry.entry_name} className={`rounded-xl border px-3 py-2.5 text-xs ${entry.exact_match?'border-[#B9D4CD] bg-white text-[#173E52]':'border-[#E7C68D] bg-[#FFF5DF] text-[#805A24]'}`}>
+                  <p className="font-black">{entry.exact_match ? 'Found your entry: ' : 'Needs manual review: '}{entry.entry_name}</p>
+                  {entry.exact_match ? (
+                    <>
+                      <p className="mt-1 font-semibold">{Array.isArray(entry.current_week_picks)&&entry.current_week_picks.length
+                        ? `Week ${preview.max_week}: ${entry.current_week_picks.join(' + ')}`
+                        : `No Week ${preview.max_week} team appears for this exact entry in the uploaded file.`}</p>
+                      {!!entry.additional_same_name_tickets_review &&
+                        <p className="mt-1 font-bold text-amber-800">{entry.additional_same_name_tickets_review} more same-name ticket(s) exist in this PDF and must be reviewed separately.</p>}
+                    </>
+                  ) : (
+                    <p className="mt-1 flex items-start gap-1 font-semibold"><AlertTriangle size={13} className="shrink-0"/>
+                      This exact numbered entry was not matched in the uploaded PDF. Check the organizer’s sheet before confirming.
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           {!!preview.examples?.length && (
             <div className="mt-3 text-xs leading-6 text-slate-700">
               <b>Sample entries:</b> {preview.examples.map(entry => entry.entry_name).join(' · ')}
@@ -166,6 +201,8 @@ export default function SurvivorPoolImport({ getAccessToken, onImported }) {
       )}
 
       {message && <p role="status" className="mt-3 text-xs font-bold leading-5 text-blue-900">{message}</p>}
+        </div>
+      </details>
     </section>
   )
 }

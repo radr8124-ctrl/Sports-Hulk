@@ -41,10 +41,17 @@ async function ownerPage(page,{canManage=false,simulateReadbackMismatch=false,se
      current_picks:simulateReadbackMismatch?[]:persistedPicks}}
   }else if(name==='/api/survivor/pool/preview' && route.request().method()==='POST'){
    const body=route.request().postDataJSON()
-   expect(body.filename).toBe('QA_OFFICIAL.csv')
+   expect(['QA_OFFICIAL.csv','QA_WEEK5.pdf']).toContain(body.filename)
    expect(body.base64.length).toBeGreaterThan(8)
-   writes.push({path:name,method:'POST',preview:true})
-   response={status:200,body:{status:'PREVIEW_READY',preview_token:'SYNTHETIC_PREVIEW_ONLY',entry_count:4,pick_rows:7,max_week:5,duplicate_ticket_instances:1,examples:[{entry_name:'SYNTHETIC QA 01',pick_count:1}]}}
+   writes.push({path:name,method:'POST',preview:true,source_format:body.filename.endsWith('.pdf')?'PDF':'CSV'})
+   response={status:200,body:{status:'PREVIEW_READY',preview_token:'SYNTHETIC_PREVIEW_ONLY',
+     entry_count:4,pick_rows:7,max_week:5,source_format:body.filename.endsWith('.pdf')?'PDF':'CSV',
+     duplicate_ticket_instances:1,examples:[{entry_name:'SYNTHETIC QA 01',pick_count:1}],
+     linked_entry_preview:body.filename.endsWith('.pdf')?[{
+       entry_name:'SYNTHETIC QA 01',exact_match:true,additional_same_name_tickets_review:1,
+       current_week_picks:['Houston Texans'],weekly_picks:[{week:5,pick_number:1,team:'Houston Texans'}],
+     }]:[],
+   }}
   }else if(name==='/api/survivor/pool/confirm' && route.request().method()==='POST'){
    const body=route.request().postDataJSON()
    expect(body.preview_token).toBe('SYNTHETIC_PREVIEW_ONLY')
@@ -126,6 +133,7 @@ test('manager-only official pool preview and confirm are separate, never touch a
  const writes=await ownerPage(page,{canManage:true})
  const section=page.getByRole('region',{name:'Import full Survivor pool'})
  await expect(section).toBeVisible()
+ await section.locator('summary').click()
  await section.getByRole('button',{name:'Preview pool file'}).isDisabled()
  await section.getByLabel('Choose official pool file').setInputFiles({name:'QA_OFFICIAL.csv',mimeType:'text/csv',buffer:Buffer.from('entry_name,week,team\nSYNTHETIC QA 01,5,Jacksonville Jaguars\n')})
  await section.getByRole('button',{name:'Preview pool file'}).click()
@@ -137,6 +145,28 @@ test('manager-only official pool preview and confirm are separate, never touch a
  await section.getByRole('button',{name:'Confirm pool import'}).click()
  await expect(section.getByRole('status')).toContainText('Your existing personal entry history was preserved')
  expect(writes.map(item=>item.path)).toEqual(['/api/survivor/pool/preview','/api/survivor/pool/confirm'])
+})
+
+test('Knockout Pool PDF is easy to open and preview the exact owner ticket; never auto-imports',async({page})=>{
+ await page.setViewportSize({width:390,height:844})
+ const writes=await ownerPage(page,{canManage:true})
+ const section=page.getByRole('region',{name:'Import full Survivor pool'})
+ await expect(section.getByText('Upload weekly PDF')).toBeVisible()
+ await expect(section.locator('details')).not.toHaveAttribute('open','')
+ await section.locator('summary').click()
+ await section.getByLabel('Choose official pool file').setInputFiles({
+  name:'QA_WEEK5.pdf',mimeType:'application/pdf',
+  buffer:Buffer.from('%PDF-1.4\nSynthetic QA fixture only; backend parsing is tested separately.\n'),
+ })
+ await expect(section.getByText(/Selected: QA_WEEK5.pdf/)).toBeVisible()
+ await section.getByRole('button',{name:'Preview pool file'}).click()
+ await expect(section.getByText('Found your entry: SYNTHETIC QA 01')).toBeVisible()
+ await expect(section.getByText('Week 5: Houston Texans')).toBeVisible()
+ await expect(section).toContainText('1 more same-name ticket')
+ await expect(section.getByRole('button',{name:'Confirm pool import'})).toBeDisabled()
+ expect(writes.map(r=>r.path)).toEqual(['/api/survivor/pool/preview'])
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1)
+ await section.screenshot({path:'/tmp/zenith_knockout_pdf_owner_preview_390_20261010.png'})
 })
 
 test('regular linked owner cannot open manager import',async({page})=>{

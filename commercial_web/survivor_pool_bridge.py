@@ -85,7 +85,51 @@ def check_preview(preview: dict, *, before_week: int, required_sha: str | None =
         raise ValueError("The uploaded file changed since the preview.")
 
 
-def describe(preview: dict) -> dict:
+def _focused_owner_entry_preview(preview: dict, names: object) -> list[dict]:
+    """Preview exact signed-in ticket names, NEVER reconcile by participant alone.
+
+    Names are derived from the authenticated server-side owner link registry;
+    client-requested names are ignored. Same-name additional PDF rows remain
+    separate organizer tickets requiring review, not merged into private picks.
+    """
+    if not isinstance(names, list) or len(names) > 16:
+        return []
+    entries = preview.get("entries") or []
+    if not isinstance(entries, list):
+        return []
+    current_week = preview.get("max_week")
+    focused = []
+    seen = set()
+    for name in names:
+        if not isinstance(name, str) or not name.strip() or len(name) > 160:
+            continue
+        name = name.strip()
+        if name in seen:
+            continue
+        seen.add(name)
+        exact = [row for row in entries if row.get("entry_name") == name]
+        extra = sum(1 for row in entries
+                    if row.get("source_entry_name") == name and row.get("entry_name") != name)
+        pick_rows = []
+        if len(exact) == 1:
+            for pick in exact[0].get("picks") or []:
+                team = pick.get("team")
+                week = pick.get("week_position")
+                pick_number = pick.get("week_pick_number")
+                if isinstance(team, str) and team.strip() and isinstance(week, int) and 1 <= week <= 25:
+                    pick_rows.append({"week":week,"pick_number":pick_number if isinstance(pick_number,int) else None,
+                                      "team":team.strip()})
+        focused.append({
+            "entry_name":name,
+            "exact_match":len(exact) == 1,
+            "additional_same_name_tickets_review":extra,
+            "weekly_picks":pick_rows,
+            "current_week_picks":[item["team"] for item in pick_rows if item["week"] == current_week],
+        })
+    return focused
+
+
+def describe(preview: dict, *, focus_entry_names: object = None) -> dict:
     meta = preview.get("meta") or {}
     return {
         "status": "PREVIEW_READY",
@@ -98,6 +142,7 @@ def describe(preview: dict) -> dict:
         "source_format": meta.get("format"),
         "duplicate_ticket_instances": preview.get("duplicate_ticket_instances", 0),
         "warnings": (meta.get("warnings") or [])[:5],
+        "linked_entry_preview": _focused_owner_entry_preview(preview, focus_entry_names),
         "examples": [
             {
                 "entry_name": entry["entry_name"],
@@ -115,7 +160,7 @@ def process(payload: dict) -> dict:
     if payload.get("action") == "preview":
         check_preview(preview, before_week=week)
         return {
-            **describe(preview),
+            **describe(preview, focus_entry_names=payload.get("focus_entry_names")),
             "pool_week_before": week,
             "official_source_before_sha256": fingerprint,
         }

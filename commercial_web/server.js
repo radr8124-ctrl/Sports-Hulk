@@ -5384,8 +5384,12 @@ const server=http.createServer(async(req,res)=>{
     if(!limit.ok) return json(res,429,{status:'RATE_LIMITED',message:'Try again shortly.'})
     try {
       const body=await readSurvivorPoolUpload(req)
+      // Focused PDF preview may only contain entries linked to the actual
+      // authenticated owner. Never trust browser-supplied entry names.
+      const ownerEntries=await linkedSurvivorEntries(req,user.id)
       const preview=await runSurvivorPoolBridge({
         action:'preview',filename:body.filename,base64:body.base64,
+        focus_entry_names:ownerEntries,
       })
       if(preview.status!=='PREVIEW_READY') return json(res,422,preview)
       const token=randomBytes(24).toString('base64url')
@@ -5599,6 +5603,7 @@ const server=http.createServer(async(req,res)=>{
 
     if(!entry) return json(res,200,{
       status:'AUTHENTICATED_NO_ENTRY',
+      pool_manager_enabled:poolManagerPermitted(user),
       entry_linked:false,
       linked_entry_count:linkedEntries.length,
       linked_entries:linkedEntries,
@@ -5650,6 +5655,7 @@ const server=http.createServer(async(req,res)=>{
 
     return json(res,200,{
       status:'READY',
+      pool_manager_enabled:poolManagerPermitted(user),
       entry_linked:true,
       linked_entry_count:linkedEntries.length,
       linked_entries:linkedEntries,

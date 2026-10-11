@@ -1098,6 +1098,22 @@ function SurvivorCommercialPanel() {
         </section>
       )}
 
+      {isSignedIn && saved.pool_manager_enabled === true && (
+        <div aria-label="Knockout Pool PDF quick access"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#C5DDD8] bg-[#F0FAF5] px-3 py-2 text-[#173E52]">
+          <span className="text-[11px] font-bold">Organizer’s weekly pool sheet</span>
+          <button type="button" onClick={() => {
+              const destination=document.getElementById('knockout-pdf-upload')
+              const details=destination?.querySelector('details')
+              if(details)details.open=true
+              destination?.scrollIntoView({behavior:'smooth',block:'start'})
+            }}
+            className="rounded-lg bg-[#173E52] px-3 py-2 text-[11px] font-black text-white focus-visible:outline-2 focus-visible:outline-[#FF7766]">
+            Upload weekly PDF <ChevronRight size={13} className="ml-0.5 inline" />
+          </button>
+        </div>
+      )}
+
       {isSignedIn && (
         <section aria-label="Survivor history status and refresh"
           className="rounded-xl border border-[#BAD6D3] bg-[#EAF7F4] px-3 py-2.5 text-[#173E52] sm:px-4">
@@ -1151,6 +1167,15 @@ function SurvivorCommercialPanel() {
             pickWindow={saved.pick_window}
             getAccessToken={getAccessToken}
             onSaved={() => setLinkRefresh(value => value + 1)}
+          />
+        </Suspense>
+      )}
+
+      {isSignedIn && (
+        <Suspense fallback={null}>
+          <SurvivorPoolImport
+            getAccessToken={getAccessToken}
+            onImported={() => setLinkRefresh(value => value + 1)}
           />
         </Suspense>
       )}
@@ -1247,15 +1272,6 @@ function SurvivorCommercialPanel() {
           requiredPicks={hasEntry && Number.isInteger(saved.required_picks) ? saved.required_picks : null}
         />
       </Suspense>
-
-      {isSignedIn && (
-        <Suspense fallback={null}>
-          <SurvivorPoolImport
-            getAccessToken={getAccessToken}
-            onImported={() => setLinkRefresh(value => value + 1)}
-          />
-        </Suspense>
-      )}
 
       {isSignedIn && linkedEntries.length > 0 && (
         <section>
