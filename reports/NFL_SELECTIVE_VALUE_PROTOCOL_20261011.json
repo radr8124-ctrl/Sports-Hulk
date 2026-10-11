@@ -1,0 +1,27 @@
+{
+  "schema": "zenith.selective_value_protocol.v1",
+  "created_at_utc": "2026-10-11T16:39:54.861Z",
+  "candidate": "opponent_adjusted_epa",
+  "minimum_expected_return_after_stress": 0.03,
+  "hypothetical_cost_per_unit_stake": 0.02,
+  "stake_per_selection": 1,
+  "rolling_seasons": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "secondary_seen_season": 2025,
+  "bootstrap_replicates": 10000,
+  "seed": 61011,
+  "selection": "one side per game: maximum model EV after hypothetical cost, require >=3%; exact ties choose home",
+  "limitations": [
+    "Historical data previously inspected; fixed now but not pristine preregistration",
+    "Historical American sportsbook odds, not exchange orderbooks",
+    "2% stake cost is hypothetical, not verified exchange fees",
+    "Binary cohort excludes tied games; conditional simulation only",
+    "No forward validation, no production picks"
+  ]
+}

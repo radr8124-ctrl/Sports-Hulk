@@ -9,6 +9,7 @@ for(const width of [320,390,430]) {
   await expect(page.locator('article').first()).toContainText('RESEARCH ONLY')
   await expect(page.getByText('Current terms reviewed: 48 / 48',{exact:false})).toBeVisible()
   await expect(page.getByText('Research model comparison · no validated edge')).toBeVisible()
+  await expect(page.getByText('Selective value test: 0 qualifying selections in 1669 games',{exact:false})).toBeVisible()
   await expect(page.getByRole('cell',{name:'Opponent-adjusted EPA',exact:true})).toBeVisible()
   await expect(page.getByText('Independent model validation: advantage not demonstrated')).toBeVisible()
   await expect(page.getByText('Books observed: 48',{exact:false})).toBeVisible()
