@@ -6,7 +6,7 @@ const clock=v=>{
 }
 const mood=status=>status==='LIVE_AHEAD'?'text-emerald-700':status==='LIVE_BEHIND'?'text-red-700':status==='UPCOMING'?'text-[#536C76]':'text-amber-800'
 const gameLabel=game=>({UPCOMING:'Upcoming',LIVE_AHEAD:'Live · ahead',LIVE_BEHIND:'Live · behind',LIVE_TIED:'Live · tied',FINAL_WIN_PENDING_ORGANIZER:'Final win · organizer pending',FINAL_LOSS_PENDING_ORGANIZER:'Final loss · organizer pending',FINAL_TIE_REVIEW_REQUIRED:'Final tie · review required',FINAL_SCORE_UNVERIFIED:'Final score unverified',SCORE_NOT_VERIFIED:'Score waiting'})[game?.status]||'Score waiting'
-export default function SurvivorWeek5FieldWatch({entryName,getAccessToken}){
+export default function SurvivorWeek5FieldWatch({entryName=null,getAccessToken=null,publicMode=false}){
  const [value,setValue]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(false)
  useEffect(()=>{
   let active=true,controller=null
@@ -15,10 +15,11 @@ export default function SurvivorWeek5FieldWatch({entryName,getAccessToken}){
    setBusy(true)
    controller?.abort();controller=new AbortController()
    try{
-    const bearer=await getAccessToken()
-    if(!bearer)throw Error('Account not authenticated')
-    const url='/api/survivor/field-watch?entry='+encodeURIComponent(entryName)+'&at='+Date.now()
-    const res=await fetch(url,{headers:{Authorization:'Bearer '+bearer},cache:'no-store',signal:controller.signal})
+    const bearer=publicMode?null:await getAccessToken?.()
+    if(!publicMode&&!bearer)throw Error('Account not authenticated')
+    const url=publicMode?'/api/survivor/public-field-watch'
+      :'/api/survivor/field-watch?entry='+encodeURIComponent(entryName)
+    const res=await fetch(url,{headers:bearer?{Authorization:'Bearer '+bearer}:{},cache:'no-store',signal:controller.signal})
     if(!res.ok)throw Error('Field feed unavailable')
     const next=await res.json()
     if(active){setValue(next);setError(false)}
@@ -30,12 +31,12 @@ export default function SurvivorWeek5FieldWatch({entryName,getAccessToken}){
   const visible=()=>{if(document.visibilityState==='visible')void load()}
   document.addEventListener('visibilitychange',visible)
   return()=>{active=false;controller?.abort();clearInterval(timer);document.removeEventListener('visibilitychange',visible)}
- },[entryName,getAccessToken])
+ },[entryName,getAccessToken,publicMode])
  if(!value&&error)return <section aria-label="Week 5 full field tracker" className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs font-semibold text-amber-900">Week 5 field tracking is temporarily unavailable; your official pool file and picks are unchanged.</section>
  return <section aria-label="Week 5 full field tracker" data-week5-full-field className="min-w-0 rounded-[22px] border border-[#A9CAC8] bg-[#EFF8F5] p-3 text-[#173E52] sm:p-4">
   <div className="flex flex-wrap items-start justify-between gap-2">
    <div><p className="text-[10px] font-black uppercase tracking-[.13em] text-[#167982]">Knockout Pool · Sunday Field Watch</p>
-   <h2 className="mt-1 text-base font-black">All 333 tickets · Week 5</h2></div>
+   <h2 className="mt-1 text-base font-black">{value?.total_entries??'Official pool'} tickets · Week 5</h2></div>
    <span className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-[10px] font-black text-[#116B76]"><RefreshCw size={12} className={busy?'animate-spin':''}/> Auto-refreshes every 2 min</span>
   </div>
   {value?.status==='VERIFIED_OFFICIAL_FIELD'?<>

@@ -5576,6 +5576,32 @@ const server=http.createServer(async(req,res)=>{
   // Verified aggregate whole-field status + owner-specific organizer ticket.
   // Scoped to an authenticated, genuinely linked Survivor entry. Never
   // imports, writes, submits picks, or auto-certifies game outcomes.
+  // Public *aggregate only*. Never authenticate, select, or return a member
+  // ticket, original entry names, source rows, tokens, or private picks here.
+  if(req.method==='GET'&&url.pathname==='/api/survivor/public-field-watch'){
+    const limit=consumeRateLimit('survivor-public-field:'+String(req.socket.remoteAddress||'unknown'),40,60*1000)
+    if(!limit.ok)return json(res,429,{status:'RATE_LIMITED'})
+    res.setHeader('Cache-Control','public, max-age=30')
+    try{
+      const [scores,ledger,meta]=await Promise.all([
+        loadExternalJson(path.join(SPORTS_ROOT,'commercial_web/public/nfl_scores.json')),
+        readFile(SURVIVOR_POOL_LEDGER_CSV,'utf8'),
+        loadExternalJson(SURVIVOR_POOL_HISTORY_META),
+      ])
+      const report=buildSurvivorWeek5FieldWatch({csvText:ledger,meta,scoreboard:scores,at:Date.now()})
+      // Explicit allowlist; future private fields cannot accidentally leak.
+      return json(res,200,{
+        status:report.status,week:report.week,total_entries:report.total_entries,
+        marked_eliminated_before_sunday:report.marked_eliminated_before_sunday,
+        in_contention_before_sunday:report.in_contention_before_sunday,
+        scoreboard_status:report.scoreboard_status,scoreboard_updated_at:report.scoreboard_updated_at||null,
+        teams:report.teams,live_exposure:report.live_exposure||null,
+        pool_result_certified:false,
+        source_description:report.source_description||null,
+      })
+    }catch{return json(res,503,{status:'PUBLIC_FIELD_UNAVAILABLE'})}
+  }
+
   if(req.method==='GET'&&url.pathname==='/api/survivor/field-watch'){
     const user=await authenticatedUser(req)
     if(!user)return json(res,401,{status:'AUTH_REQUIRED'})

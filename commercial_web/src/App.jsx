@@ -1115,6 +1115,11 @@ function SurvivorCommercialPanel() {
         </div>
       )}
 
+      {(!hasEntry || Number(saved.pool_current_week)!==5) && (
+        <Suspense fallback={<LoadingSurface label="Loading public Week 5 field" />}>
+          <SurvivorWeek5FieldWatch publicMode />
+        </Suspense>
+      )}
       {hasEntry && Number(saved.pool_current_week) === 5 && (
         <Suspense fallback={<LoadingSurface label="Loading the full Week 5 pool" />}>
           <SurvivorWeek5FieldWatch entryName={saved.active_entry} getAccessToken={getAccessToken} />
