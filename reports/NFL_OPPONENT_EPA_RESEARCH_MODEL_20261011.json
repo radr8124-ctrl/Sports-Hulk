@@ -1,0 +1,23 @@
+{
+  "version": "NFL_MARKET_PRIOR_OPPONENT_ADJUSTED_EPA_RIDGE200_RESEARCH_V1",
+  "features": [
+    "intercept",
+    "market_logit",
+    "adjusted_home_minus_away_offense_scaled_point2",
+    "adjusted_away_minus_home_defense_allowed_scaled_point2",
+    "rest_difference_scaled7",
+    "neutral_venue"
+  ],
+  "coefficients": [
+    -0.03643244697005347,
+    1.049684401714164,
+    0.031543381249609675,
+    -0.08228329111144653,
+    0.006248304737959109,
+    0.005399891526790238
+  ],
+  "training_through": 2024,
+  "training_matrix_sha256": "57b2c466961314c597d2763d080804f4d763c391379a7ab59ba804784b5b1745",
+  "research_only": true,
+  "approved_picks": 0
+}

@@ -1293,5 +1293,48 @@
     "validated_edge": false,
     "forward_games_scored": 0,
     "production_model_changed": false
+  },
+  "opponent_epa_benchmark": {
+    "candidate": "NFL_MARKET_PRIOR_OPPONENT_ADJUSTED_EPA_RIDGE200_RESEARCH_V1",
+    "checked_at_utc": "2026-10-11T16:30:13.145011+00:00",
+    "rolling_summary": {
+      "games": 1669,
+      "market": {
+        "brier": 0.210479194,
+        "log_loss": 0.608548094
+      },
+      "candidate": {
+        "brier": 0.210442544,
+        "log_loss": 0.608588589
+      },
+      "old_nine_feature": {
+        "brier": 0.210516226,
+        "log_loss": 0.608624947
+      }
+    },
+    "rolling_brier_gain": 3.664999999999918e-05,
+    "rolling_logloss_gain": -4.049500000002926e-05,
+    "rolling_week_block_95ci": [
+      -0.00040827170646269627,
+      0.0004587945039230318
+    ],
+    "secondary_seen_2025": {
+      "games": 284,
+      "market": {
+        "brier": 0.210906373,
+        "log_loss": 0.606988938
+      },
+      "candidate": {
+        "brier": 0.211550271,
+        "log_loss": 0.608266546
+      },
+      "old_nine_feature": {
+        "brier": 0.212617338,
+        "log_loss": 0.610849042
+      }
+    },
+    "validated_edge": false,
+    "forward_games_scored": 0,
+    "production_model_changed": false
   }
 }

@@ -1,0 +1,15 @@
+# Opponent-adjusted EPA challenger — 2026-10-11
+
+Tested one fixed opponent-adjustment hypothesis using the restored official NFLverse 2016–2025 raw sources. No new download, paid API, orders or production model change. Raw hashes checked against the ten preserved source receipts. Play exclusions and game-team identity match the prior EPA experiment.
+
+Before evaluation, protocol fixed a prior-week weighted ridge rating model: observed offense EPA = league intercept + offensive team rating + opposing defensive EPA-allowed rating. Each game-team observation has plays/60 weight clipped 0.5–1.5 and 0.9 weekly decay; ridge 5 on team effects and no penalty on league intercept. All observations must be strictly earlier weeks in the same season. Season state resets; teams without a prior observation receive zero correction. Current-week or future-game outcomes cannot enter a rating. Duplicate team-game observations, identical team/opponent and nonfinite values are rejected.
+
+Game-win challenger fixed at ridge 200 toward the market prior: original market logit, home-minus-away adjusted offense /0.2, away-minus-home adjusted defensive EPA allowed /0.2, rest and neutral venue plus intercept. EPA corrections clipped [-2,2]. No parameter sweep or retuning after evaluation. Model is market-informed rather than a fully independent market-free projection. These revised historical sources are retrospective rather than original as-of live captures.
+
+Chronological 2019–2024 test folds, 1,669 games: market Brier 0.210479194, opponent-adjusted candidate 0.210442544, a small positive Brier gain of 0.000036650. Market log loss 0.608548094, candidate 0.608588589, worse by 0.000040495. Paired season/week bootstrap (2,000 fixed-seed samples) 95% Brier-gain interval [-0.000408272, 0.000458795] crosses zero. This is mixed, statistically inconclusive evidence; not a reliable advantage or validated betting edge.
+
+Previously inspected 2025 diagnostic, 284 games: candidate Brier 0.211550271 versus market 0.210906373 (candidate worse). Original model Brier 0.212617338. No fresh prospective scored games or P&L claimed. Historical market moneylines are retrospectively compiled rather than timestamped executable prediction-market quotes.
+
+Saved protocol, frozen research coefficients, exact source hashes, training-ID hashes, fold metrics/coefficients, game-level predictions and per-game adjusted ratings/features in latest and timestamped research receipts. Full latest receipt committed as a checkpoint. Original frozen model preserved. Off-server raw restoration is still unverified.
+
+Six focused tests passed across the opponent-rating, EPA-identity and chronological-gate suites. Opponent tests prove current-week/future-year additions cannot alter past ratings and reject duplicate observations. Frontend build passed. Public mobile checks cover the compact model-comparison table and existing contract evidence at 320/390/430px. The panel now groups historical research models in one comparison rather than adding another long card for each experiment. Approval and execution remain disabled.

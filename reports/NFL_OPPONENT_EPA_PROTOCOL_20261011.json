@@ -1,0 +1,38 @@
+{
+  "schema": "zenith.nfl.opponent_epa_protocol.v1",
+  "created_at_utc": "2026-10-11T16:30:05.328589+00:00",
+  "candidate": "NFL_MARKET_PRIOR_OPPONENT_ADJUSTED_EPA_RIDGE200_RESEARCH_V1",
+  "features": [
+    "intercept",
+    "market_logit",
+    "adjusted_home_minus_away_offense_scaled_point2",
+    "adjusted_away_minus_home_defense_allowed_scaled_point2",
+    "rest_difference_scaled7",
+    "neutral_venue"
+  ],
+  "rating_ridge": 5,
+  "weekly_decay": 0.9,
+  "game_win_ridge": 200,
+  "epa_scaling": 0.2,
+  "epa_clip": [
+    -2,
+    2
+  ],
+  "rating_model": "Observed prior-game offense EPA = league intercept + team offense + opponent defense allowed; plays/60 weight clipped .5..1.5",
+  "eligibility": "Strict prior weeks within same season; unseen teams get zero ratings",
+  "rolling_test_seasons": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "secondary_seen_diagnostic": 2025,
+  "bootstrap_replicates": 2000,
+  "seed": 20261011,
+  "historical_data_previously_inspected": true,
+  "parameter_sweep": false,
+  "production_model_changed": false,
+  "approved_picks": 0
+}
