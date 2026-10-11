@@ -3372,12 +3372,12 @@ function FantasyCommercialPanel() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-soft md:p-8">
-        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+      <section className={mode === 'DFS Lineup Lab' ? "rounded-2xl border border-slate-200 bg-white p-4 shadow-soft" : "rounded-[30px] border border-slate-200 bg-white p-6 shadow-soft md:p-8"}>
+        <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
           <div>
-            <p className="eyebrow">Fantasy</p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Fantasy command center</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">Weekly decisions, trades, waivers, FAAB, IR stash, defense streaming, IDP and DFS — with research labels that stay separate from proven forward performance.</p>
+            {mode === 'Season-Long' && <p className="eyebrow">Fantasy</p>}
+            <h1 className={mode === 'DFS Lineup Lab' ? "text-xl font-black tracking-tight text-slate-950" : "mt-2 text-3xl font-black tracking-tight text-slate-950 md:text-4xl"}>{mode === 'DFS Lineup Lab' ? 'Fantasy · DFS' : 'Fantasy command center'}</h1>
+            {mode === 'Season-Long' && <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">Weekly decisions, trades, waivers, FAAB, IR stash, defense streaming, IDP and DFS — with research labels that stay separate from proven forward performance.</p>}
           </div>
           <div className="flex w-full min-w-0 gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 sm:w-auto sm:p-2">
             {['Season-Long','DFS Lineup Lab'].map((item) => (
@@ -3527,7 +3527,6 @@ function FantasyCommercialPanel() {
         </>
       ) : (
         <>
-          <p className="rounded-xl border border-[#D1DDD9] bg-white px-4 py-3 text-xs font-semibold text-[#506B75]">Paper lineup research · Forward profitability is still being validated.</p>
           <Suspense fallback={<LoadingSurface label="Loading DFS Lineup Lab" />}><DfsLineupLab /></Suspense>
           <details data-dfs-proof className="group rounded-2xl border border-slate-200 bg-white p-4">
             <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-black text-[#276977]">DFS strategy record and limitations <ChevronRight size={16} className="group-open:rotate-90" /></summary>

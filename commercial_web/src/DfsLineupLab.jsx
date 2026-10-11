@@ -258,24 +258,24 @@ export default function DfsLineupLab() {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[30px] border border-slate-200 bg-slate-950 p-6 text-white shadow-soft md:p-7">
-        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+    <div className="space-y-4 sm:space-y-6">
+      <section className="rounded-[30px] border border-slate-200 bg-slate-950 p-4 text-white shadow-soft md:p-7">
+        <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
           <div>
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-300">
               <Gauge size={15} /> DFS Lineup Lab
             </div>
-            <h2 className="mt-2 text-3xl font-black tracking-tight md:text-4xl">
+            <h2 className="mt-2 text-2xl font-black tracking-tight md:text-4xl">
               Let the brain build the lineup.
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-              Pick a platform and style, then tap one button. You do not need to choose a single player.
-              Locks and exclusions are optional.
+            <p className="mt-2 max-w-3xl text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6">
+              Choose a platform and build style. Player locks and exclusions are optional.
             </p>
+            <p className="mt-2 text-[11px] font-semibold leading-4 text-amber-200">Paper research · ROI not yet validated.</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-semibold text-slate-300">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold text-slate-300 lg:block">
             <div className="font-black text-white">{pool.length} current players</div>
-            <div className="mt-1">{freshness(context.generated_at)}</div>
+            <div>{freshness(context.generated_at)}</div>
           </div>
         </div>
       </section>
@@ -292,6 +292,7 @@ export default function DfsLineupLab() {
                 key={item}
                 type="button"
                 onClick={() => changePlatform(item)}
+                aria-pressed={platform === item}
                 className={`rounded-xl px-4 py-2 text-sm font-black transition ${platform === item ? 'bg-slate-950 text-white' : 'border border-slate-200 bg-white text-slate-600'}`}
               >
                 {item === 'DRAFTKINGS' ? 'DraftKings' : 'FanDuel'}
@@ -306,7 +307,7 @@ export default function DfsLineupLab() {
           <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">2 · Build style</div>
           <div className="mt-1 text-lg font-black text-slate-950">What kind of lineup do you want?</div>
         </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-4">
           {MODES.map(item => {
             const Icon = item.icon
             const active = item.key === mode
@@ -317,14 +318,15 @@ export default function DfsLineupLab() {
                 type="button"
                 disabled={unavailable}
                 aria-disabled={unavailable || undefined}
+                aria-pressed={active}
                 onClick={() => changeMode(item.key)}
-                className={`rounded-3xl border p-5 text-left transition ${active ? 'border-emerald-300 bg-emerald-50 shadow-soft' : unavailable ? 'cursor-not-allowed border-amber-200 bg-amber-50/60 opacity-80' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`rounded-2xl border p-3 text-left transition sm:p-5 ${active ? 'border-emerald-300 bg-emerald-50 shadow-soft' : unavailable ? 'cursor-not-allowed border-amber-200 bg-amber-50/60 opacity-80' : 'border-slate-200 bg-white hover:border-slate-300'}`}
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${active ? 'bg-emerald-100 text-emerald-700' : unavailable ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${active ? 'bg-emerald-100 text-emerald-700' : unavailable ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
                   <Icon size={19} />
                 </div>
-                <div className="mt-4 font-black text-slate-950">{item.label}</div>
-                <div className="mt-2 text-sm leading-5 text-slate-500">{item.text}</div>
+                <div className="mt-2 text-xs font-black text-slate-950 sm:mt-4 sm:text-base">{item.label}</div>
+                <div className="mt-1 text-[11px] leading-4 text-slate-500 sm:mt-2 sm:text-sm sm:leading-5">{item.text}</div>
                 {unavailable && (
                   <div className="mt-3 text-xs font-black leading-5 text-amber-800">
                     Unavailable · verified slate ownership required.
@@ -334,6 +336,28 @@ export default function DfsLineupLab() {
               </button>
             )
           })}
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">3 · Build</div>
+            <div className="mt-1 text-xl font-black text-slate-950">{selectedMode.label}</div>
+            <div className="mt-1 text-sm text-slate-600">No player selection required. Current locks/exclusions will be honored.</div>
+          </div>
+          <button
+            type="button"
+            onClick={build}
+            disabled={loading || !pool.length || (mode === 'CONTRARIAN' && !verifiedOwnershipAvailable)}
+            className="rounded-2xl bg-slate-950 px-6 py-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading
+              ? 'BUILDING…'
+              : mode === 'CONTRARIAN' && !verifiedOwnershipAvailable
+                ? 'VERIFIED OWNERSHIP REQUIRED'
+                : 'BUILD BEST LINEUP'}
+          </button>
         </div>
       </section>
 
@@ -380,27 +404,7 @@ export default function DfsLineupLab() {
         )}
       </section>
 
-      <section className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-          <div>
-            <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-600">3 · Build</div>
-            <div className="mt-1 text-xl font-black text-slate-950">{selectedMode.label}</div>
-            <div className="mt-1 text-sm text-slate-600">No player selection required. Current locks/exclusions will be honored.</div>
-          </div>
-          <button
-            type="button"
-            onClick={build}
-            disabled={loading || !pool.length || (mode === 'CONTRARIAN' && !verifiedOwnershipAvailable)}
-            className="rounded-2xl bg-slate-950 px-6 py-4 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading
-              ? 'BUILDING…'
-              : mode === 'CONTRARIAN' && !verifiedOwnershipAvailable
-                ? 'VERIFIED OWNERSHIP REQUIRED'
-                : 'BUILD BEST LINEUP'}
-          </button>
-        </div>
-      </section>
+
 
       {error && (
         <div className="flex gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-800">
