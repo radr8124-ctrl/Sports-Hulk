@@ -341,7 +341,7 @@
         }
       ],
       "execution_evidence": {
-        "captured_at_utc": "2026-10-11T15:56:23.228823+00:00",
+        "captured_at_utc": "2026-10-11T17:16:12.160613+00:00",
         "tokens_requested": 44,
         "books_observed": 44,
         "fee_parameters_captured": 44,
@@ -372,11 +372,11 @@
           "yes_ask": "0.8300",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.302771+00:00",
-            "yes_bid": 0.53,
-            "yes_ask": 0.54,
-            "ask_contracts": 66347.0,
-            "usable_observed_spread": true,
+            "captured_at_utc": "2026-10-11T17:16:09.666349+00:00",
+            "yes_bid": null,
+            "yes_ask": null,
+            "ask_contracts": null,
+            "usable_observed_spread": false,
             "execution_verified": false
           }
         },
@@ -389,11 +389,11 @@
           "yes_ask": "0.1800",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.303001+00:00",
-            "yes_bid": 0.46,
-            "yes_ask": 0.47,
-            "ask_contracts": 42756.53,
-            "usable_observed_spread": true,
+            "captured_at_utc": "2026-10-11T17:16:09.666609+00:00",
+            "yes_bid": null,
+            "yes_ask": null,
+            "ask_contracts": null,
+            "usable_observed_spread": false,
             "execution_verified": false
           }
         },
@@ -406,10 +406,10 @@
           "yes_ask": "0.2500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.303617+00:00",
-            "yes_bid": 0.24,
-            "yes_ask": 0.25,
-            "ask_contracts": 2355040.48,
+            "captured_at_utc": "2026-10-11T17:16:09.666816+00:00",
+            "yes_bid": 0.18,
+            "yes_ask": 0.19,
+            "ask_contracts": 9453.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -423,10 +423,10 @@
           "yes_ask": "0.7500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.303762+00:00",
-            "yes_bid": 0.74,
-            "yes_ask": 0.75,
-            "ask_contracts": 202074.7,
+            "captured_at_utc": "2026-10-11T17:16:09.666923+00:00",
+            "yes_bid": 0.81,
+            "yes_ask": 0.82,
+            "ask_contracts": 502.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -440,10 +440,10 @@
           "yes_ask": "0.5700",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.342536+00:00",
-            "yes_bid": 0.56,
-            "yes_ask": 0.57,
-            "ask_contracts": 1976687.24,
+            "captured_at_utc": "2026-10-11T17:16:09.715553+00:00",
+            "yes_bid": 0.76,
+            "yes_ask": 0.77,
+            "ask_contracts": 81847.98,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -457,10 +457,10 @@
           "yes_ask": "0.4400",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.342822+00:00",
-            "yes_bid": 0.43,
-            "yes_ask": 0.44,
-            "ask_contracts": 2598208.26,
+            "captured_at_utc": "2026-10-11T17:16:09.718666+00:00",
+            "yes_bid": 0.23,
+            "yes_ask": 0.24,
+            "ask_contracts": 204787.73,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -474,10 +474,10 @@
           "yes_ask": "0.2500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.348427+00:00",
-            "yes_bid": 0.25,
-            "yes_ask": 0.26,
-            "ask_contracts": 1511904.08,
+            "captured_at_utc": "2026-10-11T17:16:09.718989+00:00",
+            "yes_bid": 0.31,
+            "yes_ask": 0.32,
+            "ask_contracts": 99701.1,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -491,10 +491,10 @@
           "yes_ask": "0.7500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.355311+00:00",
-            "yes_bid": 0.74,
-            "yes_ask": 0.75,
-            "ask_contracts": 2894178.8,
+            "captured_at_utc": "2026-10-11T17:16:09.721624+00:00",
+            "yes_bid": 0.68,
+            "yes_ask": 0.69,
+            "ask_contracts": 174369.38,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -508,10 +508,10 @@
           "yes_ask": "0.5900",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.389182+00:00",
-            "yes_bid": 0.59,
-            "yes_ask": 0.6,
-            "ask_contracts": 2283929.66,
+            "captured_at_utc": "2026-10-11T17:16:09.765589+00:00",
+            "yes_bid": 0.48,
+            "yes_ask": 0.49,
+            "ask_contracts": 189868.88,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -525,10 +525,10 @@
           "yes_ask": "0.4100",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.392938+00:00",
-            "yes_bid": 0.4,
-            "yes_ask": 0.41,
-            "ask_contracts": 1925419.82,
+            "captured_at_utc": "2026-10-11T17:16:09.765984+00:00",
+            "yes_bid": 0.51,
+            "yes_ask": 0.52,
+            "ask_contracts": 105205.25,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -542,10 +542,10 @@
           "yes_ask": "0.6300",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.393354+00:00",
-            "yes_bid": 0.62,
-            "yes_ask": 0.63,
-            "ask_contracts": 2233279.0,
+            "captured_at_utc": "2026-10-11T17:16:09.766583+00:00",
+            "yes_bid": 0.75,
+            "yes_ask": 0.76,
+            "ask_contracts": 107803.29,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -559,10 +559,10 @@
           "yes_ask": "0.3800",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.393968+00:00",
-            "yes_bid": 0.37,
-            "yes_ask": 0.38,
-            "ask_contracts": 4617413.19,
+            "captured_at_utc": "2026-10-11T17:16:09.772020+00:00",
+            "yes_bid": 0.24,
+            "yes_ask": 0.25,
+            "ask_contracts": 80.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -576,10 +576,10 @@
           "yes_ask": "0.4500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.434485+00:00",
-            "yes_bid": 0.44,
-            "yes_ask": 0.45,
-            "ask_contracts": 3260465.68,
+            "captured_at_utc": "2026-10-11T17:16:09.811760+00:00",
+            "yes_bid": 0.41,
+            "yes_ask": 0.42,
+            "ask_contracts": 76865.12,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -593,10 +593,10 @@
           "yes_ask": "0.5600",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.442482+00:00",
-            "yes_bid": 0.55,
-            "yes_ask": 0.56,
-            "ask_contracts": 1518839.67,
+            "captured_at_utc": "2026-10-11T17:16:09.816265+00:00",
+            "yes_bid": 0.58,
+            "yes_ask": 0.59,
+            "ask_contracts": 132369.53,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -610,10 +610,10 @@
           "yes_ask": "0.3600",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.443796+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.818059+00:00",
             "yes_bid": 0.36,
             "yes_ask": 0.37,
-            "ask_contracts": 4292173.09,
+            "ask_contracts": 4221537.14,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -627,10 +627,10 @@
           "yes_ask": "0.6400",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.445395+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.820785+00:00",
             "yes_bid": 0.63,
             "yes_ask": 0.64,
-            "ask_contracts": 3330019.07,
+            "ask_contracts": 3228535.35,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -644,10 +644,10 @@
           "yes_ask": "0.4800",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.483788+00:00",
-            "yes_bid": 0.47,
-            "yes_ask": 0.48,
-            "ask_contracts": 3053389.83,
+            "captured_at_utc": "2026-10-11T17:16:09.861821+00:00",
+            "yes_bid": 0.66,
+            "yes_ask": 0.67,
+            "ask_contracts": 32.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -661,10 +661,10 @@
           "yes_ask": "0.5300",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.487118+00:00",
-            "yes_bid": 0.52,
-            "yes_ask": 0.53,
-            "ask_contracts": 1672307.75,
+            "captured_at_utc": "2026-10-11T17:16:09.862813+00:00",
+            "yes_bid": 0.32,
+            "yes_ask": 0.33,
+            "ask_contracts": 178606.41,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -678,10 +678,10 @@
           "yes_ask": "0.3100",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.487653+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.867159+00:00",
             "yes_bid": 0.3,
             "yes_ask": 0.31,
-            "ask_contracts": 1815778.93,
+            "ask_contracts": 1568239.58,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -695,10 +695,10 @@
           "yes_ask": "0.7000",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.494582+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.871447+00:00",
             "yes_bid": 0.69,
             "yes_ask": 0.7,
-            "ask_contracts": 2425058.78,
+            "ask_contracts": 2338172.95,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -712,10 +712,10 @@
           "yes_ask": "0.6200",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.527982+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.907315+00:00",
             "yes_bid": 0.61,
             "yes_ask": 0.62,
-            "ask_contracts": 3544249.54,
+            "ask_contracts": 3075636.04,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -729,10 +729,10 @@
           "yes_ask": "0.3900",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.535563+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.912776+00:00",
             "yes_bid": 0.38,
             "yes_ask": 0.39,
-            "ask_contracts": 1749990.84,
+            "ask_contracts": 1374596.18,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -746,10 +746,10 @@
           "yes_ask": "0.6200",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.537122+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.916908+00:00",
             "yes_bid": 0.61,
             "yes_ask": 0.62,
-            "ask_contracts": 197818.91,
+            "ask_contracts": 172209.02,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -763,10 +763,10 @@
           "yes_ask": "0.3900",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.542263+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.920041+00:00",
             "yes_bid": 0.38,
             "yes_ask": 0.39,
-            "ask_contracts": 8757377.59,
+            "ask_contracts": 6553182.9,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -780,10 +780,10 @@
           "yes_ask": "0.4500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.572724+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.957235+00:00",
             "yes_bid": 0.44,
             "yes_ask": 0.45,
-            "ask_contracts": 10335.74,
+            "ask_contracts": 10443.47,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -797,10 +797,10 @@
           "yes_ask": "0.5600",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.584781+00:00",
+            "captured_at_utc": "2026-10-11T17:16:09.958969+00:00",
             "yes_bid": 0.55,
             "yes_ask": 0.56,
-            "ask_contracts": 11297.05,
+            "ask_contracts": 3463.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -814,10 +814,10 @@
           "yes_ask": "0.6200",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.592557+00:00",
-            "yes_bid": 0.6,
-            "yes_ask": 0.62,
-            "ask_contracts": 14433.32,
+            "captured_at_utc": "2026-10-11T17:16:09.960464+00:00",
+            "yes_bid": 0.59,
+            "yes_ask": 0.6,
+            "ask_contracts": 5063.65,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -831,10 +831,10 @@
           "yes_ask": "0.4000",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.592955+00:00",
-            "yes_bid": 0.39,
+            "captured_at_utc": "2026-10-11T17:16:09.964922+00:00",
+            "yes_bid": 0.4,
             "yes_ask": 0.41,
-            "ask_contracts": 14742.99,
+            "ask_contracts": 10259.74,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -848,10 +848,10 @@
           "yes_ask": "0.3600",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.611814+00:00",
-            "yes_bid": 0.34,
+            "captured_at_utc": "2026-10-11T17:16:10.006667+00:00",
+            "yes_bid": 0.33,
             "yes_ask": 0.36,
-            "ask_contracts": 13910.74,
+            "ask_contracts": 10865.78,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -865,10 +865,10 @@
           "yes_ask": "0.6700",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.635127+00:00",
-            "yes_bid": 0.65,
+            "captured_at_utc": "2026-10-11T17:16:10.010442+00:00",
+            "yes_bid": 0.64,
             "yes_ask": 0.67,
-            "ask_contracts": 11754.42,
+            "ask_contracts": 10000.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -882,10 +882,10 @@
           "yes_ask": "0.5300",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.637036+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.011278+00:00",
             "yes_bid": 0.5,
             "yes_ask": 0.53,
-            "ask_contracts": 10746.0,
+            "ask_contracts": 10090.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -899,10 +899,10 @@
           "yes_ask": "0.4900",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.655908+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.012268+00:00",
             "yes_bid": 0.48,
             "yes_ask": 0.5,
-            "ask_contracts": 10266.3,
+            "ask_contracts": 10303.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -916,10 +916,10 @@
           "yes_ask": "0.4700",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.660458+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.053819+00:00",
             "yes_bid": 0.45,
             "yes_ask": 0.47,
-            "ask_contracts": 13189.43,
+            "ask_contracts": 10459.77,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -933,10 +933,10 @@
           "yes_ask": "0.5500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.684387+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.057476+00:00",
             "yes_bid": 0.53,
             "yes_ask": 0.55,
-            "ask_contracts": 6553.68,
+            "ask_contracts": 699.04,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -950,10 +950,10 @@
           "yes_ask": "0.7500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.686515+00:00",
-            "yes_bid": 0.73,
+            "captured_at_utc": "2026-10-11T17:16:10.060305+00:00",
+            "yes_bid": 0.74,
             "yes_ask": 0.75,
-            "ask_contracts": 1813.95,
+            "ask_contracts": 166.97,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -967,10 +967,10 @@
           "yes_ask": "0.2700",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.702071+00:00",
-            "yes_bid": 0.25,
+            "captured_at_utc": "2026-10-11T17:16:10.062475+00:00",
+            "yes_bid": 0.24,
             "yes_ask": 0.26,
-            "ask_contracts": 22.13,
+            "ask_contracts": 157.35,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -984,7 +984,7 @@
           "yes_ask": "0.4500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.704630+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.104604+00:00",
             "yes_bid": 0.43,
             "yes_ask": 0.45,
             "ask_contracts": 367.79,
@@ -1001,10 +1001,10 @@
           "yes_ask": "0.5700",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.734088+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.105790+00:00",
             "yes_bid": 0.55,
             "yes_ask": 0.57,
-            "ask_contracts": 13500.0,
+            "ask_contracts": 10445.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -1018,10 +1018,10 @@
           "yes_ask": "0.7400",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.734578+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.108404+00:00",
             "yes_bid": 0.72,
-            "yes_ask": 0.74,
-            "ask_contracts": 3502.0,
+            "yes_ask": 0.73,
+            "ask_contracts": 11385.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -1035,10 +1035,10 @@
           "yes_ask": "0.2800",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.753419+00:00",
-            "yes_bid": 0.25,
+            "captured_at_utc": "2026-10-11T17:16:10.111871+00:00",
+            "yes_bid": 0.27,
             "yes_ask": 0.28,
-            "ask_contracts": 11000.0,
+            "ask_contracts": 233.16,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -1052,10 +1052,10 @@
           "yes_ask": "0.8500",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.753702+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.149966+00:00",
             "yes_bid": 0.84,
             "yes_ask": 0.85,
-            "ask_contracts": 3586.84,
+            "ask_contracts": 345.02,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -1069,7 +1069,7 @@
           "yes_ask": "0.1600",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.784321+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.158737+00:00",
             "yes_bid": 0.15,
             "yes_ask": 0.16,
             "ask_contracts": 10000.0,
@@ -1086,10 +1086,10 @@
           "yes_ask": "0.3200",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.785584+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.159331+00:00",
             "yes_bid": 0.3,
             "yes_ask": 0.32,
-            "ask_contracts": 10000.0,
+            "ask_contracts": 10178.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -1103,10 +1103,10 @@
           "yes_ask": "0.7000",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.798581+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.201716+00:00",
             "yes_bid": 0.68,
-            "yes_ask": 0.7,
-            "ask_contracts": 7482.0,
+            "yes_ask": 0.71,
+            "ask_contracts": 10057.0,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -1120,10 +1120,10 @@
           "yes_ask": "0.8100",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.803597+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.202896+00:00",
             "yes_bid": 0.8,
             "yes_ask": 0.81,
-            "ask_contracts": 3564.87,
+            "ask_contracts": 523.39,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -1137,10 +1137,10 @@
           "yes_ask": "0.2100",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.828900+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.207477+00:00",
             "yes_bid": 0.19,
-            "yes_ask": 0.21,
-            "ask_contracts": 10000.0,
+            "yes_ask": 0.2,
+            "ask_contracts": 2.84,
             "usable_observed_spread": true,
             "execution_verified": false
           }
@@ -1154,7 +1154,7 @@
           "yes_ask": "0.4800",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.834319+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.233897+00:00",
             "yes_bid": 0.46,
             "yes_ask": 0.48,
             "ask_contracts": 10000.0,
@@ -1171,19 +1171,19 @@
           "yes_ask": "0.5400",
           "price_basis": "Captured indicative dollar quotes",
           "book_evidence": {
-            "captured_at_utc": "2026-10-11T15:56:20.848973+00:00",
+            "captured_at_utc": "2026-10-11T17:16:10.243522+00:00",
             "yes_bid": 0.53,
-            "yes_ask": 0.54,
-            "ask_contracts": 3519.58,
+            "yes_ask": 0.55,
+            "ask_contracts": 10087.19,
             "usable_observed_spread": true,
             "execution_verified": false
           }
         }
       ],
       "execution_evidence": {
-        "captured_at_utc": "2026-10-11T15:56:23.228823+00:00",
+        "captured_at_utc": "2026-10-11T17:16:12.160613+00:00",
         "books_observed": 48,
-        "usable_spreads": 48,
+        "usable_spreads": 46,
         "fee_metadata_complete": 48,
         "execution_fees_verified": false
       },
