@@ -47,6 +47,10 @@ export default function SurvivorWeek5FieldWatch({entryName,getAccessToken}){
       <p className="mt-1 text-sm font-black">{value.owner.official_teams.length?value.owner.official_teams.join(' + '):'Exact numbered ticket not matched'}</p>
       {value.owner.synchronization==='ORGANIZER_PDF_ONLY_NOT_ZENITH_SAVED'&&<p className="mt-1 text-[11px] font-semibold text-amber-800">Confirmed on organizer’s Week 5 sheet; not saved in Zenith’s separate pick editor.</p>}
     </div>}
+    {value.live_exposure && <div className="mt-3 grid grid-cols-3 gap-1.5 text-center" aria-label="Provisional live tickets">
+      {[['Live ahead',value.live_exposure.currently_ahead],['Live behind',value.live_exposure.currently_behind],['Live tied',value.live_exposure.currently_tied]].map(([label,count])=><div key={label} className="rounded-lg border border-[#D3E5E0] bg-white px-1.5 py-2"><div className="text-lg font-black tabular-nums">{count}</div><div className="text-[9px] font-bold text-[#536F78]">{label}</div></div>)}
+      <p className="col-span-3 text-left text-[10px] font-medium leading-4 text-[#5C727B]">ESPN game positions only, never official survival. {value.live_exposure.final_games_pending_pool_grade} tickets have final scores still awaiting organizer grading; {value.live_exposure.waiting_or_unverified} tickets await games or verified scores.</p>
+    </div>}
     <div className="mt-3 flex items-center justify-between gap-2"><p className="text-xs font-black">Sunday teams · tickets at stake</p><p className="text-[10px] text-[#647B83]">ESPN {value.scoreboard_status==='ESPN_CURRENT'?`updated ${clock(value.scoreboard_updated_at)}`:'score update pending'}</p></div>
     <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
     {value.teams.map(item=><div key={item.team} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#D4E3DF] bg-white p-2">

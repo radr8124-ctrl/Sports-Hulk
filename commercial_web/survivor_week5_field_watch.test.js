@@ -44,6 +44,9 @@ test('fresh ESPN fixture with live lead shows LIVE_AHEAD but not certified survi
  assert.equal(w.teams.find(x=>x.team==='Houston Texans').game.status,'LIVE_AHEAD')
  assert.equal(w.teams.find(x=>x.team==='Houston Texans').game.score_line,'Houston Texans 17 – Tennessee Titans 10')
  assert.equal(w.pool_result_certified,false)
+ assert.equal(w.live_exposure.currently_ahead,62)
+ assert.equal(w.live_exposure.currently_behind,0)
+ assert.equal(Object.values(w.live_exposure).reduce((n,v)=>n+v,0),185)
 })
 
 test('old scoreboard still displays original picks but not fake live scores',()=>{

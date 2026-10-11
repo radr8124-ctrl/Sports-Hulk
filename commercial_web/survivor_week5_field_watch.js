@@ -45,6 +45,13 @@ export function buildSurvivorWeek5FieldWatch({csvText,meta,scoreboard,linkedEntr
  const counts=new Map()
  for(const row of survivors)counts.set(row.team,(counts.get(row.team)||0)+1)
  const teams=[...counts].map(([team,entries])=>({team,entries,game:gameFor(team,scoreboard,fresh)})).sort((a,b)=>b.entries-a.entries||a.team.localeCompare(b.team))
+ const live_exposure={
+  currently_ahead:teams.filter(t=>t.game.status==='LIVE_AHEAD').reduce((n,t)=>n+t.entries,0),
+  currently_behind:teams.filter(t=>t.game.status==='LIVE_BEHIND').reduce((n,t)=>n+t.entries,0),
+  currently_tied:teams.filter(t=>t.game.status==='LIVE_TIED').reduce((n,t)=>n+t.entries,0),
+  final_games_pending_pool_grade:teams.filter(t=>t.game.status==='FINAL_AWAITING_ORGANIZER').reduce((n,t)=>n+t.entries,0),
+  waiting_or_unverified:teams.filter(t=>!['LIVE_AHEAD','LIVE_BEHIND','LIVE_TIED','FINAL_AWAITING_ORGANIZER'].includes(t.game.status)).reduce((n,t)=>n+t.entries,0),
+ }
  const ownerRow=typeof linkedEntry==='string'?week.find(row=>row.entry_name===linkedEntry):null
  const owner=linkedEntry?{
   entry_name:linkedEntry,official_teams:ownerRow?[ownerRow.team]:[],
@@ -55,7 +62,7 @@ export function buildSurvivorWeek5FieldWatch({csvText,meta,scoreboard,linkedEntr
  return {status:'VERIFIED_OFFICIAL_FIELD',week:5,total_entries:333,
   marked_eliminated_before_sunday:148,in_contention_before_sunday:185,
   scoreboard_status:fresh?'ESPN_CURRENT':'STALE_SCOREBOARD',scoreboard_updated_at:scoreboard?.generated_at||null,
-  teams,owner,pool_result_certified:false,external_submission_verified_by_zenith:false,
+  teams,owner,live_exposure,pool_result_certified:false,external_submission_verified_by_zenith:false,
   source_format:meta.source_format||'CSV',
   source_description:'Full Week 5 organizer PDF extracted to verified CSV; standings are pre-Sunday and live scores are provisional.',
  }
