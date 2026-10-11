@@ -1,0 +1,33 @@
+{
+  "candidate": "USER_NFL_MOV_ELO_V1",
+  "sport": "NFL",
+  "k": 20,
+  "home_adv": 48,
+  "revert": 0.75,
+  "mov_scale": 2.2,
+  "tie_score": 0.5,
+  "tie_margin_floor": 1,
+  "initial_rating": 1500,
+  "warmup_seasons": [
+    2016,
+    2017,
+    2018
+  ],
+  "test_seasons": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "previously_seen_diagnostic_season": 2025,
+  "same_day_result_updates": "AFTER_ALL_SAME_DAY_PREDICTIONS",
+  "minimum_expected_return_after_stress": 0.03,
+  "hypothetical_cost_per_unit_stake": 0.02,
+  "bootstrap_replicates": 10000,
+  "seed": 61011,
+  "parameter_tuning": false,
+  "historical_prices_have_original_quote_timestamps": false,
+  "production_model_replacement": false
+}

@@ -2369,5 +2369,74 @@
       "Top-level 100-contract hypothetical single fills; simultaneous fills unverified",
       "No funding costs, actual execution fees, realized ROI, or historical fills validated"
     ]
+  },
+  "elo_challenger": {
+    "candidate": "USER_NFL_MOV_ELO_V1",
+    "checked_at_utc": "2026-10-11T19:42:47.688596+00:00",
+    "rolling_summary": {
+      "games": 1669,
+      "market": {
+        "brier": 0.210479194,
+        "log_loss": 0.608548094
+      },
+      "candidate": {
+        "brier": 0.223265429,
+        "log_loss": 0.638907283
+      },
+      "old_nine_feature": {
+        "brier": 0.210516226,
+        "log_loss": 0.608624947
+      },
+      "week_block_brier_gain_95ci": [
+        -0.017500537218343316,
+        -0.008181196880861124
+      ],
+      "brier_gain_vs_market": -0.01278623499999998,
+      "logloss_gain_vs_market": -0.03035918900000001
+    },
+    "secondary_seen_2025": {
+      "games": 284,
+      "market": {
+        "brier": 0.210906373,
+        "log_loss": 0.606988938
+      },
+      "candidate": {
+        "brier": 0.226615306,
+        "log_loss": 0.646295844
+      },
+      "old_nine_feature": {
+        "brier": 0.212617338,
+        "log_loss": 0.610849042
+      }
+    },
+    "rolling_value_simulation": {
+      "games": 1669,
+      "selections": 1115,
+      "wins": 439,
+      "gross_profit_units": -125.86568042401332,
+      "stress_net_profit_units": -148.16568042401335,
+      "stress_net_roi": -0.13288401831750077,
+      "week_block_stress_roi_95ci": [
+        -0.20065069627287838,
+        -0.06280992689610657
+      ],
+      "roi_interval_status": "DESCRIPTIVE_ONLY"
+    },
+    "secondary_value_simulation": {
+      "games": 284,
+      "selections": 159,
+      "wins": 64,
+      "gross_profit_units": -11.34486116811629,
+      "stress_net_profit_units": -14.524861168116292,
+      "stress_net_roi": -0.09135132810136033,
+      "week_block_stress_roi_95ci": [
+        -0.26169647505326227,
+        0.08395170499708701
+      ],
+      "roi_interval_status": "DESCRIPTIVE_ONLY"
+    },
+    "production_model_changed": false,
+    "validated_edge": false,
+    "forward_games_scored": 0
   }
 }

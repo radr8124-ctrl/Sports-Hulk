@@ -1,0 +1,25 @@
+{
+  "schema": "zenith.nfl.elo.validation.v1",
+  "benchmark_sha256": "7419a5449500babd5cd061b65f938e79a2dc812fd15acd50ae49a579e4c749c5",
+  "source_hashes": {
+    "protocol": "f5a3db3f57b50fde64bfdb4caf6e783d97857d32e78833777da392c36b495eff",
+    "master": "35a23b30de0b91666f2a452d7f36df1b8fc3959a27989492e10965794c655190",
+    "reference": "f6faa1251ae8d0cfb0427d8f4cc669d82eedb88371e10ddb16aae37e0e295b0a",
+    "model_code": "a4e8340a59836f748bc47bc477c729c23727187a18a901353039d8e0c468c997"
+  },
+  "games": 1669,
+  "selections": 1115,
+  "conditional_historical_roi": -0.13288401831750077,
+  "unit_tests_passed": 104,
+  "original_forecasts_prefix_sha256": "b74351d24c0cf591624a74c8dc2d33f84ea34f1374c65d782219bc5d95b60602",
+  "production_model_changed": false,
+  "nba_tested": false,
+  "real_money_orders": 0,
+  "live_browser_tests_passed": 9,
+  "mobile_widths": [
+    320,
+    390,
+    430
+  ],
+  "horizontal_overflow": false
+}
