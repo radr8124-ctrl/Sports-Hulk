@@ -1,0 +1,36 @@
+{
+  "schema": "zenith.nfl.arbitrage_coverage_validation.v1",
+  "captured_at_utc": "2026-10-11T19:34:03.856378+00:00",
+  "before_games": 2,
+  "before_pairs": 4,
+  "after_games": 11,
+  "after_pairs": 22,
+  "positive_after_documented_fees": 0,
+  "quote_source_hashes": {
+    "execution": "a30ee6ed9305dbd7eb8b6d9620a568715164ace1e9a4780591eaf1dc502d99f4",
+    "validation": "caacc8a0c5f4328809f90adb3bd3cf0aee40dc9948bffa173f9e7f030c5323b6",
+    "kalshi": "9beaae6e2a7b0f787b6ca1dd344296ccc19bad316e362f9882e38b108fc76e97",
+    "polymarket": "9ca0b21c4640d4fa32e26514ca40fa563fa7c169272794c053b41c8af4426454",
+    "schedule": "4843dc679195f9882295c841dddf39cd049e5ce3653424fda026d11fb8f3176a",
+    "aliases": "f4c652f9f082582b536bfd8d99ecab54ad540c7a36fc3946e4f4571a12be43c3"
+  },
+  "original_13_forecast_sha256": "b74351d24c0cf591624a74c8dc2d33f84ea34f1374c65d782219bc5d95b60602",
+  "model_forecasts_required": false,
+  "unit_tests_passed": 97,
+  "initial_system_python_import_errors": [
+    "test_nfl_compact_challenger",
+    "test_nfl_epa_challenger",
+    "test_nfl_opponent_adjusted_epa",
+    "test_nfl_pbp_prior_features",
+    "test_nfl_selective_value"
+  ],
+  "runtime_resolution": "Full suite passes using configured .venv Python with existing numpy/pandas",
+  "actual_orders": 0,
+  "live_browser_tests_passed": 6,
+  "mobile_widths": [
+    320,
+    390,
+    430
+  ],
+  "horizontal_overflow": false
+}

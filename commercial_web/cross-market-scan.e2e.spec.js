@@ -7,6 +7,7 @@ for(const width of [320,390,430]){
   const card=page.locator('[data-cross-market-scan]')
   await expect(card.getByRole('heading',{name:'Cross-market price scanner · NFL'})).toBeVisible()
   await expect(card).toContainText('No orders or paper fills created.')
+  await expect(card).toContainText('independently of the prediction model')
   await expect(page.locator('[data-prediction-clv]')).toContainText('0 verified entries')
   await expect(page.locator('[data-prediction-clv]')).toContainText('Cost-adjusted CLV: not measured')
   await expect(page.locator('[data-prediction-clv]')).toContainText('positive CLV alone does not prove profitable ROI')

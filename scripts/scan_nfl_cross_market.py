@@ -9,6 +9,7 @@ from decimal import Decimal
 from pathlib import Path
 from audit_nfl_fee_sensitivity import kalshi_fee
 from validate_prediction_contracts import number, poly_fee
+from nfl_arbitrage_coverage import collect_scan_quotes
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'nfl_live/prediction_markets'
@@ -80,15 +81,24 @@ def sha(path):
 
 def main():
     now = datetime.now(timezone.utc)
-    quote_path = DATA / 'nfl_narrow_forward_quotes_latest.json'
+    quote_path = DATA / 'nfl_arbitrage_quotes_latest.json'
     execution_path = DATA / 'execution_evidence_latest.json'
     validation_path = DATA / 'contract_validation_latest.json'
     contracts_path = DATA / 'polymarket_nfl_contract_audit_latest.json'
-    observations = json.loads(quote_path.read_text())
     execution = json.loads(execution_path.read_text())
     validation = json.loads(validation_path.read_text())
-    if observations['source_hashes']['execution'] != sha(execution_path):
-        raise ValueError('Quotes do not match execution evidence; recapture quotes')
+    kalshi_path=DATA/'kalshi_nfl_contract_audit_latest.json'
+    schedule_path=ROOT/'commercial_web/public/nfl_scores.json'
+    aliases_path=ROOT/'nfl_live/identity/team_aliases.json'
+    schedule=json.loads(schedule_path.read_text())
+    observations=collect_scan_quotes(execution,json.loads(kalshi_path.read_text())['contracts'],
+        json.loads(contracts_path.read_text())['contracts'],validation,
+        schedule.get('games',[])+schedule.get('next_games',[]),json.loads(aliases_path.read_text()),now)
+    observations.update(schema='zenith.nfl.arbitrage_quotes.v1',captured_at_utc=now.isoformat(),
+        source_hashes=dict(execution=sha(execution_path),validation=sha(validation_path),
+                          kalshi=sha(kalshi_path),polymarket=sha(contracts_path),schedule=sha(schedule_path),aliases=sha(aliases_path)))
+    quote_path.write_text(json.dumps(observations,indent=2)+'\n')
+    (DATA/('nfl_arbitrage_quotes_'+now.strftime('%Y%m%dT%H%M%SZ')+'.json')).write_text(quote_path.read_text())
     schedules = {r['id']:r['fee_schedule'] for r in validation['polymarket']
                  if r['identity_checked'] and r['terms_reviewed'] and r['documented_fee_calculation_checked']}
     token_schedules = {t:schedules[c['id']] for c in json.loads(contracts_path.read_text())['contracts']
@@ -114,6 +124,8 @@ def main():
                source_quotes_captured_at_utc=min((leg['captured_at_utc'] for row in rows for leg in row['legs']), default=None),
                source_hashes=dict(quotes=sha(quote_path),execution=sha(execution_path),
                                   validation=sha(validation_path),contracts=sha(contracts_path)),
+               model_forecasts_required=False,quote_coverage=dict(observed_games=len({r['event_id'] for r in observations['rows']}),
+                   observed_outcomes=len(observations['rows']),rejected=observations['rejected']),
                paired_games=len({r['event_id'] for r in rows}), pairs_checked=len(rows),
                raw_positive_pairs=sum(r['gross_cost']<r['quantity'] for r in rows),
                positive_after_documented_fees=sum(r['conditional_net_profit'] is not None and r['conditional_net_profit']>0 for r in rows),

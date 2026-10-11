@@ -1,22 +1,31 @@
 {
   "schema": "zenith.nfl.cross_market_scan.v1",
-  "scanned_at_utc": "2026-10-11T19:21:23.679791+00:00",
-  "source_snapshot_created_at_utc": "2026-10-11T19:19:28.443324+00:00",
-  "source_quotes_captured_at_utc": "2026-10-11T19:19:25.691202+00:00",
+  "scanned_at_utc": "2026-10-11T19:34:06.564194+00:00",
+  "source_snapshot_created_at_utc": "2026-10-11T19:34:06.564194+00:00",
+  "source_quotes_captured_at_utc": "2026-10-11T19:34:03.856378+00:00",
   "source_hashes": {
-    "quotes": "a9223e38101cf7f44a6fd4a3e862955825be60aa09373d04dc161ad84becea36",
-    "execution": "818a92534eb56c1a97b75c4a204974d3e16d88ce3749bed590829edb021f9d17",
+    "quotes": "1674e796eef47822a1268e3c24cc970198e719807447095d2806ec4c20226023",
+    "execution": "a30ee6ed9305dbd7eb8b6d9620a568715164ace1e9a4780591eaf1dc502d99f4",
     "validation": "caacc8a0c5f4328809f90adb3bd3cf0aee40dc9948bffa173f9e7f030c5323b6",
     "contracts": "9ca0b21c4640d4fa32e26514ca40fa563fa7c169272794c053b41c8af4426454"
   },
-  "paired_games": 2,
-  "pairs_checked": 4,
+  "model_forecasts_required": false,
+  "quote_coverage": {
+    "observed_games": 18,
+    "observed_outcomes": 58,
+    "rejected": {
+      "GAME_STARTED": 25
+    }
+  },
+  "paired_games": 11,
+  "pairs_checked": 22,
   "raw_positive_pairs": 0,
   "positive_after_documented_fees": 0,
   "unblocked_pairs": 0,
   "blocker_counts": {
-    "NO_POSITIVE_NET_GAP": 4,
-    "SETTLEMENT_RULES_NOT_EQUIVALENT": 4
+    "NO_POSITIVE_NET_GAP": 22,
+    "SETTLEMENT_RULES_NOT_EQUIVALENT": 22,
+    "INSUFFICIENT_TOP_LEVEL_DEPTH": 10
   },
   "rows": [
     {
@@ -31,16 +40,16 @@
           "team": "LAC",
           "contract_or_token_id": "KXNFLGAME-26OCT11DENLAC-LAC",
           "ask": 0.37,
-          "top_level_depth": 3713939.7,
-          "captured_at_utc": "2026-10-11T19:19:25.691202+00:00"
+          "top_level_depth": 3880537.48,
+          "captured_at_utc": "2026-10-11T19:34:03.856378+00:00"
         },
         {
           "provider": "POLYMARKET",
           "team": "DEN",
           "contract_or_token_id": "61912153212346226574735689010757292341931967825413324728784713804768764178495",
           "ask": 0.64,
-          "top_level_depth": 589084.42,
-          "captured_at_utc": "2026-10-11T19:19:26.712093+00:00"
+          "top_level_depth": 654619.46,
+          "captured_at_utc": "2026-10-11T19:34:05.019494+00:00"
         }
       ],
       "quantity": 100.0,
@@ -70,16 +79,16 @@
           "team": "DEN",
           "contract_or_token_id": "KXNFLGAME-26OCT11DENLAC-DEN",
           "ask": 0.64,
-          "top_level_depth": 3192426.05,
-          "captured_at_utc": "2026-10-11T19:19:25.695275+00:00"
+          "top_level_depth": 3226790.68,
+          "captured_at_utc": "2026-10-11T19:34:03.861707+00:00"
         },
         {
           "provider": "POLYMARKET",
           "team": "LAC",
           "contract_or_token_id": "51102114999633637413430928699806154673949360522651523449492458853304910453987",
           "ask": 0.37,
-          "top_level_depth": 816985.16,
-          "captured_at_utc": "2026-10-11T19:19:26.748279+00:00"
+          "top_level_depth": 815659.37,
+          "captured_at_utc": "2026-10-11T19:34:05.058366+00:00"
         }
       ],
       "quantity": 100.0,
@@ -109,16 +118,16 @@
           "team": "ARI",
           "contract_or_token_id": "KXNFLGAME-26OCT11DETARI-ARI",
           "ask": 0.31,
-          "top_level_depth": 1736231.6,
-          "captured_at_utc": "2026-10-11T19:19:25.736692+00:00"
+          "top_level_depth": 1745592.61,
+          "captured_at_utc": "2026-10-11T19:34:03.911474+00:00"
         },
         {
           "provider": "POLYMARKET",
           "team": "DET",
           "contract_or_token_id": "56056672751934526125943641351839699220089479893294396205663286922097293819722",
           "ask": 0.7,
-          "top_level_depth": 318225.35,
-          "captured_at_utc": "2026-10-11T19:19:26.800405+00:00"
+          "top_level_depth": 273200.97,
+          "captured_at_utc": "2026-10-11T19:34:05.092618+00:00"
         }
       ],
       "quantity": 100.0,
@@ -148,16 +157,16 @@
           "team": "DET",
           "contract_or_token_id": "KXNFLGAME-26OCT11DETARI-DET",
           "ask": 0.7,
-          "top_level_depth": 2478324.77,
-          "captured_at_utc": "2026-10-11T19:19:25.739171+00:00"
+          "top_level_depth": 2462786.26,
+          "captured_at_utc": "2026-10-11T19:34:03.915738+00:00"
         },
         {
           "provider": "POLYMARKET",
           "team": "ARI",
           "contract_or_token_id": "45771357044293249394701484141194198475871091757894999118580113740262781405581",
           "ask": 0.31,
-          "top_level_depth": 438726.93,
-          "captured_at_utc": "2026-10-11T19:19:26.852440+00:00"
+          "top_level_depth": 425901.97,
+          "captured_at_utc": "2026-10-11T19:34:05.140771+00:00"
         }
       ],
       "quantity": 100.0,
@@ -167,6 +176,718 @@
       "conditional_net_profit": -3.1117,
       "conditional_net_roi": -0.030177952647468715,
       "one_cent_worse_fill_profit": -5.1028,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872996",
+      "teams": [
+        "JAX",
+        "HOU"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "JAX",
+          "contract_or_token_id": "KXNFLGAME-26OCT18HOUJAC-JAC",
+          "ask": 0.6,
+          "top_level_depth": 3788.24,
+          "captured_at_utc": "2026-10-11T19:34:04.012344+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "HOU",
+          "contract_or_token_id": "86145483780316106938306961633604534518555621763399884101132226004696588558059",
+          "ask": 0.41,
+          "top_level_depth": 1165.0,
+          "captured_at_utc": "2026-10-11T19:34:05.323745+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 101.0,
+      "documented_fee_cost": 2.4057,
+      "conditional_net_profit": -3.4057,
+      "conditional_net_roi": -0.032935321747253776,
+      "one_cent_worse_fill_profit": -5.4008,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872996",
+      "teams": [
+        "HOU",
+        "JAX"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "HOU",
+          "contract_or_token_id": "KXNFLGAME-26OCT18HOUJAC-HOU",
+          "ask": 0.41,
+          "top_level_depth": 10879.87,
+          "captured_at_utc": "2026-10-11T19:34:04.032045+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "JAX",
+          "contract_or_token_id": "61115085550455107197522841588697596611280045392796758443977785602594944030932",
+          "ask": 0.61,
+          "top_level_depth": 1144.0,
+          "captured_at_utc": "2026-10-11T19:34:05.372504+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 102.0,
+      "documented_fee_cost": 2.4137,
+      "conditional_net_profit": -4.4137,
+      "conditional_net_roi": -0.042271272831055695,
+      "one_cent_worse_fill_profit": -6.4168,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872997",
+      "teams": [
+        "CLE",
+        "BAL"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "CLE",
+          "contract_or_token_id": "KXNFLGAME-26OCT18BALCLE-CLE",
+          "ask": 0.35,
+          "top_level_depth": 89.3,
+          "captured_at_utc": "2026-10-11T19:34:04.060084+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "BAL",
+          "contract_or_token_id": "44331440436538619785212909844251738564846748479342123218492838481139919800798",
+          "ask": 0.68,
+          "top_level_depth": 1644.0,
+          "captured_at_utc": "2026-10-11T19:34:05.489777+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 103.0,
+      "documented_fee_cost": 2.2528,
+      "conditional_net_profit": -5.2528,
+      "conditional_net_roi": -0.04990651080066279,
+      "one_cent_worse_fill_profit": -7.2617,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872997",
+      "teams": [
+        "BAL",
+        "CLE"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "BAL",
+          "contract_or_token_id": "KXNFLGAME-26OCT18BALCLE-BAL",
+          "ask": 0.67,
+          "top_level_depth": 10271.8,
+          "captured_at_utc": "2026-10-11T19:34:04.070100+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "CLE",
+          "contract_or_token_id": "17875375028376479120175962878124508401147822081147132756927534200520109752230",
+          "ask": 0.35,
+          "top_level_depth": 925.31,
+          "captured_at_utc": "2026-10-11T19:34:05.505225+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 102.0,
+      "documented_fee_cost": 2.2325,
+      "conditional_net_profit": -4.2325,
+      "conditional_net_roi": -0.04060633679514547,
+      "one_cent_worse_fill_profit": -6.2212,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872998",
+      "teams": [
+        "PHI",
+        "CAR"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "PHI",
+          "contract_or_token_id": "KXNFLGAME-26OCT18CARPHI-PHI",
+          "ask": 0.53,
+          "top_level_depth": 10344.0,
+          "captured_at_utc": "2026-10-11T19:34:04.072749+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "CAR",
+          "contract_or_token_id": "23830168081017919977585940888287745259637871438129079800143052949223046983431",
+          "ask": 0.5,
+          "top_level_depth": 56.0,
+          "captured_at_utc": "2026-10-11T19:34:05.779981+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 103.0,
+      "documented_fee_cost": 2.5,
+      "conditional_net_profit": -5.5,
+      "conditional_net_roi": -0.052132701421800945,
+      "one_cent_worse_fill_profit": -7.4897,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872998",
+      "teams": [
+        "CAR",
+        "PHI"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "CAR",
+          "contract_or_token_id": "KXNFLGAME-26OCT18CARPHI-CAR",
+          "ask": 0.5,
+          "top_level_depth": 10051.0,
+          "captured_at_utc": "2026-10-11T19:34:04.100672+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "PHI",
+          "contract_or_token_id": "82914188951367172748889970099274188856470123976613269922741757092429595203588",
+          "ask": 0.54,
+          "top_level_depth": 5063.0,
+          "captured_at_utc": "2026-10-11T19:34:05.822603+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 104.0,
+      "documented_fee_cost": 2.4952,
+      "conditional_net_profit": -6.4952,
+      "conditional_net_roi": -0.060990542296742015,
+      "one_cent_worse_fill_profit": -8.4925,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872999",
+      "teams": [
+        "ATL",
+        "CHI"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "ATL",
+          "contract_or_token_id": "KXNFLGAME-26OCT18CHIATL-ATL",
+          "ask": 0.47,
+          "top_level_depth": 10000.0,
+          "captured_at_utc": "2026-10-11T19:34:04.110388+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "CHI",
+          "contract_or_token_id": "79757993487308721870645729402015468850899053366152558318911049657776154836791",
+          "ask": 0.57,
+          "top_level_depth": 5070.0,
+          "captured_at_utc": "2026-10-11T19:34:05.391485+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 104.0,
+      "documented_fee_cost": 2.4853,
+      "conditional_net_profit": -6.4853,
+      "conditional_net_roi": -0.06090324204373749,
+      "one_cent_worse_fill_profit": -8.4808,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872999",
+      "teams": [
+        "CHI",
+        "ATL"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "CHI",
+          "contract_or_token_id": "KXNFLGAME-26OCT18CHIATL-CHI",
+          "ask": 0.55,
+          "top_level_depth": 69.03,
+          "captured_at_utc": "2026-10-11T19:34:04.128155+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "ATL",
+          "contract_or_token_id": "50589535062318970489601970716422344354996627424334888410100120637666260267273",
+          "ask": 0.47,
+          "top_level_depth": 1051.0,
+          "captured_at_utc": "2026-10-11T19:34:05.438560+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 102.0,
+      "documented_fee_cost": 2.4873,
+      "conditional_net_profit": -4.4873,
+      "conditional_net_roi": -0.04294588911762482,
+      "one_cent_worse_fill_profit": -6.4788,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873001",
+      "teams": [
+        "NE",
+        "NYJ"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "NE",
+          "contract_or_token_id": "KXNFLGAME-26OCT18NYJNE-NE",
+          "ask": 0.76,
+          "top_level_depth": 10116.06,
+          "captured_at_utc": "2026-10-11T19:34:04.141444+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "NYJ",
+          "contract_or_token_id": "74299321784895696581327103424339031574481900081866319449209307717810449457698",
+          "ask": 0.27,
+          "top_level_depth": 889.0,
+          "captured_at_utc": "2026-10-11T19:34:05.622075+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 103.0,
+      "documented_fee_cost": 1.8713,
+      "conditional_net_profit": -4.8713,
+      "conditional_net_roi": -0.046450268090507126,
+      "one_cent_worse_fill_profit": -6.8448,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873001",
+      "teams": [
+        "NYJ",
+        "NE"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "NYJ",
+          "contract_or_token_id": "KXNFLGAME-26OCT18NYJNE-NYJ",
+          "ask": 0.26,
+          "top_level_depth": 85.3,
+          "captured_at_utc": "2026-10-11T19:34:04.152593+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "NE",
+          "contract_or_token_id": "99159010658684664429261007871676241030596537802268056909897056709633368229273",
+          "ask": 0.76,
+          "top_level_depth": 870.0,
+          "captured_at_utc": "2026-10-11T19:34:05.668195+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 102.0,
+      "documented_fee_cost": 1.8972,
+      "conditional_net_profit": -3.8972,
+      "conditional_net_roi": -0.03751015426787247,
+      "one_cent_worse_fill_profit": -5.9113,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873002",
+      "teams": [
+        "TB",
+        "PIT"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "TB",
+          "contract_or_token_id": "KXNFLGAME-26OCT18PITTB-TB",
+          "ask": 0.44,
+          "top_level_depth": 4.09,
+          "captured_at_utc": "2026-10-11T19:34:04.153413+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "PIT",
+          "contract_or_token_id": "45794536507753225333595124662928345549202628968929531269189770479639857499017",
+          "ask": 0.58,
+          "top_level_depth": 1050.0,
+          "captured_at_utc": "2026-10-11T19:34:05.852355+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 102.0,
+      "documented_fee_cost": 2.4608,
+      "conditional_net_profit": -4.4608,
+      "conditional_net_roi": -0.042703100110280605,
+      "one_cent_worse_fill_profit": -6.4657,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873002",
+      "teams": [
+        "PIT",
+        "TB"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "PIT",
+          "contract_or_token_id": "KXNFLGAME-26OCT18PITTB-PIT",
+          "ask": 0.57,
+          "top_level_depth": 10245.04,
+          "captured_at_utc": "2026-10-11T19:34:04.178414+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "TB",
+          "contract_or_token_id": "108143573548724103221479564973951462483510285175492355604607495290556124515016",
+          "ask": 0.45,
+          "top_level_depth": 10.0,
+          "captured_at_utc": "2026-10-11T19:34:05.893627+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 102.0,
+      "documented_fee_cost": 2.4625,
+      "conditional_net_profit": -4.4625,
+      "conditional_net_roi": -0.04271867895177695,
+      "one_cent_worse_fill_profit": -6.4552,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873003",
+      "teams": [
+        "IND",
+        "TEN"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "IND",
+          "contract_or_token_id": "KXNFLGAME-26OCT18TENIND-IND",
+          "ask": 0.73,
+          "top_level_depth": 10385.0,
+          "captured_at_utc": "2026-10-11T19:34:04.197739+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "TEN",
+          "contract_or_token_id": "61723266365854817156717742556510091154863811139334240691539044294139519630886",
+          "ask": 0.29,
+          "top_level_depth": 29.99,
+          "captured_at_utc": "2026-10-11T19:34:05.563470+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 102.0,
+      "documented_fee_cost": 1.9977,
+      "conditional_net_profit": -3.9977,
+      "conditional_net_roi": -0.03844027319834958,
+      "one_cent_worse_fill_profit": -5.98,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873003",
+      "teams": [
+        "TEN",
+        "IND"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "TEN",
+          "contract_or_token_id": "KXNFLGAME-26OCT18TENIND-TEN",
+          "ask": 0.29,
+          "top_level_depth": 50.0,
+          "captured_at_utc": "2026-10-11T19:34:04.200465+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "IND",
+          "contract_or_token_id": "66459436011242044973051223765222371820261509164556886948261018839787566704345",
+          "ask": 0.75,
+          "top_level_depth": 5071.0,
+          "captured_at_utc": "2026-10-11T19:34:05.604381+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 104.0,
+      "documented_fee_cost": 2.0125,
+      "conditional_net_profit": -6.0125,
+      "conditional_net_roi": -0.05671501002240302,
+      "one_cent_worse_fill_profit": -8.0172,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873005",
+      "teams": [
+        "LV",
+        "BUF"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "LV",
+          "contract_or_token_id": "KXNFLGAME-26OCT18BUFLV-LV",
+          "ask": 0.31,
+          "top_level_depth": 21.8,
+          "captured_at_utc": "2026-10-11T19:34:04.243046+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "BUF",
+          "contract_or_token_id": "61717961205676140494039377756667863064620956188464769839424327911614195333915",
+          "ask": 0.71,
+          "top_level_depth": 817.0,
+          "captured_at_utc": "2026-10-11T19:34:06.004505+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 102.0,
+      "documented_fee_cost": 2.1177,
+      "conditional_net_profit": -4.1177,
+      "conditional_net_roi": -0.03954851096403397,
+      "one_cent_worse_fill_profit": -6.1348,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873005",
+      "teams": [
+        "BUF",
+        "LV"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "BUF",
+          "contract_or_token_id": "KXNFLGAME-26OCT18BUFLV-BUF",
+          "ask": 0.7,
+          "top_level_depth": 14.15,
+          "captured_at_utc": "2026-10-11T19:34:04.255429+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "LV",
+          "contract_or_token_id": "86830640898924661251581468133500971916018386168308178798055229963584176888079",
+          "ask": 0.33,
+          "top_level_depth": 1060.0,
+          "captured_at_utc": "2026-10-11T19:34:06.053301+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 103.0,
+      "documented_fee_cost": 2.1333,
+      "conditional_net_profit": -5.1333,
+      "conditional_net_roi": -0.048826584916482216,
+      "one_cent_worse_fill_profit": -7.1232,
+      "blockers": [
+        "INSUFFICIENT_TOP_LEVEL_DEPTH",
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873006",
+      "teams": [
+        "KC",
+        "LAC"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "KC",
+          "contract_or_token_id": "KXNFLGAME-26OCT18LACKC-KC",
+          "ask": 0.82,
+          "top_level_depth": 11144.66,
+          "captured_at_utc": "2026-10-11T19:34:04.265744+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "LAC",
+          "contract_or_token_id": "25975613657668487250673927756557799100593582472155421789800705293576427824049",
+          "ask": 0.22,
+          "top_level_depth": 1086.0,
+          "captured_at_utc": "2026-10-11T19:34:05.938380+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 104.0,
+      "documented_fee_cost": 1.5548,
+      "conditional_net_profit": -5.5548,
+      "conditional_net_roi": -0.052624797735394316,
+      "one_cent_worse_fill_profit": -7.5213,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401873006",
+      "teams": [
+        "LAC",
+        "KC"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "LAC",
+          "contract_or_token_id": "KXNFLGAME-26OCT18LACKC-LAC",
+          "ask": 0.21,
+          "top_level_depth": 10001.0,
+          "captured_at_utc": "2026-10-11T19:34:04.289307+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "KC",
+          "contract_or_token_id": "58167714289864717825087991545150213770744040987591942526721915426213133665357",
+          "ask": 0.82,
+          "top_level_depth": 924.0,
+          "captured_at_utc": "2026-10-11T19:34:05.969866+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 103.0,
+      "documented_fee_cost": 1.6128,
+      "conditional_net_profit": -4.6128,
+      "conditional_net_roi": -0.04409403055840203,
+      "one_cent_worse_fill_profit": -6.6333,
       "blockers": [
         "NO_POSITIVE_NET_GAP",
         "SETTLEMENT_RULES_NOT_EQUIVALENT"
