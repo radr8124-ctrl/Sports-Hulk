@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-10-11T20:42:55.029060+00:00",
+  "source": "intelligence_warehouse/betting_v2/BETTING_V2_ALL_MARKETS_FORWARD_LEDGER.jsonl",
+  "source_sha256": "4ea749961e28240e5a5aa51af8956f8d6c7f27bf87ee13bf40695b1018bde4e9",
+  "frozen_model_version": "BETTING_V2_ALL_MARKETS_2026_10_05",
+  "settled_game_observations": 300,
+  "market_probability_mirrors": 300,
+  "selected_shadow_entries": 0,
+  "nhl_moneyline_review": {
+    "observations": 23,
+    "unique_games": 23,
+    "gross_reference_price_profit_units": 1.9430455978300205,
+    "gross_reference_price_roi_pct": 8.448024338391393,
+    "net_roi_verified": false,
+    "actual_fill_evidence_verified": false,
+    "selected_shadow_entries": 0,
+    "ledger_cost_fields": []
+  },
+  "decision": "NO_PROVEN_PROFITABLE_GAME_SELECTION_STRATEGY_IN_THIS_LEDGER",
+  "required_fix": "Independent pregame probabilities or a documented price-comparison strategy, paired with preserved executable quotes and complete costs. Mirroring market probabilities cannot supply an independent model edge.",
+  "production_model_changed": false,
+  "historical_results_rewritten": false
+}
