@@ -14,10 +14,12 @@
 html { background: #f8fafc; overflow-x: hidden; overscroll-behavior-x: none; }
 body { margin: 0; min-width: 320px; min-height: 100vh; max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
 button { font: inherit; }
-/* Keep iPhone swipes vertical; preserve pinch zoom and normal page scrolling. */
+/* On mobile, clip the page itself without creating hidden horizontal scroll containers.
+   Keep natural horizontal swipes for the score, signal, and research carousels;
+   root pan-y would otherwise block their gestures in Safari. */
 @media (max-width: 767px) {
-  html, body, #root { width: 100%; max-width: 100%; touch-action: pan-y pinch-zoom; }
-  #root { min-width: 0; overflow-x: hidden; }
+  html, body, #root { width: 100%; max-width: 100%; overflow-x: clip; touch-action: auto; }
+  #root { min-width: 0; }
 }
 
 @layer components {
