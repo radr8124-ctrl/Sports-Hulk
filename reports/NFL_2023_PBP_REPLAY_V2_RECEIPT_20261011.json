@@ -1,0 +1,26 @@
+{
+  "schema": "zenith.nfl.pbp_replay_receipt.v2",
+  "captured_at_utc": "2026-10-11T16:19:41.108398+00:00",
+  "season": 2023,
+  "source_url": "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2023.parquet",
+  "asset_id": 354728689,
+  "source_sha256": "bd3484731408def6b0ec93225bba2bd7b2c65769ca707a2b9444d891abdc6776",
+  "source_bytes": 20534088,
+  "publisher_digest": "sha256:bd3484731408def6b0ec93225bba2bd7b2c65769ca707a2b9444d891abdc6776",
+  "raw_plays": 49665,
+  "eligible_offensive_plays": 35606,
+  "games": 285,
+  "feature_rows": 570,
+  "feature_sha256": "919cd0cf9bdddcf6bdd17e27d934332157c7bbb55ba6d18b2294cc09b2f1296a",
+  "same_week_or_future_results_in_features": false,
+  "source_replay_complete": true,
+  "model_trained": false,
+  "validated_edge": false,
+  "approved_picks": 0,
+  "limitations": [
+    "Current NFLverse revised data is retrospective, not original as-of play capture",
+    "Offense and defense EPA replayed; no advantage test implied",
+    "One season restored; not the full training history",
+    "Off-server restoration not verified"
+  ]
+}

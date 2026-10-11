@@ -1,0 +1,26 @@
+{
+  "schema": "zenith.nfl.pbp_replay_receipt.v2",
+  "captured_at_utc": "2026-10-11T16:19:44.765535+00:00",
+  "season": 2025,
+  "source_url": "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2025.parquet",
+  "asset_id": 512957613,
+  "source_sha256": "c6ecedd6d678cc37ed316b23ef84ee1ec6abb69c514bb11868a7ebd5a367df29",
+  "source_bytes": 20337029,
+  "publisher_digest": "sha256:c6ecedd6d678cc37ed316b23ef84ee1ec6abb69c514bb11868a7ebd5a367df29",
+  "raw_plays": 48771,
+  "eligible_offensive_plays": 34634,
+  "games": 285,
+  "feature_rows": 570,
+  "feature_sha256": "d7d993195bc89f982b46210f432251348cae6df06598daf6cedd6de4fa13b986",
+  "same_week_or_future_results_in_features": false,
+  "source_replay_complete": true,
+  "model_trained": false,
+  "validated_edge": false,
+  "approved_picks": 0,
+  "limitations": [
+    "Current NFLverse revised data is retrospective, not original as-of play capture",
+    "Offense and defense EPA replayed; no advantage test implied",
+    "One season restored; not the full training history",
+    "Off-server restoration not verified"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "zenith.nfl.pbp_replay_receipt.v2",
+  "captured_at_utc": "2026-10-11T16:19:39.206006+00:00",
+  "season": 2022,
+  "source_url": "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2022.parquet",
+  "asset_id": 354728862,
+  "source_sha256": "931121d8897779d7944e2a293e92ed8799c8e5cceef84096ac42339003fedc09",
+  "source_bytes": 20426548,
+  "publisher_digest": "sha256:931121d8897779d7944e2a293e92ed8799c8e5cceef84096ac42339003fedc09",
+  "raw_plays": 49434,
+  "eligible_offensive_plays": 35432,
+  "games": 284,
+  "feature_rows": 568,
+  "feature_sha256": "0f6d72c4c5e0febb3d4bd8550a0a65fe9c274a15455e7367fc2815e16715147a",
+  "same_week_or_future_results_in_features": false,
+  "source_replay_complete": true,
+  "model_trained": false,
+  "validated_edge": false,
+  "approved_picks": 0,
+  "limitations": [
+    "Current NFLverse revised data is retrospective, not original as-of play capture",
+    "Offense and defense EPA replayed; no advantage test implied",
+    "One season restored; not the full training history",
+    "Off-server restoration not verified"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "version": "NFL_MARKET_PRIOR_OFF_DEF_EPA_RIDGE200_RESEARCH_V1",
+  "features": [
+    "intercept",
+    "market_logit",
+    "prior5_home_minus_away_off_epa_scaled_point2",
+    "prior5_away_minus_home_def_epa_allowed_scaled_point2",
+    "rest_difference_scaled7",
+    "neutral_venue"
+  ],
+  "coefficients": [
+    -0.03721992492767246,
+    1.052005951629768,
+    0.023995448837549907,
+    -0.06631483406689208,
+    0.006483380978358938,
+    0.005189565211904232
+  ],
+  "training_through": 2024,
+  "training_matrix_sha256": "3969165dbffdde2d0ee7de437461e2410f3ef8fc9426b3d04f6829dfb394fd61",
+  "research_only": true,
+  "approved_picks": 0
+}

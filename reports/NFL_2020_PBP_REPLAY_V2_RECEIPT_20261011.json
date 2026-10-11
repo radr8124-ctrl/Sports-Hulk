@@ -1,0 +1,26 @@
+{
+  "schema": "zenith.nfl.pbp_replay_receipt.v2",
+  "captured_at_utc": "2026-10-11T16:19:35.116954+00:00",
+  "season": 2020,
+  "source_url": "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2020.parquet",
+  "asset_id": 530452141,
+  "source_sha256": "8889f5d8782b5c5dce3c3644acdc0322b228a7e9cb13fa36cbac250e260e9f60",
+  "source_bytes": 19286459,
+  "publisher_digest": "sha256:8889f5d8782b5c5dce3c3644acdc0322b228a7e9cb13fa36cbac250e260e9f60",
+  "raw_plays": 47705,
+  "eligible_offensive_plays": 34241,
+  "games": 269,
+  "feature_rows": 538,
+  "feature_sha256": "e66fc3c7c3b46b5c59ec0c6a1bdde53931e26bfc9d061da31b9c91d02ec30596",
+  "same_week_or_future_results_in_features": false,
+  "source_replay_complete": true,
+  "model_trained": false,
+  "validated_edge": false,
+  "approved_picks": 0,
+  "limitations": [
+    "Current NFLverse revised data is retrospective, not original as-of play capture",
+    "Offense and defense EPA replayed; no advantage test implied",
+    "One season restored; not the full training history",
+    "Off-server restoration not verified"
+  ]
+}

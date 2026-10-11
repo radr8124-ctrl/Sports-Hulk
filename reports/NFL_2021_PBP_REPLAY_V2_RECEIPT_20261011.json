@@ -1,0 +1,26 @@
+{
+  "schema": "zenith.nfl.pbp_replay_receipt.v2",
+  "captured_at_utc": "2026-10-11T16:19:37.261149+00:00",
+  "season": 2021,
+  "source_url": "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2021.parquet",
+  "asset_id": 337880457,
+  "source_sha256": "333ad34378e5339d5172717cc83378e908daf02c8699416ab3e17c2ec10f78d8",
+  "source_bytes": 20249925,
+  "publisher_digest": "sha256:333ad34378e5339d5172717cc83378e908daf02c8699416ab3e17c2ec10f78d8",
+  "raw_plays": 49922,
+  "eligible_offensive_plays": 35768,
+  "games": 285,
+  "feature_rows": 570,
+  "feature_sha256": "71379236bd5c1e532756f618d944156682b8b44ff83851d7c249cb4d75b712a3",
+  "same_week_or_future_results_in_features": false,
+  "source_replay_complete": true,
+  "model_trained": false,
+  "validated_edge": false,
+  "approved_picks": 0,
+  "limitations": [
+    "Current NFLverse revised data is retrospective, not original as-of play capture",
+    "Offense and defense EPA replayed; no advantage test implied",
+    "One season restored; not the full training history",
+    "Off-server restoration not verified"
+  ]
+}

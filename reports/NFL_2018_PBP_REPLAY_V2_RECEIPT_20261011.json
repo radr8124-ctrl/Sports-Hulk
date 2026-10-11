@@ -1,0 +1,26 @@
+{
+  "schema": "zenith.nfl.pbp_replay_receipt.v2",
+  "captured_at_utc": "2026-10-11T16:19:31.184601+00:00",
+  "season": 2018,
+  "source_url": "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2018.parquet",
+  "asset_id": 250648497,
+  "source_sha256": "2e6f2dce7c7ebd46e985cabe0c17eb72b39a77f98cb4478409294f50b5820150",
+  "source_bytes": 19072097,
+  "publisher_digest": null,
+  "raw_plays": 47109,
+  "eligible_offensive_plays": 33294,
+  "games": 267,
+  "feature_rows": 534,
+  "feature_sha256": "a195727bbcd53ba5f94deea9563449a4ed9a21e4ebde343f383805df32c7cc71",
+  "same_week_or_future_results_in_features": false,
+  "source_replay_complete": true,
+  "model_trained": false,
+  "validated_edge": false,
+  "approved_picks": 0,
+  "limitations": [
+    "Current NFLverse revised data is retrospective, not original as-of play capture",
+    "Offense and defense EPA replayed; no advantage test implied",
+    "One season restored; not the full training history",
+    "Off-server restoration not verified"
+  ]
+}
