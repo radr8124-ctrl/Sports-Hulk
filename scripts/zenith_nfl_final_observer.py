@@ -134,8 +134,8 @@ def main()->int:
     started=time.monotonic()
     before=snapshot_immutable_state()
     require_original_intact(before)
-    proof=readback()
     if args.verify_only:
+        proof=readback()
         print(json.dumps({'status':proof['status'],'frozen_games':proof['frozen_games'],
              'compared_games':proof['compared_games'],'research_only':True,
              'automatic_betting':False,'network_requests':0},sort_keys=True))

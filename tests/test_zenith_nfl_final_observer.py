@@ -5,6 +5,7 @@ import json
 import subprocess
 import sys
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path('/home/ubuntu/sports-hulk')
@@ -51,6 +52,25 @@ class FinalObserverTests(unittest.TestCase):
         self.assertEqual(receipt.get('automatic_betting'),False)
         self.assertEqual(receipt.get('network_requests'),0)
         self.assertEqual(m.snapshot_immutable_state(),before)
+
+    def test_run_refreshes_summary_after_legitimate_append_before_readback(self):
+        m=load();calls=[]
+        snapshot={'original_13_sha256':m.ORIGINAL_FIRST_13_SHA256,
+            'survivor_original_1_sha256':m.ORIGINAL_SURVIVOR_LEDGER_FIRST_SHA256,
+            'private_pick_state_sha256':'c'*64}
+        def invoke(cmd,seconds):
+            module=cmd[2];calls.append(module)
+            if module==m.FINAL_MODULE:
+                return 'NFL_TRUE_PREKICKOFF_MODEL_INDIVIDUAL_OFFICIAL_FINAL_RESEARCH '+json.dumps({'total_saved_verified_final_games':0})
+            if module==m.SCORER_MODULE:
+                return 'NFL_FIRST_SCORE_FORM_VS_MARKET_OFFICIAL_FINAL_RESEARCH '+json.dumps({'independent_final_game_blocks':0,'source_pairs_scored':0})
+            raise AssertionError('Unexpected invocation')
+        def readback():
+            self.assertIn(m.SCORER_MODULE,calls,'Stale summary must be refreshed before proof readback')
+            return {'status':'AWAITING_INDEPENDENT_FINALS','frozen_games':14,'official_final_games':0,'compared_games':0}
+        with patch.object(sys,'argv',['observer','--run']),patch.object(m,'snapshot_immutable_state',return_value=snapshot),patch.object(m,'invoke',side_effect=invoke),patch.object(m,'readback',side_effect=readback),patch.object(m,'atomic_receipt'):
+            self.assertEqual(m.main(),0)
+        self.assertEqual(calls,[m.FINAL_MODULE,m.SCORER_MODULE])
 
     def test_timer_only_runs_explicit_read_only_runner(self):
         service=(ROOT/'deploy/systemd/user/sports-zenith-nfl-final-observer.service').read_text()

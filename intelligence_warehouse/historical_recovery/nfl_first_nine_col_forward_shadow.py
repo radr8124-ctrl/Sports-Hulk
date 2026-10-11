@@ -21,7 +21,7 @@ import pandas as pd
 
 from .mlb_asof_feature_store import ROOT,sha_file
 from .nfl_verified_2026_score_form import (
-    CONTEXT,CONTEXT_SCHEMA,ESPN_PREGAME,HISTORICAL,SCHEDULE,
+    CONTEXT,CONTEXT_SCHEMA,ESPN_PREGAME,HISTORICAL,SCHEDULE,_team,
 )
 from .nfl_prior_score_form_model import (
     MODEL,VERSION,SOURCE_FEATURE_NAMES,_prob,_logit,
@@ -115,7 +115,8 @@ def build_same_quote_nfl_shadow(
         if eid not in ctx:
             raise ValueError('Same-book provider source NFL game/event identity cannot match new original ESPN model source')
         item=ctx[eid]
-        if item['home_team']!=quote['home_team_abbr'] or item['away_team']!=quote['away_team_abbr']:
+        if (_team(item['home_team'])!=_team(quote['home_team_abbr'])
+            or _team(item['away_team'])!=_team(quote['away_team_abbr'])):
             raise ValueError('Same-book opponent team identity disagrees with frozen ESPN context')
         start=_utc(item['official_first_pitch_utc'])
         market_start=_utc(quote['official_espn_kickoff_utc'])

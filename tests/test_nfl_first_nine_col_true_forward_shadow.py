@@ -90,6 +90,25 @@ def model():
     }
 
 class NFLFirstRealPregameModelOverMarketShadowTests(unittest.TestCase):
+    def test_rams_source_alias_matches_without_changing_frozen_context(self):
+        c=context();c['home_team']='LA';c['away_team']='BUF'
+        b=book();b['home_team_abbr']='LAR';b['away_team_abbr']='BUF'
+        original=copy.deepcopy(c)
+        out,_=build_same_quote_nfl_shadow([c],[b],model(),now=NOW,
+            model_file_sha256=MODEL_SHA,source_market_sha256='e'*64)
+        self.assertEqual(len(out),1)
+        self.assertEqual(out[0]['home_team'],'LA')
+        self.assertEqual(c,original)
+        b['home_team_abbr']='LAC'
+        with self.assertRaisesRegex(ValueError,'team'):
+            build_same_quote_nfl_shadow([c],[b],model(),now=NOW,
+                model_file_sha256=MODEL_SHA,source_market_sha256='e'*64)
+        b['home_team_abbr']='LAR'
+        b['source_original_book_quote_updated_at_utc']=FROZEN.isoformat()
+        out,_=build_same_quote_nfl_shadow([c],[b],model(),now=NOW,
+            model_file_sha256=MODEL_SHA,source_market_sha256='e'*64)
+        self.assertEqual(out,[])
+
     def test_prequoted_score_form_calibration_uses_same_future_bookmaker_price(self):
         out,summary=build_same_quote_nfl_shadow([context()],[book()],model(),now=NOW,
                                                  model_file_sha256=MODEL_SHA,source_market_sha256='e'*64)
