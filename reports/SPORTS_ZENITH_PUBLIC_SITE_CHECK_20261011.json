@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-10-11T20:40:04.930334+00:00",
+  "public_url": "https://sportszenith.com/",
+  "public_browser_checks": 29,
+  "server_browser_checks": 29,
+  "status": "CHECKED_FLOWS_PASS",
+  "suites": [
+    "member-entry",
+    "dashboard-workspaces",
+    "dashboard-polish",
+    "mobile-viewport-clipping",
+    "cross-market-scan",
+    "prediction-market-evidence"
+  ],
+  "coverage": [
+    "promotional entry and sign-in screens",
+    "OTP form error, resend and return with simulated provider responses",
+    "dashboard links and browser history",
+    "DFS route and return to hub",
+    "mobile horizontal containment and vertical scrolling",
+    "prediction-market evidence displays"
+  ],
+  "limitations": [
+    "Chromium automation; actual iPhone Safari not independently verified",
+    "Authentication provider responses simulated; no real email sent",
+    "No claim that all application features or data feeds were verified",
+    "Positive net ROI and an independently validated trading edge remain unproven"
+  ],
+  "changes_this_check": "No frontend edits were needed for these passing checks."
+}
