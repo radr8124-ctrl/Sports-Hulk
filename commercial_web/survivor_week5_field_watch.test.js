@@ -46,7 +46,32 @@ test('fresh ESPN fixture with live lead shows LIVE_AHEAD but not certified survi
  assert.equal(w.pool_result_certified,false)
  assert.equal(w.live_exposure.currently_ahead,62)
  assert.equal(w.live_exposure.currently_behind,0)
- assert.equal(Object.values(w.live_exposure).reduce((n,v)=>n+v,0),185)
+ assert.equal(w.live_exposure.currently_ahead+w.live_exposure.currently_behind+w.live_exposure.currently_tied+w.live_exposure.final_games_pending_pool_grade+w.live_exposure.waiting_or_unverified,185)
+})
+
+test('Final Houston loss counts all 62 tickets as provisional losses, not organizer-certified eliminations',()=>{
+ const mock=structuredClone(scores)
+ mock.generated_at='2026-10-11T21:45:00Z'
+ const game=[...mock.games,...mock.next_games].find(g=>g.event_id==='401872984')
+ game.state='post';game.live=false;game.final=true;game.away_score='14';game.home_score='21';game.status='Final'
+ const w=run({scoreboard:mock,at:Date.parse('2026-10-11T21:46:00Z')})
+ assert.equal(w.teams.find(x=>x.team==='Houston Texans').game.status,'FINAL_LOSS_PENDING_ORGANIZER')
+ assert.equal(w.live_exposure.final_loss_pending_organizer,62)
+ assert.equal(w.live_exposure.final_win_pending_organizer,0)
+ assert.equal(w.in_contention_before_sunday,185)
+ assert.equal(w.pool_result_certified,false)
+ assert.deepEqual(w.owner.official_teams,['Houston Texans'])
+})
+
+test('Final Houston win counts as pending verified game result but does not auto-advance pool',()=>{
+ const mock=structuredClone(scores)
+ mock.generated_at='2026-10-11T21:45:00Z'
+ const game=[...mock.games,...mock.next_games].find(g=>g.event_id==='401872984')
+ game.state='post';game.live=false;game.final=true;game.away_score='24';game.home_score='17';game.status='Final'
+ const w=run({scoreboard:mock,at:Date.parse('2026-10-11T21:46:00Z')})
+ assert.equal(w.teams.find(x=>x.team==='Houston Texans').game.status,'FINAL_WIN_PENDING_ORGANIZER')
+ assert.equal(w.live_exposure.final_win_pending_organizer,62)
+ assert.equal(w.pool_result_certified,false)
 })
 
 test('old scoreboard still displays original picks but not fake live scores',()=>{

@@ -5,7 +5,7 @@ const clock=v=>{
  return Number.isFinite(date.valueOf())?new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(date):'not verified'
 }
 const mood=status=>status==='LIVE_AHEAD'?'text-emerald-700':status==='LIVE_BEHIND'?'text-red-700':status==='UPCOMING'?'text-[#536C76]':'text-amber-800'
-const gameLabel=game=>({UPCOMING:'Upcoming',LIVE_AHEAD:'Live · ahead',LIVE_BEHIND:'Live · behind',LIVE_TIED:'Live · tied',FINAL_AWAITING_ORGANIZER:'Final · pool grading pending',SCORE_NOT_VERIFIED:'Score waiting'})[game?.status]||'Score waiting'
+const gameLabel=game=>({UPCOMING:'Upcoming',LIVE_AHEAD:'Live · ahead',LIVE_BEHIND:'Live · behind',LIVE_TIED:'Live · tied',FINAL_WIN_PENDING_ORGANIZER:'Final win · organizer pending',FINAL_LOSS_PENDING_ORGANIZER:'Final loss · organizer pending',FINAL_TIE_REVIEW_REQUIRED:'Final tie · review required',FINAL_SCORE_UNVERIFIED:'Final score unverified',SCORE_NOT_VERIFIED:'Score waiting'})[game?.status]||'Score waiting'
 export default function SurvivorWeek5FieldWatch({entryName,getAccessToken}){
  const [value,setValue]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(false)
  useEffect(()=>{
@@ -49,7 +49,10 @@ export default function SurvivorWeek5FieldWatch({entryName,getAccessToken}){
     </div>}
     {value.live_exposure && <div className="mt-3 grid grid-cols-3 gap-1.5 text-center" aria-label="Provisional live tickets">
       {[['Live ahead',value.live_exposure.currently_ahead],['Live behind',value.live_exposure.currently_behind],['Live tied',value.live_exposure.currently_tied]].map(([label,count])=><div key={label} className="rounded-lg border border-[#D3E5E0] bg-white px-1.5 py-2"><div className="text-lg font-black tabular-nums">{count}</div><div className="text-[9px] font-bold text-[#536F78]">{label}</div></div>)}
-      <p className="col-span-3 text-left text-[10px] font-medium leading-4 text-[#5C727B]">ESPN game positions only, never official survival. {value.live_exposure.final_games_pending_pool_grade} tickets have final scores still awaiting organizer grading; {value.live_exposure.waiting_or_unverified} tickets await games or verified scores.</p>
+      <p className="col-span-3 text-left text-[10px] font-medium leading-4 text-[#5C727B]">ESPN positions only, not official survival. {value.live_exposure.waiting_or_unverified} tickets await games or verified scores.</p>
+      <div className="col-span-3 grid grid-cols-3 gap-1.5" aria-label="Final game ticket reconciliation pending organizer">
+        {[['Final wins · pending',value.live_exposure.final_win_pending_organizer],['Final losses · pending',value.live_exposure.final_loss_pending_organizer],['Final ties / review',value.live_exposure.final_tie_or_source_review]].map(([label,count])=><div key={label} className="rounded-lg border border-[#D3E5E0] bg-white px-1.5 py-2"><div className="text-lg font-black tabular-nums">{count}</div><div className="text-[9px] font-bold text-[#536F78]">{label}</div></div>)}
+      </div>
     </div>}
     <div className="mt-3 flex items-center justify-between gap-2"><p className="text-xs font-black">Sunday teams · tickets at stake</p><p className="text-[10px] text-[#647B83]">ESPN {value.scoreboard_status==='ESPN_CURRENT'?`updated ${clock(value.scoreboard_updated_at)}`:'score update pending'}</p></div>
     <div className="mt-2 grid gap-1.5 sm:grid-cols-2">

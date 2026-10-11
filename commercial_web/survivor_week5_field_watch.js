@@ -25,7 +25,7 @@ function gameFor(team,scoreboard,fresh){
  const awayPts=Number(g.away_score),homePts=Number(g.home_score)
  const valid=Number.isFinite(awayPts)&&Number.isFinite(homePts)
  const diff=away?(awayPts-homePts):(homePts-awayPts)
- const status=final?'FINAL_AWAITING_ORGANIZER':live?(valid?diff>0?'LIVE_AHEAD':diff<0?'LIVE_BEHIND':'LIVE_TIED':'LIVE_SCORE_WAITING'):'UPCOMING'
+ const status=final?(valid?diff>0?'FINAL_WIN_PENDING_ORGANIZER':diff<0?'FINAL_LOSS_PENDING_ORGANIZER':'FINAL_TIE_REVIEW_REQUIRED':'FINAL_SCORE_UNVERIFIED'):live?(valid?diff>0?'LIVE_AHEAD':diff<0?'LIVE_BEHIND':'LIVE_TIED':'LIVE_SCORE_WAITING'):'UPCOMING'
  return {status,opponent,kickoff_utc:g.start_time,
  score_line:(live||final)&&valid?`${g.away} ${awayPts} – ${g.home} ${homePts}`:null,
  game_clock:String(g.status||'').slice(0,75)||null}
@@ -49,8 +49,11 @@ export function buildSurvivorWeek5FieldWatch({csvText,meta,scoreboard,linkedEntr
   currently_ahead:teams.filter(t=>t.game.status==='LIVE_AHEAD').reduce((n,t)=>n+t.entries,0),
   currently_behind:teams.filter(t=>t.game.status==='LIVE_BEHIND').reduce((n,t)=>n+t.entries,0),
   currently_tied:teams.filter(t=>t.game.status==='LIVE_TIED').reduce((n,t)=>n+t.entries,0),
-  final_games_pending_pool_grade:teams.filter(t=>t.game.status==='FINAL_AWAITING_ORGANIZER').reduce((n,t)=>n+t.entries,0),
-  waiting_or_unverified:teams.filter(t=>!['LIVE_AHEAD','LIVE_BEHIND','LIVE_TIED','FINAL_AWAITING_ORGANIZER'].includes(t.game.status)).reduce((n,t)=>n+t.entries,0),
+  final_games_pending_pool_grade:teams.filter(t=>t.game.status.startsWith('FINAL_')).reduce((n,t)=>n+t.entries,0),
+  final_win_pending_organizer:teams.filter(t=>t.game.status==='FINAL_WIN_PENDING_ORGANIZER').reduce((n,t)=>n+t.entries,0),
+  final_loss_pending_organizer:teams.filter(t=>t.game.status==='FINAL_LOSS_PENDING_ORGANIZER').reduce((n,t)=>n+t.entries,0),
+  final_tie_or_source_review:teams.filter(t=>['FINAL_TIE_REVIEW_REQUIRED','FINAL_SCORE_UNVERIFIED'].includes(t.game.status)).reduce((n,t)=>n+t.entries,0),
+  waiting_or_unverified:teams.filter(t=>!['LIVE_AHEAD','LIVE_BEHIND','LIVE_TIED'].includes(t.game.status)&&!t.game.status.startsWith('FINAL_')).reduce((n,t)=>n+t.entries,0),
  }
  const ownerRow=typeof linkedEntry==='string'?week.find(row=>row.entry_name===linkedEntry):null
  const owner=linkedEntry?{
