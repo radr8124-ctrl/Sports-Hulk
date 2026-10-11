@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test'
+test.use({isMobile:true,hasTouch:true})
 const BASE=process.env.ZENITH_MOBILE_CLIP_URL||'http://127.0.0.1:8510/'
 for (const width of [320, 360, 390, 430]) {
 test(`mobile page keeps its roots stationary and carousels scrollable at ${width}px`,async({page})=>{
@@ -17,9 +18,10 @@ test(`mobile page keeps its roots stationary and carousels scrollable at ${width
   const signalMoved=rail.scrollLeft>0
   if(deck)deck.scrollLeft=deck.scrollWidth
   return {rootScroll:x,signalMoved,deckMoved:deck&&deck.scrollWidth>deck.clientWidth+3?deck.scrollLeft>0:true,overflowX:getComputedStyle(document.documentElement).overflowX,
-   pageWidth:document.documentElement.scrollWidth,viewport:window.innerWidth,navLeft:nav.getBoundingClientRect().left,navRight:nav.getBoundingClientRect().right}
+   touchAction:getComputedStyle(document.documentElement).touchAction, pageWidth:document.documentElement.scrollWidth,viewport:window.innerWidth,navLeft:nav.getBoundingClientRect().left,navRight:nav.getBoundingClientRect().right}
  })
  expect(rect.overflowX).toBe('clip')
+ expect(rect.touchAction).toBe('manipulation')
  expect(rect.rootScroll).toEqual([0,0,0])
  expect(rect.signalMoved).toBe(true)
  const deck=page.locator('[data-scorecard-scroll]')

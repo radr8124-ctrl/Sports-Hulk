@@ -24,3 +24,9 @@ No native Safari device access, no paid services, no external pool submission or
 - Every width checks stationary html/body/root scroll offsets, no document horizontal overflow, full-width fixed bottom navigation, working signal and score rail scrolling, and working vertical page scrolling.
 - Test now waits for the asynchronous score rail before checking scrolling and scrolls to the final snap position; immediate 60px scrolling could snap back to zero and an early score-feed arrival could replace the element being measured.
 - No further production CSS changes in this follow-up. Published CSS checkpoint remains 4481fe8. Real iPhone Safari touch/zoom behavior remains unverified.
+
+## Continued real-phone failure and gesture guard
+- User supplied two 11:33 AM iPhone Safari screenshots after prior width checks. The fixed bottom navigation shifts with the content, so earlier width-only passes did not establish resolution. The paired screenshots are consistent with visual-viewport zoom/pan, but actual device scale/offset were not captured and cause remains an inference.
+- Changed mobile root touch-action from auto to manipulation, retaining horizontal carousel gestures and pinch zoom while preventing double-tap smart zoom. WebKit reference: https://webkit.org/blog/5610/more-responsive-tapping-on-ios/. This does not reset an already enlarged Safari viewport.
+- Mobile tests now run with isMobile and hasTouch; added gesture policy assertion failed on old CSS, passed after rebuild. Production build PASS; mobile containment and Ref-stage regressions 11/11 PASS in Chromium. Public browser inspected loaded CSS and verified the new mobile gesture declaration is published.
+- Downloaded WebKit test binary, but runtime launch failed for missing system libraries. Dependency installation was blocked by the remote command policy; no Safari execution or actual device resolution claimed.
