@@ -89,13 +89,13 @@ function AskCard({ answer, compact = false, onFollowUp = null }) {
   }
 
   return (
-    <div className={`rounded-3xl border border-emerald-400/20 bg-slate-950/80 shadow-2xl shadow-emerald-950/20 ${compact ? 'p-4' : 'p-5 md:p-6'}`}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className={`min-w-0 max-w-full overflow-hidden rounded-3xl border border-emerald-400/20 bg-slate-950/80 shadow-2xl shadow-emerald-950/20 ${compact ? 'p-4' : 'p-5 md:p-6'}`}>
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-300">
             <Sparkles size={15} /> ANALYST TAKE <span className="text-sky-300">· THE REF</span>
           </div>
-          <div className={`mt-2 font-black tracking-tight text-white ${compact ? 'text-lg' : 'text-2xl'}`}>
+          <div className={`mt-2 max-w-full break-words [overflow-wrap:anywhere] font-black tracking-tight text-white ${compact ? 'text-lg' : 'text-2xl'}`}>
             {answer.take || 'No current take.'}
           </div>
         </div>
@@ -619,7 +619,7 @@ export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home', ga
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/35 backdrop-blur-[2px]" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Ask the Ref on this page" className="absolute bottom-3 right-3 top-3 flex w-[min(430px,calc(100vw-1.5rem))] flex-col rounded-2xl border border-sky-400/20 bg-[#071526] p-3 text-white shadow-2xl shadow-slate-950/50 md:bottom-4 md:right-4 md:top-4 md:rounded-[28px] md:p-4">
+      <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Ask the Ref on this page" className="absolute bottom-3 right-3 top-3 flex min-w-0 max-w-[calc(100vw-1.5rem)] w-[min(430px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-sky-400/20 bg-[#071526] p-3 text-white shadow-2xl shadow-slate-950/50 md:bottom-4 md:right-4 md:top-4 md:rounded-[28px] md:p-4">
         <div className="flex items-center justify-between">
           <button onClick={onOpenFull} className="flex items-center gap-2 text-left" title="Open full analyst">
             <ZenithRefAvatar size={44}/>
@@ -642,7 +642,7 @@ export function AssistantDrawer({ active, onClose, onOpenFull, page = 'Home', ga
           ))}
         </div>
 
-        <div className="mt-4 flex-1 space-y-3 overflow-y-auto">
+        <div className="mt-4 min-h-0 min-w-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto [&_*]:max-w-full [&_*]:break-words [&_*]:[overflow-wrap:anywhere]">
           {!messages.length && <div className="rounded-2xl bg-white/5 p-4 text-sm leading-6 text-slate-400">Ask about the current page, a player, a bet, Survivor, waivers or a score.</div>}
           {messages.map((m, i) => m.role === 'user'
             ? <div key={i} className="ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-blue-600 px-3 py-2 text-sm font-semibold">{m.text}</div>
