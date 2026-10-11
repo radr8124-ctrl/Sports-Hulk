@@ -3823,7 +3823,7 @@ export default function App() {
       <footer className={active === 'Home' ? 'border-t-2 border-[#173E52] bg-[#FFF1DB]' : 'border-t border-slate-200 bg-white'}>
         <div className="mx-auto flex max-w-[1500px] flex-col gap-2 px-5 py-6 text-sm font-semibold text-[#506B75] sm:flex-row sm:items-center sm:justify-between">
           <span>{PUBLIC_BRAND} · {PUBLIC_TAGLINE}</span>
-          <span>Real data · Unknown stays UNKNOWN · Stale stays STALE</span>
+          <span className="min-w-0 break-words">Real data · Unknown stays UNKNOWN · Stale stays STALE</span>
         </div>
       </footer>
     </div>
