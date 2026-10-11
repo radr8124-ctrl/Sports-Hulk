@@ -18,3 +18,9 @@ Actual iPhone Safari screenshot showed left-clipped Signal Board heading, game-d
 - Original CSS backed up and SHA verified on same VPS at `.deploy_backups/zenith_mobile_page_clip_20261011`. Off-VPS recovery not verified.
 
 No native Safari device access, no paid services, no external pool submission or user-account change.
+
+## Follow-up production verification
+- Ran expanded mobile-viewport-clipping tests against https://sportszenith.com/ at 320, 360, 390 and 430 pixels: **4/4 PASS** on Chromium.
+- Every width checks stationary html/body/root scroll offsets, no document horizontal overflow, full-width fixed bottom navigation, working signal and score rail scrolling, and working vertical page scrolling.
+- Test now waits for the asynchronous score rail before checking scrolling and scrolls to the final snap position; immediate 60px scrolling could snap back to zero and an early score-feed arrival could replace the element being measured.
+- No further production CSS changes in this follow-up. Published CSS checkpoint remains 4481fe8. Real iPhone Safari touch/zoom behavior remains unverified.
