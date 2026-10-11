@@ -347,6 +347,15 @@
         "fee_parameters_captured": 44,
         "http_403_count": 0,
         "execution_fees_verified": false
+      },
+      "validation": {
+        "checked_at_utc": "2026-10-11T16:00:26.762169+00:00",
+        "terms_reviewed": 22,
+        "live_open": 22,
+        "contracts_checked": 22,
+        "documented_fee_calculations_checked": 22,
+        "execution_fees_verified": false,
+        "final_exchange_settlement_verified": false
       }
     },
     "KALSHI": {
@@ -1177,7 +1186,26 @@
         "usable_spreads": 48,
         "fee_metadata_complete": 48,
         "execution_fees_verified": false
+      },
+      "validation": {
+        "checked_at_utc": "2026-10-11T16:00:26.762169+00:00",
+        "terms_reviewed": 48,
+        "live_open": 48,
+        "contracts_checked": 48,
+        "documented_fee_calculations_checked": 0,
+        "execution_fees_verified": false,
+        "final_exchange_settlement_verified": false
       }
     }
+  },
+  "model_validation": {
+    "checked_at_utc": "2026-10-11T14:23:15.035827+00:00",
+    "holdout_games": 284,
+    "market_brier": 0.210906373,
+    "model_brier": 0.212617338,
+    "validated_edge": false,
+    "prospective_finals": 0,
+    "minimum_finals": 30,
+    "status": "HISTORICAL_ADVANTAGE_NOT_DEMONSTRATED"
   }
 }
