@@ -1,8 +1,10 @@
 import React from 'react'
 import {ArrowRight,BarChart3,CheckCircle2,Radio,Sparkles,Target} from 'lucide-react'
 import ZenithRefAvatar from './ZenithRefAvatar.jsx'
+import {AccountButton,useAuth} from './AuthShell.jsx'
 
 export default function CommandCenterHero({onNavigate}){
+ const {user}=useAuth()
  return <section aria-label="Sports Zenith game-day command center"
   className="relative isolate overflow-hidden rounded-[24px] border-2 border-[#173E52] bg-[#FFF5E4] px-4 py-4 text-[#173E52] shadow-[5px_5px_0_#173E5225] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
   <div aria-hidden="true" className="pointer-events-none absolute left-0 right-0 top-0 h-2 bg-[linear-gradient(90deg,#FF7766_0%,#FF7766_28%,#FFD36A_28%,#FFD36A_54%,#46CDD2_54%,#46CDD2_84%,#173E52_84%)]"/>
@@ -31,6 +33,10 @@ export default function CommandCenterHero({onNavigate}){
       className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border-2 border-[#173E52] bg-white px-3 py-2.5 text-[12px] font-black text-[#173E52] transition hover:bg-[#E9F8F4] sm:px-5 sm:text-sm">
       <Sparkles size={15}/> Ask The Ref
      </button>
+    </div>
+    <div aria-label="Join Sports Zenith" className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[11px] font-bold text-[#536F76]">
+      <AccountButton hero />
+      <span>{user ? 'Your verified account is ready for private sports features.' : 'Use your email and a secure one-time code. No password.'}</span>
     </div>
     <div className="mt-3 hidden flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] font-bold text-[#536F76] sm:flex">
      <span className="inline-flex items-center gap-1.5"><CheckCircle2 size={12} className="text-[#178A83]"/> Game-first research</span>

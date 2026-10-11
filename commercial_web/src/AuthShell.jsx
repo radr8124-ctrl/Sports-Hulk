@@ -605,7 +605,7 @@ function AccountModal({ onClose }) {
   )
 }
 
-export function AccountButton({ compact = false }) {
+export function AccountButton({ compact = false, hero = false }) {
   const { loading, user, configured } = useAuth()
   const [open, setOpen] = useState(false)
 
@@ -621,12 +621,14 @@ export function AccountButton({ compact = false }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={user ? 'Open account' : 'Sign in to Sports Zenith'}
-        className={compact
-          ? 'flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700'
-          : 'inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-black text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700'}
+        className={hero
+          ? 'inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-lg border-2 border-[#173E52] bg-[#173E52] px-3 py-2 text-[11px] font-black text-white shadow-[2px_2px_0_#46CDD2] transition hover:bg-[#26556B]'
+          : compact
+            ? 'flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700'
+            : 'inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-black text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700'}
       >
         <UserRound size={16} />
-        {!compact && <span className="max-w-32 truncate">{configured ? label : 'Account'}</span>}
+        {hero ? <span>{user ? 'My Account' : 'Create Account / Sign In'}</span> : !compact && <span className="max-w-32 truncate">{configured ? label : 'Account'}</span>}
       </button>
       {open && typeof document !== 'undefined' && createPortal(
         <AccountModal onClose={() => setOpen(false)} />,
