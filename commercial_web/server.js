@@ -21,6 +21,7 @@ import { survivorSaveForLater } from './survivor_future_value.js'
 import { survivorBuybackState } from './survivor_buyback.js'
 import { survivorConcentrationAudit } from './survivor_concentration.js'
 import { survivorPoolDynamics } from './survivor_pool_dynamics.js'
+import {buildSurvivorWeek5FieldWatch} from './survivor_week5_field_watch.js'
 import { survivorHistoricalAvailability } from './survivor_pool_leverage.js'
 import {buildSurvivorWeek6Plan} from './survivor_week6_planner.js'
 import {buildSurvivorPreflightEvidence} from './survivor_preflight_evidence.js'
@@ -65,6 +66,7 @@ const SPORTS_PYTHON = path.join(SPORTS_ROOT, '.venv', 'bin', 'python')
 const SURVIVOR_ENTRIES_PATH = '/home/ubuntu/sports-hulk/nfl_live/derived/SURVIVOR_ENTRIES.json'
 const SURVIVOR_V2_PRIVATE_PATH = '/home/ubuntu/sports-hulk/intelligence_warehouse/survivor_accountability/SURVIVOR_V2_CURRENT.json'
 const SURVIVOR_POOL_HISTORY_CSV = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/SURVIVOR_POOL_CURRENT.csv')
+const SURVIVOR_POOL_LEDGER_CSV = path.join(SPORTS_ROOT,'nfl_live/survivor_pool/derived/SURVIVOR_POOL_LEDGER.csv')
 const SURVIVOR_POOL_HISTORY_META = path.join(SPORTS_ROOT, 'nfl_live/survivor_pool/derived/LATEST_OFFICIAL_POOL.json')
 const SURVIVOR_WEEK6_SCHEDULE_CSV = path.join(SPORTS_ROOT,'nfl_live/derived/NFLVERSE_2026_SCHEDULE.csv')
 const NFL_FORWARD_PROOF_DIR = path.join(SPORTS_ROOT,'intelligence_warehouse/nfl_advanced_pregame')
@@ -5568,6 +5570,35 @@ const server=http.createServer(async(req,res)=>{
       })
     }catch{
       return json(res,503,{status:'SCHEDULE_READ_UNAVAILABLE',message:'Week 6 schedule could not be verified. Your picks were not changed.'})
+    }
+  }
+
+  // Verified aggregate whole-field status + owner-specific organizer ticket.
+  // Scoped to an authenticated, genuinely linked Survivor entry. Never
+  // imports, writes, submits picks, or auto-certifies game outcomes.
+  if(req.method==='GET'&&url.pathname==='/api/survivor/field-watch'){
+    const user=await authenticatedUser(req)
+    if(!user)return json(res,401,{status:'AUTH_REQUIRED'})
+    const throttle=consumeRateLimit('survivor-field-watch:'+user.id,30,60*1000)
+    if(!throttle.ok)return json(res,429,{status:'RATE_LIMITED'})
+    const linked=await linkedSurvivorEntries(req,user.id)
+    const wanted=String(url.searchParams.get('entry')||'').trim()
+    if(wanted&&!linked.includes(wanted))return json(res,403,{status:'NOT_ENTRY_OWNER'})
+    const selected=selectLinkedSurvivorEntry(linked,wanted)
+    if(!selected)return json(res,403,{status:'LINKED_ENTRY_REQUIRED'})
+    res.setHeader('Cache-Control','private, no-store')
+    try{
+      const [data,ledger,meta]=await Promise.all([
+        loadAll(),readFile(SURVIVOR_POOL_LEDGER_CSV,'utf8'),loadExternalJson(SURVIVOR_POOL_HISTORY_META),
+      ])
+      const entry=data.survivorUser?.entries?.[selected]
+      if(!entry)return json(res,404,{status:'PRIVATE_ENTRY_NOT_FOUND'})
+      return json(res,200,buildSurvivorWeek5FieldWatch({
+        csvText:ledger,meta,scoreboard:data.nflScores,linkedEntry:selected,
+        zenithPicks:entry.current_picks||[],at:Date.now(),
+      }))
+    }catch{
+      return json(res,503,{status:'FIELD_SOURCE_UNAVAILABLE',message:'Official field or current scores could not be loaded; no picks changed.'})
     }
   }
 

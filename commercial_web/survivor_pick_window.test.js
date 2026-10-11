@@ -95,7 +95,7 @@ test('unverified official schedule, stale scoreboard and mismatch all fail close
   {scheduleCsv:''},{scheduleCsv:schedule.replace('2026_05_PHI_JAX','2026_05_PHI_SEA')},
   {scoreboard:{...scores,generated_at:'2026-10-09T15:00:00Z'}},
   {ruleConfirmed:false},{poolWeek:0},
-  {scoreboard:{...scores,next_games:scores.next_games.map(x=>x.event_id==='401872981'?{...x,start_time:'2026-10-14T13:30:00Z'}:x)}},
+  {scoreboard:{...scores,games:scores.games.map(x=>x.event_id==='401872981'?{...x,start_time:'2026-10-14T13:30:00Z'}:x),next_games:scores.next_games.map(x=>x.event_id==='401872981'?{...x,start_time:'2026-10-14T13:30:00Z'}:x)}},
  ]
  for(const values of scenarios){
   const result=run(values)

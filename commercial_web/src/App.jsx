@@ -56,6 +56,7 @@ import { rankSurvivorCandidates } from '../survivor_week5_rank'
 const SurvivorScoreCards = lazy(() => import('./SurvivorScoreCards'))
 const SurvivorPastPicks = lazy(() => import('./SurvivorPastPicks'))
 const SurvivorNextRoundStatus = lazy(() => import('./SurvivorNextRoundStatus'))
+const SurvivorWeek5FieldWatch = lazy(() => import('./SurvivorWeek5FieldWatch'))
 
 function LoadingSurface({ label = 'Loading' }) {
   return (
@@ -1112,6 +1113,12 @@ function SurvivorCommercialPanel() {
             Upload weekly PDF <ChevronRight size={13} className="ml-0.5 inline" />
           </button>
         </div>
+      )}
+
+      {hasEntry && Number(saved.pool_current_week) === 5 && (
+        <Suspense fallback={<LoadingSurface label="Loading the full Week 5 pool" />}>
+          <SurvivorWeek5FieldWatch entryName={saved.active_entry} getAccessToken={getAccessToken} />
+        </Suspense>
       )}
 
       {isSignedIn && (
