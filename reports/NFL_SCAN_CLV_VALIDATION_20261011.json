@@ -1,0 +1,26 @@
+{
+  "schema": "zenith.nfl.scan_clv.validation.v1",
+  "capture_at_utc": "2026-10-11T19:19:25.691202+00:00",
+  "source_hashes": {
+    "quotes": "a9223e38101cf7f44a6fd4a3e862955825be60aa09373d04dc161ad84becea36",
+    "execution": "818a92534eb56c1a97b75c4a204974d3e16d88ce3749bed590829edb021f9d17",
+    "validation": "caacc8a0c5f4328809f90adb3bd3cf0aee40dc9948bffa173f9e7f030c5323b6",
+    "contracts": "9ca0b21c4640d4fa32e26514ca40fa563fa7c169272794c053b41c8af4426454"
+  },
+  "paired_games": 2,
+  "pairs_checked": 4,
+  "positive_after_documented_fees": 0,
+  "unit_tests_passed": 20,
+  "live_browser_tests_passed": 6,
+  "mobile_widths": [
+    320,
+    390,
+    430
+  ],
+  "source_hash_readback_verified": true,
+  "real_money_orders": 0,
+  "paper_entries_created": 0,
+  "net_roi_measured": false,
+  "clv_measured": false,
+  "model_replaced": false
+}

@@ -34,9 +34,11 @@ def summarize(trades,mode):
   equity+=profit;peak=max(peak,equity);drawdown=max(drawdown,peak-equity)
  return dict(status='SETTLED_PAPER_ACCOUNTING' if mode=='PAPER' else 'SETTLED_ACTUAL_ACCOUNTING',mode=mode,net_profit=float(net),net_roi=float(net/total),settled_capital_including_entry_fees=float(total),maximum_drawdown=float(drawdown),settled_trades=len(settled),pending_trades=pending,submitted_records=len(trades))
 def main():
+ from prediction_clv import summarize_clv
  source=ROOT/'nfl_live/prediction_markets/nfl_roi_paper_trades.jsonl'
  trades=[json.loads(s) for s in source.read_text().splitlines() if s.strip()] if source.exists() else []
  report=summarize(trades,'PAPER')
+ report['closing_line_value']=summarize_clv(trades,'PAPER')
  observation=json.loads((ROOT/'nfl_live/prediction_markets/nfl_narrow_forward_quotes_latest.json').read_text())
  report.update(schema='zenith.prediction.roi_status.v1',checked_at_utc=datetime.now(timezone.utc).isoformat(),primary_objective='NET_ROI_AFTER_ALL_COSTS',scope='NFL game winners; existing frozen model',observed_games=observation['observed_games'],observed_outcomes=observation['observed_outcomes'],observations_captured_at_utc=observation['captured_at_utc'],trade_ledger_present=source.exists(),validated_profitable_edge=False,actual_trades=0,approved_picks=0,remaining=['Freeze a selection and sizing rule before outcomes','Verify contract-specific fees and settlement treatment','Record forward paper entries and actual execution assumptions','Grade every selection including losses; assess ROI uncertainty'])
  output=ROOT/'nfl_live/prediction_markets/prediction_roi_status_latest.json';output.write_text(json.dumps(report,indent=2)+'\n')

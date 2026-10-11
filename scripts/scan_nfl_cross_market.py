@@ -125,6 +125,8 @@ def main():
                             'No funding costs, actual execution fees, realized ROI, or historical fills validated'])
     target=DATA/'nfl_cross_market_scan_latest.json'
     target.write_text(json.dumps(out,indent=2)+'\n')
+    archive=DATA/('nfl_cross_market_scan_'+now.strftime('%Y%m%dT%H%M%SZ')+'.json')
+    archive.write_text(target.read_text())
     public_path=ROOT/'commercial_web/public/prediction_market_nfl_evidence.json'
     public=json.loads(public_path.read_text())
     public['cross_market_scan']=out
