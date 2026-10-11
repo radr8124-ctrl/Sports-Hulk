@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-10-11T20:34:02.860169+00:00",
+  "archive_directory": "/home/ubuntu/sports-hulk/nfl_live/prediction_markets/prospective_availability/20261011T203402860169Z",
+  "source_file_sha256": {
+    "AVAILABILITY_TIMELINE.csv": "a70ff0e7d7424337e0f452731de08b4f9c1638f2b1acc83f6279ef1ffc29a070",
+    "AVAILABILITY_REPORTS_CURRENT.csv": "e83f24052520cecfba7d1bc5da775da4e7b9f0f969d33357d79770fa579d910c"
+  },
+  "records_sha256": "4854e26dcfb61a0776815ee1462102dd4aa4b9ec7e99a0a9ea079bcc7f33ecdc",
+  "injury_records": 2898,
+  "news_context_records": 8,
+  "records_with_publication_time": 8,
+  "injury_records_with_publication_time": 0,
+  "confirmed_starting_qb_records": 0,
+  "quote_linked_feature_sets": 0,
+  "status": "ARCHIVED_ONLY_NOT_A_MODEL_FEATURE_SET",
+  "limitations": [
+    "Local export bytes are preserved; these are not original upstream HTTP payloads.",
+    "Capture time is now, even when source observation is older; no retroactive quote joins.",
+    "Missing publication timestamps remain empty.",
+    "News is context, not verified player state. QB injury status is not a starting-QB announcement.",
+    "Event identity, publisher verification, freshness and future quote joins remain required.",
+    "This command is manual; no recurring collection or profitable edge is implied."
+  ],
+  "verification": {
+    "script_suite_passed": 111,
+    "source_and_records_hashes_verified": true,
+    "automatic_collection_enabled": false,
+    "production_model_changed": false,
+    "external_rest_harness_independently_verified": false
+  }
+}
