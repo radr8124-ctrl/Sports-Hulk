@@ -1,0 +1,193 @@
+{
+  "schema": "zenith.nfl.cross_market_scan.v1",
+  "scanned_at_utc": "2026-10-11T19:18:14.465990+00:00",
+  "source_snapshot_created_at_utc": "2026-10-11T17:17:25.781323+00:00",
+  "source_quotes_captured_at_utc": "2026-10-11T17:16:09.818059+00:00",
+  "source_hashes": {
+    "quotes": "907339e15a7f2c3655bdc7ee0e91510670dcdecaec7bdba4f2092d6e10535365",
+    "execution": "ad4f8862b45114f60851adc18c8d6cc24dc0c3f68aca2fc8c28c1a9336cdff94",
+    "validation": "899c02656e1b17de79bd97e4df8d15bc60a5331a647aead442ab6dd05ebde167",
+    "contracts": "9ca0b21c4640d4fa32e26514ca40fa563fa7c169272794c053b41c8af4426454"
+  },
+  "paired_games": 2,
+  "pairs_checked": 4,
+  "raw_positive_pairs": 0,
+  "positive_after_documented_fees": 0,
+  "unblocked_pairs": 0,
+  "blocker_counts": {
+    "NO_POSITIVE_NET_GAP": 4,
+    "SETTLEMENT_RULES_NOT_EQUIVALENT": 4,
+    "STALE_OR_FUTURE_QUOTE": 4
+  },
+  "rows": [
+    {
+      "event_id": "401872989",
+      "teams": [
+        "LAC",
+        "DEN"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "LAC",
+          "contract_or_token_id": "KXNFLGAME-26OCT11DENLAC-LAC",
+          "ask": 0.37,
+          "top_level_depth": 4221537.14,
+          "captured_at_utc": "2026-10-11T17:16:09.818059+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "DEN",
+          "contract_or_token_id": "61912153212346226574735689010757292341931967825413324728784713804768764178495",
+          "ask": 0.64,
+          "top_level_depth": 421230.37,
+          "captured_at_utc": "2026-10-11T17:16:10.887778+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 101.0,
+      "documented_fee_cost": 2.3312,
+      "conditional_net_profit": -3.3312,
+      "conditional_net_roi": -0.03223808491530148,
+      "one_cent_worse_fill_profit": -5.3325,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT",
+        "STALE_OR_FUTURE_QUOTE"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872989",
+      "teams": [
+        "DEN",
+        "LAC"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "DEN",
+          "contract_or_token_id": "KXNFLGAME-26OCT11DENLAC-DEN",
+          "ask": 0.64,
+          "top_level_depth": 3228535.35,
+          "captured_at_utc": "2026-10-11T17:16:09.820785+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "LAC",
+          "contract_or_token_id": "51102114999633637413430928699806154673949360522651523449492458853304910453987",
+          "ask": 0.37,
+          "top_level_depth": 406313.45,
+          "captured_at_utc": "2026-10-11T17:16:10.919571+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 101.0,
+      "documented_fee_cost": 2.3193,
+      "conditional_net_profit": -3.3193,
+      "conditional_net_roi": -0.03212662106692554,
+      "one_cent_worse_fill_profit": -5.3068,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT",
+        "STALE_OR_FUTURE_QUOTE"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872991",
+      "teams": [
+        "ARI",
+        "DET"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "ARI",
+          "contract_or_token_id": "KXNFLGAME-26OCT11DETARI-ARI",
+          "ask": 0.31,
+          "top_level_depth": 1568239.58,
+          "captured_at_utc": "2026-10-11T17:16:09.867159+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "DET",
+          "contract_or_token_id": "56056672751934526125943641351839699220089479893294396205663286922097293819722",
+          "ask": 0.7,
+          "top_level_depth": 128469.82,
+          "captured_at_utc": "2026-10-11T17:16:10.961914+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 101.0,
+      "documented_fee_cost": 2.13,
+      "conditional_net_profit": -3.13,
+      "conditional_net_roi": -0.030350043634248036,
+      "one_cent_worse_fill_profit": -5.1477,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT",
+        "STALE_OR_FUTURE_QUOTE"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    },
+    {
+      "event_id": "401872991",
+      "teams": [
+        "DET",
+        "ARI"
+      ],
+      "legs": [
+        {
+          "provider": "KALSHI",
+          "team": "DET",
+          "contract_or_token_id": "KXNFLGAME-26OCT11DETARI-DET",
+          "ask": 0.7,
+          "top_level_depth": 2338172.95,
+          "captured_at_utc": "2026-10-11T17:16:09.871447+00:00"
+        },
+        {
+          "provider": "POLYMARKET",
+          "team": "ARI",
+          "contract_or_token_id": "45771357044293249394701484141194198475871091757894999118580113740262781405581",
+          "ask": 0.31,
+          "top_level_depth": 579464.37,
+          "captured_at_utc": "2026-10-11T17:16:11.002409+00:00"
+        }
+      ],
+      "quantity": 100.0,
+      "conditional_completion_payout": 100.0,
+      "gross_cost": 101.0,
+      "documented_fee_cost": 2.1117,
+      "conditional_net_profit": -3.1117,
+      "conditional_net_roi": -0.030177952647468715,
+      "one_cent_worse_fill_profit": -5.1028,
+      "blockers": [
+        "NO_POSITIVE_NET_GAP",
+        "SETTLEMENT_RULES_NOT_EQUIVALENT",
+        "STALE_OR_FUTURE_QUOTE"
+      ],
+      "decision": "BLOCKED",
+      "approved_pick": false,
+      "execution_enabled": false
+    }
+  ],
+  "actual_trades": 0,
+  "approved_picks": 0,
+  "execution_enabled": false,
+  "limitations": [
+    "Only saved matched NFL winner asks; no sharp sportsbook benchmark",
+    "Cross-provider postponement and cancellation payoffs are not equivalent",
+    "Top-level 100-contract hypothetical single fills; simultaneous fills unverified",
+    "No funding costs, actual execution fees, realized ROI, or historical fills validated"
+  ]
+}
