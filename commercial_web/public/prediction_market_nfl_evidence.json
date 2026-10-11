@@ -1,0 +1,784 @@
+{
+  "schema": "zenith.nfl.prediction_evidence.v1",
+  "generated_at_utc": "2026-10-11T15:51:43.863822+00:00",
+  "approved_picks": 0,
+  "providers": {
+    "POLYMARKET": {
+      "captured_at_utc": "2026-10-11T15:51:43.863822+00:00",
+      "matched_games": 22,
+      "terms_captured": 22,
+      "pagination_complete": true,
+      "markets": [
+        {
+          "provider": "POLYMARKET",
+          "id": "4024655",
+          "event": "Philadelphia Eagles vs Jacksonville Jaguars",
+          "question": "Eagles vs. Jaguars",
+          "outcomes": [
+            "Eagles",
+            "Jaguars"
+          ],
+          "display_prices": [
+            "0.455",
+            "0.545"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024657",
+          "event": "Cincinnati Bengals vs Miami Dolphins",
+          "question": "Bengals vs. Dolphins",
+          "outcomes": [
+            "Bengals",
+            "Dolphins"
+          ],
+          "display_prices": [
+            "0.755",
+            "0.245"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024660",
+          "event": "Las Vegas Raiders vs New England Patriots",
+          "question": "Raiders vs. Patriots",
+          "outcomes": [
+            "Raiders",
+            "Patriots"
+          ],
+          "display_prices": [
+            "0.375",
+            "0.625"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024664",
+          "event": "Minnesota Vikings vs New Orleans Saints",
+          "question": "Vikings vs. Saints",
+          "outcomes": [
+            "Vikings",
+            "Saints"
+          ],
+          "display_prices": [
+            "0.555",
+            "0.445"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024666",
+          "event": "Cleveland Browns vs New York Jets",
+          "question": "Browns vs. Jets",
+          "outcomes": [
+            "Browns",
+            "Jets"
+          ],
+          "display_prices": [
+            "0.435",
+            "0.565"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024667",
+          "event": "Indianapolis Colts vs Pittsburgh Steelers",
+          "question": "Colts vs. Steelers",
+          "outcomes": [
+            "Colts",
+            "Steelers"
+          ],
+          "display_prices": [
+            "0.415",
+            "0.585"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024668",
+          "event": "Houston Texans vs Tennessee Titans",
+          "question": "Texans vs. Titans",
+          "outcomes": [
+            "Texans",
+            "Titans"
+          ],
+          "display_prices": [
+            "0.745",
+            "0.255"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024671",
+          "event": "New York Giants vs Washington Commanders",
+          "question": "Giants vs. Commanders",
+          "outcomes": [
+            "Giants",
+            "Commanders"
+          ],
+          "display_prices": [
+            "0.365",
+            "0.635"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024675",
+          "event": "Denver Broncos vs Los Angeles Chargers",
+          "question": "Broncos vs. Chargers",
+          "outcomes": [
+            "Broncos",
+            "Chargers"
+          ],
+          "display_prices": [
+            "0.635",
+            "0.365"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024677",
+          "event": "Detroit Lions vs Arizona Cardinals",
+          "question": "Lions vs. Cardinals",
+          "outcomes": [
+            "Lions",
+            "Cardinals"
+          ],
+          "display_prices": [
+            "0.695",
+            "0.305"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024678",
+          "event": "Chicago Bears vs Green Bay Packers",
+          "question": "Bears vs. Packers",
+          "outcomes": [
+            "Bears",
+            "Packers"
+          ],
+          "display_prices": [
+            "0.525",
+            "0.475"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4024680",
+          "event": "San Francisco 49ers vs Seattle Seahawks",
+          "question": "49ers vs. Seahawks",
+          "outcomes": [
+            "49ers",
+            "Seahawks"
+          ],
+          "display_prices": [
+            "0.385",
+            "0.615"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329882",
+          "event": "Houston Texans vs Jacksonville Jaguars",
+          "question": "Texans vs. Jaguars",
+          "outcomes": [
+            "Texans",
+            "Jaguars"
+          ],
+          "display_prices": [
+            "0.39",
+            "0.61"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329883",
+          "event": "Chicago Bears vs Atlanta Falcons",
+          "question": "Bears vs. Falcons",
+          "outcomes": [
+            "Bears",
+            "Falcons"
+          ],
+          "display_prices": [
+            "0.55",
+            "0.45"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329884",
+          "event": "Baltimore Ravens vs Cleveland Browns",
+          "question": "Ravens vs. Browns",
+          "outcomes": [
+            "Ravens",
+            "Browns"
+          ],
+          "display_prices": [
+            "0.655",
+            "0.345"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329885",
+          "event": "Tennessee Titans vs Indianapolis Colts",
+          "question": "Titans vs. Colts",
+          "outcomes": [
+            "Titans",
+            "Colts"
+          ],
+          "display_prices": [
+            "0.27",
+            "0.73"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329886",
+          "event": "New York Jets vs New England Patriots",
+          "question": "Jets vs. Patriots",
+          "outcomes": [
+            "Jets",
+            "Patriots"
+          ],
+          "display_prices": [
+            "0.26",
+            "0.74"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329887",
+          "event": "New Orleans Saints vs New York Giants",
+          "question": "Saints vs. Giants",
+          "outcomes": [
+            "Saints",
+            "Giants"
+          ],
+          "display_prices": [
+            "0.52",
+            "0.48"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329888",
+          "event": "Carolina Panthers vs Philadelphia Eagles",
+          "question": "Panthers vs. Eagles",
+          "outcomes": [
+            "Panthers",
+            "Eagles"
+          ],
+          "display_prices": [
+            "0.48",
+            "0.52"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329889",
+          "event": "Pittsburgh Steelers vs Tampa Bay Buccaneers",
+          "question": "Steelers vs. Buccaneers",
+          "outcomes": [
+            "Steelers",
+            "Buccaneers"
+          ],
+          "display_prices": [
+            "0.565",
+            "0.435"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329891",
+          "event": "Los Angeles Chargers vs Kansas City Chiefs",
+          "question": "Chargers vs. Chiefs",
+          "outcomes": [
+            "Chargers",
+            "Chiefs"
+          ],
+          "display_prices": [
+            "0.2",
+            "0.8"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        },
+        {
+          "provider": "POLYMARKET",
+          "id": "4329892",
+          "event": "Buffalo Bills vs Las Vegas Raiders",
+          "question": "Bills vs. Raiders",
+          "outcomes": [
+            "Bills",
+            "Raiders"
+          ],
+          "display_prices": [
+            "0.69",
+            "0.31"
+          ],
+          "price_basis": "Captured indicative outcome prices"
+        }
+      ]
+    },
+    "KALSHI": {
+      "captured_at_utc": "2026-10-11T14:01:15.436970+00:00",
+      "matched_games": 24,
+      "terms_captured": 48,
+      "markets": [
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11PHIJAC-JAC",
+          "event": "Philadelphia Eagles vs Jacksonville Jaguars",
+          "question": "Jacksonville wins",
+          "yes_bid": "0.8200",
+          "yes_ask": "0.8300",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11PHIJAC-PHI",
+          "event": "Philadelphia Eagles vs Jacksonville Jaguars",
+          "question": "Philadelphia wins",
+          "yes_bid": "0.1700",
+          "yes_ask": "0.1800",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11CINMIA-MIA",
+          "event": "Cincinnati Bengals vs Miami Dolphins",
+          "question": "Miami wins",
+          "yes_bid": "0.2400",
+          "yes_ask": "0.2500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11CINMIA-CIN",
+          "event": "Cincinnati Bengals vs Miami Dolphins",
+          "question": "Cincinnati wins",
+          "yes_bid": "0.7400",
+          "yes_ask": "0.7500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11CLENYJ-NYJ",
+          "event": "Cleveland Browns vs New York Jets",
+          "question": "New York J wins",
+          "yes_bid": "0.5600",
+          "yes_ask": "0.5700",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11CLENYJ-CLE",
+          "event": "Cleveland Browns vs New York Jets",
+          "question": "Cleveland wins",
+          "yes_bid": "0.4300",
+          "yes_ask": "0.4400",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11HOUTEN-TEN",
+          "event": "Houston Texans vs Tennessee Titans",
+          "question": "Tennessee wins",
+          "yes_bid": "0.2400",
+          "yes_ask": "0.2500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11HOUTEN-HOU",
+          "event": "Houston Texans vs Tennessee Titans",
+          "question": "Houston wins",
+          "yes_bid": "0.7400",
+          "yes_ask": "0.7500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11INDPIT-PIT",
+          "event": "Indianapolis Colts vs Pittsburgh Steelers",
+          "question": "Pittsburgh wins",
+          "yes_bid": "0.5800",
+          "yes_ask": "0.5900",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11INDPIT-IND",
+          "event": "Indianapolis Colts vs Pittsburgh Steelers",
+          "question": "Indianapolis wins",
+          "yes_bid": "0.4000",
+          "yes_ask": "0.4100",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11LVNE-NE",
+          "event": "Las Vegas Raiders vs New England Patriots",
+          "question": "New England wins",
+          "yes_bid": "0.6200",
+          "yes_ask": "0.6300",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11LVNE-LV",
+          "event": "Las Vegas Raiders vs New England Patriots",
+          "question": "Las Vegas wins",
+          "yes_bid": "0.3700",
+          "yes_ask": "0.3800",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11MINNO-NO",
+          "event": "Minnesota Vikings vs New Orleans Saints",
+          "question": "New Orleans wins",
+          "yes_bid": "0.4400",
+          "yes_ask": "0.4500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11MINNO-MIN",
+          "event": "Minnesota Vikings vs New Orleans Saints",
+          "question": "Minnesota wins",
+          "yes_bid": "0.5500",
+          "yes_ask": "0.5600",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11DENLAC-LAC",
+          "event": "Denver Broncos vs Los Angeles Chargers",
+          "question": "Los Angeles C wins",
+          "yes_bid": "0.3500",
+          "yes_ask": "0.3600",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11DENLAC-DEN",
+          "event": "Denver Broncos vs Los Angeles Chargers",
+          "question": "Denver wins",
+          "yes_bid": "0.6300",
+          "yes_ask": "0.6400",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11CHIGB-GB",
+          "event": "Chicago Bears vs Green Bay Packers",
+          "question": "Green Bay wins",
+          "yes_bid": "0.4700",
+          "yes_ask": "0.4800",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11CHIGB-CHI",
+          "event": "Chicago Bears vs Green Bay Packers",
+          "question": "Chicago wins",
+          "yes_bid": "0.5200",
+          "yes_ask": "0.5300",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11DETARI-ARI",
+          "event": "Detroit Lions vs Arizona Cardinals",
+          "question": "Arizona wins",
+          "yes_bid": "0.3000",
+          "yes_ask": "0.3100",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11DETARI-DET",
+          "event": "Detroit Lions vs Arizona Cardinals",
+          "question": "Detroit wins",
+          "yes_bid": "0.6900",
+          "yes_ask": "0.7000",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11BALATL-ATL",
+          "event": "Baltimore Ravens vs Atlanta Falcons",
+          "question": "Atlanta wins",
+          "yes_bid": "0.6100",
+          "yes_ask": "0.6200",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT11BALATL-BAL",
+          "event": "Baltimore Ravens vs Atlanta Falcons",
+          "question": "Baltimore wins",
+          "yes_bid": "0.3800",
+          "yes_ask": "0.3900",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT12BUFLAR-LAR",
+          "event": "Buffalo Bills vs Los Angeles Rams",
+          "question": "Los Angeles R wins",
+          "yes_bid": "0.6100",
+          "yes_ask": "0.6200",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT12BUFLAR-BUF",
+          "event": "Buffalo Bills vs Los Angeles Rams",
+          "question": "Buffalo wins",
+          "yes_bid": "0.3800",
+          "yes_ask": "0.3900",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT15SEADEN-DEN",
+          "event": "Seattle Seahawks vs Denver Broncos",
+          "question": "Denver wins",
+          "yes_bid": "0.4400",
+          "yes_ask": "0.4500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT15SEADEN-SEA",
+          "event": "Seattle Seahawks vs Denver Broncos",
+          "question": "Seattle wins",
+          "yes_bid": "0.5500",
+          "yes_ask": "0.5600",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18HOUJAC-JAC",
+          "event": "Houston Texans vs Jacksonville Jaguars",
+          "question": "Jacksonville wins",
+          "yes_bid": "0.6000",
+          "yes_ask": "0.6200",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18HOUJAC-HOU",
+          "event": "Houston Texans vs Jacksonville Jaguars",
+          "question": "Houston wins",
+          "yes_bid": "0.3800",
+          "yes_ask": "0.4000",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18BALCLE-CLE",
+          "event": "Baltimore Ravens vs Cleveland Browns",
+          "question": "Cleveland wins",
+          "yes_bid": "0.3400",
+          "yes_ask": "0.3600",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18BALCLE-BAL",
+          "event": "Baltimore Ravens vs Cleveland Browns",
+          "question": "Baltimore wins",
+          "yes_bid": "0.6500",
+          "yes_ask": "0.6700",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18CARPHI-PHI",
+          "event": "Carolina Panthers vs Philadelphia Eagles",
+          "question": "Philadelphia wins",
+          "yes_bid": "0.5100",
+          "yes_ask": "0.5300",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18CARPHI-CAR",
+          "event": "Carolina Panthers vs Philadelphia Eagles",
+          "question": "Carolina wins",
+          "yes_bid": "0.4700",
+          "yes_ask": "0.4900",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18CHIATL-ATL",
+          "event": "Chicago Bears vs Atlanta Falcons",
+          "question": "Atlanta wins",
+          "yes_bid": "0.4500",
+          "yes_ask": "0.4700",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18CHIATL-CHI",
+          "event": "Chicago Bears vs Atlanta Falcons",
+          "question": "Chicago wins",
+          "yes_bid": "0.5300",
+          "yes_ask": "0.5500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18NYJNE-NE",
+          "event": "New York Jets vs New England Patriots",
+          "question": "New England wins",
+          "yes_bid": "0.7400",
+          "yes_ask": "0.7500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18NYJNE-NYJ",
+          "event": "New York Jets vs New England Patriots",
+          "question": "New York J wins",
+          "yes_bid": "0.2600",
+          "yes_ask": "0.2700",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18PITTB-TB",
+          "event": "Pittsburgh Steelers vs Tampa Bay Buccaneers",
+          "question": "Tampa Bay wins",
+          "yes_bid": "0.4300",
+          "yes_ask": "0.4500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18PITTB-PIT",
+          "event": "Pittsburgh Steelers vs Tampa Bay Buccaneers",
+          "question": "Pittsburgh wins",
+          "yes_bid": "0.5500",
+          "yes_ask": "0.5700",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18TENIND-IND",
+          "event": "Tennessee Titans vs Indianapolis Colts",
+          "question": "Indianapolis wins",
+          "yes_bid": "0.7300",
+          "yes_ask": "0.7400",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18TENIND-TEN",
+          "event": "Tennessee Titans vs Indianapolis Colts",
+          "question": "Tennessee wins",
+          "yes_bid": "0.2500",
+          "yes_ask": "0.2800",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18ARILAR-LAR",
+          "event": "Arizona Cardinals vs Los Angeles Rams",
+          "question": "Los Angeles R wins",
+          "yes_bid": "0.8400",
+          "yes_ask": "0.8500",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18ARILAR-ARI",
+          "event": "Arizona Cardinals vs Los Angeles Rams",
+          "question": "Arizona wins",
+          "yes_bid": "0.1500",
+          "yes_ask": "0.1600",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18BUFLV-LV",
+          "event": "Buffalo Bills vs Las Vegas Raiders",
+          "question": "Las Vegas wins",
+          "yes_bid": "0.3000",
+          "yes_ask": "0.3200",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18BUFLV-BUF",
+          "event": "Buffalo Bills vs Las Vegas Raiders",
+          "question": "Buffalo wins",
+          "yes_bid": "0.6800",
+          "yes_ask": "0.7000",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18LACKC-KC",
+          "event": "Los Angeles Chargers vs Kansas City Chiefs",
+          "question": "Kansas City wins",
+          "yes_bid": "0.8000",
+          "yes_ask": "0.8100",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18LACKC-LAC",
+          "event": "Los Angeles Chargers vs Kansas City Chiefs",
+          "question": "Los Angeles C wins",
+          "yes_bid": "0.1900",
+          "yes_ask": "0.2100",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18DALGB-GB",
+          "event": "Dallas Cowboys vs Green Bay Packers",
+          "question": "Green Bay wins",
+          "yes_bid": "0.4600",
+          "yes_ask": "0.4800",
+          "price_basis": "Captured indicative dollar quotes"
+        },
+        {
+          "provider": "KALSHI",
+          "id": "KXNFLGAME-26OCT18DALGB-DAL",
+          "event": "Dallas Cowboys vs Green Bay Packers",
+          "question": "Dallas wins",
+          "yes_bid": "0.5300",
+          "yes_ask": "0.5400",
+          "price_basis": "Captured indicative dollar quotes"
+        }
+      ]
+    }
+  }
+}
