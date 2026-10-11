@@ -3484,7 +3484,9 @@ function FantasyCommercialPanel() {
             </div>
           </section>
 
-          <section className="min-w-0">
+          <details data-fantasy-proof className="group min-w-0 rounded-2xl border border-slate-200 bg-white p-4">
+            <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-black text-[#276977]">Fantasy forward-testing record <ChevronRight size={16} className="group-open:rotate-90" /></summary>
+            <div className="mt-4 border-t border-slate-100 pt-4">
             <div className="section-heading">
               <div><p className="eyebrow">Forward proof</p><h2>Five fantasy lanes are being tested</h2></div>
               <span className="health-pill">NO AUTO-PROMOTION</span>
@@ -3499,7 +3501,8 @@ function FantasyCommercialPanel() {
                 </div>
               ))}
             </div>
-          </section>
+            </div>
+          </details>
 
           <section>
             <div className="section-heading">
@@ -3524,7 +3527,11 @@ function FantasyCommercialPanel() {
         </>
       ) : (
         <>
-          <section>
+          <p className="rounded-xl border border-[#D1DDD9] bg-white px-4 py-3 text-xs font-semibold text-[#506B75]">Paper lineup research · Forward profitability is still being validated.</p>
+          <Suspense fallback={<LoadingSurface label="Loading DFS Lineup Lab" />}><DfsLineupLab /></Suspense>
+          <details data-dfs-proof className="group rounded-2xl border border-slate-200 bg-white p-4">
+            <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 text-sm font-black text-[#276977]">DFS strategy record and limitations <ChevronRight size={16} className="group-open:rotate-90" /></summary>
+            <section className="mt-4 border-t border-slate-100 pt-4">
             <div className="section-heading">
               <div><p className="eyebrow">DFS V3</p><h2>Strategy proof before lineup hype</h2></div>
               <span className="health-pill">{dfs.forward_official_snapshots || 0} FORWARD SLATES</span>
@@ -3546,8 +3553,8 @@ function FantasyCommercialPanel() {
                 <div className="mt-2 text-sm leading-6 text-amber-950">Contrarian mode stays unavailable when slate ownership is missing. The optimizer will not fabricate low-owned percentages.</div>
               </div>
             </div>
-          </section>
-          <Suspense fallback={<LoadingSurface label="Loading DFS Lineup Lab" />}><DfsLineupLab /></Suspense>
+            </section>
+          </details>
         </>
       )}
     </div>
@@ -3750,7 +3757,7 @@ export default function App() {
           <Suspense fallback={<LoadingSurface label="Loading analyst" />}><AskSportsHulkPage /></Suspense>
         ) : (
           <>
-            {!['Home', 'Welcome', 'Dashboards'].includes(active) && <DashboardWorkspaceNav active={active} onNavigate={navigate} />}
+            {!['Home', 'Welcome', 'Dashboards'].includes(active) && <DashboardWorkspaceNav active={active} onNavigate={navigate} onOpenAsk={() => setAssistantOpen(true)} />}
             {active === 'Home' && (
               <>
                 <CommandCenterHero onNavigate={navigate} />

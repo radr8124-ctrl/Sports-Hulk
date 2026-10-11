@@ -667,7 +667,7 @@ export function AssistantLauncher({ onClick }) {
       onClick={onClick}
       aria-label="Open the Ref sports assistant"
       title="The Ref — Zenith sports intelligence"
-      className="fixed bottom-[calc(5.7rem+env(safe-area-inset-bottom))] right-3 z-40 flex items-center gap-3 rounded-2xl border border-sky-300/30 bg-slate-950 p-1.5 text-white shadow-xl shadow-slate-950/40 transition hover:border-sky-300/60 md:bottom-5 md:right-5 md:rounded-[22px] md:p-2 md:pr-3"
+      className="fixed bottom-[calc(5.7rem+env(safe-area-inset-bottom))] right-3 z-40 hidden items-center gap-3 rounded-2xl border border-sky-300/30 bg-slate-950 p-1.5 text-white shadow-xl shadow-slate-950/40 transition hover:border-sky-300/60 lg:bottom-5 lg:right-5 lg:flex lg:rounded-[22px] lg:p-2 lg:pr-3"
     >
       <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0C2036] md:h-12 md:w-12">
         <ZenithRefAvatar size={48} compact/>
