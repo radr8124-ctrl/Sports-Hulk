@@ -5595,8 +5595,27 @@ const server=http.createServer(async(req,res)=>{
         display_prices:Array.isArray(row.display_prices)?row.display_prices.slice(0,5):[],
         price_basis:String(row.price_basis||'indicative').slice(0,120),
       }))
+      let evaluation=null
+      try{
+        const evaluated=JSON.parse(await readFile(path.join(SPORTS_ROOT,'nfl_live/prediction_markets/evaluation_latest.json'),'utf8'))
+        if(evaluated.schema==='zenith.prediction_markets.evaluation.v1' &&
+           evaluated.source_captured_at_utc===saved.captured_at_utc &&
+           Array.isArray(evaluated.records)){
+          const reasons=new Map(evaluated.records.map(row=>[String(row.provider)+'|'+String(row.market_id),{
+            decision:'PASS',reason_codes:Array.isArray(row.reason_codes)?row.reason_codes.slice(0,12):[]
+          }]))
+          for(const market of markets){
+            market.evaluation=reasons.get(market.provider+'|'+market.id)||{decision:'PASS',reason_codes:['EVALUATION_MISSING']}
+          }
+          evaluation={status:'NO_VERIFIED_PICKS',evaluated_at_utc:evaluated.evaluated_at_utc,
+            evaluated:evaluated.evaluated,play:0,monitor:0,pass:evaluated.pass}
+        }
+      }catch{}
+      if(!evaluation){
+        for(const market of markets)market.evaluation={decision:'PASS',reason_codes:['EVALUATION_NOT_CURRENT']}
+      }
       return json(res,200,{status:'RESEARCH_ONLY',captured_at_utc:saved.captured_at_utc||null,
-        market_count:saved.market_count||0,providers:saved.providers||{},markets,
+        market_count:saved.market_count||0,providers:saved.providers||{},markets,evaluation,
         picks_approved:false,execution_enabled:false})
     }catch{return json(res,503,{status:'SNAPSHOT_UNAVAILABLE',markets:[]})}
   }
