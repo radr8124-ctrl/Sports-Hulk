@@ -1,3 +1,4 @@
+import DashboardWorkspaceNav, { jumpToDashboardSection } from './DashboardWorkspaceNav.jsx'
 import MemberEntry, { DashboardHub } from './MemberEntry.jsx'
 import PredictionMarketsPanel from './PredictionMarketsPanel.jsx'
 import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
@@ -2091,6 +2092,10 @@ function BestBetsV2Panel() {
         </div>
       </section>
 
+      <nav aria-label="Betting dashboard sections" className="flex flex-wrap gap-2">
+        {[['bet-prices', 'Compare prices'], ['bet-watchlist', 'Research watchlist']].map(([id, label]) =>
+          <button type="button" key={id} onClick={() => jumpToDashboardSection(id)} className="min-h-10 rounded-xl border border-[#D1DDD9] bg-white px-3 text-xs font-black text-[#276977]">{label}</button>)}
+      </nav>
       <SportFilter sports={sports} active={sport} onChange={next => {setSport(next); setShowAllResearch(false)}} />
       <div role="group" aria-label="Betting market filter" className="flex gap-2 overflow-x-auto pb-1">
         {BET_MARKET_FILTERS.map(item => (
@@ -2100,9 +2105,11 @@ function BestBetsV2Panel() {
           </button>
         ))}
       </div>
+      <div id="bet-prices" tabIndex={-1} className="scroll-mt-28">
       <Suspense fallback={<LoadingSurface label="Loading sportsbook odds and price comparisons" />}>
         <BettingOddsBoard sport={sport} market={market} />
       </Suspense>
+      </div>
       <BestBetsMarketCoverage sport={sport} market={market} currentData={data} priorBoard={priorBoard} nflScores={nflScores} />
       {grouped.plays.length > 0 && (
         <div className="space-y-3">
@@ -2110,7 +2117,7 @@ function BestBetsV2Panel() {
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{grouped.plays.map(renderBetCard)}</div>
         </div>
       )}
-      <div className="section-heading">
+      <div id="bet-watchlist" tabIndex={-1} className="section-heading scroll-mt-28">
         <div>
           <p className="eyebrow">Not official picks</p>
           <h3>Research watchlist</h3>
@@ -3223,7 +3230,22 @@ function RateMyTeamPanel({ preferredLeagueId = null, onSelectedLeagueChange, onT
 
 function FantasyCommercialPanel() {
   const { user, getAccessToken, loading: authLoading } = useAuth()
-  const [mode, setMode] = useState('Season-Long')
+  const modeFromLocation = () => window.location.hash.toLowerCase() === '#fantasy/dfs' ? 'DFS Lineup Lab' : 'Season-Long'
+  const [mode, setMode] = useState(modeFromLocation)
+  useEffect(() => {
+    const syncMode = () => setMode(modeFromLocation())
+    window.addEventListener('hashchange', syncMode)
+    window.addEventListener('popstate', syncMode)
+    return () => {
+      window.removeEventListener('hashchange', syncMode)
+      window.removeEventListener('popstate', syncMode)
+    }
+  }, [])
+  const changeMode = next => {
+    const hash = next === 'DFS Lineup Lab' ? '#fantasy/dfs' : '#fantasy'
+    if (window.location.hash !== hash) window.location.hash = hash
+    setMode(next)
+  }
   const [lane, setLane] = useState('my_teams')
   const [sport, setSport] = useState('NFL')
   const [teamOptions, setTeamOptions] = useState([])
@@ -3359,7 +3381,7 @@ function FantasyCommercialPanel() {
           </div>
           <div className="flex w-full min-w-0 gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 sm:w-auto sm:p-2">
             {['Season-Long','DFS Lineup Lab'].map((item) => (
-              <button key={item} onClick={() => setMode(item)} className={`min-h-11 min-w-0 flex-1 rounded-xl px-2 py-2.5 text-xs font-black leading-4 sm:flex-none sm:whitespace-nowrap sm:px-4 sm:text-sm ${mode === item ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{item}</button>
+              <button key={item} aria-pressed={mode === item} onClick={() => changeMode(item)} className={`min-h-11 min-w-0 flex-1 rounded-xl px-2 py-2.5 text-xs font-black leading-4 sm:flex-none sm:whitespace-nowrap sm:px-4 sm:text-sm ${mode === item ? 'bg-slate-950 text-white' : 'text-slate-500'}`}>{item}</button>
             ))}
           </div>
         </div>
@@ -3593,7 +3615,7 @@ const ROUTE_HASH = {
 const HASH_ROUTE = Object.fromEntries(Object.entries(ROUTE_HASH).map(([route, hash]) => [hash, route]))
 
 function routeFromLocation() {
-  const hash = window.location.hash.replace(/^#/, '').trim().toLowerCase()
+  const hash = window.location.hash.replace(/^#/, '').trim().toLowerCase().split('/')[0]
   if (hash === 'welcome') return 'Welcome'
   if (hash === 'practice') return 'Bet Lab'
   return HASH_ROUTE[hash] || 'Home'
@@ -3651,14 +3673,15 @@ export default function App() {
     return () => window.removeEventListener('keydown', closeOverlays)
   }, [])
 
-  const navigate = (item) => {
+  const navigate = (item, view = '') => {
     const route = item === 'Betting' ? 'Best Bets' : item
-    if (route !== active) {
-      const hash = ROUTE_HASH[route] || ''
+    const hash = (ROUTE_HASH[route] || '') + (route === 'Fantasy' && view === 'dfs' ? '/dfs' : '')
+    if (route !== active || window.location.hash.replace(/^#/, '') !== hash) {
       const nextUrl = hash
         ? `${window.location.pathname}${window.location.search}#${hash}`
         : `${window.location.pathname}${window.location.search}`
       window.history.pushState({ route }, '', nextUrl)
+      window.dispatchEvent(new Event('hashchange'))
       setActive(route)
     }
     setAssistantOpen(false)
@@ -3727,6 +3750,7 @@ export default function App() {
           <Suspense fallback={<LoadingSurface label="Loading analyst" />}><AskSportsHulkPage /></Suspense>
         ) : (
           <>
+            {!['Home', 'Welcome', 'Dashboards'].includes(active) && <DashboardWorkspaceNav active={active} onNavigate={navigate} />}
             {active === 'Home' && (
               <>
                 <CommandCenterHero onNavigate={navigate} />

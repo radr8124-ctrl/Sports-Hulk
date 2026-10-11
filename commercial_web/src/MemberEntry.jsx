@@ -31,6 +31,8 @@ export function DashboardHub({ onNavigate, embedded = false }) {
         <div className="member-card-icon"><Icon size={25} /></div>
         <h2>{title}</h2><p>{text}</p>
         <button onClick={() => onNavigate(route)}>{action} <ArrowRight size={17} /></button>
+        {route === 'Fantasy' && <button onClick={() => onNavigate('Fantasy', 'dfs')}>Build a DFS lineup <ArrowRight size={17} /></button>}
+        {route === 'Best Bets' && <button onClick={() => onNavigate('Props')}>Explore player props <ArrowRight size={17} /></button>}
       </article>)}
     </div>
     <div className="member-ref-strip"><ZenithRefAvatar size={68} /><div><h2>Need a second look? Ask The Ref.</h2><p>Bring a matchup or player question. Follow the answer back to its sources.</p></div>
