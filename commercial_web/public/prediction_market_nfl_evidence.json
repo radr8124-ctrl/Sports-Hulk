@@ -1415,5 +1415,38 @@
       "Record forward paper entries and actual execution assumptions",
       "Grade every selection including losses; assess ROI uncertainty"
     ]
+  },
+  "fee_sensitivity": {
+    "schema": "zenith.nfl.documented_fee_sensitivity.v1",
+    "checked_at_utc": "2026-10-11T17:50:41.937744+00:00",
+    "official_formula_sources": [
+      "https://kalshi.com/docs/kalshi-fee-schedule.pdf",
+      "https://docs.kalshi.com/getting_started/fee_rounding",
+      "https://docs.polymarket.com/trading/fees",
+      "https://docs.polymarket.com/market-data/market-details"
+    ],
+    "kalshi_schedule_review": "Official July7 2026 PDF retrieved through web reader; NFL multiplier1 verified; direct VPS PDF retrieval unavailable",
+    "source_hashes": {
+      "observations": "907339e15a7f2c3655bdc7ee0e91510670dcdecaec7bdba4f2092d6e10535365",
+      "validation": "899c02656e1b17de79bd97e4df8d15bc60a5331a647aead442ab6dd05ebde167",
+      "execution": "ad4f8862b45114f60851adc18c8d6cc24dc0c3f68aca2fc8c28c1a9336cdff94"
+    },
+    "source_observations_captured_at": "2026-10-11T17:17:25.781323+00:00",
+    "outcomes_checked": 14,
+    "positive_before_fees": 5,
+    "positive_after_documented_fees": 2,
+    "positive_with_1c_worse_fill": 0,
+    "above_3pct_after_documented_fees": 0,
+    "best_conditional_modeled_roi": 0.012811053406293902,
+    "realized_roi": null,
+    "approved_picks": 0,
+    "validated_profitable_edge": false,
+    "limitations": [
+      "Saved quote prices, not current offers or actual fills",
+      "100-contract single-fill assumption; depth and availability not guaranteed",
+      "Market-assisted probabilities unvalidated; zero-tie base is conditional",
+      "Fees documented, actual charged fees and legacy Polymarket parameter reconciliation unverified",
+      "No rebates, funding costs or cancellation assumptions credited"
+    ]
   }
 }
