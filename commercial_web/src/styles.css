@@ -11,8 +11,8 @@
 }
 
 * { box-sizing: border-box; }
-html { background: #f8fafc; }
-body { margin: 0; min-width: 320px; min-height: 100vh; }
+html { background: #f8fafc; overflow-x: clip; overscroll-behavior-x: none; }
+body { margin: 0; min-width: 320px; min-height: 100vh; max-width: 100%; overflow-x: clip; overscroll-behavior-x: none; }
 button { font: inherit; }
 
 @layer components {
