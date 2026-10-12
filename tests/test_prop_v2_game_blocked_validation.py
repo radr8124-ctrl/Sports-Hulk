@@ -77,6 +77,24 @@ class ActualGameBlockedFoldTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing"):
             v2.game_blocked_rolling_origin_folds(frame)
 
+    def test_partial_final_provenance_excludes_whole_game_from_training(self):
+        frame = sample(44)
+        frame["final_observed_at_utc"] = frame["event_start"] + pd.Timedelta(hours=3)
+        target = "NHL|PROP|game|1"
+        row_id = frame.index[frame.block_key.eq(target)][0]
+        frame.loc[row_id, "final_observed_at_utc"] = pd.NaT
+        folds = v2.game_blocked_rolling_origin_folds(frame)
+        self.assertTrue(folds)
+        for train, _ in folds:
+            self.assertNotIn(target, set(train.block_key))
+
+    def test_no_model_promotion_from_mean_improvement_without_confidence(self):
+        choose = v2.choose_deployment_probability_source
+        self.assertEqual(choose(True, True, False, False, False), "MARKET_REFERENCE")
+        self.assertEqual(choose(False, False, False, True, False), "MARKET_REFERENCE")
+        self.assertEqual(choose(True, True, True, False, False), "LANE_CORE_MODEL")
+        self.assertEqual(choose(False, False, False, True, True), "MARKET_CALIBRATED")
+
     def test_many_prop_rows_but_too_few_games_is_untrained(self):
         frame = sample(16, forecasts_per_game=25)
         result = v2.walk_forward(frame, {"features": ["context_signal"]})
@@ -151,3 +169,21 @@ class ActualGameBlockedFoldTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class FrozenGameIdentityTests(unittest.TestCase):
+    def test_game_or_event_only_never_calendar_date(self):
+        self.assertIsNone(v2.verified_game_block_key('NFL','PROP','',''))
+        self.assertEqual(v2.verified_game_block_key('NFL','PROP','BUF@NYJ',''), 'NFL|PROP|game|BUF@NYJ')
+        self.assertEqual(v2.verified_game_block_key('NFL','PROP','','event-123'), 'NFL|PROP|event|event-123')
+
+class VerifiedFinalAvailabilityTests(unittest.TestCase):
+    def test_observation_timestamp_excludes_missing_or_future_final(self):
+        frame = sample(games=44)
+        frame['final_observed_at_utc'] = frame['event_start'] + pd.Timedelta(hours=5)
+        frame.loc[frame.block_key.eq('NHL|PROP|game|0'),'final_observed_at_utc'] = pd.NaT
+        frame.loc[frame.block_key.eq('NHL|PROP|game|1'),'final_observed_at_utc'] = frame['event_start'] + pd.Timedelta(days=100)
+        folds = v2.game_blocked_rolling_origin_folds(frame)
+        self.assertTrue(folds)
+        for train,test in folds:
+            self.assertFalse(set(train.block_key).intersection({'NHL|PROP|game|0','NHL|PROP|game|1'}))
+            self.assertLessEqual(train.final_observed_at_utc.max(),test.time.min())

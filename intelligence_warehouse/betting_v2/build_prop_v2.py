@@ -735,6 +735,15 @@ def quarantine_conflicting_game_starts(frame):
     return keep
 
 
+def verified_game_block_key(sport, lane, game_key, event_id):
+    """A date alone cannot identify one independent game."""
+    if game_key:
+        return f"{sport}|{lane}|game|{game_key}"
+    if event_id:
+        return f"{sport}|{lane}|event|{event_id}"
+    return None
+
+
 def build_history(cfg):
     path = cfg["history"]
     if not path.exists():
@@ -788,15 +797,9 @@ def build_history(cfg):
         game_key = text_value(history_value(row, payload, "game_key"))
         event_id = text_value(history_value(row, payload, "event_id"))
         recommendation_key = recommendation_key or text_value(history_value(row, payload, "recommendation_key"))
-        if game_key:
-            block_key = f"{cfg['sport']}|{cfg['lane']}|game|{game_key}"
-        elif event_id:
-            block_key = f"{cfg['sport']}|{cfg['lane']}|event|{event_id}"
-        elif start is not None:
-            block_key = f"{cfg['sport']}|{cfg['lane']}|date|{start.date().isoformat()}"
-        else:
-            # Without an actual game/event identifier, each player-prop row
-            # must not masquerade as one independent completed game.
+        block_key = verified_game_block_key(cfg["sport"], cfg["lane"], game_key, event_id)
+        if block_key is None:
+            # Calendar dates are not independent game identities.
             continue
 
         rows.append({
@@ -864,6 +867,17 @@ def game_blocked_rolling_origin_folds(frame):
     starts = groups["event_start"].min()
     ends = groups["event_start"].max()
     first_prediction = groups["time"].min()
+    # A verified source-observation time, when available, supersedes the
+    # 24-hour post-kickoff proxy. This is first OBSERVED final, not an
+    # inferred final timestamp and not the scheduled end time.
+    has_final_observation = "final_observed_at_utc" in d.columns
+    if has_final_observation:
+        d["final_observed_at_utc"] = pd.to_datetime(
+            d["final_observed_at_utc"], errors="coerce", utc=True)
+        # If official-final provenance is supplied, every leg in the game
+        # must carry it; groupby.max otherwise silently ignores missing legs.
+        observed = d.groupby("block_key")["final_observed_at_utc"].max()
+        fully_observed = d.groupby("block_key")["final_observed_at_utc"].apply(lambda x: x.notna().all())
     # Quarantine entire events if the provider's kickoff varies within one
     # claimed game. Selecting the lucky side of a conflicting clock leaks.
     consistent = (ends - starts) <= pd.Timedelta(
@@ -886,6 +900,12 @@ def game_blocked_rolling_origin_folds(frame):
         # Entire train games only: all observations for a historic game are
         # either available before the cutoff or excluded, never split.
         train_keys = {key for key in keys[:at] if ends.loc[key] <= barrier}
+        if has_final_observation:
+            train_keys = {key for key in train_keys
+                          if bool(fully_observed.loc[key])
+                          and pd.notna(observed.loc[key])
+                          and observed.loc[key] <= cutoff
+                          and observed.loc[key] >= ends.loc[key]}
         train = d[d["block_key"].isin(train_keys)].copy()
         if len(train) < 30 or train["block_key"].nunique() < MIN_INDEPENDENT_TRAIN_GAMES:
             continue
@@ -895,6 +915,17 @@ def game_blocked_rolling_origin_folds(frame):
             raise AssertionError("Future game/quote in training features")
         folds.append((train.sort_values("time"), test.sort_values("time")))
     return folds
+
+
+def choose_deployment_probability_source(core_beats_reference, core_beats_calibrated,
+                                         core_confidence_supported, cal_beats_reference,
+                                         calibration_confidence_supported):
+    """Do not deploy models from apparent mean gains without game-block support."""
+    if core_beats_reference and core_beats_calibrated and core_confidence_supported:
+        return "LANE_CORE_MODEL"
+    if cal_beats_reference and calibration_confidence_supported:
+        return "MARKET_CALIBRATED"
+    return "MARKET_REFERENCE"
 
 
 def walk_forward(frame, cfg):
@@ -1014,13 +1045,6 @@ def walk_forward(frame, cfg):
     beta_score = fit_logistic(full_score, y_full, l2=5.0)
     old_score_coef = float(beta_score[-1])
 
-    if core_beats_reference and core_beats_calibrated:
-        source = "LANE_CORE_MODEL"
-    elif cal_beats_reference:
-        source = "MARKET_CALIBRATED"
-    else:
-        source = "MARKET_REFERENCE"
-
     core_confidence_supported = bool(
         comparisons["core_vs_reference"]["confidence_supported"]
         and comparisons["core_vs_calibrated"]["confidence_supported"]
@@ -1030,6 +1054,13 @@ def walk_forward(frame, cfg):
     )
     old_score_confidence_supported = bool(
         comparisons["old_score_vs_core"]["confidence_supported"]
+    )
+
+    # Mean improvements alone are not enough to change deployed probabilities.
+    # Require paired whole-game evidence before promoting any learned model.
+    source = choose_deployment_probability_source(
+        core_beats_reference, core_beats_calibrated, core_confidence_supported,
+        cal_beats_reference, calibration_confidence_supported,
     )
 
     old_score_status = (
@@ -1736,6 +1767,14 @@ def main():
         (DIST / "prop_v2_models.json").write_text(json.dumps(model_payload, indent=2))
         (DIST / "prop_v2_validation.json").write_text(json.dumps(validation_payload, indent=2))
         (DIST / "prop_v2_current.json").write_text(json.dumps(current_payload, indent=2))
+
+    # Refresh the visible research-only PrizePicks watch feed alongside
+    # the canonical prop snapshots. No unpriced row becomes a betting pick.
+    from scripts.export_nhl_prizepicks_unpriced_watches import main as refresh_unpriced_watches
+    refresh_unpriced_watches()
+    watch_payload = json.loads((PUBLIC / "nhl_prizepicks_unpriced_watches.json").read_text())
+    if DIST.exists():
+        (DIST / "nhl_prizepicks_unpriced_watches.json").write_text(json.dumps(watch_payload, indent=2) + "\n")
 
     print(json.dumps({
         "status": "READY",
