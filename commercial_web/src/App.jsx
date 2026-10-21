@@ -10,6 +10,8 @@ import { bettingNavItems, navItems, nflSections, scoreLeagues, statusCards } fro
 import { PUBLIC_BRAND, PUBLIC_BRAND_WORD_1, PUBLIC_BRAND_WORD_2, PUBLIC_TAGLINE } from './brandConfig'
 import BetMeaning, { betDisplayLabel } from './BetMeaning'
 import { survivorHomeSummary } from '../survivor_home_summary.js'
+import BroadcastTicker from './site/BroadcastTicker'
+import { buildScoreTickerItems } from './site/scoreTickerModel.mjs'
 
 const AskSportsHulkPage = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AskSportsHulkPage })))
 const AssistantDrawer = lazy(() => import('./AskSportsHulk').then(module => ({ default: module.AssistantDrawer })))
@@ -1631,55 +1633,8 @@ function HomeScoreRail({ onNavigate }) {
   const nhl = useJsonEndpoint('/nhl_scores.json', { games: [] })
   const cfb = useJsonEndpoint('/cfb_scores.json', { games: [] })
   const cbb = useJsonEndpoint('/cbb_scores.json', { games: [] })
-  const normalize = (game, league) => ({
-    id: game.event_id || game.gamePk || `${league}-${game.away}-${game.home}`,
-    league,
-    away: game.away_abbr || game.away || game.away_team || 'Away',
-    home: game.home_abbr || game.home || game.home_team || 'Home',
-    awayScore: (game.final || game.live) ? (game.away_score ?? game.awayScore ?? '—') : '—',
-    homeScore: (game.final || game.live) ? (game.home_score ?? game.homeScore ?? '—') : '—',
-    status: game.final ? 'FINAL' : game.live ? 'LIVE' : 'UPCOMING',
-  })
-  const games = [
-    ...(nfl.games || []).map((game) => normalize(game, 'NFL')),
-    ...(mlb.today_games || mlb.games || []).map((game) => normalize(game, 'MLB')),
-    ...(nba.games || []).map((game) => normalize(game, 'NBA')),
-    ...(nhl.games || []).map((game) => normalize(game, 'NHL')),
-    ...(cfb.games || []).map((game) => normalize(game, 'CFB')),
-    ...(cbb.games || []).map((game) => normalize(game, 'CBB')),
-  ]
-    .sort((a, b) => {
-      const rank = (game) => game.status === 'LIVE' ? 0 : game.status === 'FINAL' ? 2 : 1
-      return rank(a) - rank(b)
-    })
-    .slice(0, 12)
-
-  return (
-    <section>
-      <div className="section-heading">
-        <div><p className="eyebrow">Scores</p><h2>Across the sports world</h2><p className="mt-2 text-sm text-slate-500">NFL · MLB · NBA · NHL · CFB · CBB in one live rail.</p></div>
-        <button onClick={() => onNavigate('Scores')} className="text-sm font-black text-blue-700">View all scores →</button>
-      </div>
-      {games.length ? (
-        <div className="flex snap-x gap-3 overflow-x-auto pb-2">
-          {games.map((game) => (
-            <div key={game.id} className="min-w-[230px] snap-start rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
-              <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.14em]">
-                <span className="text-blue-700">{game.league}</span>
-                <span className={game.status === 'LIVE' ? 'text-red-600' : 'text-slate-400'}>{game.status}</span>
-              </div>
-              <div className="mt-4 space-y-2 text-sm font-black text-slate-900">
-                <div className="flex items-center justify-between"><span>{game.away}</span><span>{game.awayScore}</span></div>
-                <div className="flex items-center justify-between"><span>{game.home}</span><span>{game.homeScore}</span></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <EmptyPanel icon={Radio} title="Score feeds are connected" text="There are no games in the current display window. Upcoming and live games will appear automatically." />
-      )}
-    </section>
-  )
+  const games = buildScoreTickerItems({ nfl, mlb, nba, nhl, cfb, cbb })
+  return <BroadcastTicker games={games} onNavigate={onNavigate} />
 }
 
 function HomeImpactNews({ onNavigate }) {
@@ -3619,6 +3574,8 @@ export default function App() {
         </div>
       </nav>
 
+      {active === 'Home' && <HomeScoreRail onNavigate={navigate} />}
+
       <main id="main-content" tabIndex="-1" className="mx-auto max-w-[1500px] space-y-8 px-4 py-6 md:px-5 md:py-8">
         {isAsk ? (
           <Suspense fallback={<LoadingSurface label="Loading analyst" />}><AskSportsHulkPage /></Suspense>
@@ -3629,7 +3586,6 @@ export default function App() {
                 <CommercialHero onNavigate={navigate} />
                 <StatusStrip />
                 <HomeDecisionPanel onNavigate={navigate} />
-                <HomeScoreRail onNavigate={navigate} />
                 <HomeImpactNews onNavigate={navigate} />
                 <HomeSnapshots onNavigate={navigate} />
                 <LearningPanel />
