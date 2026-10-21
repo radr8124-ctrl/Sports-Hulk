@@ -1,0 +1,22 @@
+.zenith-broadcast { display:flex; align-items:center; height:48px; width:100%; overflow:hidden; background:linear-gradient(100deg,#06131f 0%,#0a1c2b 54%,#071421 100%); color:#eff6fb; border-bottom:1px solid #2c4655; box-shadow:0 8px 24px rgba(9,25,38,.12); }
+.zenith-broadcast-label { flex-shrink:0; display:flex; align-items:center; gap:5px; padding:0 19px; height:100%; border-right:1px solid #294151; font-size:10px; font-weight:900; letter-spacing:.13em; color:#e8bd71; white-space:nowrap; }
+.zenith-broadcast-label-muted { color:#b9cad2; }
+.zenith-broadcast-pulse { height:6px; width:6px; border-radius:50%; background:#59dfc1; box-shadow:0 0 10px #59dfc1; margin-right:5px; }
+.zenith-broadcast-window { min-width:0; flex:1; overflow:hidden; height:100%; display:flex; align-items:center; mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent); }
+.zenith-broadcast-track { display:flex; align-items:center; width:max-content; animation:zenith-scores-scroll 65s linear infinite; will-change:transform; }
+.zenith-broadcast-track.is-paused { animation-play-state:paused; }
+.zenith-broadcast-sequence { display:flex; align-items:center; flex-shrink:0; }
+.zenith-ticker-game { display:inline-flex; align-items:center; white-space:nowrap; gap:12px; padding:0 23px; border-right:1px solid #2f4553; min-height:24px; }
+.zenith-ticker-league { font-size:9px; font-weight:900; letter-spacing:.12em; color:#e8bd71; }
+.zenith-ticker-matchup { font-size:12px; font-weight:800; letter-spacing:.01em; }
+.zenith-ticker-at { color:#7d9aa8; font-size:10px; }
+.zenith-ticker-score { font-variant-numeric:tabular-nums; color:#fff; font-size:12px; font-weight:900; }
+.zenith-ticker-status { font-size:9px; font-weight:900; letter-spacing:.08em; color:#a4b8c3; }
+.zenith-ticker-status.is-live { color:#65ead0; }
+.zenith-broadcast-view { height:100%; flex-shrink:0; padding:0 19px; border-left:1px solid #294151; color:#e8bd71; font-size:10px; font-weight:900; letter-spacing:.09em; white-space:nowrap; transition:background .2s; }
+.zenith-broadcast-view:hover,.zenith-broadcast-view:focus-visible { background:#173045; outline-offset:-3px; }
+.zenith-broadcast-view span { margin-left:6px; font-size:13px; }
+.zenith-broadcast-empty { padding:0 16px; color:#acbec8; font-size:11px; font-weight:700; }
+@keyframes zenith-scores-scroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+@media(max-width:640px) { .zenith-broadcast { height:44px; }.zenith-broadcast-label { padding:0 10px; font-size:9px; }.zenith-broadcast-label-muted { display:none; }.zenith-broadcast-view { padding:0 11px; font-size:9px; }.zenith-ticker-game { padding:0 15px; gap:8px; } }
+@media(prefers-reduced-motion:reduce) { .zenith-broadcast-track { animation:none; } .zenith-broadcast-window { overflow-x:auto; mask-image:none; } .zenith-broadcast-sequence[aria-hidden="true"] { display:none; } }
