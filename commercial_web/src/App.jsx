@@ -1500,20 +1500,20 @@ function humanize(value) {
 
 function CommercialHero({ onNavigate }) {
   return (
-    <section className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-soft">
-      <div className="grid gap-8 p-7 md:p-10 lg:grid-cols-[1.35fr_.65fr] lg:items-end">
+    <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-soft">
+      <div className="grid gap-5 p-6 md:p-8 lg:grid-cols-[1.6fr_.4fr] lg:items-center">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-700">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-amber-800">
             <Activity size={14} /> Live sports intelligence
           </div>
-          <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-[-0.04em] text-slate-950 md:text-6xl">
+          <h1 className="mt-3 max-w-4xl text-3xl font-black tracking-[-0.04em] text-slate-950 md:text-5xl">
             One place for the game.
-            <span className="block text-blue-700">Answers first. Evidence underneath.</span>
+            <span className="block text-teal-700">Answers first. Evidence underneath.</span>
           </h1>
-          <p className="mt-5 max-w-3xl text-base font-medium leading-7 text-slate-500 md:text-lg">
+          <p className="mt-3 max-w-3xl text-sm font-medium leading-6 text-slate-500 md:text-base">
             Scores, betting research, props, PrizePicks, parlays, Survivor, fantasy, DFS and news — organized around the decisions you actually need to make.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="mt-5 flex flex-wrap gap-3">
             <button onClick={() => onNavigate('Best Bets')} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5">
               See today's intelligence
             </button>
@@ -1522,7 +1522,7 @@ function CommercialHero({ onNavigate }) {
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <div className="mini-metric"><Brain size={18} /><b>Learning</b><span>Forward tracked</span></div>
           <div className="mini-metric"><ShieldCheck size={18} /><b>Proof</b><span>Losses stay visible</span></div>
           <div className="mini-metric"><Radio size={18} /><b>Live</b><span>Scores + markets</span></div>
